@@ -364,3 +364,20 @@ if llm_has_blocker_without_fallback:
 **文档版本**: 3.0.0
 **最后更新**: 2026-03-04
 **基于**: HANDBOOK 完整手册 + 7 个新增评估维度
+
+## 扩展资源 (Extended Resources)
+
+### Skill 拆分策略指南
+
+当遇到 SCALE-005 (token-budget-awareness) 警告时，参考：
+- **文档**: `skill-splitting-strategy-analysis.md`
+- **内容**: 5 维度诊断框架、5 种拆分策略、实战案例、最佳实践
+
+**快速决策**:
+- 综合评分 ≥ 80: 强烈建议拆分
+- 综合评分 60-79: 建议拆分
+- 综合评分 < 60: 考虑其他优化手段
+
+**拆分收益预期**:
+- Token 消耗降低: 55-65%
+- 触发精准度提升: 10-15%
