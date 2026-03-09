@@ -1,0 +1,100 @@
+id: SEC-004
+name: tool-permission-minimization
+severity: warning
+component_type: skill
+category: security
+
+title:
+  zh: "工具权限未最小化"
+  en: "Tool permissions not minimized"
+
+description:
+  zh: |
+    技能的 allowed-tools 声明应遵循最小权限原则，只声明实际需要的工具。
+    过度的工具权限可能带来安全风险。
+  en: |
+    Skill allowed-tools declaration should follow principle of least privilege,
+    declaring only actually needed tools. Excessive tool permissions may pose security risks.
+
+rationale:
+  zh: "基于安全最佳实践，权限应最小化以降低风险"
+  en: "Per security best practices, permissions should be minimized to reduce risk"
+
+detection:
+  method: frontmatter-analysis
+  risky_combinations:
+    - tools: ["Bash", "Read", "Write", "Edit"]
+      risk: high
+      description: "Full file system access"
+    - tools: ["Bash", "Write"]
+      risk: medium
+      description: "Can write arbitrary files via bash"
+    - tools: ["Bash", "Read"]
+      risk: low
+      description: "Can read arbitrary files via bash"
+  check_items:
+    - allowed-tools 是否过度
+    - 是否有危险工具组合
+    - 是否有权限说明
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **权限最小化实践**:
+
+      ```yaml
+      # ❌ 过度权限
+      ---
+      allowed-tools: Bash, Read, Write, Edit, LS, Glob
+      ---
+
+      # ✅ 最小权限 - 只读操作
+      ---
+      allowed-tools: Read, Glob
+      tool_permission_note: "仅需读取文件和使用 Glob 查找文件"
+      ---
+
+      # ✅ 最小权限 - Git 操作
+      ---
+      allowed-tools: Bash, Read
+      tool_permission_note: |
+        Bash: 执行 Git 命令
+        Read: 读取项目文件
+      ---
+      ```
+
+      **文档说明示例**:
+      ```markdown
+      ## 工具权限说明
+
+      **Bash**: 执行 Git 命令（git worktree, git add, git commit）
+      **Read**: 读取项目文件（.gitignore, CLAUDE.md）
+      **Write**: 创建 .gitignore 条目（仅在文件不存在时）
+      ```
+    en: |
+      **Permission Minimization**:
+
+      ```yaml
+      # ❌ Excessive permissions
+      ---
+      allowed-tools: Bash, Read, Write, Edit, LS, Glob
+      ---
+
+      # ✅ Minimal permissions - read-only
+      ---
+      allowed-tools: Read, Glob
+      tool_permission_note: "Only need to read files and use Glob to find files"
+      ---
+
+      # ✅ Minimal permissions - Git operations
+      ---
+      allowed-tools: Bash, Read
+      tool_permission_note: |
+        Bash: Execute Git commands
+        Read: Read project files
+      ---
+      ```
+
+tags: ["security", "permissions", "allowed-tools", "least-privilege"]
+related_rules: ["SEC-001", "SEC-002"]

@@ -1,0 +1,49 @@
+id: GATE-005
+name: phase-complete-quality-gate
+severity: warning
+component_type: workflow
+category: quality-gate
+
+title:
+  zh: "Phase 完成质量卡点验证缺失"
+  en: "Phase complete quality gate missing"
+
+description:
+  zh: |
+    验证 Phase 完成后的质量卡点。
+
+    **检查项**:
+    - 该 Phase 的所有 Task 是否完成
+    - Phase 状态是否更新为 completed
+    - 完整测试是否通过
+    - 验证是否通过
+
+    **Gate 5 通过标准**:
+    - ✅ 该 Phase 的所有 Task 标记为完成
+    - ✅ Phase 状态更新为 completed
+    - ✅ 所有相关测试通过
+    - ✅ 验证步骤通过
+
+  en: |
+    Validates quality gate after phase completion.
+
+    **Checks**:
+    - All Tasks in the phase are completed
+    - Phase status is updated to completed
+    - All related tests pass
+    - Verification passes
+
+check_logic:
+  type: workflow_analysis
+  conditions:
+    - all_tasks_completed: true
+    - phase_status_updated: true
+    - all_tests_passing: true
+    - verification_passed: true
+
+suggestion:
+  zh: "在 Phase 完成后运行质量检查，确保所有 Task 完成且测试通过"
+  en: "Run quality check after phase completion to ensure all tasks are done and tests pass"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

@@ -1,0 +1,18 @@
+{
+  "stageId": "stage-4-validation",
+  "name": "规范验证核心知识",
+  "description": "对照 HANDBOOK 验证设计合规性",
+  "handbookReferences": ["chapter-9"],
+  "coreKnowledge": {
+    "validationCategories": {
+      "naming": {"rules": [{"pattern": "kebab-case", "applyTo": ["name"]}]},
+      "yaml": {"rules": [{"check": "requiredFields", "fields": ["name", "description"]}]},
+      "structure": {"rules": [{"check": "sectionsComplete", "required": ["概述", "使用场景"]}]},
+      "references": {"rules": [{"check": "pathFormat", "pattern": "relative"}]},
+      "workflow": {"rules": [{"check": "stepsContinuous"}, {"check": "exitCondition"}]},
+      "context": {"rules": [{"check": "tokenLimit", "max": 2000}]}
+    },
+    "validationSeverity": {"error": "必须修复", "warning": "建议修复", "info": "可选优化"},
+    "integrationWithReviewArchitecture": {"description": "调用 /review-architecture 进行深度验证"}
+  }
+}

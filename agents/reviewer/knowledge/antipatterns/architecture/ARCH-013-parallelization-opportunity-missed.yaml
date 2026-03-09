@@ -1,0 +1,76 @@
+id: ARCH-013
+name: parallelization-opportunity-missed
+severity: info
+component_type: all
+category: architecture
+
+title:
+  zh: "可并行化任务串行执行"
+  en: "Missed Parallelization Opportunity"
+
+description:
+  zh: |
+    无数据依赖关系的Subagent调用被串行执行，降低了执行效率。
+    并行执行可显著减少总体执行时间。
+  en: |
+    Independent subagent calls executed serially, reducing execution efficiency.
+
+rationale:
+  zh: "识别并行机会可提升系统性能和响应速度"
+  en: "Identifying parallel opportunities improves system performance"
+
+detection:
+  method: custom
+  custom_function: check_parallel_opportunity
+  criteria:
+    - 识别连续的Task调用
+    - 分析调用间的数据依赖
+    - 检查调用结果是否立即被使用
+  threshold:
+    min_independent_calls: 2  # 2+独立调用触发
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      并行化执行：
+      1. 使用并行Task调用(如果框架支持)
+      2. 将独立调用分组并发执行
+      3. 在输出中记录并行执行建议
+    en: |
+      Parallelize execution:
+      1. Use parallel Task calls if framework supports
+      2. Group independent calls for concurrent execution
+      3. Document parallel execution suggestions
+
+examples:
+  bad:
+    zh: |
+      # 串行执行（无依赖）
+      1. Task: validate-syntax    # 独立任务
+      2. Task: check-formatting  # 独立任务
+      3. Task: run-linter        # 独立任务
+      # 总时间 = t1 + t2 + t3
+    en: |
+      # Serial execution (no dependencies)
+      1. Task: validate-syntax    # Independent
+      2. Task: check-formatting  # Independent
+      3. Task: run-linter        # Independent
+      # Total time = t1 + t2 + t3
+  good:
+    zh: |
+      # 并行执行
+      Parallel:
+        - Task: validate-syntax
+        - Task: check-formatting
+        - Task: run-linter
+      # 总时间 ≈ max(t1, t2, t3)
+    en: |
+      # Parallel execution
+      Parallel:
+        - Task: validate-syntax
+        - Task: check-formatting
+        - Task: run-linter
+      # Total time ≈ max(t1, t2, t3)
+
+tags: ["architecture", "performance", "parallelism", "efficiency"]

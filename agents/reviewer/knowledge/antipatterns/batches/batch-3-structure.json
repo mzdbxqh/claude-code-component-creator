@@ -1,0 +1,58 @@
+{
+  "batchId": "batch-3-structure",
+  "name": "结构规范检查",
+  "description": "检测文档结构和格式规范",
+  "category": "structure",
+  "patterns": [
+    {
+      "id": "AP019",
+      "name": "文档结构混乱",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "disorganized_structure",
+      "message": "文档结构不清晰，章节顺序混乱",
+      "impact": "用户难以快速找到所需信息",
+      "fix": "遵循标准结构：目的 → 使用场景 → 工作流程 → 示例 → 最佳实践 → 常见陷阱"
+    },
+    {
+      "id": "AP036",
+      "name": "缺少概述部分",
+      "severity": "info",
+      "layer": "pattern",
+      "check": "missing:## 目的 OR missing:## Overview",
+      "message": "缺少概述/目的部分",
+      "impact": "用户无法快速了解组件价值",
+      "fix": "添加 ## 目的 部分，说明组件解决什么问题"
+    },
+    {
+      "id": "AP038",
+      "name": "标题层级错误",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "heading_level_incorrect",
+      "message": "标题层级使用不当（如跳过H2直接使用H3）",
+      "impact": "文档结构层次不清晰",
+      "fix": "使用正确的Markdown标题层级：# 主标题 → ## 章节 → ### 小节"
+    },
+    {
+      "id": "AP039",
+      "name": "代码块无语言标识",
+      "severity": "info",
+      "layer": "pattern",
+      "check": "code_block_no_language",
+      "message": "代码块未指定语言标识",
+      "impact": "语法高亮失效，阅读体验差",
+      "fix": "在代码块开头添加语言标识，如：```python, ```bash"
+    },
+    {
+      "id": "AP040",
+      "name": "链接失效",
+      "severity": "info",
+      "layer": "pattern",
+      "check": "broken_links",
+      "message": "文档中包含失效链接",
+      "impact": "用户无法访问引用的资源",
+      "fix": "检查并修复所有链接，使用相对路径或验证后的绝对路径"
+    }
+  ]
+}

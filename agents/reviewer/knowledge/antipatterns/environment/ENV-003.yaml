@@ -1,0 +1,55 @@
+id: ENV-003
+name: path-separator-handling
+severity: info
+component_type: all
+category: environment
+
+title:
+  zh: "硬编码路径分隔符时建议说明"
+  en: "Recommend noting when hardcoding path separators"
+
+description:
+  zh: |
+    技能如硬编码反斜杠路径分隔符，建议说明或改用正斜杠（Git 兼容所有平台）。
+    使用正斜杠的技能无需说明。
+  en: |
+    Skills hardcoding backslash path separators are recommended to note or use forward slash (Git compatible on all platforms).
+    Skills using forward slash don't need notes.
+
+rationale:
+  zh: "仅检查使用反斜杠的情况，正斜杠在所有平台都兼容"
+  en: "Only check backslash usage, forward slash is compatible on all platforms"
+
+detection:
+  method: code-analysis
+  risk_patterns:
+    - pattern: '\\\\[a-zA-Z]'
+      risk: "Hardcoded backslash may fail on Unix"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      推荐使用正斜杠 `/`（Git 兼容所有平台）：
+
+      ```bash
+      # 推荐
+      path="project/src/main.js"
+
+      # 避免
+      path="project\\src\\main.js"
+      ```
+    en: |
+      Recommend using forward slash `/` (Git compatible on all platforms):
+
+      ```bash
+      # Recommended
+      path="project/src/main.js"
+
+      # Avoid
+      path="project\\src\\main.js"
+      ```
+
+tags: ["environment", "path", "separator"]
+related_rules: ["ENV-001", "ENV-002"]

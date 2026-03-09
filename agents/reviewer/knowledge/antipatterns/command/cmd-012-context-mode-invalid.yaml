@@ -1,0 +1,65 @@
+id: CMD-012
+name: context-mode-invalid
+severity: error
+component_type: command
+category: metadata
+
+title:
+  zh: "无效的 context 模式"
+  en: "Invalid context mode"
+
+description:
+  zh: |
+    Command 的 context 字段必须是有效值之一：
+    - inherit: 继承父级上下文
+    - fork: 创建独立上下文
+    - isolated: 完全隔离
+  en: |
+    Command context field must be one of valid values:
+    - inherit: Inherit parent context
+    - fork: Create independent context
+    - isolated: Fully isolated
+
+rationale:
+  zh: "无效的 context 值会导致运行时错误或不可预期的行为。"
+  en: "Invalid context values cause runtime errors or unexpected behavior."
+
+handbook_reference: "Chapter 5.2"
+
+detection:
+  method: regex
+  pattern: "^context:\\s*(?!inherit$|fork$|isolated$).+$"
+  file_pattern: "commands/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "将 context 设置为 inherit、fork 或 isolated 之一。"
+    en: "Set context to one of: inherit, fork, or isolated."
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: deploy
+      context: shared
+      ---
+    en: |
+      ---
+      name: deploy
+      context: shared
+      ---
+  good:
+    zh: |
+      ---
+      name: deploy
+      context: fork
+      ---
+    en: |
+      ---
+      name: deploy
+      context: fork
+      ---
+
+tags: ["metadata", "context", "command"]
+related_rules: []

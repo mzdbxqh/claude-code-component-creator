@@ -1,0 +1,67 @@
+id: SUB-006
+name: no-task-boundary
+severity: error
+component_type: subagent
+category: workflow
+
+title:
+  zh: "缺少任务边界定义"
+  en: "No task boundary defined"
+
+description:
+  zh: |
+    Subagent 应该明确定义任务边界：
+    - 输入是什么
+    - 处理范围
+    - 输出是什么
+  en: |
+    Subagent should clearly define task boundaries:
+    - What is the input
+    - Processing scope
+    - What is the output
+
+rationale:
+  zh: "清晰的边界防止任务蔓延，确保单一职责。"
+  en: "Clear boundaries prevent scope creep and ensure single responsibility."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(输入|Input|输出|Output|边界|Boundary)).*$'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加输入/输出章节，明确定义任务边界。"
+    en: "Add input/output sections to clearly define task boundaries."
+
+examples:
+  bad:
+    zh: |
+      # File Analyzer
+      分析文件内容。
+    en: |
+      # File Analyzer
+      Analyze file content.
+  good:
+    zh: |
+      ## 输入
+      - file_path: 要分析的文件路径
+      - options: 分析选项
+
+      ## 输出
+      - analysis_result: 分析结果对象
+      - issues: 发现的问题列表
+    en: |
+      ## Input
+      - file_path: Path to file to analyze
+      - options: Analysis options
+
+      ## Output
+      - analysis_result: Analysis result object
+      - issues: List of found issues
+
+tags: ["workflow", "boundary", "subagent"]
+related_rules: []

@@ -1,0 +1,103 @@
+id: DESC-001
+name: missing-trigger-scenario
+severity: warning
+component_type: skill
+category: description
+
+title:
+  zh: "缺少触发场景说明"
+  en: "Missing trigger scenario"
+
+description:
+  zh: |
+    Skill 的 description 字段必须包含明确的触发场景说明。
+
+    **官方参考 (skill-creator)**:
+    > Include both **what the skill does** AND **specific contexts for when to use it**.
+    > All "when to use" info goes in the description, not in the body.
+
+    **检查项**:
+    - description 是否包含"when"、"whenever"、"when to use"等关键词
+    - 是否列出具体使用场景（如"当你需要...时"）
+    - 是否仅描述功能而不说明使用时机
+
+  en: |
+    Skill description field must include clear trigger scenario explanation.
+
+    **Official Reference (skill-creator)**:
+    > Include both **what the skill does** AND **specific contexts for when to use it**.
+
+    **Check Items**:
+    - Whether description contains keywords like "when", "whenever", "when to use"
+    - Whether specific usage scenarios are listed
+    - Whether it only describes functionality without explaining when to use
+
+rationale:
+  zh: "description 字段是决定 Claude 是否触发技能的主要机制。缺少触发场景会导致 under-triggering 问题。"
+  en: "The description field is the primary mechanism that determines whether Claude triggers a skill. Missing trigger scenarios leads to under-triggering."
+
+handbook_reference: "https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md"
+
+detection:
+  method: keyword-and-pattern-check
+  keywords:
+    - "when"
+    - "whenever"
+    - "当你需要"
+    - "触发"
+    - "使用时"
+  require_trigger_scenarios: 2
+  file_pattern: "*/SKILL.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 description 中添加触发场景说明，例如：
+      - "当你需要...时"
+      - "无论何时...都应该使用此技能"
+      - "适用于...场景"
+
+      正面示例：
+      "How to build a simple fast dashboard. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
+    en: |
+      Add trigger scenario description, such as:
+      - "When you need to..."
+      - "Use this skill whenever..."
+      - "Applicable to... scenarios"
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: data-analyzer
+      description: 数据分析工具，用于处理和分析结构化数据。
+      ---
+    en: |
+      ---
+      name: data-analyzer
+      description: Data analysis tool for processing and analyzing structured data.
+      ---
+  good:
+    zh: |
+      ---
+      name: data-analyzer
+      description: |
+        数据分析工具，用于处理和分析结构化数据。
+        当你需要分析 CSV、Excel 或 JSON 数据时使用此技能。
+        无论何时用户提到数据清洗、统计分析或数据可视化，即使他们没有明确提到"分析"，也应该使用此技能。
+        触发：数据分析/数据清洗/统计分析/可视化/data analysis
+      ---
+    en: |
+      ---
+      name: data-analyzer
+      description: |
+        Data analysis tool for processing and analyzing structured data.
+        Use this skill when you need to analyze CSV, Excel, or JSON data.
+        Whenever the user mentions data cleaning, statistical analysis, or data visualization,
+        even if they don't explicitly mention "analysis", you should use this skill.
+        Trigger: data analysis/data cleaning/statistical analysis/visualization
+      ---
+
+tags: ["description", "trigger", "skill", "skill-creator"]
+related_rules: ["DESC-002", "SKILL-001"]

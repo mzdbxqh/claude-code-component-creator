@@ -1,0 +1,20 @@
+{
+  "stageId": "stage-5-implementation",
+  "name": "实现规划核心知识",
+  "description": "生成详细的实施计划和任务分解",
+  "handbookReferences": ["chapter-5", "chapter-6", "chapter-7"],
+  "coreKnowledge": {
+    "implementationPhases": {
+      "phase1": {"name": "基础搭建", "duration": "2-4小时", "tasks": ["创建文件结构", "配置 YAML", "编写基础框架"]},
+      "phase2": {"name": "核心功能", "duration": "4-8小时", "tasks": ["实现主要功能", "添加错误处理", "编写示例"]},
+      "phase3": {"name": "完善优化", "duration": "2-4小时", "tasks": ["完善文档", "性能优化", "测试验证"]}
+    },
+    "fileStructureTemplates": {
+      "skill": {"files": [{"path": "SKILL.md", "required": true}]},
+      "command": {"files": [{"path": "commands/command-name.md", "required": true}]},
+      "hook": {"files": [{"path": ".claude/hooks/hooks.json", "required": true}]}
+    },
+    "testingStrategy": {"unitTest": "测试单个功能", "integrationTest": "测试集成", "validation": "使用 /review-architecture"},
+    "commitStrategy": {"frequency": "每个小功能后提交", "types": ["feat", "fix", "docs", "test"]}
+  }
+}

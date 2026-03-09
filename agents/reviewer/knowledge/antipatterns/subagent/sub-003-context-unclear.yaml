@@ -1,0 +1,59 @@
+id: SUB-003
+name: context-unclear
+severity: warning
+component_type: subagent
+category: metadata
+
+title:
+  zh: "上下文模式不清晰"
+  en: "Context mode unclear"
+
+description:
+  zh: |
+    Subagent 应该明确设置 context 模式（inherit/fork/isolated），
+    以便调用者理解其运行时行为。
+  en: |
+    Subagent should explicitly set context mode (inherit/fork/isolated),
+    so callers understand its runtime behavior.
+
+rationale:
+  zh: "清晰的上下文模式有助于理解 Subagent 的状态依赖关系。"
+  en: "Clear context mode helps understand subagent's state dependencies."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: regex
+  pattern: '^---\n(?!.*context:)'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加 context 字段，选择 inherit、fork 或 isolated。"
+    en: "Add context field, choose inherit, fork, or isolated."
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: task-runner
+      ---
+    en: |
+      ---
+      name: task-runner
+      ---
+  good:
+    zh: |
+      ---
+      name: task-runner
+      context: fork
+      ---
+    en: |
+      ---
+      name: task-runner
+      context: fork
+      ---
+
+tags: ["metadata", "context", "subagent"]
+related_rules: []

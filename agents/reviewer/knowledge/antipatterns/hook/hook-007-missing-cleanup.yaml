@@ -1,0 +1,67 @@
+id: HOOK-007
+name: missing-cleanup
+severity: warning
+component_type: hook
+category: workflow
+
+title:
+  zh: "缺少清理逻辑"
+  en: "Missing cleanup logic"
+
+description:
+  zh: |
+    Hook 如果创建了临时资源（文件、连接等），
+    应该定义清理逻辑以确保资源被释放。
+  en: |
+    Hooks creating temporary resources (files, connections, etc.)
+    should define cleanup logic to ensure resources are released.
+
+rationale:
+  zh: "资源泄漏会导致系统性能下降和稳定性问题。"
+  en: "Resource leaks cause system performance degradation and stability issues."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: custom
+  custom_function: "check_cleanup_logic"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加清理逻辑或使用 try-finally 模式确保资源释放。"
+    en: "Add cleanup logic or use try-finally pattern to ensure resource release."
+
+examples:
+  bad:
+    zh: |
+      ## 处理器
+      const tempFile = createTempFile();
+      process(tempFile);
+      // 没有删除临时文件
+    en: |
+      ## Handler
+      const tempFile = createTempFile();
+      process(tempFile);
+      // temp file not deleted
+  good:
+    zh: |
+      ## 处理器
+      const tempFile = createTempFile();
+      try {
+        process(tempFile);
+      } finally {
+        deleteTempFile(tempFile);
+      }
+    en: |
+      ## Handler
+      const tempFile = createTempFile();
+      try {
+        process(tempFile);
+      } finally {
+        deleteTempFile(tempFile);
+      }
+
+tags: ["workflow", "cleanup", "resources", "hook"]
+related_rules: []

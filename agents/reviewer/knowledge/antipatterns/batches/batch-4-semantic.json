@@ -1,0 +1,58 @@
+{
+  "batchId": "batch-4-semantic",
+  "name": "语义深度检查",
+  "description": "检测内容语义质量和设计合理性",
+  "category": "semantic",
+  "patterns": [
+    {
+      "id": "AP011",
+      "name": "缺少错误处理说明",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "missing_error_handling",
+      "message": "未说明错误处理和边界情况",
+      "impact": "用户不知道如何处理异常情况",
+      "fix": "添加错误处理说明，列出常见错误场景和应对方法"
+    },
+    {
+      "id": "AP016",
+      "name": "模型选择不当",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "inappropriate_model",
+      "message": "模型选择可能不适合任务复杂度",
+      "impact": "成本浪费或性能不足",
+      "fix": "简单任务用 haiku，标准任务用 sonnet，复杂任务用 opus"
+    },
+    {
+      "id": "AP021",
+      "name": "Skill类型不明确",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "unclear_skill_type",
+      "message": "未明确说明是 Reference/Tool/Task 类型",
+      "impact": "Claude 加载策略可能不优化",
+      "fix": "在描述中明确 Skill 类型和主要用途"
+    },
+    {
+      "id": "AP022",
+      "name": "工作流程不清晰",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "unclear_workflow",
+      "message": "工作流程步骤不清晰或过于复杂",
+      "impact": "执行结果不稳定，用户困惑",
+      "fix": "使用 numbered list 明确步骤，每个步骤单一职责"
+    },
+    {
+      "id": "AP025",
+      "name": "过度依赖外部工具",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "over_reliance_on_bash",
+      "message": "过度使用 Bash 工具执行本可用 Claude 能力完成的任务",
+      "impact": "降低可移植性，增加安全风险",
+      "fix": "优先使用 Claude 的代码分析和编辑能力，Bash 仅用于必要操作"
+    }
+  ]
+}

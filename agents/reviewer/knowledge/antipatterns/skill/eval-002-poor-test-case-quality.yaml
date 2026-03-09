@@ -1,0 +1,254 @@
+id: EVAL-002
+name: poor-test-case-quality
+severity: warning
+component_type: skill
+category: eval
+
+title:
+  zh: "测试用例质量低下"
+  en: "Poor test case quality"
+
+description:
+  zh: |
+    测试用例必须是实质性的，足够复杂以至于 Claude 真正需要咨询该技能。
+
+    **官方参考 (skill-creator)**:
+    > The queries must be substantive enough that Claude would actually benefit
+    > from consulting a skill. Simple queries like "read file X" are poor test
+    > cases — they won't trigger skills regardless of description quality.
+
+    **负面示例** (应该避免):
+    - "Format this data"
+    - "Extract text from PDF"
+    - "Create a chart"
+    - "Read file X"
+    - 少于 10 个词的查询
+
+    **正面示例** (应该效仿):
+    - "ok so my boss just sent me this xlsx file (its in my downloads, called
+      something like 'Q4 sales final FINAL v2.xlsx') and she wants me to add a
+      column that shows the profit margin as a percentage..."
+
+    **检查项**:
+    - 测试提示是否过于简单（<10 词）
+    - 是否包含具体细节（文件名、场景、背景）
+    - 是否是多功能任务（需要多步骤处理）
+    - 是否使用了自然口语化表达
+  en: |
+    Test cases must be substantive enough that Claude would actually benefit
+    from consulting the skill.
+
+    **Official reference (skill-creator)**:
+    > Simple queries like "read file X" are poor test cases — they won't
+    > trigger skills regardless of description quality.
+
+    **Negative examples** (avoid):
+    - "Format this data"
+    - "Extract text from PDF"
+    - "Create a chart"
+    - "Read file X"
+    - Queries with fewer than 10 words
+
+    **Positive examples** (follow):
+    - "ok so my boss just sent me this xlsx file (its in my downloads, called
+      something like 'Q4 sales final FINAL v2.xlsx') and she wants me to add a
+      column that shows the profit margin as a percentage..."
+
+    **Checks**:
+    - Is test prompt too short (<10 words)?
+    - Does it include specific details (file names, scenarios, context)?
+    - Is it a multi-step task?
+    - Does it use natural conversational language?
+
+rationale:
+  zh: "简单的查询无论如何描述都不会触发技能，因为 Claude 可以独立处理它们。只有复杂的、多步骤的、专业化的查询才需要技能指导。"
+  en: "Simple queries won't trigger skills regardless of description quality because Claude can handle them independently. Only complex, multi-step, specialized queries need skill guidance."
+
+handbook_reference: "Official skill-creator Step 4: Test Cases - Quality Requirements"
+
+detection:
+  method: custom
+  custom_function: "check_test_case_quality"
+  file_pattern: 'evals/evals.json'
+  checks:
+    - word_count: "Count words in each prompt"
+    - specificity: "Check for specific details (file names, numbers, context)"
+    - multi_step: "Determine if task requires multiple steps"
+    - conversational: "Check for natural language patterns"
+  thresholds:
+    min_words: 10
+    recommended_words: 20
+    min_specificity_score: 3
+  quality_indicators:
+    - file_references: "Mentions specific files"
+    - context_details: "Provides background context"
+    - user_scenario: "Describes a realistic user scenario"
+    - multi_part_task: "Contains multiple related subtasks"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      改进测试用例质量的方法：
+
+      1. **添加具体细节**:
+         - 具体文件名（如'Q4 sales final FINAL v2.xlsx'）
+         - 具体场景（如'my boss just sent me'）
+         - 具体目标（如'show profit margin as percentage'）
+
+      2. **使用自然语言**:
+         - 模拟真实用户的表达方式
+         - 包含口语化表达（如'ok so', 'something like'）
+         - 避免命令式短语
+
+      3. **设计多步骤任务**:
+         - 需要多个操作才能完成
+         - 涉及数据转换或处理
+         - 需要判断和决策
+
+      4. **覆盖边缘场景**:
+         - 不直接提及技能名称但需要的场景
+         - 与其他技能竞争但应触发此技能的场景
+
+      **改进示例**:
+      ❌ 差： "Create a chart"
+      ✅ 好： "I need to visualize our Q4 sales trend - the data is in
+             sales_2024_q4.xlsx, columns A to E. My manager wants a line chart
+             showing monthly revenue growth with a projection for next quarter."
+    en: |
+      Ways to improve test case quality:
+
+      1. **Add specific details**:
+         - Specific file names (e.g., 'Q4 sales final FINAL v2.xlsx')
+         - Specific scenarios (e.g., 'my boss just sent me')
+         - Specific goals (e.g., 'show profit margin as percentage')
+
+      2. **Use natural language**:
+         - Mimic how real users speak
+         - Include conversational phrases (e.g., 'ok so', 'something like')
+         - Avoid imperative phrases
+
+      3. **Design multi-step tasks**:
+         - Requires multiple operations to complete
+         - Involves data transformation or processing
+         - Requires judgment and decision-making
+
+      4. **Cover edge scenarios**:
+         - Scenarios that don't name the skill but need it
+         - Scenarios that compete with other skills but should trigger this one
+
+      **Improvement examples**:
+      ❌ Bad: "Create a chart"
+      ✅ Good: "I need to visualize our Q4 sales trend - the data is in
+             sales_2024_q4.xlsx, columns A to E. My manager wants a line chart
+             showing monthly revenue growth with a projection for next quarter."
+
+examples:
+  bad:
+    zh: |
+      ```json
+      {
+        "evals": [
+          {
+            "id": 1,
+            "prompt": "Format this data"
+          },
+          {
+            "id": 2,
+            "prompt": "Read the file"
+          }
+        ]
+      }
+      ```
+
+      问题：
+      - 太短（<10 词）
+      - 没有具体细节
+      - 单步任务
+    en: |
+      ```json
+      {
+        "evals": [
+          {
+            "id": 1,
+            "prompt": "Format this data"
+          },
+          {
+            "id": 2,
+            "prompt": "Read the file"
+          }
+        ]
+      }
+      ```
+
+      Problems:
+      - Too short (<10 words)
+      - No specific details
+      - Single-step tasks
+
+  good:
+    zh: |
+      ```json
+      {
+        "evals": [
+          {
+            "id": 1,
+            "eval_name": "xlsx-profit-margin-calc",
+            "prompt": "ok so my boss just sent me this xlsx file (its in my
+            downloads, called something like 'Q4 sales final FINAL v2.xlsx')
+            and she wants me to add a column that shows the profit margin as a
+            percentage. The revenue is in column C and costs are in column D i
+            think. Can you help me figure out the formula and add it?"
+          },
+          {
+            "id": 2,
+            "eval_name": "pdf-contract-summary",
+            "prompt": "I have a vendor contract PDF in my documents folder
+            (vendor_agreement_acme_2024.pdf) and I need to extract all the
+            payment terms and key dates - like when invoices are due, what the
+            late fees are, and when the contract renews. My legal team needs a
+            summary table by end of day."
+          }
+        ]
+      }
+      ```
+
+      优点：
+      - 足够长度（>30 词）
+      - 包含具体细节（文件名、列名、场景）
+      - 多步骤任务
+      - 自然口语化表达
+    en: |
+      ```json
+      {
+        "evals": [
+          {
+            "id": 1,
+            "eval_name": "xlsx-profit-margin-calc",
+            "prompt": "ok so my boss just sent me this xlsx file (its in my
+            downloads, called something like 'Q4 sales final FINAL v2.xlsx')
+            and she wants me to add a column that shows the profit margin as a
+            percentage. The revenue is in column C and costs are in column D i
+            think. Can you help me figure out the formula and add it?"
+          },
+          {
+            "id": 2,
+            "eval_name": "pdf-contract-summary",
+            "prompt": "I have a vendor contract PDF in my documents folder
+            (vendor_agreement_acme_2024.pdf) and I need to extract all the
+            payment terms and key dates - like when invoices are due, what the
+            late fees are, and when the contract renews. My legal team needs a
+            summary table by end of day."
+          }
+        ]
+      }
+      ```
+
+      Advantages:
+      - Sufficient length (>30 words)
+      - Includes specific details (file names, column names, scenarios)
+      - Multi-step tasks
+      - Natural conversational language
+
+tags: ["eval", "test-cases", "quality", "skill-creator"]
+related_rules: ["EVAL-001", "SCRIPT-001", "INTENT-001"]

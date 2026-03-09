@@ -1,0 +1,63 @@
+id: SUB-009
+name: no-timeout-handling
+severity: warning
+component_type: subagent
+category: workflow
+
+title:
+  zh: "缺少超时处理"
+  en: "No timeout handling"
+
+description:
+  zh: |
+    Subagent 如果执行可能耗时的操作，
+    应该设置超时机制并处理超时情况。
+  en: |
+    Subagent performing potentially time-consuming operations
+    should set timeout mechanisms and handle timeout scenarios.
+
+rationale:
+  zh: "超时处理防止任务无限挂起，提高系统可靠性。"
+  en: "Timeout handling prevents tasks from hanging indefinitely, improving system reliability."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(超时|Timeout|时限|Time Limit)).*$'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加超时设置和超时处理逻辑。"
+  en: "Add timeout settings and timeout handling logic."
+
+examples:
+  bad:
+    zh: |
+      ## 处理
+      调用外部 API 获取数据。
+      （没有超时设置）
+  en: |
+      ## Processing
+      Call external API to fetch data.
+      (No timeout set)
+  good:
+    zh: |
+      ## 超时设置
+      - API 调用：30 秒超时
+      - 文件读取：10 秒超时
+
+      ## 超时处理
+      如超时，返回部分结果并标记超时状态。
+  en: |
+      ## Timeout Settings
+      - API call: 30 second timeout
+      - File read: 10 second timeout
+
+      ## Timeout Handling
+      If timeout, return partial results with timeout status.
+
+tags: ["workflow", "timeout", "reliability", "subagent"]
+related_rules: []

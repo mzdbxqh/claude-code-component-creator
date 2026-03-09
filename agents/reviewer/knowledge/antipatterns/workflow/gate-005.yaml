@@ -1,0 +1,42 @@
+id: GATE-005
+name: phase-complete-quality-gate
+severity: warning
+component_type: workflow
+category: gate
+
+title:
+  zh: "Phase-Complete 阶段质量卡点验证失败"
+  en: "Phase-Complete phase quality gate validation failed"
+
+description: |
+  验证 Phase-Complete 阶段完成后的输出质量。
+
+  **检查项**:
+  - 所有 Task 是否完成
+  - Phase 状态是否更新
+  - 交付物是否完整
+
+  **通过标准**:
+  - Phase 内所有 Task 标记为完成
+  - Phase 状态更新为 Complete
+  - 所有交付物已生成并验证
+
+  **失败恢复**:
+  - Task 未完成：继续执行剩余 Task
+  - 状态未更新：更新 Phase 状态
+  - 交付物缺失：补充缺失的交付物
+
+check_logic:
+  type: workflow_analysis
+  phase: phase-complete
+  conditions:
+    - all_tasks_completed: true
+    - phase_status_updated: true
+    - deliverables_complete: true
+
+suggestion:
+  zh: "确保 Phase-Complete 输出中所有 Task 完成、状态更新、交付物完整"
+  en: "Ensure Phase-Complete output has all tasks completed, status updated, and deliverables complete"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

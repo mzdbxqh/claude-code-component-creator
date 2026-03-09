@@ -1,0 +1,73 @@
+id: MCP-007
+name: tool-schema-invalid
+severity: error
+component_type: mcp
+category: config
+
+title:
+  zh: "工具 Schema 无效"
+  en: "Invalid tool schema"
+
+description:
+  zh: |
+    MCP 工具的参数 schema 必须是有效的 JSON Schema，
+    包含类型定义和必要的字段描述。
+  en: |
+    MCP tool parameter schema must be valid JSON Schema,
+    containing type definitions and necessary field descriptions.
+
+rationale:
+  zh: "有效的 schema 确保参数验证正常工作。"
+  en: "Valid schema ensures parameter validation works correctly."
+
+handbook_reference: "Chapter 8.2"
+
+detection:
+  method: custom
+  custom_function: "validate_tool_schema"
+  file_pattern: '*.yaml'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "修复 schema 定义，确保符合 JSON Schema 规范。"
+    en: "Fix schema definition to ensure compliance with JSON Schema specification."
+
+examples:
+  bad:
+    zh: |
+      tools:
+        - name: search
+          parameters:
+            query: string
+            # 无效的 schema 格式
+    en: |
+      tools:
+        - name: search
+          parameters:
+            query: string
+            # invalid schema format
+  good:
+    zh: |
+      tools:
+        - name: search
+          parameters:
+            type: object
+            properties:
+              query:
+                type: string
+                description: 搜索关键词
+            required: [query]
+    en: |
+      tools:
+        - name: search
+          parameters:
+            type: object
+            properties:
+              query:
+                type: string
+                description: Search query
+            required: [query]
+
+tags: ["config", "schema", "tools", "mcp"]
+related_rules: []

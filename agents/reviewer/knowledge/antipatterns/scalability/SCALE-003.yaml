@@ -1,0 +1,74 @@
+id: SCALE-003
+name: timeout-configuration
+severity: warning
+component_type: all
+category: scalability
+
+title:
+  zh: "超时配置缺失"
+  en: "Timeout configuration missing"
+
+description:
+  zh: |
+    技能如有长时间操作，应配置超时时间和超时处理策略，
+    防止操作无限期挂起。
+  en: |
+    Skills with long-running operations should configure timeout and handling strategy
+    to prevent operations from hanging indefinitely.
+
+rationale:
+  zh: "基于扩展性最佳实践，长时间操作应有超时保护"
+  en: "Per scalability best practices, long-running operations should have timeout protection"
+
+detection:
+  method: section-check
+  required_when: "有>1 分钟操作时"
+  required_sections:
+    - "超时配置"
+    - "超时处理"
+    - "Timeout"
+    - "时限"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **超时配置实践**:
+
+      ```markdown
+      ## 超时配置
+
+      | 操作类型 | 超时时间 | 超时处理 |
+      |---------|---------|---------|
+      | API 调用 | 30 秒    | 重试 3 次  |
+      | 测试执行 | 5 分钟   | 标记失败  |
+      | 代码审查 | 10 分钟  | 部分审查  |
+
+      **超时处理流程**:
+      1. 检测超时
+      2. 记录当前状态
+      3. 返回友好错误消息
+      4. 提供恢复选项
+      ```
+    en: |
+      **Timeout Configuration**:
+
+      ```markdown
+      ## Timeout Configuration
+
+      | Operation Type | Timeout | Handling |
+      |---------------|---------|----------|
+      | API Call | 30s | Retry 3 times |
+      | Test Execution | 5min | Mark as failed |
+      | Code Review | 10min | Partial review |
+
+      **Timeout Handling Process**:
+      1. Detect timeout
+      2. Record current state
+      3. Return friendly error message
+      4. Provide recovery options
+      ```
+
+tags: ["scalability", "timeout", "long-running"]
+related_rules: ["SCALE-001", "SCALE-002"]

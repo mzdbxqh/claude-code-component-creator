@@ -1,0 +1,22 @@
+id: IO-003
+name: required-parameter-validation
+severity: error
+component_type: all
+category: linkage
+title:
+  zh: "必填参数未验证"
+  en: "Required parameter not validated"
+description:
+  zh: "必填参数缺少默认值或必传验证"
+  en: "Required parameter lacks default value or mandatory validation"
+detection:
+  method: custom
+  custom_function: check_required_params
+rationale:
+  zh: "防止运行时因缺少必要参数而失败"
+  en: "Prevent runtime failures due to missing required parameters"
+fix:
+  automatic: false
+  suggestion:
+    zh: "为必填参数添加默认值或在文档中明确标注"
+    en: "Add default values for required parameters or clearly mark in documentation"

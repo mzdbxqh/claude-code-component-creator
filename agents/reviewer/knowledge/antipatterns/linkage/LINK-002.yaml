@@ -1,0 +1,22 @@
+id: LINK-002
+name: tool-permission-consistency
+severity: warning
+component_type: all
+category: linkage
+title:
+  zh: "工具权限不一致"
+  en: "Tool permission inconsistency"
+description:
+  zh: "Subagent声明的tools与实际使用不一致"
+  en: "Declared tools do not match actual tool usage"
+detection:
+  method: custom
+  custom_function: check_tool_consistency
+rationale:
+  zh: "确保工具权限声明准确反映实际使用"
+  en: "Ensure tool permissions accurately reflect actual usage"
+fix:
+  automatic: true
+  suggestion:
+    zh: "更新allowed-tools声明以匹配实际使用"
+    en: "Update allowed-tools declaration to match actual usage"

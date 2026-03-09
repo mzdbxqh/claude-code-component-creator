@@ -1,0 +1,77 @@
+id: LLM-003
+name: llm-model-range
+severity: warning
+component_type: all
+category: llm-compatibility
+
+title:
+  zh: "支持的模型范围未声明"
+  en: "Supported model range not declared"
+
+description:
+  zh: |
+    技能应在 frontmatter 中声明支持的模型范围和所需能力，帮助用户选择适合自己模型环境的技能。
+  en: |
+    Skills should declare supported model range and required capabilities in frontmatter to help users choose skills suitable for their model environment.
+
+rationale:
+  zh: "基于 LLM 兼容性最佳实践，模型范围声明有助于用户正确选择技能"
+  en: "Per LLM compatibility best practices, model range declaration helps users choose skills correctly"
+
+detection:
+  method: frontmatter-check
+  required_fields:
+    - supported_models
+    - required_capabilities
+  optional_fields:
+    - unsupported_models
+    - fallback_available
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 frontmatter 中添加模型支持声明。
+
+      示例：
+      ```yaml
+      ---
+      name: brainstorming
+      description: 在创建或开发时使用...
+      supported_models:
+        - claude-3-opus
+        - claude-3-sonnet
+        - claude-3-haiku
+      required_capabilities:
+        - AskUserQuestion
+        - tool_use
+      unsupported_models:
+        - qwen
+        - gemini
+      fallback_available: true
+      ---
+      ```
+    en: |
+      Add model support declaration in frontmatter.
+
+      Example:
+      ```yaml
+      ---
+      name: brainstorming
+      description: Use when creating or developing...
+      supported_models:
+        - claude-3-opus
+        - claude-3-sonnet
+        - claude-3-haiku
+      required_capabilities:
+        - AskUserQuestion
+        - tool_use
+      unsupported_models:
+        - qwen
+        - gemini
+      fallback_available: true
+      ---
+      ```
+
+tags: ["llm", "compatibility", "frontmatter", "declaration"]
+related_rules: ["LLM-001", "LLM-002"]

@@ -1,0 +1,84 @@
+id: ARCH-001
+name: workflow-incomplete
+severity: error
+component_type: all
+category: architecture
+
+title:
+  zh: "工作流不完整"
+  en: "Incomplete Workflow"
+
+description:
+  zh: |
+    项目缺少完整的工作流定义，未能覆盖从需求到交付的全生命周期。
+    一个完整的工作流应包含：设计、执行、验证、交付四个阶段。
+  en: |
+    Project lacks complete workflow definition, not covering full lifecycle from requirement to delivery.
+    A complete workflow should include: design, execution, verification, and delivery phases.
+
+rationale:
+  zh: "完整的工作流确保项目可维护、可追踪"
+  en: "Complete workflow ensures project maintainability and traceability"
+
+detection:
+  method: custom
+  custom_function: check_workflow_completeness
+  criteria:
+    - 检查是否存在设计阶段 Skill/Command
+    - 检查是否存在执行阶段 Skill/Command
+    - 检查是否存在验证阶段 Skill/Command
+    - 检查是否存在交付/收尾阶段 Skill/Command
+
+threshold:
+  min_phases: 3
+  warning_phases: 4
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      补充缺失的工作流阶段：
+      1. 设计阶段：创建 brainstorming、writing-plans 等 Skill
+      2. 执行阶段：创建 executing-plans、subagent-driven-development 等 Skill
+      3. 验证阶段：创建 verification-before-completion 等 Skill
+      4. 交付阶段：创建 finishing-a-development-branch 等 Skill
+    en: |
+      Add missing workflow phases:
+      1. Design: Create brainstorming, writing-plans skills
+      2. Execution: Create executing-plans, subagent-driven-development skills
+      3. Verification: Create verification-before-completion skill
+      4. Delivery: Create finishing-a-development-branch skill
+
+examples:
+  bad:
+    zh: |
+      # 项目只有执行和验证阶段
+      skills/
+        ├── executing-plans/
+        └── verification-before-completion/
+    en: |
+      # Project only has execution and verification phases
+      skills/
+        ├── executing-plans/
+        └── verification-before-completion/
+  good:
+    zh: |
+      # 完整的四阶段工作流
+      skills/
+        ├── brainstorming/          # 设计阶段
+        ├── writing-plans/          # 设计阶段
+        ├── executing-plans/        # 执行阶段
+        ├── subagent-driven-development/  # 执行阶段
+        ├── verification-before-completion/  # 验证阶段
+        └── finishing-a-development-branch/  # 交付阶段
+    en: |
+      # Complete four-phase workflow
+      skills/
+        ├── brainstorming/          # Design phase
+        ├── writing-plans/          # Design phase
+        ├── executing-plans/        # Execution phase
+        ├── subagent-driven-development/  # Execution phase
+        ├── verification-before-completion/  # Verification phase
+        └── finishing-a-development-branch/  # Delivery phase
+
+tags: ["architecture", "workflow", "completeness"]

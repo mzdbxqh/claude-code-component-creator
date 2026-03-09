@@ -1,0 +1,57 @@
+id: MCP-005
+name: retry-logic-missing
+severity: warning
+component_type: mcp
+category: workflow
+
+title:
+  zh: "缺少重试逻辑"
+  en: "Missing retry logic"
+
+description:
+  zh: |
+    MCP 服务器如果依赖外部服务，
+    应该实现重试机制以处理临时故障。
+  en: |
+    MCP servers depending on external services
+    should implement retry mechanisms to handle transient failures.
+
+rationale:
+  zh: "重试机制提高系统的容错能力和可用性。"
+  en: "Retry mechanisms improve system fault tolerance and availability."
+
+handbook_reference: "Chapter 8.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(重试|Retry|容错|Fault Tolerance)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加重试配置，包括最大重试次数和退避策略。"
+    en: "Add retry configuration including max retries and backoff strategy."
+
+examples:
+  bad:
+    zh: |
+      ## 错误处理
+      如 API 调用失败，返回错误。
+    en: |
+      ## Error Handling
+      If API call fails, return error.
+  good:
+    zh: |
+      ## 重试策略
+      - 最大重试次数: 3
+      - 退避策略: 指数退避 (1s, 2s, 4s)
+      - 只重试 5xx 错误，不重试 4xx
+    en: |
+      ## Retry Strategy
+      - Max retries: 3
+      - Backoff: exponential (1s, 2s, 4s)
+      - Only retry 5xx errors, not 4xx
+
+tags: ["workflow", "retry", "reliability", "mcp"]
+related_rules: []

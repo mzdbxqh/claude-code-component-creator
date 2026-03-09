@@ -1,0 +1,55 @@
+id: SKILL-009
+name: error-handling-missing
+severity: warning
+component_type: skill
+category: workflow
+
+title:
+  zh: "缺少错误处理说明"
+  en: "Missing error handling description"
+
+description:
+  zh: |
+    Skill 应该说明可能出现的错误情况及处理方式。
+    这帮助用户理解失败时的行为和如何排查问题。
+  en: |
+    Skill should describe possible error scenarios and handling methods.
+    This helps users understand failure behavior and troubleshooting.
+
+rationale:
+  zh: "完善的错误处理说明提升用户体验和可维护性。"
+  en: "Comprehensive error handling description improves UX and maintainability."
+
+handbook_reference: "Chapter 4.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(错误处理|Error Handling|异常|Exceptions)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加错误处理章节，列出常见错误和解决方法。"
+    en: "Add error handling section listing common errors and solutions."
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      （没有错误处理说明）
+    en: |
+      # My Skill
+      (No error handling description)
+  good:
+    zh: |
+      ## 错误处理
+      - 文件不存在: 返回错误信息并退出
+      - 权限不足: 提示用户检查权限
+    en: |
+      ## Error Handling
+      - File not found: Return error message and exit
+      - Permission denied: Prompt user to check permissions
+
+tags: ["workflow", "error-handling", "skill"]
+related_rules: []

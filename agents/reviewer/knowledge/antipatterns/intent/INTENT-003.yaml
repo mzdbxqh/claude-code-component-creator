@@ -1,0 +1,89 @@
+id: INTENT-003
+name: missing-exclusion-scenario
+severity: info
+component_type: skill
+category: intent-matching
+
+title:
+  zh: "技能未定义排除场景"
+  en: "Skill missing exclusion scenarios"
+
+description:
+  zh: |
+    技能应说明"当 Y 时不使用"的排除场景，帮助大模型避免错误匹配。
+    排除场景与触发场景同样重要。
+  en: |
+    Skills should specify exclusion scenarios "when NOT to use Y" to help LLM avoid incorrect matching.
+    Exclusion scenarios are as important as trigger scenarios.
+
+rationale:
+  zh: "基于意图匹配最佳实践，明确的排除场景可减少误匹配"
+  en: "Per intent matching best practices, clear exclusion scenarios reduce false matching"
+
+detection:
+  method: pattern-check
+  required_patterns:
+    - "不.*时使用"
+    - "When NOT to use"
+    - "禁止在"
+    - "不要在"
+    - "不适用于"
+    - "when.*not.*use"
+    - "avoid.*when"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      添加"何时不使用"或"排除场景"章节，明确说明技能不适用的情况。
+      示例：
+      - "功能正常时不使用此技能"
+      - "不要在没找到根本原因前修复"
+      - "不适用于单体架构项目"
+    en: |
+      Add 'When NOT to Use' or 'Exclusion Scenarios' section to clarify when the skill should not be used.
+      Examples:
+      - "Do not use when functionality is working correctly"
+      - "Avoid fixing before finding root cause"
+      - "Not applicable to monolithic architecture projects"
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 系统化调试技能
+      ---
+      ## 何时使用
+      在遇到 bug 时使用
+    en: |
+      ---
+      description: Systematic debugging skill
+      ---
+      ## When to Use
+      Use when encountering bugs
+  good:
+    zh: |
+      ---
+      description: 系统化调试技能
+      ---
+      ## 何时使用
+      在遇到 bug、测试失败或意外行为时使用
+
+      ## 何时不使用
+      - 功能正常时不使用
+      - 不要在没找到根本原因前直接修复
+      - 不适用于已知问题的快速修复场景
+    en: |
+      ---
+      description: Systematic debugging skill
+      ---
+      ## When to Use
+      Use when encountering bugs, test failures, or unexpected behavior
+
+      ## When NOT to Use
+      - Do not use when functionality is working correctly
+      - Avoid fixing before finding root cause
+      - Not applicable to quick-fix scenarios for known issues
+
+tags: ["intent", "exclusion", "skill", "matching"]
+related_rules: ["INTENT-001", "INTENT-002"]

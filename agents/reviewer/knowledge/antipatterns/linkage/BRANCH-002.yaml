@@ -1,0 +1,22 @@
+id: BRANCH-002
+name: default-branch-handling
+severity: info
+component_type: all
+category: linkage
+title:
+  zh: "缺少默认分支处理"
+  en: "Missing default branch handling"
+description:
+  zh: "条件分支缺少else/default处理"
+  en: "Conditional branch lacks else/default handling"
+detection:
+  method: custom
+  custom_function: check_default_branch
+rationale:
+  zh: "确保所有条件分支都有默认处理逻辑"
+  en: "Ensure all conditional branches have default handling logic"
+fix:
+  automatic: false
+  suggestion:
+    zh: "为条件分支添加else/default处理"
+    en: "Add else/default handling for conditional branches"

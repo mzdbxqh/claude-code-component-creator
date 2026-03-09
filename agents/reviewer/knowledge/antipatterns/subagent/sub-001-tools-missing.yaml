@@ -1,0 +1,67 @@
+id: SUB-001
+name: tools-missing
+severity: error
+component_type: subagent
+category: metadata
+
+title:
+  zh: "缺少工具声明"
+  en: "Missing tools declaration"
+
+description:
+  zh: |
+    Subagent 必须在 metadata 中声明 allowed-tools，
+    明确说明需要使用的工具列表。
+  en: |
+    Subagent must declare allowed-tools in metadata,
+    clearly specifying the list of tools needed.
+
+rationale:
+  zh: "工具声明是安全机制，确保 Subagent 不会越权操作。"
+  en: "Tool declaration is a security mechanism ensuring subagent doesn't operate beyond permissions."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: regex
+  pattern: '^---\n(?!.*allowed-tools:)'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加 allowed-tools 字段，列出所有需要的工具。"
+    en: "Add allowed-tools field listing all required tools."
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: file-analyzer
+      description: 分析文件
+      ---
+    en: |
+      ---
+      name: file-analyzer
+      description: Analyze files
+      ---
+  good:
+    zh: |
+      ---
+      name: file-analyzer
+      description: 分析文件
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+    en: |
+      ---
+      name: file-analyzer
+      description: Analyze files
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+
+tags: ["metadata", "tools", "subagent"]
+related_rules: ["SUB-005"]

@@ -1,0 +1,52 @@
+id: GATE-003
+name: plan-quality-gate
+severity: warning
+component_type: workflow
+category: quality-gate
+
+title:
+  zh: "Plan 阶段质量卡点验证缺失"
+  en: "Plan phase quality gate missing"
+
+description:
+  zh: |
+    验证 plan 阶段完成后的质量卡点。
+
+    **检查项**:
+    - feat-*.md 文件是否已生成
+    - Task 数量是否合理 (每个文件 3-7 个 Task)
+    - Task 目标是否明确
+    - 是否引用了正确的技能
+    - 验证标准是否清晰
+
+    **Gate 3 通过标准**:
+    - ✅ 每个 Phase 都有对应的 feat-*.md 文件
+    - ✅ Task 数量在合理范围内 (3-7 个)
+    - ✅ 每个 Task 都有明确的验证标准
+    - ✅ 引用了适当的子代理和技能
+
+  en: |
+    Validates quality gate after plan phase.
+
+    **Checks**:
+    - feat-*.md files exist
+    - Task count is reasonable (3-7 per file)
+    - Task goals are clear
+    - Skills are correctly referenced
+    - Verification criteria are clear
+
+check_logic:
+  type: file_content_check
+  target_file: "feat-*.md"
+  conditions:
+    - file_exists: true
+    - task_count_reasonable: true
+    - task_goals_clear: true
+    - skills_referenced: true
+
+suggestion:
+  zh: "在 plan 完成后运行质量检查，确保 feat-*.md 符合标准"
+  en: "Run quality check after plan to ensure feat-*.md meets standards"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

@@ -1,0 +1,67 @@
+id: SKILL-008
+name: workflow-incomplete
+severity: warning
+component_type: skill
+category: workflow
+
+title:
+  zh: "工作流描述不完整"
+  en: "Incomplete workflow description"
+
+description:
+  zh: |
+    Skill 应该清晰描述其工作流：输入处理、执行步骤、输出格式。
+    缺少工作流描述会导致用户使用困难。
+  en: |
+    Skill should clearly describe its workflow: input processing, execution steps, output format.
+    Missing workflow description makes usage difficult.
+
+rationale:
+  zh: "清晰的工作流描述帮助用户理解 Skill 的行为和预期。"
+  en: "Clear workflow description helps users understand skill behavior and expectations."
+
+handbook_reference: "Chapter 4.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(工作流|Workflow|执行流程|Execution)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加工作流章节，描述输入、处理步骤和输出。"
+    en: "Add workflow section describing inputs, processing steps, and outputs."
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      描述...
+      ## 用法
+      /my-skill
+      （缺少工作流说明）
+    en: |
+      # My Skill
+      Description...
+      ## Usage
+      /my-skill
+      (Missing workflow description)
+  good:
+    zh: |
+      # My Skill
+      描述...
+      ## 工作流
+      1. 解析用户输入
+      2. 执行验证
+      3. 返回结果
+    en: |
+      # My Skill
+      Description...
+      ## Workflow
+      1. Parse user input
+      2. Execute validation
+      3. Return results
+
+tags: ["workflow", "documentation", "skill"]
+related_rules: []

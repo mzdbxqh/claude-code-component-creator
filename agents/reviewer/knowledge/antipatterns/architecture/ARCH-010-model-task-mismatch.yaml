@@ -1,0 +1,94 @@
+id: ARCH-010
+name: model-task-mismatch
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "模型选择与任务复杂度不匹配"
+  en: "Model-Task Complexity Mismatch"
+
+description:
+  zh: |
+    任务复杂度与选择的模型能力不匹配。
+    复杂任务使用轻量级模型(haiku)可能导致质量下降，
+    简单任务使用重量级模型(opus)造成资源浪费。
+  en: |
+    Task complexity doesn't match selected model capability.
+
+rationale:
+  zh: "合理选择模型可平衡质量和成本"
+  en: "Proper model selection balances quality and cost"
+
+detection:
+  method: custom
+  custom_function: check_model_task_match
+  rules:
+    complex_tasks:
+      keywords: ["architecture", "design", "orchestration", "planning", "review", "analyze"]
+      required_model: ["sonnet", "opus"]
+    simple_tasks:
+      keywords: ["format", "convert", "extract", "count", "list"]
+      suitable_model: ["haiku", "sonnet"]
+    model_tiers:
+      haiku: 1
+      sonnet: 2
+      opus: 3
+  threshold:
+    min_tier_gap: 2  # 差距2级以上触发
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      调整模型选择：
+      1. 架构/设计/规划任务 → sonnet或opus
+      2. 代码执行/数据处理 → sonnet
+      3. 简单格式化/提取 → haiku
+      4. 在SKILL.md中说明模型选择理由
+    en: |
+      Adjust model selection:
+      1. Architecture/design/planning → sonnet or opus
+      2. Code execution/data processing → sonnet
+      3. Simple formatting/extraction → haiku
+      4. Document model selection rationale in SKILL.md
+
+examples:
+  bad:
+    zh: |
+      # 架构设计任务使用轻量模型
+      ---
+      name: architecture-designer
+      model: haiku  # 不合适：架构设计需要推理能力
+      ---
+    en: |
+      # Architecture task using lightweight model
+      ---
+      name: architecture-designer
+      model: haiku  # Unsuitable: architecture needs reasoning
+      ---
+  good:
+    zh: |
+      # 根据任务复杂度选择模型
+      ---
+      name: architecture-designer
+      model: opus   # 架构设计使用最强模型
+      ---
+
+      ---
+      name: json-formatter
+      model: haiku  # 简单任务使用轻量模型
+      ---
+    en: |
+      # Select model based on task complexity
+      ---
+      name: architecture-designer
+      model: opus   # Architecture uses strongest model
+      ---
+
+      ---
+      name: json-formatter
+      model: haiku  # Simple task uses lightweight model
+      ---
+
+tags: ["architecture", "model", "efficiency", "cost"]

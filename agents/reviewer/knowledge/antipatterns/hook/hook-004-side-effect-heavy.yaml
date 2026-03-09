@@ -1,0 +1,63 @@
+id: HOOK-004
+name: side-effect-heavy
+severity: warning
+component_type: hook
+category: workflow
+
+title:
+  zh: "副作用过大"
+  en: "Heavy side effects"
+
+description:
+  zh: |
+    Hook 不应该产生过多的副作用（如修改多个文件、调用外部 API）。
+    副作用应该控制在最小范围。
+  en: |
+    Hooks should not produce excessive side effects (e.g., modifying multiple files, calling external APIs).
+    Side effects should be minimized.
+
+rationale:
+  zh: "过多的副作用使 Hook 难以预测和调试，影响系统稳定性。"
+  en: "Excessive side effects make hooks unpredictable and hard to debug, affecting system stability."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: custom
+  custom_function: "check_side_effects"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "减少副作用，或将副作用拆分到多个专用 Hook 中。"
+    en: "Reduce side effects or split them into multiple specialized hooks."
+
+examples:
+  bad:
+    zh: |
+      ## 处理器
+      1. 修改配置文件
+      2. 调用外部 API
+      3. 发送邮件通知
+      4. 更新数据库
+      5. 修改另一个文件
+    en: |
+      ## Handler
+      1. Modify config file
+      2. Call external API
+      3. Send email notification
+      4. Update database
+      5. Modify another file
+  good:
+    zh: |
+      ## 处理器
+      1. 验证文件格式
+      2. 如验证失败，记录日志
+    en: |
+      ## Handler
+      1. Validate file format
+      2. If validation fails, log the error
+
+tags: ["workflow", "side-effects", "hook"]
+related_rules: []

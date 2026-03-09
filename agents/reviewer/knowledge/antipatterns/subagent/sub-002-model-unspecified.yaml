@@ -1,0 +1,67 @@
+id: SUB-002
+name: model-unspecified
+severity: warning
+component_type: subagent
+category: metadata
+
+title:
+  zh: "未指定模型"
+  en: "Model not specified"
+
+description:
+  zh: |
+    Subagent 应该明确指定使用的模型（haiku/sonnet/opus），
+    以便控制性能和成本。
+  en: |
+    Subagent should explicitly specify the model to use (haiku/sonnet/opus),
+    to control performance and cost.
+
+rationale:
+  zh: "不同任务需要不同模型能力，明确指定可避免资源浪费。"
+  en: "Different tasks require different model capabilities; explicit specification prevents resource waste."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: regex
+  pattern: '^---\n(?!.*model:)'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加 model 字段，选择合适的模型。"
+    en: "Add model field with appropriate model selection."
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: data-processor
+      allowed-tools:
+        - Read
+      ---
+    en: |
+      ---
+      name: data-processor
+      allowed-tools:
+        - Read
+      ---
+  good:
+    zh: |
+      ---
+      name: data-processor
+      model: haiku
+      allowed-tools:
+        - Read
+      ---
+    en: |
+      ---
+      name: data-processor
+      model: haiku
+      allowed-tools:
+        - Read
+      ---
+
+tags: ["metadata", "model", "subagent"]
+related_rules: ["SUB-010"]

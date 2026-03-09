@@ -1,0 +1,53 @@
+---
+# WorkflowState schema for external state management
+workflow:
+  id: string
+  name: string
+  status: enum[pending, in_progress, completed, failed, paused]
+  current_stage: enum[intent, blueprint, delivery]
+
+  created_at: datetime
+  updated_at: datetime
+  completed_at: datetime|null
+
+  artifacts:
+    intent:
+      current: string|null
+      history: [string]
+    blueprint:
+      current: string|null
+      generating: boolean
+      history: [string]
+    delivery:
+      current: string|null
+      generating: boolean
+      history: [string]
+
+  stages:
+    intent:
+      status: enum[not_started, in_progress, completed]
+      artifact_id: string|null
+      started_at: datetime|null
+      completed_at: datetime|null
+    blueprint:
+      status: enum[not_started, in_progress, completed]
+      artifact_id: string|null
+      started_at: datetime|null
+      completed_at: datetime|null
+      current_step: string|null
+      progress_percent: number
+    delivery:
+      status: enum[not_started, in_progress, completed]
+      artifact_id: string|null
+      started_at: datetime|null
+      completed_at: datetime|null
+
+  resilience:
+    error_handlers: [...]
+    auto_fixes: [...]
+
+  resume:
+    last_context_hash: string
+    pending_action: string
+    recovery_points: [...]
+---

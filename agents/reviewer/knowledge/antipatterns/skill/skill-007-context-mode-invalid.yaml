@@ -1,0 +1,61 @@
+id: SKILL-007
+name: context-mode-invalid
+severity: error
+component_type: skill
+category: metadata
+
+title:
+  zh: "无效的 context 模式"
+  en: "Invalid context mode"
+
+description:
+  zh: |
+    Skill 的 context 字段必须是以下有效值之一：
+    - inherit: 继承父级上下文
+    - fork: 创建独立上下文
+    - isolated: 完全隔离
+  en: |
+    Skill context field must be one of valid values:
+    - inherit: Inherit parent context
+    - fork: Create independent context
+    - isolated: Fully isolated
+
+rationale:
+  zh: "无效的 context 值会导致运行时错误。"
+  en: "Invalid context values cause runtime errors."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: regex
+  pattern: '^context:\s*(?!inherit$|fork$|isolated$).+$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "将 context 设置为 inherit、fork 或 isolated 之一。"
+    en: "Set context to one of: inherit, fork, or isolated."
+
+examples:
+  bad:
+    zh: |
+      ---
+      context: shared
+      ---
+    en: |
+      ---
+      context: shared
+      ---
+  good:
+    zh: |
+      ---
+      context: fork
+      ---
+    en: |
+      ---
+      context: fork
+      ---
+
+tags: ["metadata", "context", "skill"]
+related_rules: ["SKILL-012"]

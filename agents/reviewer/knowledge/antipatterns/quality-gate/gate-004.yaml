@@ -1,0 +1,52 @@
+id: GATE-004
+name: execute-quality-gate
+severity: warning
+component_type: workflow
+category: quality-gate
+
+title:
+  zh: "Execute 阶段质量卡点验证缺失"
+  en: "Execute phase quality gate missing"
+
+description:
+  zh: |
+    验证 execute 阶段完成后的质量卡点。
+
+    **检查项**:
+    - 代码是否已实现
+    - 测试是否已编写并通过
+    - 静态扫描是否通过
+    - 代码审查是否完成
+    - 进度是否已更新
+
+    **Gate 4 通过标准**:
+    - ✅ TDD 流程得到遵循 (先测试后实现)
+    - ✅ 所有测试通过
+    - ✅ 静态扫描无错误
+    - ✅ 代码审查完成 (如适用)
+    - ✅ Phase 进度已更新
+
+  en: |
+    Validates quality gate after execute phase.
+
+    **Checks**:
+    - Code is implemented
+    - Tests are written and passing
+    - Static analysis passes
+    - Code review completed
+    - Progress is updated
+
+check_logic:
+  type: workflow_analysis
+  conditions:
+    - code_implemented: true
+    - tests_passing: true
+    - static_analysis_clean: true
+    - progress_updated: true
+
+suggestion:
+  zh: "在批次执行完成后运行质量检查，确保代码质量符合标准"
+  en: "Run quality check after batch execution to ensure code quality meets standards"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

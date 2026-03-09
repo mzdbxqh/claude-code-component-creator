@@ -1,0 +1,57 @@
+id: SUB-010
+name: model-mismatch
+severity: warning
+component_type: subagent
+category: metadata
+
+title:
+  zh: "模型选择不匹配"
+  en: "Model selection mismatch"
+
+description:
+  zh: |
+    Subagent 选择的模型应该与其任务复杂度匹配。
+    简单任务使用 opus 浪费资源，复杂任务使用 haiku 质量不足。
+  en: |
+    Subagent's selected model should match its task complexity.
+    Simple tasks using opus waste resources; complex tasks using haiku lack quality.
+
+rationale:
+  zh: "合理的模型选择平衡性能和成本。"
+  en: "Proper model selection balances performance and cost."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: custom
+  custom_function: "check_model_task_match"
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "根据任务复杂度选择合适的模型。"
+  en: "Select appropriate model based on task complexity."
+
+examples:
+  bad:
+    zh: |
+      描述：简单格式化字符串
+      model: opus
+      （过于昂贵）
+  en: |
+      Description: Simple string formatting
+      model: opus
+      (Overkill)
+  good:
+    zh: |
+      描述：复杂代码重构
+      model: opus
+      （合适）
+  en: |
+      Description: Complex code refactoring
+      model: opus
+      (Appropriate)
+
+tags: ["metadata", "model", "optimization", "subagent"]
+related_rules: ["SUB-002"]

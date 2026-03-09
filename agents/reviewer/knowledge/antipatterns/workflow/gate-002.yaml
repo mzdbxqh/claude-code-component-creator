@@ -1,0 +1,42 @@
+id: GATE-002
+name: phase-plan-quality-gate
+severity: warning
+component_type: workflow
+category: gate
+
+title:
+  zh: "Phase-Plan 阶段质量卡点验证失败"
+  en: "Phase-Plan phase quality gate validation failed"
+
+description: |
+  验证 Phase-Plan 阶段完成后的输出质量。
+
+  **检查项**:
+  - Phase 与服务匹配是否正确
+  - 工作流匹配是否合理
+  - Phase 依赖关系是否清晰
+
+  **通过标准**:
+  - 每个 Phase 对应正确的服务
+  - Phase 工作流与架构设计一致
+  - Phase 间依赖关系明确
+
+  **失败恢复**:
+  - Phase 与服务不匹配：重新规划 Phase 划分
+  - 工作流不匹配：调整 Phase 顺序
+  - 依赖关系不清晰：补充 Phase 接口定义
+
+check_logic:
+  type: workflow_analysis
+  phase: phase-plan
+  conditions:
+    - phase_service_matched: true
+    - workflow_matched_correctly: true
+    - phase_dependencies_clear: true
+
+suggestion:
+  zh: "确保 Phase-Plan 输出中 Phase 与服务正确匹配、工作流合理、依赖关系清晰"
+  en: "Ensure Phase-Plan output has correct phase-service matching, reasonable workflow, and clear dependencies"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

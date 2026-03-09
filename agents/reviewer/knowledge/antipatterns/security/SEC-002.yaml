@@ -1,0 +1,118 @@
+id: SEC-002
+name: sensitive-data-handling
+severity: error
+component_type: all
+category: security
+
+title:
+  zh: "敏感数据处理不当"
+  en: "Sensitive data handling issues"
+
+description:
+  zh: |
+    技能如处理 API Token、密钥、密码等敏感数据，必须使用安全存储方式，
+    禁止硬编码、禁止记录到日志、禁止明文存储。
+  en: |
+    Skills handling API Tokens, secrets, passwords must use secure storage,
+    never hardcode, never log, never store in plaintext.
+
+rationale:
+  zh: "基于安全最佳实践，敏感数据必须加密存储且最小化访问"
+  en: "Per security best practices, sensitive data must be encrypted and access minimized"
+
+detection:
+  method: code-analysis
+  sensitive_patterns:
+    - pattern: '(?i)(api[_-]?key|token|secret|password|credential)\s*=\s*["\x27][^"\x27]+'
+      risk: critical
+      description: "Hardcoded credentials"
+    - pattern: '(?i)logger\..*(?i)(key|token|secret|password)'
+      risk: high
+      description: "Logging sensitive data"
+    - pattern: '(?i)(key|token|secret)\s*:\s*["\x27][^"\x27]+'
+      risk: critical
+      description: "Hardcoded secret in config"
+  required_practices:
+    - 使用环境变量
+    - 使用密钥管理工具
+    - 数据脱敏处理
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **敏感数据保护实践**:
+
+      ❌ 不安全:
+      ```bash
+      # 硬编码 API Key
+      API_KEY="sk-1234567890abcdef"
+
+      # 记录敏感数据
+      logger.info("Using token: $API_KEY")
+      ```
+
+      ✅ 安全:
+      ```bash
+      # 使用环境变量
+      API_KEY="${BRAVE_API_KEY:-}"
+      if [[ -z "$API_KEY" ]]; then
+        echo "Error: BRAVE_API_KEY not set"
+        exit 1
+      fi
+
+      # 脱敏显示
+      masked_key="${API_KEY:0:4}...${API_KEY: -4}"
+      logger.info("Using token: $masked_key")
+
+      # 或使用密钥管理
+      # ~/.credentials 文件，权限 600
+      API_KEY=$(grep brave_api_key ~/.credentials | cut -d'=' -f2)
+      ```
+
+      **配置示例**:
+      ```yaml
+      ## 敏感数据保护
+
+      **Token 存储**:
+      - ✅ 使用环境变量：$BRAVE_API_KEY
+      - ✅ 使用密钥管理：~/.credentials（权限 600）
+      - ❌ 不要硬编码到代码
+      - ❌ 不要记录到日志
+
+      **脱敏处理**:
+      - API Key 显示为：sk-1234...abcd
+      - 密码永不显示
+      ```
+    en: |
+      **Sensitive Data Protection**:
+
+      ❌ Insecure:
+      ```bash
+      # Hardcoded API Key
+      API_KEY="sk-1234567890abcdef"
+
+      # Logging sensitive data
+      logger.info("Using token: $API_KEY")
+      ```
+
+      ✅ Secure:
+      ```bash
+      # Use environment variable
+      API_KEY="${BRAVE_API_KEY:-}"
+      if [[ -z "$API_KEY" ]]; then
+        echo "Error: BRAVE_API_KEY not set"
+        exit 1
+      fi
+
+      # Masked display
+      masked_key="${API_KEY:0:4}...${API_KEY: -4}"
+      logger.info("Using token: $masked_key")
+
+      # Or use secret management
+      # ~/.credentials file with permission 600
+      API_KEY=$(grep brave_api_key ~/.credentials | cut -d'=' -f2)
+      ```
+
+tags: ["security", "sensitive-data", "credentials", "logging"]
+related_rules: ["SEC-001", "SEC-004"]

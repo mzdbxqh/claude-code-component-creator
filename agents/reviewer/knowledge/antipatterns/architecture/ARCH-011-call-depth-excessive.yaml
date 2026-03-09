@@ -1,0 +1,64 @@
+id: ARCH-011
+name: call-depth-excessive
+severity: error
+component_type: all
+category: architecture
+
+title:
+  zh: "Subagent调用链过深"
+  en: "Excessive Call Chain Depth"
+
+description:
+  zh: |
+    Subagent调用链深度超过阈值，增加调试难度、失败风险和认知负担。
+    每增加一层调用，错误追踪和性能调优的复杂度都会显著上升。
+  en: |
+    Call chain depth exceeds threshold, increasing debugging difficulty and failure risk.
+
+rationale:
+  zh: "扁平的调用结构更易于理解和维护"
+  en: "Flat call structure is easier to understand and maintain"
+
+detection:
+  method: custom
+  custom_function: check_call_depth
+  criteria:
+    - 从入口点构建调用树
+    - 计算最大深度
+  threshold:
+    max_depth: 5
+    warning_depth: 4
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      扁平化调用链：
+      1. 使用aggregator模式汇总多个子调用
+      2. 将深层调用改为兄弟调用
+      3. 在Skill内部实现循环而非递归调用
+      4. 考虑使用事件机制解耦
+    en: |
+      Flatten call chain:
+      1. Use aggregator pattern for multiple sub-calls
+      2. Convert deep calls to sibling calls
+      3. Implement loops internally instead of recursion
+      4. Consider event mechanism for decoupling
+
+examples:
+  bad:
+    zh: |
+      A -> B -> C -> D -> E -> F  # 深度6，过长
+      # 调试时需要追踪6层上下文
+    en: |
+      A -> B -> C -> D -> E -> F  # Depth 6, too deep
+      # Debugging requires tracing 6 layers of context
+  good:
+    zh: |
+      A -> B -> [C, D, E]         # 深度3，扁平化
+      # C, D, E 并行/兄弟调用
+    en: |
+      A -> B -> [C, D, E]         # Depth 3, flattened
+      # C, D, E are parallel/sibling calls
+
+tags: ["architecture", "call-chain", "complexity", "depth"]

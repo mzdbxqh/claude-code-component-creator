@@ -1,0 +1,64 @@
+id: MCP-001
+name: server-config-invalid
+severity: error
+component_type: mcp
+category: config
+
+title:
+  zh: "服务器配置无效"
+  en: "Invalid server configuration"
+
+description:
+  zh: |
+    MCP 服务器配置必须包含必需的字段：
+    - name: 服务器名称
+    - version: 版本号
+    - transport: 传输方式 (stdio/sse)
+  en: |
+    MCP server configuration must include required fields:
+    - name: Server name
+    - version: Version number
+    - transport: Transport method (stdio/sse)
+
+rationale:
+  zh: "完整的配置是 MCP 服务器正常运行的基础。"
+  en: "Complete configuration is the foundation for MCP server operation."
+
+handbook_reference: "Chapter 8.2"
+
+detection:
+  method: yaml-path
+  yaml_path: "$.server"
+  pattern: '^(?!.*name:|.*version:|.*transport:).*$'
+  file_pattern: '*.yaml'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加缺失的必需配置字段。"
+    en: "Add missing required configuration fields."
+
+examples:
+  bad:
+    zh: |
+      server:
+        name: my-server
+        # 缺少 version 和 transport
+    en: |
+      server:
+        name: my-server
+        # missing version and transport
+  good:
+    zh: |
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: stdio
+    en: |
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: stdio
+
+tags: ["config", "server", "mcp"]
+related_rules: []

@@ -1,0 +1,63 @@
+id: MCP-008
+name: no-health-check
+severity: warning
+component_type: mcp
+category: workflow
+
+title:
+  zh: "缺少健康检查"
+  en: "No health check"
+
+description:
+  zh: |
+    MCP 服务器应该提供健康检查端点或方法，
+    以便监控系统可以检测其运行状态。
+  en: |
+    MCP servers should provide a health check endpoint or method,
+    so monitoring systems can detect their operational status.
+
+rationale:
+  zh: "健康检查是运维和监控的基础。"
+  en: "Health checks are fundamental for operations and monitoring."
+
+handbook_reference: "Chapter 8.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(健康检查|Health Check|状态|Status)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加健康检查实现，返回服务器状态。"
+    en: "Add health check implementation returning server status."
+
+examples:
+  bad:
+    zh: |
+      # MCP Server
+      提供搜索功能。
+      （没有健康检查）
+    en: |
+      # MCP Server
+      Provides search functionality.
+      (No health check)
+  good:
+    zh: |
+      ## 健康检查
+      端点: `health`
+      返回:
+        - status: healthy/unhealthy
+        - version: 服务器版本
+        - uptime: 运行时间
+    en: |
+      ## Health Check
+      Endpoint: `health`
+      Returns:
+        - status: healthy/unhealthy
+        - version: Server version
+        - uptime: Uptime
+
+tags: ["workflow", "health-check", "monitoring", "mcp"]
+related_rules: []

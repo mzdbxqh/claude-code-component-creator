@@ -1,0 +1,23 @@
+id: LINK-003
+name: call-depth-limit
+severity: warning
+component_type: all
+category: linkage
+title:
+  zh: "调用深度超限"
+  en: "Call depth exceeded"
+description:
+  zh: "调用链深度超过10层，可能导致性能问题"
+  en: "Call chain depth exceeds 10 layers, may cause performance issues"
+detection:
+  method: custom
+  custom_function: check_call_depth
+  threshold: 10
+rationale:
+  zh: "过深的调用链难以维护和调试"
+  en: "Deep call chains are difficult to maintain and debug"
+fix:
+  automatic: false
+  suggestion:
+    zh: "考虑扁平化调用结构或合并中间层"
+    en: "Consider flattening the call structure or merging intermediate layers"

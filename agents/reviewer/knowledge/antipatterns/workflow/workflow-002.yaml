@@ -1,0 +1,47 @@
+id: WORKFLOW-002
+name: quality-gate-validation
+severity: warning
+component_type: workflow
+category: workflow
+
+title:
+  zh: "质量卡点验证缺失"
+  en: "Quality gate validation missing"
+
+description:
+  zh: |
+    验证工作流中的质量卡点是否设计正确。
+
+    **检查项**:
+    - 每个阶段完成后是否有质量检查
+    - 质量检查是否有明确的通过标准
+    - 质量检查失败是否有恢复流程
+
+    **质量卡点示例**:
+    - Gate 1 (brainstorm 后): 服务列表完整、命名规范、测试策略
+    - Gate 2 (phase-plan 后): Phase 与服务匹配、工作流匹配正确
+    - Gate 3 (plan 后): Task 数量合理、目标明确、技能引用
+    - Gate 4 (批次执行后): TDD 流程、测试通过、静态扫描
+    - Gate 5 (Phase 完成后): 所有 Task 完成、Phase 状态更新
+
+  en: |
+    Validates that quality gates are properly designed in the workflow.
+
+    **Checks**:
+    - Quality check exists after each phase
+    - Quality check has clear pass criteria
+    - Recovery process exists for failed checks
+
+check_logic:
+  type: workflow_analysis
+  conditions:
+    - has_quality_gate_after_phase: true
+    - has_pass_criteria: true
+    - has_recovery_process: true
+
+suggestion:
+  zh: "为每个阶段添加质量卡点检查和恢复流程"
+  en: "Add quality gate checks and recovery processes for each phase"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

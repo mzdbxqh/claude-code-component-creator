@@ -1,0 +1,136 @@
+id: SKILL-014
+name: content-length-issues
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "内容长度问题"
+  en: "Content length issues"
+
+description:
+  zh: |
+    Skill 文档内容长度需要符合以下要求：
+
+    **最小长度**: 除 metadata 外，正文内容应至少 200 字符
+    - 过短的文档无法提供足够的上下文和指导
+
+    **最大长度**: 正文内容应不超过 500 行
+    - 超过 500 行会导致 LLM 注意力分散，规则遵从性下降
+    - 符合官方 skill-creator 的 Progressive Disclosure 原则
+
+    **分层文档策略**:
+    - 如果内容超过 500 行，必须有 references/或 docs/子目录
+    - 主文档应使用引用指向扩展内容
+    - references/中的示例可以替代内嵌示例
+
+    **官方参考**: Anthropic skill-creator 规范建议保持 SKILL.md under 500 lines
+  en: |
+    Skill document content length should meet the following requirements:
+
+    **Minimum length**: Body content (excluding metadata) should be at least 200 characters
+    - Overly short documentation cannot provide sufficient context and guidance
+
+    **Maximum length**: Body content should not exceed 500 lines
+    - Exceeding 500 lines causes LLM attention dispersion and reduced rule compliance
+    - Follows official skill-creator Progressive Disclosure principle
+
+    **Layered documentation strategy**:
+    - If content exceeds 500 lines, must have references/ or docs/ subdirectory
+    - Main document should reference extended content
+    - Examples in references/ can substitute inline examples
+
+    **Official reference**: Anthropic skill-creator spec recommends keeping SKILL.md under 500 lines
+
+rationale:
+  zh: "根据官方 skill-creator 的 Progressive Disclosure 三层次加载系统，保持主文档精简可以提高规则遵从性。"
+  en: "Following official skill-creator Progressive Disclosure three-level loading system, keeping main document concise improves rule compliance."
+
+handbook_reference: "Chapter 4.4 + Official skill-creator Progressive Disclosure"
+
+detection:
+  method: custom
+  custom_function: "check_content_length"
+  file_pattern: '*.md'
+  thresholds:
+    min_characters: 200
+    max_lines: 500
+  checks:
+    - min_length_violation
+    - max_length_violation
+    - references_dir_missing
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      如果文档过长 (>500 行):
+      1. 将详细内容移动到 references/子目录
+      2. 在主文档中使用@path 引用指向扩展内容
+      3. 保持主文档专注于核心工作流和关键指导
+
+      如果文档过短 (<200 字符):
+      1. 扩充详细描述
+      2. 添加使用示例
+      3. 添加错误处理说明
+      4. 添加注意事项/常见陷阱
+    en: |
+      If document is too long (>500 lines):
+      1. Move detailed content to references/ subdirectory
+      2. Use @path references in main document to extended content
+      3. Keep main document focused on core workflow and key guidance
+
+      If document is too short (<200 characters):
+      1. Expand detailed description
+      2. Add usage examples
+      3. Add error handling instructions
+      4. Add cautions/common pitfalls
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      这是一个 Skill。
+      ## 用法
+      /my-skill
+    en: |
+      # My Skill
+      This is a skill.
+      ## Usage
+      /my-skill
+  good:
+    zh: |
+      # My Skill
+      详细描述 Skill 的功能和用途。
+
+      ## 功能
+      - 功能 1
+      - 功能 2
+
+      ## 用法
+      /my-skill <参数>
+
+      ## 示例
+      ...
+
+      ## 注意事项
+      ...
+    en: |
+      # My Skill
+      Detailed description of skill functionality and purpose.
+
+      ## Features
+      - Feature 1
+      - Feature 2
+
+      ## Usage
+      /my-skill <args>
+
+      ## Examples
+      ...
+
+      ## Cautions
+      ...
+
+tags: ["structure", "documentation", "skill"]
+related_rules: ["SKILL-001", "SKILL-003"]

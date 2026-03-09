@@ -1,0 +1,63 @@
+id: SKILL-011
+name: argument-hint-missing
+severity: warning
+component_type: skill
+category: metadata
+
+title:
+  zh: "缺少 argument-hint"
+  en: "Missing argument-hint"
+
+description:
+  zh: |
+    Skill 接受参数时应在 metadata 中声明 argument-hint，
+    用于提示用户如何提供参数。
+  en: |
+    Skills accepting arguments should declare argument-hint in metadata
+    to prompt users on how to provide arguments.
+
+rationale:
+  zh: "argument-hint 提升用户体验，让用户知道如何传递参数。"
+  en: "argument-hint improves UX by letting users know how to pass arguments."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: custom
+  custom_function: "check_missing_argument_hint"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加 argument-hint 字段，描述参数格式。"
+    en: "Add argument-hint field describing parameter format."
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: my-skill
+      description: 需要参数
+      ---
+    en: |
+      ---
+      name: my-skill
+      description: Requires arguments
+      ---
+  good:
+    zh: |
+      ---
+      name: my-skill
+      description: 需要参数
+      argument-hint: "<file-path> [--option value]"
+      ---
+    en: |
+      ---
+      name: my-skill
+      description: Requires arguments
+      argument-hint: "<file-path> [--option value]"
+      ---
+
+tags: ["metadata", "arguments", "skill"]
+related_rules: []

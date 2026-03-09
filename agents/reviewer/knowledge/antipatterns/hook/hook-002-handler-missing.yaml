@@ -1,0 +1,61 @@
+id: HOOK-002
+name: handler-missing
+severity: error
+component_type: hook
+category: workflow
+
+title:
+  zh: "缺少处理器定义"
+  en: "Missing handler definition"
+
+description:
+  zh: |
+    Hook 必须定义处理器逻辑，说明当事件触发时执行什么操作。
+    缺少处理器导致 Hook 无法执行任何任务。
+  en: |
+    Hook must define handler logic describing what actions to execute when triggered.
+    Missing handler prevents the hook from performing any tasks.
+
+rationale:
+  zh: "处理器是 Hook 的核心，定义事件触发后的行为。"
+  en: "Handler is the core of a hook, defining behavior after event triggers."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: regex
+  pattern: "^(?!.*##\\s*(处理器|Handler|处理逻辑|Logic)).*$"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加处理器章节，定义事件触发时的处理逻辑。"
+    en: "Add handler section defining processing logic when event triggers."
+
+examples:
+  bad:
+    zh: |
+      # Pre-save Hook
+      在文件保存前触发。
+    en: |
+      # Pre-save Hook
+      Triggered before file save.
+  good:
+    zh: |
+      ## 处理器
+
+      当文件保存事件触发时：
+      1. 检查文件格式
+      2. 验证语法
+      3. 如验证失败，阻止保存
+    en: |
+      ## Handler
+
+      When file save event triggers:
+      1. Check file format
+      2. Validate syntax
+      3. If validation fails, prevent save
+
+tags: ["workflow", "handler", "hook"]
+related_rules: []

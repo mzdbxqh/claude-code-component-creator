@@ -1,0 +1,44 @@
+{
+  "batchId": "batch-4-practice",
+  "name": "最佳实践检查",
+  "description": "检测方案是否符合Skill最佳实践",
+  "category": "practice",
+  "patterns": [
+    {
+      "id": "MP014",
+      "name": "不符合Skill命名规范",
+      "severity": "error",
+      "check": "name_format_invalid",
+      "message": "Skill名称不符合kebab-case规范",
+      "impact": "可能导致组件发现或调用失败",
+      "fix": "使用小写字母和连字符，如：my-skill-name"
+    },
+    {
+      "id": "MP015",
+      "name": "缺少description字段规划",
+      "severity": "error",
+      "check": "missing:description_plan",
+      "message": "未规划description字段内容",
+      "impact": "Claude Code无法正确理解Skill用途",
+      "fix": "规划description内容，包含触发场景和功能描述"
+    },
+    {
+      "id": "MP016",
+      "name": "context设置不当",
+      "severity": "warning",
+      "check": "context_invalid",
+      "message": "context未设置为ask或fork",
+      "impact": "可能影响Skill的执行方式",
+      "fix": "根据Skill类型选择合适的context（ask/fork）"
+    },
+    {
+      "id": "MP017",
+      "name": "缺少示例设计",
+      "severity": "warning",
+      "check": "missing:example_design",
+      "message": "未规划Skill的使用示例",
+      "impact": "用户难以理解如何使用Skill",
+      "fix": "设计典型的使用场景和示例"
+    }
+  ]
+}

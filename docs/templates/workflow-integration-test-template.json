@@ -1,0 +1,220 @@
+{
+  "$schema": "workflow-integration-test-template.json",
+  "version": "1.0.0",
+  "description": "工作流集成测试模板 - 用于验证跨组件数据流和质量卡点",
+  "testCases": [
+    {
+      "id": "TC-WORKFLOW-001",
+      "name": "完整开发工作流测试",
+      "category": "workflow-integration",
+      "checkType": "workflow",
+      "description": "验证 brainstorm → phase-plan → plan → execute 完整工作流",
+      "workflow": ["brainstorm", "phase-plan", "plan", "execute"],
+      "validationRules": [
+        {
+          "rule": "workflow-output-exists",
+          "description": "每个阶段必须输出预期文件",
+          "required": true,
+          "expectedOutputs": [
+            "architecture.md",
+            "design.md",
+            "feat-*.md"
+          ]
+        },
+        {
+          "rule": "data-flow-correct",
+          "description": "数据流必须正确传递",
+          "required": true,
+          "flow": [
+            "brainstorm → architecture.md",
+            "phase-plan reads architecture.md",
+            "phase-plan → design.md",
+            "plan reads design.md",
+            "plan → feat-*.md",
+            "execute reads feat-*.md"
+          ]
+        }
+      ],
+      "expectedOutput": {
+        "architecture.md": "DDD 领域设计文档，包含服务列表",
+        "design.md": "Phase 实施计划，包含 Phase 列表",
+        "feat-*.md": "详细 Task 列表，包含验证标准"
+      }
+    },
+    {
+      "id": "TC-WORKFLOW-002",
+      "name": "质量卡点验证测试",
+      "category": "workflow-integration",
+      "checkType": "quality-gate",
+      "description": "验证 Gate 1-5 质量卡点是否正常工作",
+      "gates": [
+        {
+          "gate": "Gate 1",
+          "location": "brainstorm 完成后",
+          "checks": ["服务列表完整", "服务状态标注", "命名规范", "测试策略"]
+        },
+        {
+          "gate": "Gate 2",
+          "location": "phase-plan 完成后",
+          "checks": ["Phase 与服务匹配", "工作流匹配正确", "Phase 状态正确", "测试场景矩阵"]
+        },
+        {
+          "gate": "Gate 3",
+          "location": "plan 完成后",
+          "checks": ["Task 数量合理", "目标明确", "技能引用", "文件列表", "验证标准"]
+        },
+        {
+          "gate": "Gate 4",
+          "location": "批次执行完成后",
+          "checks": ["TDD 流程", "测试通过", "静态扫描", "代码审查", "进度更新"]
+        },
+        {
+          "gate": "Gate 5",
+          "location": "Phase 完成后",
+          "checks": ["所有 Task 完成", "Phase 状态更新", "完整测试通过", "验证通过"]
+        }
+      ],
+      "expectedOutput": {
+        "all_gates_passed": true,
+        "gate_report": "docs/quality-gates/gate-report.md"
+      }
+    },
+    {
+      "id": "TC-WORKFLOW-003",
+      "name": "Command 链依赖测试",
+      "category": "workflow-integration",
+      "checkType": "dependency",
+      "description": "验证 Command 之间的依赖关系是否正确",
+      "commands": ["brainstorm", "phase-plan", "plan", "execute"],
+      "validationRules": [
+        {
+          "rule": "allowed-tools-correct",
+          "description": "每个 Command 的 allowed-tools 必须包含所需工具",
+          "required": true
+        },
+        {
+          "rule": "subagent-declaration",
+          "description": "调用的 subagent 必须正确声明",
+          "required": true
+        },
+        {
+          "rule": "skill-reference-valid",
+          "description": "引用的 skill 必须存在",
+          "required": true
+        }
+      ],
+      "expectedOutput": {
+        "dependency_graph": "docs/analysis/dependency-graph.md",
+        "circular_dependencies": [],
+        "missing_references": []
+      }
+    },
+    {
+      "id": "TC-WORKFLOW-004",
+      "name": "跨组件数据流测试 - Brainstorm 到 Phase-Plan",
+      "category": "workflow-integration",
+      "checkType": "dataflow",
+      "description": "验证 brainstorm 输出到 phase-plan 输入的数据流",
+      "source": {
+        "component": "brainstorm",
+        "output": "architecture.md"
+      },
+      "target": {
+        "component": "phase-plan",
+        "input": "architecture.md"
+      },
+      "validationRules": [
+        {
+          "rule": "output-exists",
+          "description": "brainstorm 必须输出 architecture.md",
+          "required": true
+        },
+        {
+          "rule": "input-consumed",
+          "description": "phase-plan 必须读取 architecture.md",
+          "required": true
+        },
+        {
+          "rule": "data-format-consistent",
+          "description": "数据格式在传递过程中保持一致",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "TC-WORKFLOW-005",
+      "name": "跨组件数据流测试 - Phase-Plan 到 Plan",
+      "category": "workflow-integration",
+      "checkType": "dataflow",
+      "description": "验证 phase-plan 输出到 plan 输入的数据流",
+      "source": {
+        "component": "phase-plan",
+        "output": "design.md"
+      },
+      "target": {
+        "component": "plan",
+        "input": "design.md"
+      },
+      "validationRules": [
+        {
+          "rule": "output-exists",
+          "description": "phase-plan 必须输出 design.md",
+          "required": true
+        },
+        {
+          "rule": "input-consumed",
+          "description": "plan 必须读取 design.md",
+          "required": true
+        },
+        {
+          "rule": "phase-list-transferred",
+          "description": "Phase 列表完整传递到 plan",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "TC-WORKFLOW-006",
+      "name": "跨组件数据流测试 - Plan 到 Execute",
+      "category": "workflow-integration",
+      "checkType": "dataflow",
+      "description": "验证 plan 输出到 execute 输入的数据流",
+      "source": {
+        "component": "plan",
+        "output": "feat-*.md"
+      },
+      "target": {
+        "component": "execute",
+        "input": "feat-*.md"
+      },
+      "validationRules": [
+        {
+          "rule": "output-exists",
+          "description": "plan 必须输出 feat-*.md",
+          "required": true
+        },
+        {
+          "rule": "input-consumed",
+          "description": "execute 必须读取 feat-*.md",
+          "required": true
+        },
+        {
+          "rule": "task-list-transferred",
+          "description": "Task 列表完整传递到 execute",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "benchmarkConfig": {
+    "withSkill": {
+      "description": "使用 CCC 技能配置执行",
+      "skills": ["superpowers:brainstorming", "superpowers:writing-plans", "superpowers:executing-plans"]
+    },
+    "baseline": {
+      "description": "不使用 CCC 技能配置执行",
+      "skills": []
+    },
+    "metrics": ["duration_ms", "tokens_used", "pass_rate", "quality_score"]
+  }
+}

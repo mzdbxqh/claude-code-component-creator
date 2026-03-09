@@ -1,0 +1,49 @@
+id: SKILL-012
+name: context-invalid
+severity: error
+component_type: skill
+category: metadata
+
+title:
+  zh: "context 值与 Skill 类型不匹配"
+  en: "Context value incompatible with skill type"
+
+description:
+  zh: |
+    某些 Skill 类型需要特定的 context 设置。
+    例如，修改文件系统的 Skill 通常需要 fork 或 isolated。
+  en: |
+    Certain skill types require specific context settings.
+    For example, skills modifying filesystem typically need fork or isolated.
+
+rationale:
+  zh: "正确的 context 设置确保安全性和可预测性。"
+  en: "Correct context settings ensure safety and predictability."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: custom
+  custom_function: "check_context_compatibility"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "根据 Skill 的行为选择合适的 context 模式。"
+    en: "Select appropriate context mode based on skill behavior."
+
+examples:
+  bad:
+    zh: |
+      （修改文件的 Skill 使用 inherit 上下文）
+    en: |
+      (File-modifying skill using inherit context)
+  good:
+    zh: |
+      （修改文件的 Skill 使用 fork 上下文）
+    en: |
+      (File-modifying skill using fork context)
+
+tags: ["metadata", "context", "skill"]
+related_rules: ["SKILL-007"]

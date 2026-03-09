@@ -1,0 +1,58 @@
+{
+  "batchId": "batch-2-content",
+  "name": "内容质量检查",
+  "description": "检测组件内容的质量和完整性",
+  "category": "content",
+  "patterns": [
+    {
+      "id": "AP003",
+      "name": "描述过于简短",
+      "severity": "warning",
+      "layer": "pattern",
+      "check": "description.length < 20",
+      "message": "description 字段内容过短（建议20+字符）",
+      "impact": "Claude 难以准确理解组件用途，可能导致匹配精度下降",
+      "fix": "扩展描述，包含触发场景和具体功能，如：'当用户请求Python代码审查时，执行静态分析和风格检查'"
+    },
+    {
+      "id": "AP004",
+      "name": "Token数过多",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "tokens > 2000",
+      "message": "组件内容超过2000 tokens",
+      "impact": "可能导致上下文溢出，影响性能和成本",
+      "fix": "精简内容，拆分为多个组件，或使用 Subagent 处理复杂逻辑"
+    },
+    {
+      "id": "AP005",
+      "name": "缺少使用示例",
+      "severity": "warning",
+      "layer": "pattern",
+      "check": "missing:## 示例 OR missing:## Examples",
+      "message": "缺少使用示例部分（90.6%成功插件包含示例）",
+      "impact": "用户难以理解如何使用该组件",
+      "fix": "添加 ## 示例 部分，展示2-3个典型使用场景"
+    },
+    {
+      "id": "AP007",
+      "name": "缺少反模式说明",
+      "severity": "info",
+      "layer": "pattern",
+      "check": "missing:## 常见陷阱 OR missing:## Anti-patterns",
+      "message": "缺少反模式/常见陷阱说明（70.2%成功插件包含）",
+      "impact": "用户可能重复常见错误",
+      "fix": "添加 ## 常见陷阱 部分，说明应避免的做法"
+    },
+    {
+      "id": "AP006",
+      "name": "工具权限过宽",
+      "severity": "warning",
+      "layer": "pattern",
+      "check": "Bash in allowed-tools AND no restriction",
+      "message": "包含 Bash 工具权限但未限制具体命令",
+      "impact": "安全风险，可能执行危险命令",
+      "fix": "限制 Bash 权限范围，如：Bash(git*), Bash(ls*), 或移除 Bash"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+id: HOOK-003
+name: condition-too-complex
+severity: warning
+component_type: hook
+category: workflow
+
+title:
+  zh: "触发条件过于复杂"
+  en: "Trigger condition too complex"
+
+description:
+  zh: |
+    Hook 的触发条件应该简单明了，过于复杂的条件难以理解和维护。
+    条件判断应限制在 3 个以内。
+  en: |
+    Hook trigger conditions should be simple and clear; overly complex conditions are hard to understand and maintain.
+    Condition checks should be limited to 3 or fewer.
+
+rationale:
+  zh: "简单的条件更容易测试和调试，降低出错概率。"
+  en: "Simple conditions are easier to test and debug, reducing error probability."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: custom
+  custom_function: "check_condition_complexity"
+  file_pattern: "hooks/*.md"
+  threshold: 3
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "简化触发条件，或将复杂逻辑拆分到多个 Hook 中。"
+    en: "Simplify trigger conditions or split complex logic into multiple hooks."
+
+examples:
+  bad:
+    zh: |
+      ## 触发条件
+      file.type == 'js' AND file.size > 1000 AND user.role == 'admin'
+      AND file.path.includes('/src/') AND timestamp.hour > 9
+    en: |
+      ## Trigger Condition
+      file.type == 'js' AND file.size > 1000 AND user.role == 'admin'
+      AND file.path.includes('/src/') AND timestamp.hour > 9
+  good:
+    zh: |
+      ## 触发条件
+      file.type == 'js' AND file.path.includes('/src/')
+    en: |
+      ## Trigger Condition
+      file.type == 'js' AND file.path.includes('/src/')
+
+tags: ["workflow", "condition", "complexity", "hook"]
+related_rules: []

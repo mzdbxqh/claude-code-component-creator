@@ -1,0 +1,67 @@
+id: ARCH-014
+name: command-naming-inconsistent
+severity: warning
+component_type: command
+category: architecture
+
+title:
+  zh: "命令命名不符合规范"
+  en: "Inconsistent Command Naming"
+
+description:
+  zh: |
+    Command名称不符合ccc:*或glaf4:*命名规范。
+    不一致的命名降低可用性，增加用户学习成本。
+  en: |
+    Command name doesn't follow naming conventions, reducing usability.
+
+rationale:
+  zh: "统一的命名规范提升用户体验和可发现性"
+  en: "Consistent naming improves UX and discoverability"
+
+detection:
+  method: regex
+  pattern: '^(ccc|glaf4):[a-z][a-z0-9-]*$'
+  invert_match: true
+  file_pattern: "commands/*.md"
+  criteria:
+    - 从YAML frontmatter提取name字段
+    - 验证命名格式
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      规范命令命名：
+      1. 使用ccc:<动词>格式，如ccc:init, ccc:build
+      2. 或使用glaf4:<领域>-<动词>格式，如glaf4:db-migrate
+      3. 保持小写，使用连字符分隔
+      4. 使用清晰的动词表示动作
+    en: |
+      Standardize command naming:
+      1. Use ccc:<verb> format, e.g., ccc:init, ccc:build
+      2. Or glaf4:<domain>-<verb>, e.g., glaf4:db-migrate
+      3. Keep lowercase with hyphens
+      4. Use clear verbs for actions
+
+examples:
+  bad:
+    zh: |
+      name: InitProject      # 错误：驼峰命名
+      name: build_project    # 错误：下划线
+      name: deployTool       # 错误：无前缀
+    en: |
+      name: InitProject      # Wrong: CamelCase
+      name: build_project    # Wrong: Underscore
+      name: deployTool       # Wrong: No prefix
+  good:
+    zh: |
+      name: ccc:init         # 标准格式
+      name: ccc:build        # 标准格式
+      name: glaf4:db-backup  # 带领域前缀
+    en: |
+      name: ccc:init         # Standard format
+      name: ccc:build        # Standard format
+      name: glaf4:db-backup  # With domain prefix
+
+tags: ["architecture", "naming", "convention", "ux"]

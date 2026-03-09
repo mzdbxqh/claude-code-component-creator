@@ -1,0 +1,44 @@
+{
+  "batchId": "batch-3-risk",
+  "name": "风险评估检查",
+  "description": "检测风险评估的质量和完整性",
+  "category": "risk",
+  "patterns": [
+    {
+      "id": "MP010",
+      "name": "风险描述过于笼统",
+      "severity": "error",
+      "check": "risk_description_length:<50",
+      "message": "风险描述过于笼统（少于50字符）",
+      "impact": "无法准确理解和评估风险",
+      "fix": "详细描述风险场景、触发条件和影响范围"
+    },
+    {
+      "id": "MP011",
+      "name": "缺少缓解措施",
+      "severity": "error",
+      "check": "missing:mitigation",
+      "message": "识别的风险缺少对应的缓解措施",
+      "impact": "风险无法被有效管理",
+      "fix": "为每个识别的风险制定具体的缓解措施"
+    },
+    {
+      "id": "MP012",
+      "name": "缺少优先级排序",
+      "severity": "warning",
+      "check": "missing:risk_priority",
+      "message": "风险未按高/中/低优先级分类",
+      "impact": "无法优先处理关键风险",
+      "fix": "为每个风险标注优先级（高/中/低）"
+    },
+    {
+      "id": "MP013",
+      "name": "未识别关键路径风险",
+      "severity": "warning",
+      "check": "missing:critical_path_risk",
+      "message": "未识别关键路径上的单点失败风险",
+      "impact": "关键路径失败可能导致整个改造失败",
+      "fix": "识别关键路径，分析单点失败风险"
+    }
+  ]
+}

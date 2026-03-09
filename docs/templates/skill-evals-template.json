@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "description": "[技能名称] 测试用例",
+  "testCases": [
+    {
+      "id": "TC-001",
+      "name": "基本功能测试",
+      "prompt": "[测试输入描述]",
+      "category": "functional",
+      "expectedOutput": "[预期输出描述]",
+      "qualityThresholds": {
+        "responseTime": 5,
+        "accuracy": 90
+      }
+    },
+    {
+      "id": "TC-002",
+      "name": "边界测试 - 空输入",
+      "prompt": "",
+      "category": "boundary",
+      "expectedOutput": "友好的提示信息，说明需要提供输入"
+    },
+    {
+      "id": "TC-003",
+      "name": "边界测试 - 大输入",
+      "prompt": "[大量数据输入]",
+      "category": "boundary",
+      "expectedOutput": "分页或限制显示的结果"
+    }
+  ],
+  "shouldNotTriggerSkills": [
+    {
+      "id": "NT-001",
+      "name": "简单操作",
+      "prompt": "[简单操作描述]",
+      "reason": "单步骤操作，不需要技能介入"
+    }
+  ],
+  "_comment": "使用说明：1. 复制此模板到 skills/xxx/evals/evals.json  2. 根据技能功能修改测试用例  3. 运行 /xxx:test-sandbox 执行测试"
+}

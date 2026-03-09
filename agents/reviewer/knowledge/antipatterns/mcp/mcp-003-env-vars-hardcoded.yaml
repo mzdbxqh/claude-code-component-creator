@@ -1,0 +1,57 @@
+id: MCP-003
+name: env-vars-hardcoded
+severity: warning
+component_type: mcp
+category: security
+
+title:
+  zh: "硬编码环境变量"
+  en: "Hardcoded environment variables"
+
+description:
+  zh: |
+    MCP 服务器配置中的敏感信息（API 密钥、密码等）
+    不应该硬编码，应该使用环境变量引用。
+  en: |
+    Sensitive information in MCP server configuration (API keys, passwords, etc.)
+    should not be hardcoded; should use environment variable references.
+
+rationale:
+  zh: "硬编码凭证是安全风险，可能导致凭证泄露。"
+  en: "Hardcoded credentials are a security risk that may lead to credential exposure."
+
+handbook_reference: "Chapter 8.3"
+
+detection:
+  method: regex
+  pattern: '(api[_-]?key|password|secret|token):\s*[^${][a-zA-Z0-9_-]+'
+  file_pattern: '*.yaml'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "使用环境变量占位符 ${ENV_VAR_NAME} 替代硬编码值。"
+    en: "Use environment variable placeholder ${ENV_VAR_NAME} instead of hardcoded values."
+
+examples:
+  bad:
+    zh: |
+      server:
+        config:
+          api_key: sk-1234567890abcdef
+    en: |
+      server:
+        config:
+          api_key: sk-1234567890abcdef
+  good:
+    zh: |
+      server:
+        config:
+          api_key: ${API_KEY}
+    en: |
+      server:
+        config:
+          api_key: ${API_KEY}
+
+tags: ["security", "env-vars", "credentials", "mcp"]
+related_rules: []

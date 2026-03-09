@@ -1,0 +1,58 @@
+id: SKILL-004
+name: token-excessive
+severity: warning
+component_type: all
+category: performance
+
+title:
+  zh: "Token 使用量过高"
+  en: "Excessive token usage"
+
+description:
+  zh: |
+    Skill 文档过长会导致每次调用消耗过多 Token，增加成本并可能超出上下文窗口。
+    建议 Skill 文档控制在 2000 Token 以内，长文档应分章节组织。
+  en: |
+    Overly long skill documentation consumes excessive tokens per invocation, increasing costs and potentially exceeding context window.
+    Recommended skill documentation should be under 2000 tokens, long documents should be organized in sections.
+
+rationale:
+  zh: "Token 消耗直接影响运行成本和上下文窗口使用，精简的文档更高效。"
+  en: "Token consumption directly impacts operating costs and context window usage; concise documentation is more efficient."
+
+handbook_reference: "Chapter 4.5"
+
+detection:
+  method: custom
+  custom_function: "check_token_count"
+  file_pattern: '*.md'
+  threshold: 2000
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      1. 删除冗余描述
+      2. 将详细内容移至外部文档，使用链接引用
+      3. 使用更简洁的表达方式
+      4. 提供快速参考模式（100-200 tokens）
+    en: |
+      1. Remove redundant descriptions
+      2. Move detailed content to external docs, use links
+      3. Use more concise expressions
+      4. Provide quick reference mode (100-200 tokens)
+
+examples:
+  bad:
+    zh: |
+      （文档超过 2000 Token，包含大量重复描述和过长的示例）
+    en: |
+      (Document exceeds 2000 tokens with repetitive descriptions and overly long examples)
+  good:
+    zh: |
+      （精炼的文档，核心信息明确，示例简洁，提供快速参考）
+    en: |
+      (Concise document with clear core information, brief examples, and quick reference)
+
+tags: ["performance", "token", "cost", "scalability", "skill"]
+related_rules: ["SKILL-014"]

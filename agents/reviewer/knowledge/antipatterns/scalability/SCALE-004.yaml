@@ -1,0 +1,86 @@
+id: SCALE-004
+name: progress-feedback
+severity: info
+component_type: all
+category: scalability
+
+title:
+  zh: "进度反馈机制缺失"
+  en: "Progress feedback mechanism missing"
+
+description:
+  zh: |
+    技能如有多步骤操作，应提供进度反馈机制，
+    让用户了解当前执行状态和剩余时间。
+  en: |
+    Skills with multi-step operations should provide progress feedback mechanism
+    to let users know current execution status and estimated remaining time.
+
+rationale:
+  zh: "基于用户体验最佳实践，长时间操作应提供进度反馈"
+  en: "Per user experience best practices, long-running operations should provide progress feedback"
+
+detection:
+  method: section-check
+  required_when: "有多步骤操作时"
+  required_sections:
+    - "进度反馈"
+    - "进度"
+    - "Progress"
+    - "Feedback"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **进度反馈实践**:
+
+      ```markdown
+      ## 进度反馈
+
+      **进度显示**:
+      ```
+      执行计划：[=====>____] 50%
+
+      已完成：Task 1-3
+      进行中：Task 4
+      待执行：Task 5-10
+      预计剩余：5 分钟
+      ```
+
+      **更新频率**:
+      - 每完成一个 Task 更新一次
+      - 长时间操作每 30 秒更新一次
+
+      **更新方式**:
+      - 使用 TodoWrite 更新任务状态
+      - 输出进度摘要
+      ```
+    en: |
+      **Progress Feedback**:
+
+      ```markdown
+      ## Progress Feedback
+
+      **Progress Display**:
+      ```
+      Execution: [=====>____] 50%
+
+      Completed: Task 1-3
+      In Progress: Task 4
+      Pending: Task 5-10
+      Estimated remaining: 5 minutes
+      ```
+
+      **Update Frequency**:
+      - Update after each Task completion
+      - Update every 30 seconds for long operations
+
+      **Update Method**:
+      - Use TodoWrite to update task status
+      - Output progress summary
+      ```
+
+tags: ["scalability", "progress", "feedback", "ux"]
+related_rules: ["SCALE-001", "SCALE-003"]

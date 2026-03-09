@@ -1,0 +1,22 @@
+id: IO-001
+name: parameter-compatibility
+severity: error
+component_type: all
+category: linkage
+title:
+  zh: "参数不兼容"
+  en: "Parameter incompatibility"
+description:
+  zh: "Command的argument-hint与Subagent的参数要求不兼容"
+  en: "Command argument-hint is incompatible with subagent parameter requirements"
+detection:
+  method: custom
+  custom_function: check_parameter_compatibility
+rationale:
+  zh: "确保调用方传递的参数满足被调用方的要求"
+  en: "Ensure caller passes parameters that meet callee requirements"
+fix:
+  automatic: false
+  suggestion:
+    zh: "统一argument-hint格式，确保参数数量一致"
+    en: "Unify argument-hint format, ensure parameter count matches"

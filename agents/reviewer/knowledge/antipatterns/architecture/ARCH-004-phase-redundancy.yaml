@@ -1,0 +1,71 @@
+id: ARCH-004
+name: phase-redundancy
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "工作流阶段冗余"
+  en: "Redundant Workflow Phases"
+
+description:
+  zh: |
+    工作流中存在职责重叠的阶段，造成执行效率低下和认知负担。
+    例如：设计阶段和计划阶段都产出类似的架构文档，或验证阶段和审查阶段功能重叠。
+  en: |
+    Overlapping responsibilities between workflow phases causing inefficiency and cognitive burden.
+    Example: Design and planning phases both produce similar architecture documents.
+
+rationale:
+  zh: "消除冗余阶段可提升执行效率，减少上下文切换，明确各阶段职责边界"
+  en: "Eliminating redundant phases improves efficiency and reduces context switching"
+
+detection:
+  method: custom
+  custom_function: check_phase_redundancy
+  criteria:
+    - 检查相邻阶段的输出产物类型是否重复
+    - 分析阶段描述的职责重叠度
+    - 检查阶段触发条件是否相似
+  threshold:
+    max_similarity: 0.7  # 相似度超过70%触发
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      消除阶段冗余：
+      1. 合并功能相似的相邻阶段
+      2. 或明确区分各阶段独特产出
+      3. 重新定义阶段边界和职责
+    en: |
+      Eliminate phase redundancy:
+      1. Merge adjacent phases with similar functions
+      2. Or clearly distinguish unique outputs of each phase
+      3. Redefine phase boundaries and responsibilities
+
+examples:
+  bad:
+    zh: |
+      # 阶段1: 架构设计 → 产出 architecture.md
+      # 阶段2: 详细设计 → 产出 design.md (内容与architecture.md 70%重复)
+      # 阶段3: 代码审查 → 检查代码质量
+      # 阶段4: 质量验证 → 再次检查代码质量
+    en: |
+      # Phase 1: Architecture → produces architecture.md
+      # Phase 2: Detailed Design → produces design.md (70% duplicate)
+      # Phase 3: Code Review → checks code quality
+      # Phase 4: Quality Verification → checks code quality again
+  good:
+    zh: |
+      # 阶段1: 架构设计 → 产出 architecture.md (高层设计)
+      # 阶段2: 详细设计 → 产出 design.md (API/数据结构细节，无重复)
+      # 阶段3: 代码实现 → 产出代码
+      # 阶段4: 验证审查 → 统一检查代码和质量
+    en: |
+      # Phase 1: Architecture → produces architecture.md (high-level)
+      # Phase 2: Detailed Design → produces design.md (API/data structures, no overlap)
+      # Phase 3: Implementation → produces code
+      # Phase 4: Verification → unified code and quality check
+
+tags: ["architecture", "workflow", "redundancy", "phase"]

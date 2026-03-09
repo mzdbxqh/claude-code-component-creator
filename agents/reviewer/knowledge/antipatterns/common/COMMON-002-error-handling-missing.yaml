@@ -1,0 +1,37 @@
+id: COMMON-002
+name: error-handling-missing
+severity: warning
+component_type: all
+category: structure
+
+title:
+  zh: "缺少错误处理说明"
+  en: "Error handling missing"
+
+description:
+  zh: |
+    组件应说明如何处理错误情况，包括常见错误和恢复策略。
+  en: |
+    Components should explain how to handle error situations, including common errors and recovery strategies.
+
+rationale:
+  zh: "错误处理是健壮性的关键，用户需要知道如何应对失败情况"
+  en: "Error handling is key to robustness, users need to know how to handle failures"
+
+detection:
+  method: section-check
+  required_sections:
+    - "错误处理"
+    - "Error Handling"
+    - "异常处理"
+    - "Exception Handling"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加错误处理章节，说明常见错误和处理方式"
+    en: "Add error handling section explaining common errors and handling approaches"
+
+tags: ["structure", "error-handling", "common"]
+related_rules: ["SKILL-009", "CMD-008"]

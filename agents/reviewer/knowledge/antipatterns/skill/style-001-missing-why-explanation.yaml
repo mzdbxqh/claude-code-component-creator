@@ -1,0 +1,199 @@
+id: STYLE-001
+name: missing-why-explanation
+severity: info
+component_type: skill
+category: style
+
+title:
+  zh: "缺少原因解释"
+  en: "Missing why explanation"
+
+description:
+  zh: |
+    工作流步骤或指令应该解释**为什么**这样做是重要的，而不是仅仅给出指令。
+
+    **官方参考 (skill-creator)**:
+    > Try to explain to the model **why** things are important in lieu of
+    > heavy-handed MUSTs. Today's LLMs are *smart*. They have good theory
+    > of mind and when given a good harness can go beyond rote instructions.
+
+    **检查项**:
+    - 工作流步骤是否包含"原因"说明
+    - 是否提供了理论依据或背景说明
+    - 是否解释了不遵循的后果
+    - 是否过度依赖强制措辞而没有解释
+
+    **注意**: 此规则为 info 级别，因为这是写作风格建议而非强制要求。
+  en: |
+    Workflow steps or instructions should explain **why** something is important,
+    not just give orders.
+
+    **Official reference (skill-creator)**:
+    > Try to explain to the model **why** things are important in lieu of
+    > heavy-handed MUSTs. Today's LLMs are *smart*. They have good theory
+    > of mind and when given a good harness can go beyond rote instructions.
+
+    **Checks**:
+    - Do workflow steps include "why" explanations?
+    - Is there theoretical basis or context provided?
+    - Are consequences of non-compliance explained?
+    - Is there over-reliance on mandatory language without explanation?
+
+    **Note**: This rule is info level because it's a writing style recommendation.
+
+rationale:
+  zh: "现代 LLM 具有强大的理解能力，当理解原因时能更好地遵循指导。解释'为什么'比单纯说'必须'更有效。"
+  en: "Modern LLMs have strong comprehension abilities and follow guidance better when they understand the reasoning. Explaining 'why' is more effective than just saying 'must'."
+
+handbook_reference: "Official skill-creator Writing Style - Explain Why"
+
+detection:
+  method: custom
+  custom_function: "check_why_explanations"
+  file_pattern: '*.md'
+  checks:
+    - workflow_steps_have_why: "Check if workflow steps include reasoning"
+    - must_count_without_why: "Count MUST/ALWAYS/NEVER without accompanying why"
+    - explanation_indicators: "Look for 'because', 'therefore', 'so that', 'this ensures' patterns"
+  patterns:
+    why_indicators:
+      - "because"
+      - "therefore"
+      - "so that"
+      - "this ensures"
+      - "this prevents"
+      - "这样可以"
+      - "因为这可以"
+      - "避免"
+      - "确保"
+    mandatory_words:
+      - "MUST"
+      - "ALWAYS"
+      - "NEVER"
+      - "必须"
+      - "总是"
+      - "绝不"
+  thresholds:
+    max_mandatory_without_why: 5
+    min_why_ratio: 0.3
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      添加原因解释的方法：
+
+      1. **为每个重要指令添加原因**:
+         ❌ "MUST validate input before processing"
+         ✅ "Validate input before processing - this prevents injection attacks
+            and ensures data integrity"
+
+      2. **解释后果**:
+         ❌ "ALWAYS escape user input"
+         ✅ "Always escape user input to prevent XSS attacks. Unescaped input
+            could allow malicious scripts to execute in users' browsers."
+
+      3. **提供背景**:
+         ❌ "NEVER store passwords in plain text"
+         ✅ "Never store passwords in plain text. If the database is compromised,
+            attackers could immediately use all credentials. Use bcrypt or
+            argon2 hashing instead."
+
+      4. **使用中文解释**:
+         ❌ "必须先检查权限"
+         ✅ "必须先检查权限，这样可以防止未授权访问，保护用户数据安全"
+
+      **常用解释模式**:
+      - "这样可以..."
+      - "因为这能够..."
+      - "避免..."
+      - "确保..."
+      - "防止..."
+    en: |
+      Ways to add why explanations:
+
+      1. **Add reasoning for important instructions**:
+         ❌ "MUST validate input before processing"
+         ✅ "Validate input before processing - this prevents injection attacks
+            and ensures data integrity"
+
+      2. **Explain consequences**:
+         ❌ "ALWAYS escape user input"
+         ✅ "Always escape user input to prevent XSS attacks. Unescaped input
+            could allow malicious scripts to execute in users' browsers."
+
+      3. **Provide context**:
+         ❌ "NEVER store passwords in plain text"
+         ✅ "Never store passwords in plain text. If the database is compromised,
+            attackers could immediately use all credentials. Use bcrypt or
+            argon2 hashing instead."
+
+      **Common explanation patterns**:
+      - "This prevents..."
+      - "This ensures..."
+      - "Because..."
+      - "So that..."
+      - "To avoid..."
+
+examples:
+  bad:
+    zh: |
+      ## 工作流
+
+      1. ** MUST ** 验证所有输入
+      2. ** ALWAYS ** 检查用户权限
+      3. ** NEVER ** 直接执行用户提供的 SQL
+
+      问题：
+      - 只有强制指令
+      - 没有解释原因
+      - 用户不知道为什么要这样做
+    en: |
+      ## Workflow
+
+      1. **MUST** validate all input
+      2. **ALWAYS** check user permissions
+      3. **NEVER** execute user-provided SQL directly
+
+      Problems:
+      - Only mandatory instructions
+      - No explanation of why
+      - Users don't understand the reasoning
+
+  good:
+    zh: |
+      ## 工作流
+
+      1. **验证所有输入** - 这样可以防止注入攻击，确保数据完整性。未经验证的输入可能导致 SQL 注入或 XSS 漏洞。
+
+      2. **检查用户权限** - 确保用户只能访问其授权的资源。权限检查是防止未授权访问的第一道防线。
+
+      3. **不直接执行用户提供的 SQL** - 使用参数化查询或 ORM。直接执行用户 SQL 会导致严重的注入漏洞，攻击者可以读取、修改或删除数据库中的任何数据。
+
+      优点：
+      - 每个指令都有原因解释
+      - 说明了不遵循的后果
+      - 帮助理解背后的安全原理
+    en: |
+      ## Workflow
+
+      1. **Validate all input** - This prevents injection attacks and ensures
+         data integrity. Unvalidated input could lead to SQL injection or XSS
+         vulnerabilities.
+
+      2. **Check user permissions** - Ensures users can only access resources
+         they're authorized for. Permission checks are the first line of defense
+         against unauthorized access.
+
+      3. **Never execute user-provided SQL directly** - Use parameterized queries
+         or ORM instead. Direct execution of user SQL leads to serious injection
+         vulnerabilities where attackers could read, modify, or delete any data
+         in the database.
+
+      Advantages:
+      - Each instruction has a why explanation
+      - Explains consequences of non-compliance
+      - Helps understand underlying security principles
+
+tags: ["style", "writing", "why-explanation", "skill-creator"]
+related_rules: ["STYLE-002", "SKILL-008", "SKILL-009"]

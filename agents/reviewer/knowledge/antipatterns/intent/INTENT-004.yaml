@@ -1,0 +1,65 @@
+id: INTENT-004
+name: low-action-word-density
+severity: warning
+component_type: skill
+category: intent-matching
+
+title:
+  zh: "技能描述缺少动作词"
+  en: "Skill description lacks action words"
+
+description:
+  zh: |
+    技能描述应包含足够的动作词（动词），帮助大模型理解技能执行的操作类型。
+    动作词密度过低会导致匹配不准确。
+  en: |
+    Skill descriptions should include sufficient action words (verbs) to help LLM understand
+    the types of operations the skill performs. Low action word density leads to inaccurate matching.
+
+rationale:
+  zh: "基于意图匹配最佳实践，动作词密度应≥0.2（动作词数/描述长度）"
+  en: "Per intent matching best practices, action word density should be ≥0.2 (action words / description length)"
+
+detection:
+  method: keyword-ratio
+  action_words:
+    zh: ["编写", "创建", "实现", "测试", "调试", "验证", "执行", "设计", "分析", "修复", "检查", "审查", "部署", "配置", "管理", "加载", "读取", "生成", "派遣", "集成"]
+    en: ["write", "create", "implement", "test", "debug", "verify", "execute", "design", "analyze", "fix", "check", "review", "deploy", "configure", "manage", "load", "read", "generate", "dispatch", "integrate"]
+  min_ratio: 0.2
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 description 中添加更多动作词来描述技能执行的操作。
+      示例：
+      - "加载计划，批判性审查，分批执行任务，批次之间报告"
+      - "识别独立域，创建任务，派遣代理，审查摘要，集成修复"
+    en: |
+      Add more action words in description to describe operations performed by the skill.
+      Examples:
+      - "Load plan, critically review, execute tasks in batches, report between batches"
+      - "Identify independent domains, create tasks, dispatch agents, review summaries, integrate fixes"
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 计划执行技能，用于任务管理和进度跟踪
+      ---
+    en: |
+      ---
+      description: Plan execution skill for task management and progress tracking
+      ---
+  good:
+    zh: |
+      ---
+      description: 当伙伴提供完整的实施计划时使用 - 加载计划，批判性审查，分批执行任务，批次之间报告以供审查
+      ---
+    en: |
+      ---
+      description: Use when partner provides complete implementation plan - load plan, critically review, execute tasks in batches, report between batches for review
+      ---
+
+tags: ["intent", "action-word", "skill", "matching"]
+related_rules: ["INTENT-001", "INTENT-002"]

@@ -1,0 +1,68 @@
+{
+  "batchId": "batch-7-context",
+  "name": "上下文与模型配置检查",
+  "description": "检测 context 模式、模型选择和 Token 配置的合理性",
+  "category": "context",
+  "patterns": [
+    {
+      "id": "AP701",
+      "name": "上下文模式不当",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "inappropriate_context_mode",
+      "message": "context 设置可能不适合任务类型（fork vs inherit）",
+      "impact": "fork 任务使用 inherit 可能导致上下文污染，inherit 任务使用 fork 可能丢失上下文",
+      "fix": "独立任务用 fork，依赖前置状态的任务用 inherit"
+    },
+    {
+      "id": "AP702",
+      "name": "缺少环境声明",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "missing_environment_declaration",
+      "message": "未说明 Skill 预期的环境状态或前置条件",
+      "impact": "用户不清楚何时可以调用此 Skill",
+      "fix": "添加环境要求说明：如'需要处于 git 仓库目录'"
+    },
+    {
+      "id": "AP703",
+      "name": "继承模式依赖不明确",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "unclear_inherit_dependencies",
+      "message": "context: inherit 模式下未声明前置依赖",
+      "impact": "在错误的上下文中调用导致失败",
+      "fix": "明确列出所有前置条件和依赖"
+    },
+    {
+      "id": "AP704",
+      "name": "Token数超标",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "token_count_exceeded",
+      "message": "Skill 总 Token 数超过 2000（手册建议 500-1500）",
+      "impact": "增加上下文负担，影响性能和成本",
+      "fix": "精简内容，拆分复杂 Skill 为多个小 Skill"
+    },
+    {
+      "id": "AP705",
+      "name": "description过短",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "description_too_short",
+      "message": "description 字段少于 50 字符",
+      "impact": "Claude 无法准确理解触发场景",
+      "fix": "扩展描述至 50-200 字符，说明具体触发场景"
+    },
+    {
+      "id": "AP706",
+      "name": "模型选择不当",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "inappropriate_model_selection",
+      "message": "模型选择可能不适合任务复杂度",
+      "impact": "简单任务用 sonnet/opus 浪费成本，复杂任务用 haiku 性能不足",
+      "fix": "简单任务用 haiku，标准任务用 sonnet，复杂推理用 opus"
+    }
+  ]
+}

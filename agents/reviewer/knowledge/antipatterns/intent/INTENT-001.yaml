@@ -1,0 +1,72 @@
+id: INTENT-001
+name: missing-trigger-scenario
+severity: warning
+component_type: skill
+category: intent-matching
+
+title:
+  zh: "技能缺少触发场景说明"
+  en: "Skill missing trigger scenario description"
+
+description:
+  zh: |
+    技能的 description 字段应包含明确的触发场景说明，帮助大模型理解何时使用该技能。
+    缺少触发场景会导致技能匹配不准确。
+  en: |
+    Skill description should include clear trigger scenario statements to help LLM understand when to use the skill.
+    Missing trigger scenarios leads to inaccurate skill matching.
+
+rationale:
+  zh: "基于意图匹配最佳实践，技能应声明'当 X 时使用'的场景"
+  en: "Per intent matching best practices, skills should declare 'use when X' scenarios"
+
+detection:
+  method: pattern-check
+  patterns:
+    - "当.*时"
+    - "在.*时使用"
+    - "Use when"
+    - "When to use"
+    - "When.*use"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 description 或'何时使用'章节中添加触发场景说明。
+      建议提供多个场景以提高匹配准确性。
+      示例：
+      - "在遇到 bug、测试失败或意外行为时使用"
+      - "当需要创建新服务或验证服务命名时使用"
+      - "在实现任何功能或 bugfix 时使用"
+    en: |
+      Add trigger scenario statements in description or 'When to Use' section.
+      Multiple scenarios recommended for better matching accuracy.
+      Examples:
+      - "Use when encountering bugs, test failures, or unexpected behavior"
+      - "Use when creating new services or validating service naming"
+      - "Use when implementing any feature or bugfix"
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 系统化调试技能
+      ---
+    en: |
+      ---
+      description: Systematic debugging skill
+      ---
+  good:
+    zh: |
+      ---
+      description: 在遇到任何 bug、测试失败或意外行为时使用，在提出修复前 - 四阶段框架确保在尝试解决方案前先理解根本原因
+      ---
+    en: |
+      ---
+      description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes - four-phase framework ensures understanding before attempting solutions
+      ---
+
+tags: ["intent", "trigger", "skill", "matching"]
+related_rules: ["INTENT-002", "INTENT-003"]

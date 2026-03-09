@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "description": "HANDBOOK-COMPLETE.md 章节引用映射，供各阶段 Subagent 引用",
+  "references": {
+    "chapter-1": {
+      "title": "架构概览",
+      "path": "01-架构概览/README.md",
+      "sections": ["组件类型", "架构原则", "设计哲学"]
+    },
+    "chapter-2": {
+      "title": "组件类型详解",
+      "path": "02-组件类型详解/README.md",
+      "sections": ["Skill", "Command", "Hook", "Subagent", "MCP"]
+    },
+    "chapter-3": {
+      "title": "工作流模式",
+      "path": "03-工作流模式/README.md",
+      "keyStats": {
+        "conditional": "58.8%",
+        "sequential": "26.1%",
+        "unstructured": "13.8%",
+        "parallel": "1.3%"
+      }
+    },
+    "chapter-4": {
+      "title": "Skill 文件引用与上下文",
+      "path": "04-Skill规范/04-文件引用与上下文.md",
+      "keyStats": {
+        "fileReferenceUsage": "90.4%",
+        "maxRecursionDepth": 5
+      }
+    },
+    "chapter-5": {
+      "title": "Command 开发规范",
+      "path": "05-Command规范/README.md",
+      "sections": ["基本结构", "参数设计", "输出格式"]
+    },
+    "chapter-6": {
+      "title": "Hook 开发规范",
+      "path": "06-Hook规范/README.md",
+      "eventTypes": [
+        "PreToolUse", "PostToolUse", "PrePromptSend",
+        "SessionStart", "SessionEnd", "Stop",
+        "ToolError", "ToolOutput", "UserPromptSubmit"
+      ]
+    },
+    "chapter-7": {
+      "title": "Subagent 开发规范",
+      "path": "07-Subagent规范/README.md",
+      "keyConcepts": ["fork vs inherit", "内置类型", "上下文管理"]
+    },
+    "chapter-8": {
+      "title": "MCP 开发规范",
+      "path": "08-MCP规范/README.md"
+    },
+    "chapter-9": {
+      "title": "设计规范",
+      "path": "09-设计规范/README.md",
+      "sections": ["错误处理", "命名规范", "Token 限制"]
+    }
+  }
+}

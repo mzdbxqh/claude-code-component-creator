@@ -1,0 +1,12 @@
+{
+  "name": "ccc",
+  "version": "3.0.0",
+  "description": "Claude Code Component Creator v3.0 - Intent/Blueprint/Delivery workflow with meta-reflection",
+  "author": {
+    "name": "mzdbxqh"
+  },
+  "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
+  "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
+  "license": "MIT",
+  "keywords": ["component", "design", "workflow", "reflection", "intent", "blueprint", "delivery"]
+}

@@ -1,0 +1,88 @@
+id: SEC-001
+name: command-injection-check
+severity: error
+component_type: all
+category: security
+
+title:
+  zh: "命令注入风险"
+  en: "Command injection risk"
+
+description:
+  zh: |
+    技能如执行 Bash 命令，必须验证用户输入，避免命令注入攻击。
+    重点检测高风险模式：eval、exec、管道到 bash。
+  en: |
+    Skills executing Bash commands must validate user input to avoid command injection attacks.
+    Focus on high-risk patterns: eval, exec, piping to bash.
+
+rationale:
+  zh: "基于安全最佳实践，所有外部输入必须验证后才能用于命令执行"
+  en: "Per security best practices, all external input must be validated before command execution"
+
+detection:
+  method: code-analysis
+  risk_patterns:
+    - pattern: 'eval\s+.*\$'
+      risk: critical
+      description: "eval with variable interpolation"
+    - pattern: 'exec\s+.*\$'
+      risk: critical
+      description: "exec with variable interpolation"
+    - pattern: '\|.*bash'
+      risk: critical
+      description: "piping to bash"
+    - pattern: 'echo.*\$.*\|.*sh'
+      risk: critical
+      description: "echo variable piped to shell"
+  required_practices:
+    - 输入验证
+    - 参数化命令
+    - 命令白名单
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **安全实践**:
+
+      ❌ 不安全:
+      ```bash
+      eval "git worktree add $USER_INPUT"
+      echo "$USER_INPUT" | bash
+      ```
+
+      ✅ 安全:
+      ```bash
+      # 验证输入（白名单）
+      if [[ ! "$USER_INPUT" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        echo "Invalid input"
+        exit 1
+      fi
+
+      # 使用引号包裹
+      git worktree add "$SAFE_INPUT"
+      ```
+    en: |
+      **Secure Practices**:
+
+      ❌ Insecure:
+      ```bash
+      eval "git worktree add $USER_INPUT"
+      echo "$USER_INPUT" | bash
+      ```
+
+      ✅ Secure:
+      ```bash
+      # Validate input (whitelist)
+      if [[ ! "$USER_INPUT" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        echo "Invalid input"
+        exit 1
+      fi
+
+      # Use quoted variables
+      git worktree add "$SAFE_INPUT"
+      ```
+
+tags: ["security", "command-injection", "bash", "input-validation"]
+related_rules: ["SEC-002", "SEC-003"]

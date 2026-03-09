@@ -1,0 +1,90 @@
+id: ARCH-002
+name: phase-handoff-unclear
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "阶段交接不清晰"
+  en: "Unclear Phase Handoff"
+
+description:
+  zh: |
+    工作流各阶段之间的交接机制不明确，缺少状态传递或触发条件定义。
+    阶段交接应明确：触发条件、输入数据、输出产物、状态同步机制。
+  en: |
+    Handoff mechanism between workflow phases is unclear, missing state transfer or trigger condition definitions.
+    Phase handoff should define: trigger conditions, input data, output artifacts, and state sync mechanism.
+
+rationale:
+  zh: "清晰的阶段交接确保工作流顺畅执行，支持会话恢复"
+  en: "Clear phase handoff ensures smooth workflow execution and supports session recovery"
+
+detection:
+  method: regex
+  patterns:
+    - "会话恢复|session recovery|从上次停止|resume from"
+    - "状态更新|update status|progress.md|task_plan.md"
+    - "feat-\\*.md|design.md|architecture.md"
+  threshold: 2
+  file_pattern: "skills/*/SKILL.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 Skill 文档中明确阶段交接：
+      1. 添加上下文传递说明（文件/环境变量/参数）
+      2. 定义会话恢复流程
+      3. 明确触发下一阶段的条件
+      4. 记录状态同步机制
+    en: |
+      Define phase handoff in skill documentation:
+      1. Add context transfer description (file/env/parameter)
+      2. Define session recovery process
+      3. Clarify conditions for triggering next phase
+      4. Document state synchronization mechanism
+
+examples:
+  bad:
+    zh: |
+      # 缺少交接说明
+      ## 执行流程
+      1. 读取计划
+      2. 执行任务
+      3. 完成
+    en: |
+      # Missing handoff description
+      ## Execution Flow
+      1. Read plan
+      2. Execute tasks
+      3. Complete
+  good:
+    zh: |
+      # 清晰的交接说明
+      ## 执行流程
+      1. 读取 feat-*.md 计划文件
+      2. 执行任务，每批更新 progress.md
+      3. 完成后自动触发验证阶段
+
+      ## 会话恢复
+      读取 feat-*.md 找到 `[ ]` 标记的待执行任务，从该位置继续
+
+      ## 阶段交接
+      输出: 完成的代码 + 更新的 progress.md
+      触发: verification-before-completion Skill
+    en: |
+      # Clear handoff description
+      ## Execution Flow
+      1. Read feat-*.md plan file
+      2. Execute tasks, update progress.md per batch
+      3. Auto-trigger verification phase when complete
+
+      ## Session Recovery
+      Read feat-*.md to find `[ ]` pending tasks, resume from there
+
+      ## Phase Handoff
+      Output: Completed code + updated progress.md
+      Trigger: verification-before-completion Skill
+
+tags: ["architecture", "workflow", "handoff"]

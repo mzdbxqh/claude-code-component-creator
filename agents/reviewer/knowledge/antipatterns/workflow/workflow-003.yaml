@@ -1,0 +1,46 @@
+id: WORKFLOW-003
+name: workflow-integration-test-coverage
+severity: info
+component_type: workflow
+category: workflow
+
+title:
+  zh: "工作流集成测试覆盖缺失"
+  en: "Workflow integration test coverage missing"
+
+description:
+  zh: |
+    验证生成的插件是否包含工作流集成测试。
+
+    **检查项**:
+    - evals/evals.json 是否包含工作流集成测试用例
+    - 测试用例是否覆盖跨组件场景
+    - 测试用例是否有明确的预期输出
+
+    **测试场景示例**:
+    - brainstorm → phase-plan 数据流测试
+    - phase-plan → plan 数据流测试
+    - plan → execute 数据流测试
+    - 质量卡点 Gate 1-5 验证测试
+
+  en: |
+    Validates that generated plugins contain workflow integration tests.
+
+    **Checks**:
+    - evals/evals.json contains workflow integration test cases
+    - Test cases cover cross-component scenarios
+    - Test cases have clear expected outputs
+
+check_logic:
+  type: file_content_check
+  target_file: "evals/evals.json"
+  conditions:
+    - has_workflow_integration_tests: true
+    - test_cases_cover_cross_component: true
+
+suggestion:
+  zh: "在 evals/evals.json 中添加工作流集成测试用例"
+  en: "Add workflow integration test cases to evals/evals.json"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

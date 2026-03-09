@@ -1,0 +1,56 @@
+id: LLM-002
+name: model-blocker-check
+severity: warning
+component_type: all
+category: llm-compatibility
+
+title:
+  zh: "使用阻断性功能建议说明"
+  en: "Blocking features recommended to document"
+
+description:
+  zh: |
+    技能如使用阻断性功能（AskUserQuestion、Task 工具等），建议说明或提供替代方案。
+    这有助于提高跨模型兼容性，但不强制要求。
+  en: |
+    Skills using blocking features (AskUserQuestion, Task tool, etc.) are recommended to document or provide alternatives.
+    This helps improve cross-model compatibility, but not mandatory.
+
+rationale:
+  zh: "基于 LLM 兼容性最佳实践，阻断性功能建议说明以提高可用性"
+  en: "Per LLM compatibility best practices, blocking features recommended to document for better usability"
+
+detection:
+  method: feature-analysis
+  blocker_features:
+    - name: AskUserQuestion
+      models_blocked: ["qwen", "gemini", "llama"]
+    - name: Task
+      models_blocked: ["qwen", "gemini"]
+    - name: Skill\(skill=
+      models_blocked: ["qwen", "gemini"]
+
+fix:
+  automatic: false
+  strategy:
+    zh: |
+      可选择添加说明或提供替代方案：
+
+      ```markdown
+      ## 使用说明
+
+      本技能使用 AskUserQuestion 进行交互。如在不支持的模型上使用，
+      可通过文本提问方式实现类似功能。
+      ```
+    en: |
+      Optionally add notes or provide alternatives:
+
+      ```markdown
+      ## Usage Notes
+
+      This skill uses AskUserQuestion for interaction. On unsupported models,
+      similar functionality can be achieved through text-based questioning.
+      ```
+
+tags: ["llm", "compatibility", "blocking", "fallback"]
+related_rules: ["LLM-001", "LLM-003"]

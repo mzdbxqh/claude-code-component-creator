@@ -1,0 +1,69 @@
+id: SKILL-015
+name: duplicate-sections
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "重复的章节"
+  en: "Duplicate sections"
+
+description:
+  zh: |
+    Skill 文档中出现了重复的章节标题。
+    这通常意味着文档结构混乱或内容组织不当。
+  en: |
+    Duplicate section headers appear in skill documentation.
+    This usually indicates disorganized document structure.
+
+rationale:
+  zh: "清晰的文档结构有助于用户快速找到所需信息。"
+  en: "Clear document structure helps users quickly find needed information."
+
+handbook_reference: "Chapter 4.4"
+
+detection:
+  method: custom
+  custom_function: "check_duplicate_sections"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "合并重复章节或将内容重新组织到合适的章节中。"
+    en: "Merge duplicate sections or reorganize content into appropriate sections."
+
+examples:
+  bad:
+    zh: |
+      ## 示例
+      ...
+      ## 用法
+      ...
+      ## 示例  (重复！)
+      ...
+    en: |
+      ## Examples
+      ...
+      ## Usage
+      ...
+      ## Examples  (Duplicate!)
+      ...
+  good:
+    zh: |
+      ## 用法
+      ...
+      ## 示例
+      ...
+      ## 注意事项
+      ...
+    en: |
+      ## Usage
+      ...
+      ## Examples
+      ...
+      ## Cautions
+      ...
+
+tags: ["structure", "documentation", "skill"]
+related_rules: []

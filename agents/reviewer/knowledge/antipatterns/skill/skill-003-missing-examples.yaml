@@ -1,0 +1,102 @@
+id: SKILL-003
+name: missing-examples
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "缺少使用示例"
+  en: "Missing usage examples"
+
+description:
+  zh: |
+    Skill 文档应包含至少一个清晰的使用示例，帮助用户理解如何调用该 Skill。
+    示例可以是内嵌的 (## Examples 章节)，也可以通过 references/目录或@path 引用提供。
+
+    接受的示例来源 (优先级从高到低):
+    1. 内嵌示例：## Examples 或 ## 示例 章节
+    2. 引用目录：references/, examples/, docs/examples/ 子目录中的示例文件
+    3. 文件引用：使用 @path 语法引用的外部示例文件
+    4. 外部链接：指向有效 URL 的示例
+  en: |
+    Skill documentation should include at least one clear usage example to help users understand how to invoke it.
+    Examples can be inline (## Examples section) or provided via references/ directory or @path references.
+
+    Accepted example sources (priority from high to low):
+    1. Inline examples: ## Examples or ## 示例 section
+    2. Reference directory: example files in references/, examples/, docs/examples/ subdirectories
+    3. File references: External example files referenced using @path syntax
+    4. External links: Examples linked via valid URLs
+
+rationale:
+  zh: "示例是文档的重要组成部分，能显著降低用户的学习成本。使用引用目录可以避免主文档过长，符合 Progressive Disclosure 原则。"
+  en: "Examples are essential documentation components that significantly reduce learning cost. Using reference directories avoids overly long main documents, following Progressive Disclosure principle."
+
+handbook_reference: "Chapter 4.4 + Official skill-creator Progressive Disclosure"
+
+detection:
+  method: custom
+  custom_function: "check_examples_exist"
+  file_pattern: '*.md'
+  check_order:
+    - inline: "Check for ## Examples or ## 示例 section in main file"
+    - references_dir: "Scan references/, examples/, docs/examples/ subdirectories"
+    - file_references: "Parse @path syntax references in main file"
+    - external_links: "Check for valid URL links to examples"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      添加示例的方式有多种：
+      1. 在主文档中添加 '## 示例' 章节（推荐用于简单技能）
+      2. 创建 references/子目录存放示例（推荐用于复杂技能或>500 行文档）
+      3. 使用@path 引用外部示例文件
+    en: |
+      There are multiple ways to add examples:
+      1. Add '## Examples' section in main document (recommended for simple skills)
+      2. Create references/ subdirectory for examples (recommended for complex skills or >500 line documents)
+      3. Use @path syntax to reference external example files
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      这是一个 Skill。
+
+      ## 用法
+      调用此 Skill。
+
+      （缺少示例章节）
+    en: |
+      # My Skill
+      This is a skill.
+
+      ## Usage
+      Invoke this skill.
+
+      (Missing examples section)
+  good:
+    zh: |
+      # My Skill
+      这是一个 Skill。
+
+      ## 示例
+
+      ### 基础用法
+      ```
+      /my-skill arg1 arg2
+      ```
+    en: |
+      # My Skill
+      This is a skill.
+
+      ## Examples
+
+      ### Basic Usage
+      ```
+      /my-skill arg1 arg2
+      ```
+
+tags: ["structure", "examples", "documentation", "skill"]
+related_rules: ["SKILL-014"]

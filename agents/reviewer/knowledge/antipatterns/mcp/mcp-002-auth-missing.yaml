@@ -1,0 +1,71 @@
+id: MCP-002
+name: auth-missing
+severity: error
+component_type: mcp
+category: security
+
+title:
+  zh: "缺少认证配置"
+  en: "Missing authentication configuration"
+
+description:
+  zh: |
+    需要认证的 MCP 服务器必须在配置中声明认证方式，
+    不能在没有认证的情况下暴露敏感功能。
+  en: |
+    MCP servers requiring authentication must declare auth method in configuration,
+    and cannot expose sensitive functionality without authentication.
+
+rationale:
+  zh: "认证是保护 MCP 服务器安全的基本要求。"
+  en: "Authentication is a basic requirement for MCP server security."
+
+handbook_reference: "Chapter 8.3"
+
+detection:
+  method: custom
+  custom_function: "check_auth_configuration"
+  file_pattern: '*.yaml'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加认证配置，支持 bearer token、api-key 等方式。"
+    en: "Add authentication configuration, supporting bearer token, api-key, etc."
+
+examples:
+  bad:
+    zh: |
+      server:
+        name: secure-api
+        # 没有认证配置
+      tools:
+        - name: delete-data
+    en: |
+      server:
+        name: secure-api
+        # no auth configuration
+      tools:
+        - name: delete-data
+  good:
+    zh: |
+      server:
+        name: secure-api
+        auth:
+          type: bearer
+          required: true
+      tools:
+        - name: delete-data
+          requires_auth: true
+    en: |
+      server:
+        name: secure-api
+        auth:
+          type: bearer
+          required: true
+      tools:
+        - name: delete-data
+          requires_auth: true
+
+tags: ["security", "auth", "mcp"]
+related_rules: []

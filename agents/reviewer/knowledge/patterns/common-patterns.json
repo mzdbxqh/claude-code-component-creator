@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "description": "Claude Code 组件常用设计模式库",
+  "patterns": [
+    {
+      "id": "DP001",
+      "name": "Explore-Plan-Execute",
+      "category": "workflow",
+      "description": "复杂任务分解模式：先探索理解问题，再制定计划，最后执行验证",
+      "applicable": ["skill", "subagent"],
+      "structure": {
+        "explore": "理解问题和上下文，收集必要信息",
+        "plan": "制定详细的执行计划，分解步骤",
+        "execute": "按计划执行，验证结果"
+      },
+      "benefits": [
+        "降低复杂任务的失败率",
+        "提供清晰的执行路径",
+        "便于调试和优化"
+      ],
+      "example": {
+        "scenario": "代码重构任务",
+        "implementation": "1. 探索：分析现有代码结构\n2. 计划：制定重构方案\n3. 执行：逐步重构并测试"
+      }
+    },
+    {
+      "id": "DP002",
+      "name": "Pre-Check-Action-Verify",
+      "category": "workflow",
+      "description": "安全操作模式：执行前检查条件，执行操作，执行后验证结果",
+      "applicable": ["skill", "command"],
+      "structure": {
+        "pre_check": "检查前置条件（权限、依赖、状态）",
+        "action": "执行核心操作",
+        "verify": "验证结果是否符合预期"
+      },
+      "benefits": [
+        "避免破坏性操作",
+        "提供清晰的错误信息",
+        "确保操作的原子性"
+      ],
+      "example": {
+        "scenario": "文件删除操作",
+        "implementation": "1. 检查：文件是否存在，是否有权限\n2. 操作：删除文件\n3. 验证：确认文件已删除"
+      }
+    },
+    {
+      "id": "DP003",
+      "name": "Template-Fill-Validate",
+      "category": "generation",
+      "description": "内容生成模式：使用模板，填充数据，验证输出",
+      "applicable": ["skill"],
+      "structure": {
+        "template": "定义内容模板",
+        "fill": "填充动态数据",
+        "validate": "验证生成的内容"
+      },
+      "benefits": [
+        "保证输出格式一致",
+        "减少错误",
+        "便于维护"
+      ],
+      "example": {
+        "scenario": "文档生成",
+        "implementation": "1. 模板：Markdown 文档模板\n2. 填充：插入项目信息\n3. 验证：检查格式和完整性"
+      }
+    }
+  ]
+}

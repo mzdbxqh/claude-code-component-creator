@@ -1,0 +1,53 @@
+id: ENV-002
+name: shell-compatibility-check
+severity: info
+component_type: all
+category: environment
+
+title:
+  zh: "使用特定 Shell 命令时建议说明"
+  en: "Recommend noting when using specific Shell commands"
+
+description:
+  zh: |
+    技能如使用特定 Shell 的命令（如 Bash 特有的 [[]]、PowerShell cmdlet），
+    建议简要说明。通用命令无需说明。
+  en: |
+    Skills using specific Shell commands (e.g., Bash-specific [[]], PowerShell cmdlets)
+    are recommended to note briefly. Generic commands don't need notes.
+
+rationale:
+  zh: "仅对使用特定 Shell 功能的技能检查"
+  en: "Only check skills using specific Shell features"
+
+detection:
+  method: code-analysis
+  shell_specific_patterns:
+    - "powershell"
+    - "Get-"
+    - "Set-"
+    - "\[\[.*\]\]"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      如使用特定 Shell 命令，添加简短说明：
+
+      ```markdown
+      ## Shell 要求
+
+      本技能使用 Bash 命令，Windows 用户需安装 Git Bash。
+      ```
+    en: |
+      If using specific Shell commands, add brief note:
+
+      ```markdown
+      ## Shell Requirements
+
+      This skill uses Bash commands, Windows users need Git Bash.
+      ```
+
+tags: ["environment", "shell", "bash", "powershell"]
+related_rules: ["ENV-001", "ENV-003"]

@@ -1,0 +1,65 @@
+id: MCP-006
+name: error-handling-missing
+severity: error
+component_type: mcp
+category: workflow
+
+title:
+  zh: "缺少错误处理"
+  en: "Missing error handling"
+
+description:
+  zh: |
+    MCP 服务器的工具必须定义错误处理逻辑，
+    包括错误码、错误信息和恢复建议。
+  en: |
+    MCP server tools must define error handling logic,
+    including error codes, messages, and recovery suggestions.
+
+rationale:
+  zh: "完善的错误处理帮助调用者理解和处理问题。"
+  en: "Comprehensive error handling helps callers understand and handle issues."
+
+handbook_reference: "Chapter 8.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(错误处理|Error Handling|错误码|Error Codes)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加错误处理章节，定义错误码和处理方式。"
+    en: "Add error handling section defining error codes and handling methods."
+
+examples:
+  bad:
+    zh: |
+      ### tool: fetch-data
+      从 API 获取数据。
+    en: |
+      ### tool: fetch-data
+      Fetch data from API.
+  good:
+    zh: |
+      ### tool: fetch-data
+      从 API 获取数据。
+
+      #### 错误处理
+      | 错误码 | 说明 | 处理建议 |
+      |--------|------|----------|
+      | E001 | API 不可用 | 检查网络连接 |
+      | E002 | 认证失败 | 检查 API 密钥 |
+    en: |
+      ### tool: fetch-data
+      Fetch data from API.
+
+      #### Error Handling
+      | Error Code | Description | Suggestion |
+      |------------|-------------|------------|
+      | E001 | API unavailable | Check network connection |
+      | E002 | Auth failed | Check API key |
+
+tags: ["workflow", "error-handling", "mcp"]
+related_rules: []

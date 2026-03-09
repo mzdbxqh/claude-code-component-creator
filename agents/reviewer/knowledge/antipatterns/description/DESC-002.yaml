@@ -1,0 +1,115 @@
+id: DESC-002
+name: description-not-pushy
+severity: info
+component_type: skill
+category: description
+
+title:
+  zh: "描述不够积极主动"
+  en: "Description not pushy enough"
+
+description:
+  zh: |
+    Skill 描述应该足够"pushy"以对抗 under-triggering 问题。
+
+    **官方参考 (skill-creator)**:
+    > Make descriptions a little bit "pushy" to combat under-triggering.
+    > Claude only consults skills for tasks it can't easily handle on its own.
+
+    **检查项**:
+    - 是否列出了至少 3 个相关触发场景
+    - 是否包含"even if"类型的说明（即使用户没有明确提及）
+    - 是否覆盖了边缘但相关的用例
+    - description 长度是否足够（复杂技能建议≥50 词）
+
+  en: |
+    Skill description should be "pushy" enough to combat under-triggering.
+
+    **Official Reference (skill-creator)**:
+    > Make descriptions a little bit "pushy" to combat under-triggering.
+
+    **Check Items**:
+    - Whether at least 3 related trigger scenarios are listed
+    - Whether "even if" type explanations are included
+    - Whether edge but related use cases are covered
+    - Whether description length is sufficient
+
+rationale:
+  zh: |
+    Claude 只会在认为自己无法轻松处理的任务时才会咨询技能。
+    足够 pushy 的描述可以确保技能在适当场景下被触发。
+    这有助于解决技能触发不足 (under-triggering) 的问题。
+  en: |
+    Claude only consults skills for tasks it cant easily handle on its own.
+    A pushy description ensures the skill is triggered in appropriate scenarios.
+    This helps solve the under-triggering problem.
+
+handbook_reference: "https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md"
+
+detection:
+  method: threshold-and-pattern-check
+  min_scenarios: 3
+  check_even_if: true
+  check_pushy_language:
+    - "even if"
+    - "always use"
+    - "make sure to"
+    - "whenever"
+    - "任何...都"
+    - "即使"
+  min_word_count: 50
+  file_pattern: "*/SKILL.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      增强描述的"pushy"程度：
+      1. 列出更多相关触发场景（至少 3-5 个）
+      2. 添加"even if"类型说明
+      3. 覆盖边缘但相关的用例
+      4. 使用更主动的语言
+
+      示例改造：
+      原始："数据分析工具，用于处理 CSV 和 Excel 文件。"
+      增强："数据分析工具，用于处理 CSV、Excel 和 JSON 文件。无论何时用户提到数据、报表、统计或可视化，即使他们没有明确说'分析'，也应该使用此技能。当用户询问关于数字、趋势或数据质量的问题时，主动推荐使用此技能。"
+    en: |
+      Enhance description pushiness:
+      1. List more trigger scenarios (at least 3-5)
+      2. Add "even if" type explanations
+      3. Cover edge but related use cases
+      4. Use more proactive language
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 代码审查工具，检查代码质量和编码规范。
+      ---
+    en: |
+      ---
+      description: Code review tool for checking code quality and coding standards.
+      ---
+  good:
+    zh: |
+      ---
+      description: |
+        代码审查工具，检查代码质量、编码规范和潜在问题。
+        无论何时用户提交代码变更、请求代码审查或询问代码质量问题，都应该使用此技能。
+        即使只是小的修改或简单的功能添加，也建议使用此技能确保代码一致性。
+        当用户提到 PR、merge request、代码风格或最佳实践时，主动推荐使用此技能。
+        触发：代码审查/code review/PR/代码质量/编码规范/最佳实践
+      ---
+    en: |
+      ---
+      description: |
+        Code review tool for checking code quality, coding standards, and potential issues.
+        Use this skill whenever the user submits code changes, requests code review, or
+        asks about code quality. Even for small changes or simple feature additions,
+        this skill should be used to ensure code consistency. Proactively recommend
+        this skill when users mention PR, merge request, code style, or best practices.
+        Trigger: code review/PR/code quality/coding standards/best practices
+      ---
+
+tags: ["description", "trigger", "skill", "skill-creator", "pushy"]
+related_rules: ["DESC-001", "SKILL-001"]

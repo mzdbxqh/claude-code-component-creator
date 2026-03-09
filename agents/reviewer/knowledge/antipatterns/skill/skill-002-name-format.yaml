@@ -1,0 +1,65 @@
+id: SKILL-002
+name: name-format
+severity: error
+component_type: skill
+category: metadata
+
+title:
+  zh: "Skill 名称格式无效"
+  en: "Invalid Skill name format"
+
+description:
+  zh: |
+    Skill 名称必须遵循 kebab-case 命名规范（小写字母，单词间用连字符分隔）。
+    名称只能包含小写字母、数字和连字符，不能以连字符开头或结尾。
+  en: |
+    Skill name must follow kebab-case naming convention (lowercase letters, words separated by hyphens).
+    Name can only contain lowercase letters, numbers, and hyphens. Cannot start or end with hyphen.
+
+rationale:
+  zh: "统一的命名规范确保组件库的一致性，便于搜索和引用。"
+  en: "Consistent naming ensures component library uniformity, making search and reference easier."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: regex
+  pattern: '^name:\s*([A-Z][^\s]*|[^a-z0-9-].*|.*[-_]$|^[^a-z].*)$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: true
+  suggestion:
+    zh: "将名称转换为 kebab-case 格式，如：MySkill -> my-skill"
+    en: "Convert name to kebab-case format, e.g., MySkill -> my-skill"
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: MySkill
+      ---
+      或
+      ---
+      name: my_skill
+      ---
+    en: |
+      ---
+      name: MySkill
+      ---
+      or
+      ---
+      name: my_skill
+      ---
+  good:
+    zh: |
+      ---
+      name: my-skill
+      ---
+    en: |
+      ---
+      name: my-skill
+      ---
+
+tags: ["metadata", "name", "format", "skill"]
+related_rules: []

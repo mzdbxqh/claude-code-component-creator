@@ -1,0 +1,44 @@
+{
+  "batchId": "batch-5-planning",
+  "name": "工作量与回滚策略检查",
+  "description": "检测实施计划和风险缓解策略",
+  "category": "planning",
+  "patterns": [
+    {
+      "id": "MP018",
+      "name": "缺少工作量估算",
+      "severity": "error",
+      "check": "missing:effort_estimate",
+      "message": "缺少工作量估算（人天/工时）",
+      "impact": "无法评估资源需求和排期",
+      "fix": "提供详细的工作量估算，包含各阶段人天"
+    },
+    {
+      "id": "MP019",
+      "name": "缺少里程碑划分",
+      "severity": "warning",
+      "check": "missing:milestones",
+      "message": "实施计划缺少明确的里程碑",
+      "impact": "无法跟踪进度和评估风险",
+      "fix": "划分清晰的里程碑，每个里程碑有明确的交付物和验收标准"
+    },
+    {
+      "id": "MP020",
+      "name": "缺少回滚策略",
+      "severity": "error",
+      "check": "missing:rollback_strategy",
+      "message": "缺少失败时的回滚策略",
+      "impact": "改造失败时无法快速恢复",
+      "fix": "制定详细的回滚策略，包含触发条件和操作步骤"
+    },
+    {
+      "id": "MP021",
+      "name": "缺少验证标准",
+      "severity": "warning",
+      "check": "missing:validation_criteria",
+      "message": "未定义改造完成的验证标准",
+      "impact": "无法确认改造是否成功完成",
+      "fix": "定义明确的验收标准，包含功能验证和性能指标"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+id: ENV-001
+name: os-compatibility-declaration
+severity: info
+component_type: all
+category: environment
+
+title:
+  zh: "使用平台特定命令时建议声明兼容性"
+  en: "Recommend declaring compatibility when using platform-specific commands"
+
+description:
+  zh: |
+    技能如使用平台特定命令（如 Windows 特有的 PowerShell、Linux 特有的包管理器），
+    建议声明支持的操作系统。通用技能无需声明。
+  en: |
+    Skills using platform-specific commands (e.g., Windows PowerShell, Linux package managers)
+    are recommended to declare supported operating systems. Generic skills don't need declaration.
+
+rationale:
+  zh: "仅对使用平台特定功能的技能检查，避免不必要的文档负担"
+  en: "Only check skills using platform-specific features to avoid unnecessary documentation burden"
+
+detection:
+  method: code-analysis
+  platform_specific_patterns:
+    - "powershell"
+    - "apt-get"
+    - "yum"
+    - "brew"
+    - "choco"
+    - "wsl"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      如使用平台特定命令，添加简短说明：
+
+      ```markdown
+      ## 平台说明
+
+      本技能使用 apt-get，仅支持 Debian/Ubuntu 系统。
+      ```
+    en: |
+      If using platform-specific commands, add brief note:
+
+      ```markdown
+      ## Platform Notes
+
+      This skill uses apt-get, only supports Debian/Ubuntu systems.
+      ```
+
+tags: ["environment", "compatibility", "os", "platform"]
+related_rules: ["ENV-002", "ENV-003"]

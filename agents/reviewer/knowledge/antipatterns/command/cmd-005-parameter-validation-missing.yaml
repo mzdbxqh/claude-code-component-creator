@@ -1,0 +1,61 @@
+id: CMD-005
+name: parameter-validation-missing
+severity: warning
+component_type: command
+category: workflow
+
+title:
+  zh: "缺少参数验证"
+  en: "Missing parameter validation"
+
+description:
+  zh: |
+    Command 应该验证输入参数的有效性，包括：
+    - 必填参数检查
+    - 参数格式验证
+    - 值范围检查
+  en: |
+    Command should validate input parameters including:
+    - Required parameter checks
+    - Parameter format validation
+    - Value range checks
+
+rationale:
+  zh: "参数验证可以防止错误输入导致的意外行为。"
+  en: "Parameter validation prevents unexpected behavior from invalid inputs."
+
+handbook_reference: "Chapter 5.4"
+
+detection:
+  method: regex
+  pattern: "^(?!.*##\\s*(参数验证|Parameter Validation|验证|Validation)).*$"
+  file_pattern: "commands/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加参数验证说明，描述如何验证和处理无效输入。"
+    en: "Add parameter validation section describing how to validate and handle invalid inputs."
+
+examples:
+  bad:
+    zh: |
+      ## 用法
+      /deploy app-name
+      （没有说明参数验证）
+    en: |
+      ## Usage
+      /deploy app-name
+      (No parameter validation described)
+  good:
+    zh: |
+      ## 参数验证
+      - app-name: 必填，只能包含小写字母、数字和连字符
+      - --env: 可选，只能是 development、staging 或 production
+    en: |
+      ## Parameter Validation
+      - app-name: Required, lowercase letters, numbers, and hyphens only
+      - --env: Optional, must be development, staging, or production
+
+tags: ["workflow", "validation", "parameters", "command"]
+related_rules: []

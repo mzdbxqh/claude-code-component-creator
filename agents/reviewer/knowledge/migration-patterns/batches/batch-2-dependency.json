@@ -1,0 +1,44 @@
+{
+  "batchId": "batch-2-dependency",
+  "name": "依赖分析检查",
+  "description": "检测原Agent依赖和Skill映射分析",
+  "category": "dependency",
+  "patterns": [
+    {
+      "id": "MP006",
+      "name": "缺少工具依赖分析",
+      "severity": "error",
+      "check": "missing:tools_analysis",
+      "message": "未分析原Agent使用的工具依赖",
+      "impact": "可能导致Skill缺少必要的工具权限",
+      "fix": "列出原Agent使用的所有工具，并规划Skill的allowed-tools"
+    },
+    {
+      "id": "MP007",
+      "name": "缺少外部服务依赖",
+      "severity": "warning",
+      "check": "missing:external_services",
+      "message": "未识别外部API或服务依赖",
+      "impact": "可能遗漏网络权限或配置依赖",
+      "fix": "识别所有外部服务调用（数据库、API、第三方服务）"
+    },
+    {
+      "id": "MP008",
+      "name": "依赖映射不完整",
+      "severity": "warning",
+      "check": "incomplete:tool_mapping",
+      "message": "Agent工具到Skill工具的映射不完整",
+      "impact": "改造后功能可能缺失",
+      "fix": "建立完整的工具映射表，说明每个Agent工具的替代方案"
+    },
+    {
+      "id": "MP009",
+      "name": "缺少权限分析",
+      "severity": "info",
+      "check": "missing:permission_analysis",
+      "message": "未分析权限变化",
+      "impact": "可能忽略权限缩小带来的影响",
+      "fix": "对比Agent和Skill的权限范围，识别差异"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "batchId": "batch-1-yaml",
+  "name": "YAML基础检查",
+  "description": "检测 YAML frontmatter 基础结构和必填字段",
+  "category": "yaml",
+  "patterns": [
+    {
+      "id": "AP001",
+      "name": "缺少描述字段",
+      "severity": "error",
+      "layer": "rule",
+      "check": "missing:description",
+      "message": "YAML frontmatter 缺少必需的 description 字段",
+      "impact": "Claude Code 无法正确理解组件用途，可能导致误触发或无法触发",
+      "fix": "添加 description: [简洁描述组件功能和触发场景，20-100字符]"
+    },
+    {
+      "id": "AP002",
+      "name": "YAML语法错误",
+      "severity": "error",
+      "layer": "rule",
+      "check": "yaml_parse_error",
+      "message": "YAML frontmatter 语法错误",
+      "impact": "组件无法被 Claude Code 正确解析和加载",
+      "fix": "检查缩进（统一使用2空格）、引号匹配、特殊字符转义"
+    },
+    {
+      "id": "AP015",
+      "name": "缺少版本声明",
+      "severity": "info",
+      "layer": "rule",
+      "check": "missing:version",
+      "message": "未声明版本号",
+      "impact": "不利于追踪组件变更和兼容性管理",
+      "fix": "可选添加 version: 1.0.0"
+    },
+    {
+      "id": "AP020",
+      "name": "缺少名称字段",
+      "severity": "error",
+      "layer": "rule",
+      "check": "missing:name",
+      "message": "YAML frontmatter 缺少必需的 name 字段",
+      "impact": "组件无法被识别和调用",
+      "fix": "添加 name: [kebab-case命名，如code-reviewer]"
+    },
+    {
+      "id": "AP009",
+      "name": "命名格式错误",
+      "severity": "error",
+      "layer": "rule",
+      "check": "name_format_invalid",
+      "message": "组件名称不符合规范（应使用kebab-case）",
+      "impact": "可能导致组件发现失败或调用错误",
+      "fix": "使用小写字母和连字符，如：my-skill-name"
+    }
+  ]
+}

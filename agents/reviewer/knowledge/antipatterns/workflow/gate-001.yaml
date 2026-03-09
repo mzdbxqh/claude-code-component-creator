@@ -1,0 +1,42 @@
+id: GATE-001
+name: brainstorm-quality-gate
+severity: warning
+component_type: workflow
+category: gate
+
+title:
+  zh: "Brainstorm 阶段质量卡点验证失败"
+  en: "Brainstorm phase quality gate validation failed"
+
+description: |
+  验证 Brainstorm 阶段完成后的输出质量。
+
+  **检查项**:
+  - 服务列表是否完整
+  - 服务命名是否符合规范
+  - 测试策略是否明确定义
+
+  **通过标准**:
+  - 所有必需服务已识别
+  - 服务命名遵循项目规范
+  - 每个服务有明确的测试策略
+
+  **失败恢复**:
+  - 服务列表不完整：重新执行 brainstorm，补充缺失服务
+  - 命名不规范：使用 naming 技能修正
+  - 测试策略缺失：补充测试设计
+
+check_logic:
+  type: workflow_analysis
+  phase: brainstorm
+  conditions:
+    - service_list_complete: true
+    - naming_convention_followed: true
+    - test_strategy_defined: true
+
+suggestion:
+  zh: "确保 Brainstorm 输出包含完整的服务列表、规范的命名和明确的测试策略"
+  en: "Ensure Brainstorm output contains complete service list, standard naming, and clear test strategy"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

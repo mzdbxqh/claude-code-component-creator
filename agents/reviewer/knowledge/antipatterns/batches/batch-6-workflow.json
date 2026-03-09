@@ -1,0 +1,68 @@
+{
+  "batchId": "batch-6-workflow",
+  "name": "工作流模式检查",
+  "description": "检测 Skill 工作流设计的合理性和清晰度（手册第3章：Conditional 58.8%, Sequential 26.1%）",
+  "category": "workflow",
+  "patterns": [
+    {
+      "id": "AP601",
+      "name": "步骤间逻辑混乱",
+      "severity": "error",
+      "layer": "semantic",
+      "check": "disordered_steps",
+      "message": "工作流步骤编号不连续或逻辑跳跃",
+      "impact": "执行顺序混乱，结果不可预测",
+      "fix": "使用连续的步骤编号（Step 1, Step 2...），确保逻辑顺序"
+    },
+    {
+      "id": "AP602",
+      "name": "条件分支不明确",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "unclear_conditional",
+      "message": "存在条件判断但未明确分支逻辑（如使用 AskUserQuestion 但未说明各分支）",
+      "impact": "条件场景处理不完整",
+      "fix": "明确列出所有条件分支及对应的处理逻辑"
+    },
+    {
+      "id": "AP603",
+      "name": "缺少退出条件",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "missing_exit_condition",
+      "message": "工作流未定义明确的结束/退出条件",
+      "impact": "可能陷入无限循环或无法正确终止",
+      "fix": "添加明确的退出条件：如'当 X 完成时结束'"
+    },
+    {
+      "id": "AP604",
+      "name": "缺少工具使用声明",
+      "severity": "error",
+      "layer": "rule",
+      "check": "undeclared_tool_usage",
+      "message": "步骤中使用的工具未在 YAML allowed-tools 中声明",
+      "impact": "运行时权限被拒绝",
+      "fix": "在 YAML frontmatter 中添加 allowed-tools 声明"
+    },
+    {
+      "id": "AP605",
+      "name": "步骤依赖不明确",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "unclear_step_dependencies",
+      "message": "步骤间输入/输出依赖关系不清晰",
+      "impact": "步骤执行顺序可能错误",
+      "fix": "明确说明每个步骤的输入来源和输出用途"
+    },
+    {
+      "id": "AP606",
+      "name": "无限循环风险",
+      "severity": "error",
+      "layer": "semantic",
+      "check": "infinite_loop_risk",
+      "message": "存在循环结构但无明确的退出条件",
+      "impact": "导致无限执行，消耗资源",
+      "fix": "添加循环计数器或明确的终止条件"
+    }
+  ]
+}

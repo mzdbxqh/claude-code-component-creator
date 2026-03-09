@@ -1,0 +1,15 @@
+{
+  "stageId": "stage-3-detailed-design",
+  "name": "详细设计核心知识",
+  "description": "设计 YAML 配置、工作流步骤、工具权限",
+  "handbookReferences": ["chapter-4", "chapter-5", "chapter-6", "chapter-7"],
+  "coreKnowledge": {
+    "yamlFrontmatter": {
+      "requiredFields": {"name": {"format": "kebab-case"}, "description": {"minLength": 50, "maxLength": 200}, "context": {"options": ["main", "fork"]}},
+      "optionalFields": {"model": {"options": ["haiku", "sonnet", "opus"]}, "allowed-tools": {"common": ["Read", "Grep", "Write", "Bash", "Task"]}}
+    },
+    "fileReferences": {"syntax": "@path/to/file.md", "rules": ["使用相对路径", "不能是绝对路径", "最大深度5层"], "usageRate": "90.4%"},
+    "workflowDesign": {"stepStructure": ["明确目标", "具体操作", "期望输出", "错误处理"], "errorHandling": {"levels": ["Fatal", "Critical", "Warning"]}},
+    "toolPermissions": {"guidelines": ["最小权限原则", "Bash 需谨慎", "Task 仅用于 fork"]}
+  }
+}

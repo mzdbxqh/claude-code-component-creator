@@ -1,0 +1,22 @@
+id: LOOP-001
+name: recursion-termination
+severity: error
+component_type: all
+category: linkage
+title:
+  zh: "递归缺少终止条件"
+  en: "Recursion lacks termination condition"
+description:
+  zh: "递归调用缺少明确的终止条件，可能导致无限循环"
+  en: "Recursive call lacks clear termination condition, may cause infinite loop"
+detection:
+  method: custom
+  custom_function: check_recursion_termination
+rationale:
+  zh: "确保所有递归调用都能正常终止"
+  en: "Ensure all recursive calls can terminate normally"
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加递归深度限制或终止条件检查"
+    en: "Add recursion depth limit or termination condition check"

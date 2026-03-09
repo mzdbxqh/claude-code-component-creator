@@ -1,0 +1,45 @@
+---
+artifact:
+  type: intent
+  id: INT-{timestamp}-{hash}
+  version: "3.0"
+  created_at: "{iso8601}"
+  expires_at: "{iso8601+7days}"
+  status: draft
+
+cognitive_load:
+  must_remember: []
+  context_window_budget:
+    total: 4000
+    reserved_for_critical: 1000
+    allocated_for_design: 3000
+
+essence:
+  current_state:
+    description: ""
+    pain_points: []
+  problem_statement:
+    root_cause: ""
+    impact: {}
+  solution_space:
+    constraints:
+      hard: []
+      soft: []
+    candidate_solutions: []
+  validation:
+    success_criteria: []
+
+inference:
+  auto_inferred: []
+
+knowledge_transfer:
+  produces: []
+  uncertainties: []
+
+state_machine:
+  current_state: draft
+
+reflection:
+  policy_ref: "RP-CCC-v3.0"
+  self_assessment: {}
+---

@@ -1,0 +1,22 @@
+id: BRANCH-001
+name: error-scene-coverage
+severity: warning
+component_type: all
+category: linkage
+title:
+  zh: "错误场景未覆盖"
+  en: "Error scenario not covered"
+description:
+  zh: "声明的error handling场景未被代码覆盖"
+  en: "Declared error handling scenarios are not covered by code"
+detection:
+  method: custom
+  custom_function: check_error_coverage
+rationale:
+  zh: "确保所有声明的错误场景都有对应的处理逻辑"
+  en: "Ensure all declared error scenarios have corresponding handling logic"
+fix:
+  automatic: false
+  suggestion:
+    zh: "为缺失的错误场景添加处理逻辑或更新文档"
+    en: "Add handling logic for missing error scenarios or update documentation"

@@ -1,0 +1,307 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claude-code-component-creator.dev/schemas/antipattern",
+  "title": "Antipattern Definition Schema",
+  "description": "Schema for defining antipatterns in the Claude Code Component Creator knowledge base",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "severity",
+    "component_type",
+    "category",
+    "title",
+    "description",
+    "detection"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the antipattern (e.g., SKILL-001, CMD-002)",
+      "pattern": "^[A-Z]+-[0-9]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Machine-readable name (kebab-case)",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "severity": {
+      "type": "string",
+      "description": "Severity level of the antipattern",
+      "enum": ["error", "warning", "info"]
+    },
+    "component_type": {
+      "type": "string",
+      "description": "Type of component this antipattern applies to",
+      "enum": ["skill", "command", "hook", "subagent", "mcp", "all"]
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the antipattern for grouping",
+      "enum": [
+        "metadata",
+        "structure",
+        "workflow",
+        "arguments",
+        "user-input",
+        "trigger",
+        "lifecycle",
+        "tools",
+        "model",
+        "config",
+        "auth",
+        "dependencies",
+        "performance",
+        "security",
+        "best-practice"
+      ]
+    },
+    "title": {
+      "type": "object",
+      "description": "Bilingual title for the antipattern",
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": {
+          "type": "string",
+          "description": "Chinese title"
+        },
+        "en": {
+          "type": "string",
+          "description": "English title"
+        }
+      }
+    },
+    "description": {
+      "type": "object",
+      "description": "Bilingual description explaining the antipattern",
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": {
+          "type": "string",
+          "description": "Chinese description"
+        },
+        "en": {
+          "type": "string",
+          "description": "English description"
+        }
+      }
+    },
+    "rationale": {
+      "type": "object",
+      "description": "Bilingual rationale/justification for this rule",
+      "properties": {
+        "zh": {
+          "type": "string",
+          "description": "Chinese rationale"
+        },
+        "en": {
+          "type": "string",
+          "description": "English rationale"
+        }
+      }
+    },
+    "handbook_reference": {
+      "type": "string",
+      "description": "Reference to the HANDBOOK chapter/section",
+      "pattern": "^Chapter [0-9]+(\\.[0-9]+)*$"
+    },
+    "detection": {
+      "type": "object",
+      "description": "Detection configuration for this antipattern",
+      "required": ["method"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "Detection method to use",
+          "enum": ["regex", "ast", "yaml-path", "custom"]
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern (for regex method)"
+        },
+        "file_pattern": {
+          "type": "string",
+          "description": "Glob pattern for files to check (e.g., '*.md', 'commands/*.md')"
+        },
+        "yaml_path": {
+          "type": "string",
+          "description": "YAML path expression (for yaml-path method, e.g., 'metadata.description')"
+        },
+        "ast_query": {
+          "type": "string",
+          "description": "AST query pattern (for ast method)"
+        },
+        "custom_function": {
+          "type": "string",
+          "description": "Name of custom detection function (for custom method)"
+        },
+        "threshold": {
+          "type": "number",
+          "description": "Threshold value for detection (e.g., min/max length)"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "method": { "const": "regex" } }
+          },
+          "then": {
+            "required": ["pattern"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "method": { "const": "yaml-path" } }
+          },
+          "then": {
+            "required": ["yaml_path"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "method": { "const": "ast" } }
+          },
+          "then": {
+            "required": ["ast_query"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "method": { "const": "custom" } }
+          },
+          "then": {
+            "required": ["custom_function"]
+          }
+        }
+      ]
+    },
+    "fix": {
+      "type": "object",
+      "description": "Fix suggestion configuration",
+      "properties": {
+        "automatic": {
+          "type": "boolean",
+          "description": "Whether this antipattern can be auto-fixed",
+          "default": false
+        },
+        "suggestion": {
+          "type": "object",
+          "description": "Bilingual fix suggestion",
+          "required": ["zh", "en"],
+          "properties": {
+            "zh": {
+              "type": "string",
+              "description": "Chinese fix suggestion"
+            },
+            "en": {
+              "type": "string",
+              "description": "English fix suggestion"
+            }
+          }
+        },
+        "fix_function": {
+          "type": "string",
+          "description": "Name of custom fix function (if automatic=true)"
+        }
+      }
+    },
+    "examples": {
+      "type": "object",
+      "description": "Example code showing bad and good patterns",
+      "properties": {
+        "bad": {
+          "type": "object",
+          "description": "Bad example (the antipattern)",
+          "required": ["zh", "en"],
+          "properties": {
+            "zh": {
+              "type": "string",
+              "description": "Chinese bad example with explanation"
+            },
+            "en": {
+              "type": "string",
+              "description": "English bad example with explanation"
+            }
+          }
+        },
+        "good": {
+          "type": "object",
+          "description": "Good example (the corrected pattern)",
+          "required": ["zh", "en"],
+          "properties": {
+            "zh": {
+              "type": "string",
+              "description": "Chinese good example with explanation"
+            },
+            "en": {
+              "type": "string",
+              "description": "English good example with explanation"
+            }
+          }
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for filtering and grouping",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_rules": {
+      "type": "array",
+      "description": "IDs of related antipatterns",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]+-[0-9]+$"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "SKILL-001",
+      "name": "description-length",
+      "severity": "error",
+      "component_type": "skill",
+      "category": "metadata",
+      "title": {
+        "zh": "描述长度过短或缺失",
+        "en": "Description too short or missing"
+      },
+      "description": {
+        "zh": "Skill 的 description 字段是用户理解组件用途的第一信息源。长度小于 50 字符或大于 500 字符都属于不规范。",
+        "en": "Skill description field is the first information source for users to understand component purpose. Length less than 50 or greater than 500 characters is non-compliant."
+      },
+      "rationale": {
+        "zh": "基于 HANDBOOK 第 4 章 Skill 规范，description 必须清晰简洁。",
+        "en": "Based on HANDBOOK Chapter 4 Skill specification."
+      },
+      "handbook_reference": "Chapter 4.2",
+      "detection": {
+        "method": "regex",
+        "pattern": "^description:\\s*(.{0,49}|.{501,})$",
+        "file_pattern": "*.md"
+      },
+      "fix": {
+        "automatic": false,
+        "suggestion": {
+          "zh": "将 description 长度控制在 50-500 字符之间，清晰描述组件用途。",
+          "en": "Keep description length between 50-500 characters, clearly describing the component purpose."
+        }
+      },
+      "examples": {
+        "bad": {
+          "zh": "```yaml\\n---\\ndescription: 短\\n---\\n```",
+          "en": "```yaml\\n---\\ndescription: Short\\n---\\n```"
+        },
+        "good": {
+          "zh": "```yaml\\n---\\ndescription: 这是一个用于自动化部署的 Skill，支持 Docker 和 Kubernetes。\\n---\\n```",
+          "en": "```yaml\\n---\\ndescription: This is a Skill for automated deployment, supporting Docker and Kubernetes.\\n---\\n```"
+        }
+      },
+      "tags": ["metadata", "description", "skill"],
+      "related_rules": ["SKILL-002"]
+    }
+  ]
+}

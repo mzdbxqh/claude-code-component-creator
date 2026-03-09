@@ -1,0 +1,57 @@
+id: SKILL-006
+name: model-mismatch
+severity: warning
+component_type: skill
+category: metadata
+
+title:
+  zh: "模型选择不当"
+  en: "Model selection mismatch"
+
+description:
+  zh: |
+    Skill 选择的模型与其复杂度不匹配。
+    简单任务使用 sonnet/opus 造成浪费，复杂任务使用 haiku 导致质量下降。
+  en: |
+    Selected model doesn't match skill complexity.
+    Simple tasks using sonnet/opus is wasteful; complex tasks using haiku degrades quality.
+
+rationale:
+  zh: "合理选择模型可以平衡成本和质量。"
+  en: "Proper model selection balances cost and quality."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: custom
+  custom_function: "check_model_complexity_match"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      - haiku: 简单、快速的任务
+      - sonnet: 中等复杂度任务（默认）
+      - opus: 复杂推理、代码生成任务
+    en: |
+      - haiku: Simple, fast tasks
+      - sonnet: Medium complexity tasks (default)
+      - opus: Complex reasoning, code generation
+
+examples:
+  bad:
+    zh: |
+      （一个简单的文件读取 Skill 使用了 model: opus）
+    en: |
+      (A simple file reading skill using model: opus)
+  good:
+    zh: |
+      （复杂代码生成任务使用 model: opus）
+      （简单查询任务使用 model: haiku）
+    en: |
+      (Complex code generation using model: opus)
+      (Simple query task using model: haiku)
+
+tags: ["metadata", "model", "performance", "skill"]
+related_rules: []

@@ -1,0 +1,63 @@
+id: LLM-001
+name: llm-specific-feature-declaration
+severity: warning
+component_type: all
+category: llm-compatibility
+
+title:
+  zh: "LLM 特有功能依赖建议声明"
+  en: "LLM-specific feature dependency recommended to declare"
+
+description:
+  zh: |
+    技能如依赖特定 LLM 的专有功能（如 AskUserQuestion、Task 工具等），建议在文档中声明。
+    声明可以帮助用户了解模型兼容性，但不强制要求。
+  en: |
+    Skills depending on LLM-specific proprietary features (e.g., AskUserQuestion, Task tool) are recommended to declare this in documentation.
+    Declaration helps users understand model compatibility, but not mandatory.
+
+rationale:
+  zh: "基于 LLM 兼容性最佳实践，特有功能依赖建议声明以提高透明度"
+  en: "Per LLM compatibility best practices, proprietary feature dependencies recommended to declare for transparency"
+
+detection:
+  method: code-analysis
+  patterns:
+    - "AskUserQuestion"
+    - "Task("
+    - "Skill(skill="
+    - "TaskCreate"
+    - "TaskUpdate"
+  required_sections:
+    - "模型兼容性"
+    - "支持的功能"
+    - "Model Compatibility"
+    - "Supported Models"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  strategy:
+    zh: |
+      可选择添加模型兼容性说明：
+
+      ```markdown
+      ## 模型兼容性
+
+      本技能使用 Claude 特有功能（AskUserQuestion），在其他模型上可能需要调整。
+      ```
+
+      或移除特有功能依赖，改用通用实现。
+    en: |
+      Optionally add model compatibility note:
+
+      ```markdown
+      ## Model Compatibility
+
+      This skill uses Claude-specific features (AskUserQuestion), may need adjustment on other models.
+      ```
+
+      Or remove specific feature dependency, use generic implementation.
+
+tags: ["llm", "compatibility", "askuserquestion"]
+related_rules: ["LLM-002", "LLM-003"]

@@ -1,0 +1,109 @@
+id: ARCH-015
+name: output-spec-incomplete
+severity: error
+component_type: all
+category: architecture
+
+title:
+  zh: "输出规范定义不完整"
+  en: "Incomplete Output Specification"
+
+description:
+  zh: |
+    缺少Output Specification章节或定义不完整。
+    完整的输出规范应包括：输出格式、存储位置、示例、错误输出。
+  en: |
+    Missing or incomplete output specification section.
+
+rationale:
+  zh: "明确的输出规范帮助用户理解组件行为，支持自动化处理"
+  en: "Clear output spec helps users understand component behavior"
+
+detection:
+  method: regex
+  patterns:
+    - "## Output Specification"
+    - "### .*Output"
+    - "输出格式|output format"
+  threshold: 1
+  file_pattern: "*.md"
+  criteria:
+    - 检查是否存在输出规范章节
+    - 验证是否包含输出示例
+    - 检查是否说明错误输出
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      完善输出规范：
+      1. 添加## Output Specification章节
+      2. 说明输出格式(console/file/both)
+      3. 提供完整的输出示例
+      4. 说明错误情况的输出
+      5. 指定文件输出路径(如适用)
+    en: |
+      Complete output specification:
+      1. Add ## Output Specification section
+      2. Specify output format (console/file/both)
+      3. Provide complete output examples
+      4. Document error output
+      5. Specify file output paths if applicable
+
+examples:
+  bad:
+    zh: |
+      ## 执行流程
+      1. 读取输入
+      2. 处理数据
+      3. 输出结果
+      # 缺少：输出格式说明、示例、位置
+    en: |
+      ## Execution Flow
+      1. Read input
+      2. Process data
+      3. Output results
+      # Missing: format description, examples, location
+  good:
+    zh: |
+      ## Output Specification
+
+      ### Console Output
+      ```
+      Result: <status>
+      Details: <message>
+      ```
+
+      ### File Output
+      | 属性 | 值 |
+      |-----|---|
+      | 路径 | `docs/output/{timestamp}.md` |
+      | 格式 | Markdown |
+
+      ### 输出示例
+      ```yaml
+      status: completed
+      result: success
+      ```
+    en: |
+      ## Output Specification
+
+      ### Console Output
+      ```
+      Result: <status>
+      Details: <message>
+      ```
+
+      ### File Output
+      | Attribute | Value |
+      |-----------|-------|
+      | Path | `docs/output/{timestamp}.md` |
+      | Format | Markdown |
+
+      ### Example Output
+      ```yaml
+      status: completed
+      result: success
+      ```
+
+tags: ["architecture", "output", "specification", "documentation"]

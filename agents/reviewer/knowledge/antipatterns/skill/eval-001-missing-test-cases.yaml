@@ -1,0 +1,164 @@
+id: EVAL-001
+name: missing-test-cases
+severity: info
+component_type: skill
+category: eval
+
+title:
+  zh: "缺少测试用例"
+  en: "Missing test cases"
+
+description:
+  zh: |
+    Skill 应该在 `evals/evals.json` 中包含 2-3 个真实的测试提示。
+
+    **官方参考 (skill-creator)**:
+    > After writing the skill draft, come up with 2-3 realistic test prompts.
+    > Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts.
+
+    **检查项**:
+    - 是否存在 `evals/evals.json` 文件
+    - 是否包含至少 2 个测试提示
+    - 测试提示是否真实（用户实际会说的话）
+
+    **注意**: 此规则为 info 级别，因为测试用例是推荐实践而非强制要求。
+  en: |
+    Skill should include 2-3 realistic test prompts in `evals/evals.json`.
+
+    **Official reference (skill-creator)**:
+    > After writing the skill draft, come up with 2-3 realistic test prompts.
+    > Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts.
+
+    **Checks**:
+    - Does `evals/evals.json` exist?
+    - Does it contain at least 2 test prompts?
+    - Are test prompts realistic (what users would actually say)?
+
+    **Note**: This rule is info level because test cases are recommended practice, not mandatory.
+
+rationale:
+  zh: "根据官方 skill-creator 规范，测试用例是技能开发的标准流程。它们用于验证技能触发准确率并支持后续迭代优化。"
+  en: "Per official skill-creator spec, test cases are standard practice in skill development. They validate skill trigger accuracy and support iterative optimization."
+
+handbook_reference: "Official skill-creator Step 4: Test Cases"
+
+detection:
+  method: custom
+  custom_function: "check_test_cases_existence"
+  file_pattern: '*.md'
+  checks:
+    - evals_dir_exists: "Check if evals/ directory exists in skill root"
+    - evals_json_exists: "Check if evals/evals.json file exists"
+    - test_count: "Verify at least 2 test prompts exist"
+    - prompt_format: "Validate prompt field exists in each test"
+  thresholds:
+    min_tests: 2
+    recommended_tests: 3
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      创建测试用例的步骤：
+
+      1. 创建 `evals/` 目录（如果不存在）
+      2. 创建 `evals/evals.json` 文件
+      3. 定义 2-3 个真实的测试提示
+
+      示例结构：
+      ```json
+      {
+        "skill_name": "your-skill-name",
+        "evals": [
+          {
+            "id": 1,
+            "eval_name": "descriptive-test-name",
+            "prompt": "用户的真实查询（应包含具体场景和细节）"
+          },
+          {
+            "id": 2,
+            "eval_name": "another-test-scenario",
+            "prompt": "另一个不同的使用场景"
+          }
+        ]
+      }
+      ```
+
+      **测试设计原则**:
+      - 使用用户实际会说的话（自然语言）
+      - 包含具体细节（文件名、场景、背景）
+      - 避免过于简单的查询（如"read file X"）
+      - 覆盖不同的触发场景
+    en: |
+      Steps to create test cases:
+
+      1. Create `evals/` directory (if not exists)
+      2. Create `evals/evals.json` file
+      3. Define 2-3 realistic test prompts
+
+      Example structure:
+      ```json
+      {
+        "skill_name": "your-skill-name",
+        "evals": [
+          {
+            "id": 1,
+            "eval_name": "descriptive-test-name",
+            "prompt": "User's real query (should include specific context and details)"
+          },
+          {
+            "id": 2,
+            "eval_name": "another-test-scenario",
+            "prompt": "A different usage scenario"
+          }
+        ]
+      }
+      ```
+
+      **Test design principles**:
+      - Use natural language users would actually speak
+      - Include specific details (file names, scenarios, context)
+      - Avoid overly simple queries (like "read file X")
+      - Cover different trigger scenarios
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      这是一个技能。
+
+      （没有 evals/目录或 evals.json 文件）
+    en: |
+      # My Skill
+      This is a skill.
+
+      (No evals/ directory or evals.json file)
+
+  good:
+    zh: |
+      # My Skill
+      这是一个技能。
+
+      ## 测试用例
+
+      测试用例已保存在 `evals/evals.json` 中。
+
+      ```
+      evals/
+      └── evals.json
+      ```
+    en: |
+      # My Skill
+      This is a skill.
+
+      ## Test Cases
+
+      Test cases are saved in `evals/evals.json`.
+
+      ```
+      evals/
+      └── evals.json
+      ```
+
+tags: ["eval", "test-cases", "skill-creator", "quality-assurance"]
+related_rules: ["EVAL-002", "SCRIPT-001", "SKILL-003"]

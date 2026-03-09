@@ -1,0 +1,67 @@
+id: HOOK-006
+name: error-not-propagated
+severity: error
+component_type: hook
+category: workflow
+
+title:
+  zh: "错误未正确传播"
+  en: "Error not properly propagated"
+
+description:
+  zh: |
+    Hook 中的错误应该被正确捕获和传播，
+    以便调用者知道处理失败并采取相应措施。
+  en: |
+    Errors in hooks should be properly caught and propagated
+    so callers know processing failed and can take appropriate action.
+
+rationale:
+  zh: "静默失败会导致难以调试的问题和数据不一致。"
+  en: "Silent failures lead to hard-to-debug issues and data inconsistency."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: regex
+  pattern: "try.*catch.*empty|catch.*{}|ignore.*error|suppress.*error"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "确保错误被捕获并传播，或使用适当的方式记录。"
+    en: "Ensure errors are caught and propagated, or logged appropriately."
+
+examples:
+  bad:
+    zh: |
+      try {
+        processFile();
+      } catch (e) {
+        // 忽略错误
+      }
+    en: |
+      try {
+        processFile();
+      } catch (e) {
+        // ignore error
+      }
+  good:
+    zh: |
+      try {
+        processFile();
+      } catch (e) {
+        logError(e);
+        throw new HookError("处理失败", e);
+      }
+    en: |
+      try {
+        processFile();
+      } catch (e) {
+        logError(e);
+        throw new HookError("Processing failed", e);
+      }
+
+tags: ["workflow", "error-handling", "hook"]
+related_rules: []

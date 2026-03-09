@@ -1,0 +1,67 @@
+id: SKILL-013
+name: tools-overprivileged
+severity: warning
+component_type: skill
+category: security
+
+title:
+  zh: "工具权限过于宽泛"
+  en: "Overly broad tool permissions"
+
+description:
+  zh: |
+    Skill 声明了不需要的工具权限，违反最小权限原则。
+    例如，只读取文件的 Skill 却声明了 Write 权限。
+  en: |
+    Skill declares unnecessary tool permissions, violating least privilege principle.
+    For example, a file-reading skill declaring Write permission.
+
+rationale:
+  zh: "最小权限原则是安全最佳实践，减少潜在风险。"
+  en: "Least privilege principle is a security best practice that reduces risk."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: custom
+  custom_function: "check_overprivileged_tools"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "移除未使用的工具权限，只保留必要的。"
+    en: "Remove unused tool permissions, keep only necessary ones."
+
+examples:
+  bad:
+    zh: |
+      ---
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+      ---
+      （但 Skill 只使用了 Read）
+    en: |
+      ---
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+      ---
+      (But skill only uses Read)
+  good:
+    zh: |
+      ---
+      allowed-tools:
+        - Read
+      ---
+    en: |
+      ---
+      allowed-tools:
+        - Read
+      ---
+
+tags: ["security", "tools", "skill"]
+related_rules: ["SKILL-005"]

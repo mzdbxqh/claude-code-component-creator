@@ -1,0 +1,35 @@
+id: COMMON-001
+name: description-missing
+severity: error
+component_type: all
+category: metadata
+
+title:
+  zh: "缺少描述"
+  en: "Description missing"
+
+description:
+  zh: |
+    所有组件（Skill/Command/Hook/SubAgent/MCP）都必须有 description 字段。
+    description 是用户理解组件用途的第一信息源。
+  en: |
+    All components (Skill/Command/Hook/SubAgent/MCP) must have description field.
+    Description is the primary source for users to understand component purpose.
+
+rationale:
+  zh: "基于 HANDBOOK 规范，description 是必需字段"
+  en: "Per HANDBOOK specification, description is a required field"
+
+detection:
+  method: field-check
+  required_field: description
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加清晰的 description 字段，说明组件的用途和功能"
+    en: "Add clear description field explaining component purpose and functionality"
+
+tags: ["metadata", "description", "common"]
+related_rules: ["SKILL-001", "CMD-001"]

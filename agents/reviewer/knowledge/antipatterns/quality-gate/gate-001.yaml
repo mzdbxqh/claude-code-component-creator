@@ -1,0 +1,52 @@
+id: GATE-001
+name: brainstorm-quality-gate
+severity: warning
+component_type: workflow
+category: quality-gate
+
+title:
+  zh: "Brainstorm 阶段质量卡点验证缺失"
+  en: "Brainstorm phase quality gate missing"
+
+description:
+  zh: |
+    验证 brainstorm 阶段完成后的质量卡点。
+
+    **检查项**:
+    - architecture.md 是否已生成
+    - 服务列表是否完整
+    - 服务命名是否符合规范
+    - 是否标注了新增/修改状态
+    - 测试策略是否定义
+
+    **Gate 1 通过标准**:
+    - ✅ 所有服务都有清晰的职责描述
+    - ✅ 服务命名符合 kebab-case 规范
+    - ✅ 标注了每个服务是新增还是修改
+    - ✅ 定义了核心服务的测试策略
+
+  en: |
+    Validates quality gate after brainstorm phase.
+
+    **Checks**:
+    - architecture.md exists
+    - Service list is complete
+    - Service naming follows conventions
+    - New/modified status is labeled
+    - Test strategy is defined
+
+check_logic:
+  type: file_content_check
+  target_file: "architecture.md"
+  conditions:
+    - file_exists: true
+    - has_service_list: true
+    - naming_convention_valid: true
+    - test_strategy_defined: true
+
+suggestion:
+  zh: "在 brainstorm 完成后运行质量检查，确保 architecture.md 符合标准"
+  en: "Run quality check after brainstorm to ensure architecture.md meets standards"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

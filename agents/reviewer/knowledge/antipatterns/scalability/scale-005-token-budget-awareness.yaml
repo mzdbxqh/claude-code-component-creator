@@ -1,0 +1,136 @@
+id: SCALE-005
+name: token-budget-awareness
+severity: warning
+component_type: skill
+category: scalability
+
+title:
+  zh: "Token 预算意识缺失"
+  en: "Token budget awareness missing"
+
+description:
+  zh: |
+    Skill 文档应该遵循 Token 预算分配原则，保持内容精简且高效：
+
+    **Token 预算分配建议**:
+    | 章节 | 预算比例 | 行数限制 |
+    |------|----------|----------|
+    | Purpose/描述 | 5-10% | 20-40 行 |
+    | Workflow | 30-40% | 120-160 行 |
+    | Input/Output Format | 10-15% | 40-60 行 |
+    | Error Handling | 10-15% | 40-60 行 |
+    | Examples | 15-20% | 60-80 行 |
+    | Notes/Best Practices | 10-15% | 40-60 行 |
+    | 其他 | 5-10% | 20-40 行 |
+
+    **最大行数限制**: 400 行（软限制 450 行）
+    - 超过限制时应使用 references/目录存放扩展内容
+
+    **官方参考**: Anthropic skill-creator 建议保持 SKILL.md under 500 lines，理想<400 行
+  en: |
+    Skill documentation should follow token budget allocation principles, keeping content concise and efficient:
+
+    **Token Budget Allocation Suggestions**:
+    | Section | Budget | Line Limit |
+    |---------|--------|------------|
+    | Purpose/Description | 5-10% | 20-40 lines |
+    | Workflow | 30-40% | 120-160 lines |
+    | Input/Output Format | 10-15% | 40-60 lines |
+    | Error Handling | 10-15% | 40-60 lines |
+    | Examples | 15-20% | 60-80 lines |
+    | Notes/Best Practices | 10-15% | 40-60 lines |
+    | Other | 5-10% | 20-40 lines |
+
+    **Maximum line limit**: 400 lines (soft limit 450 lines)
+    - Use references/ directory for extended content when exceeding limit
+
+    **Official reference**: Anthropic skill-creator recommends keeping SKILL.md under 500 lines, ideally <400 lines
+
+rationale:
+  zh: "LLM 的注意力机制在长文档中会显著下降。遵循 Token 预算分配可以确保关键信息得到充分关注，同时避免文档膨胀导致的规则遵从性问题。"
+  en: "LLM attention mechanism significantly degrades in long documents. Following token budget allocation ensures critical information receives adequate attention while avoiding rule compliance issues caused by document bloat."
+
+handbook_reference: "Official skill-creator Progressive Disclosure + Chapter 4"
+
+detection:
+  method: custom
+  custom_function: "check_token_budget"
+  file_pattern: '*.md'
+  thresholds:
+    max_lines: 400
+    max_lines_soft: 450
+    min_lines: 100
+  section_weights:
+    purpose: 0.10
+    workflow: 0.35
+    input_output: 0.12
+    error_handling: 0.13
+    examples: 0.17
+    notes: 0.13
+  checks:
+    - total_length_violation: "Check if total lines exceed 400"
+    - section_imbalance: "Check if any section exceeds its budget by >50%"
+    - missing_section: "Check if required sections are present"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      如果 Token 预算超标:
+      1. 识别并精简冗余描述
+      2. 将详细内容移至 references/目录
+      3. 使用简洁的表格替代冗长文字
+      4. 移除重复的说明和示例
+
+      如果章节比例失衡:
+      1. Workflow 应保持 30-40%（核心流程）
+      2. Examples 应保持 15-20%（足够指导用户）
+      3. Error Handling 应保持 10-15%（完整覆盖）
+    en: |
+      If token budget exceeded:
+      1. Identify and streamline redundant descriptions
+      2. Move detailed content to references/ directory
+      3. Use concise tables instead of verbose text
+      4. Remove duplicate explanations and examples
+
+      If section proportions imbalanced:
+      1. Workflow should be 30-40% (core process)
+      2. Examples should be 15-20% (enough to guide users)
+      3. Error Handling should be 10-15% (complete coverage)
+
+examples:
+  bad:
+    zh: |
+      # 问题文档
+      - Purpose 部分写了 100 行（应 20-40 行）
+      - Workflow 只有 10%（应 30-40%）
+      - 没有 Error Handling 章节
+      - 总行数 600 行（超 400 行限制）
+    en: |
+      # Problematic document
+      - Purpose section is 100 lines (should be 20-40)
+      - Workflow is only 10% (should be 30-40%)
+      - No Error Handling section
+      - Total 600 lines (exceeds 400 limit)
+  good:
+    zh: |
+      # 良好文档结构
+      - Purpose: 25 行 (8%)
+      - Workflow: 140 行 (35%)
+      - Input/Output: 50 行 (12%)
+      - Error Handling: 55 行 (14%)
+      - Examples: 70 行 (17%)
+      - Notes: 60 行 (14%)
+      - 总计：400 行
+    en: |
+      # Good document structure
+      - Purpose: 25 lines (8%)
+      - Workflow: 140 lines (35%)
+      - Input/Output: 50 lines (12%)
+      - Error Handling: 55 lines (14%)
+      - Examples: 70 lines (17%)
+      - Notes: 60 lines (14%)
+      - Total: 400 lines
+
+tags: ["scalability", "token-usage", "structure", "skill", "progressive-disclosure"]
+related_rules: ["SKILL-014", "SKILL-016", "SKILL-008"]

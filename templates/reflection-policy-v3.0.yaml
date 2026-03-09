@@ -1,0 +1,52 @@
+---
+artifact:
+  type: reflection-policy
+  id: RP-CCC-v3.0
+  version: "3.0.0"
+  applies_to: [Intent, Blueprint, Delivery]
+
+dimensions:
+  - id: D1
+    name: "用户体验"
+    weight: 0.25
+    checkpoints:
+      - id: D1-C1
+        question: "交互是否顺畅？"
+        criteria: "用户无需记忆复杂ID，支持自然语言"
+      - id: D1-C2
+        question: "使用门槛是否足够低？"
+        criteria: "90%场景只需1个命令"
+
+  - id: D2
+    name: "模型稳定性"
+    weight: 0.25
+    checkpoints:
+      - id: D2-C1
+        question: "是否避免LLM状态维护？"
+        criteria: "状态外置，LLM只负责内容生成"
+      - id: D2-C2
+        question: "是否有确定性约束？"
+        criteria: "关键字段结构化"
+
+  - id: D3
+    name: "准确性"
+    weight: 0.25
+    checkpoints:
+      - id: D3-C1
+        question: "是否有交叉验证机制？"
+        criteria: "关键决策双模型验证"
+      - id: D3-C2
+        question: "是否有外部验证？"
+        criteria: "YAML/JSON可被非LLM工具验证"
+
+  - id: D4
+    name: "鲁棒性"
+    weight: 0.25
+    checkpoints:
+      - id: D4-C1
+        question: "失败是否有恢复路径？"
+        criteria: "每种错误类型都有明确处理策略"
+      - id: D4-C2
+        question: "是否有重试和退避机制？"
+        criteria: "网络/模型错误自动重试"
+---

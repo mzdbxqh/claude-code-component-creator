@@ -1,0 +1,32 @@
+{
+  "stageId": "stage-1-requirement",
+  "name": "需求分析核心知识",
+  "description": "帮助用户澄清需求，输出结构化需求规格",
+  "handbookReferences": ["chapter-1", "chapter-2"],
+  "coreKnowledge": {
+    "requirementCategories": {
+      "functional": {
+        "description": "功能需求 - 系统应该做什么",
+        "questions": ["核心功能是什么？", "输入是什么？", "期望的输出是什么？", "需要处理哪些数据？"]
+      },
+      "nonFunctional": {
+        "description": "非功能需求 - 质量属性",
+        "questions": ["性能要求（响应时间）？", "并发处理能力？", "安全性要求？", "可维护性要求？"]
+      },
+      "constraints": {
+        "description": "约束条件 - 限制因素",
+        "questions": ["技术栈限制？", "预算/时间限制？", "合规性要求？", "依赖的外部系统？"]
+      }
+    },
+    "clarificationTechniques": {
+      "fiveWhys": {"description": "连续问5个为什么，深挖根本原因"},
+      "userStory": {"template": "As a {role}, I want {feature} so that {value}"},
+      "scenarioAnalysis": {"questions": ["谁会用这个功能？", "在什么情况下使用？", "使用频率如何？"]}
+    },
+    "outputTemplate": {"requirementSpec": {"sections": ["problemStatement", "targetUsers", "coreFeatures", "nonFunctionalRequirements", "constraints", "successCriteria"]}}
+  },
+  "commonPitfalls": [
+    {"id": "REQ-001", "name": "需求过于模糊", "solution": "使用5Why技术深挖具体功能"},
+    {"id": "REQ-002", "name": "忽略非功能需求", "solution": "显式询问性能、安全、并发要求"}
+  ]
+}

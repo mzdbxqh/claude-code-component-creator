@@ -1,0 +1,103 @@
+id: SEC-003
+name: path-traversal-prevention
+severity: warning
+component_type: all
+category: security
+
+title:
+  zh: "路径遍历风险防护"
+  en: "Path traversal prevention"
+
+description:
+  zh: |
+    技能如处理文件路径，必须验证路径边界，防止路径遍历攻击。
+    未验证的路径可能导致访问项目目录外的文件。
+  en: |
+    Skills handling file paths must validate path boundaries to prevent path traversal attacks.
+    Unvalidated paths may allow access to files outside project directory.
+
+rationale:
+  zh: "基于安全最佳实践，所有文件操作必须限制在项目边界内"
+  en: "Per security best practices, all file operations must be limited within project boundaries"
+
+detection:
+  method: code-analysis
+  risk_patterns:
+    - pattern: '\.\./|\.\.\\'
+      risk: medium
+      description: "Parent directory traversal"
+    - pattern: '^(?:[a-zA-Z]:)?/'
+      risk: low
+      description: "Absolute path without validation"
+  required_when: "处理文件路径时"
+  check_items:
+    - 路径规范化
+    - 目录边界检查
+    - 路径白名单
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **路径安全实践**:
+
+      ```bash
+      # 获取项目根目录
+      PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+      # 解析真实路径（消除../等）
+      REAL_PATH="$(realpath "$INPUT_PATH")"
+
+      # 检查是否在项目目录内
+      if [[ ! "$REAL_PATH" =~ ^"$PROJECT_ROOT" ]]; then
+        echo "Error: Path outside project boundary"
+        exit 1
+      fi
+
+      # 或使用白名单
+      ALLOWED_DIRS=(".worktrees" "docs" "src")
+      for dir in "${ALLOWED_DIRS[@]}"; do
+        if [[ "$INPUT_PATH" == "$dir"/* ]]; then
+          ALLOWED=true
+          break
+        fi
+      done
+      ```
+
+      **文档说明示例**:
+      ```markdown
+      ## 路径安全
+
+      **验证逻辑**:
+      1. 解析真实路径（消除符号链接和相对路径）
+      2. 检查是否在项目根目录内
+      3. 使用白名单限制允许的路径
+      ```
+    en: |
+      **Path Security Practices**:
+
+      ```bash
+      # Get project root
+      PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+      # Resolve real path (eliminate ../ etc)
+      REAL_PATH="$(realpath "$INPUT_PATH")"
+
+      # Check if within project boundary
+      if [[ ! "$REAL_PATH" =~ ^"$PROJECT_ROOT" ]]; then
+        echo "Error: Path outside project boundary"
+        exit 1
+      fi
+
+      # Or use whitelist
+      ALLOWED_DIRS=(".worktrees" "docs" "src")
+      for dir in "${ALLOWED_DIRS[@]}"; do
+        if [[ "$INPUT_PATH" == "$dir"/* ]]; then
+          ALLOWED=true
+          break
+        fi
+      done
+      ```
+
+tags: ["security", "path-traversal", "file-path", "validation"]
+related_rules: ["SEC-001", "SEC-002"]

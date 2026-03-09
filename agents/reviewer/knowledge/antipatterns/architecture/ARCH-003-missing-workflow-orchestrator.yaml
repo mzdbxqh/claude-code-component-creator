@@ -1,0 +1,80 @@
+id: ARCH-003
+name: missing-workflow-orchestrator
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "缺少工作流编排器"
+  en: "Missing Workflow Orchestrator"
+
+description:
+  zh: |
+    项目缺少统一的工作流编排机制，各阶段通过松散的文件约定连接，缺少集中管理。
+    建议引入 workflow-manager 或类似机制统一协调各阶段。
+  en: |
+    Project lacks unified workflow orchestration mechanism, phases connected through loose file conventions without centralized management.
+    Recommend introducing workflow-manager or similar for unified coordination.
+
+rationale:
+  zh: "统一编排器提供状态可视化、错误恢复、并行优化等能力"
+  en: "Unified orchestrator provides state visualization, error recovery, parallel optimization capabilities"
+
+detection:
+  method: custom
+  custom_function: check_workflow_orchestrator
+  criteria:
+    - 检查是否存在 workflow-manager Skill
+    - 检查是否有统一的状态追踪机制
+    - 检查是否有工作流可视化能力
+
+threshold:
+  min_score: 1  # 至少有一个编排机制
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      引入工作流编排机制：
+      1. 创建 workflow-manager Skill 管理工作流定义和执行
+      2. 实现状态聚合视图（如 ccc:status 命令）
+      3. 添加工作流可视化文档
+      4. 实现会话恢复的统一机制
+    en: |
+      Introduce workflow orchestration:
+      1. Create workflow-manager Skill for workflow definition and execution
+      2. Implement state aggregation view (e.g., ccc:status command)
+      3. Add workflow visualization documentation
+      4. Implement unified session recovery mechanism
+
+examples:
+  bad:
+    zh: |
+      # 各阶段独立管理
+      brainstorm → 生成 architecture.md（手动）
+      plan → 读取 architecture.md 生成 design.md（手动）
+      execute → 读取 design.md 执行（手动）
+      # 缺少统一追踪当前阶段的能力
+    en: |
+      # Each phase managed independently
+      brainstorm → generates architecture.md (manual)
+      plan → reads architecture.md generates design.md (manual)
+      execute → reads design.md executes (manual)
+      # No unified way to track current phase
+  good:
+    zh: |
+      # 统一编排
+      workflow-manager Skill 协调各阶段
+      - 当前状态追踪（当前阶段、已完成、待执行）
+      - 自动触发下一阶段
+      - 统一会话恢复
+      - 可视化工作流图
+    en: |
+      # Unified orchestration
+      workflow-manager Skill coordinates all phases
+      - Current state tracking (current phase, completed, pending)
+      - Auto-trigger next phase
+      - Unified session recovery
+      - Visual workflow diagram
+
+tags: ["architecture", "workflow", "orchestration"]

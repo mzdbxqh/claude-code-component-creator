@@ -1,0 +1,83 @@
+id: ARCH-009
+name: tool-permission-overlap
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "工具权限范围重叠"
+  en: "Overlapping Tool Permissions"
+
+description:
+  zh: |
+    多个Subagent拥有完全相同的工具权限，缺乏职责分离。
+    这违背了最小权限原则，增加了安全风险。
+  en: |
+    Multiple subagents have identical tool permissions, lacking responsibility separation.
+    This violates the principle of least privilege.
+
+rationale:
+  zh: "按最小权限原则分配工具，区分各组件专属工具集"
+  en: "Assign tools according to least privilege principle"
+
+detection:
+  method: custom
+  custom_function: check_permission_overlap
+  criteria:
+    - 对比不同组件的allowed-tools列表
+    - 计算Jaccard相似度
+  threshold:
+    identical_tools_count: 4  # 4+相同工具触发
+    similarity_threshold: 0.8  # 相似度超过80%触发
+  exclude_common:
+    - "Read"  # 几乎所有组件都需要
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      优化权限分配：
+      1. 为每个组件定义专属工具集
+      2. 移除不需要的工具
+      3. 对于共享功能，创建专用工具Skill
+      4. 记录每个工具的用途
+    en: |
+      Optimize permission assignment:
+      1. Define unique tool sets for each component
+      2. Remove unnecessary tools
+      3. Create dedicated tool skills for shared functionality
+      4. Document each tool's purpose
+
+examples:
+  bad:
+    zh: |
+      # Skill A
+      allowed-tools: ["Read", "Write", "Bash", "Task", "Glob", "Grep"]
+
+      # Skill B
+      allowed-tools: ["Read", "Write", "Bash", "Task", "Glob", "Grep"]
+      # 权限完全相同，缺乏区分
+    en: |
+      # Skill A
+      allowed-tools: ["Read", "Write", "Bash", "Task", "Glob", "Grep"]
+
+      # Skill B
+      allowed-tools: ["Read", "Write", "Bash", "Task", "Glob", "Grep"]
+      # Identical permissions, no distinction
+  good:
+    zh: |
+      # Skill A - 文件处理器
+      allowed-tools: ["Read", "Write", "Glob"]
+
+      # Skill B - 代码分析器
+      allowed-tools: ["Read", "Grep", "Glob"]
+      # 权限反映各自职责
+    en: |
+      # Skill A - File processor
+      allowed-tools: ["Read", "Write", "Glob"]
+
+      # Skill B - Code analyzer
+      allowed-tools: ["Read", "Grep", "Glob"]
+      # Permissions reflect respective responsibilities
+
+tags: ["architecture", "permissions", "separation", "security"]

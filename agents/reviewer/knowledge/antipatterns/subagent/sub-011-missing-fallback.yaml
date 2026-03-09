@@ -1,0 +1,61 @@
+id: SUB-011
+name: missing-fallback
+severity: warning
+component_type: subagent
+category: workflow
+
+title:
+  zh: "缺少降级策略"
+  en: "Missing fallback strategy"
+
+description:
+  zh: |
+    Subagent 应该定义当主要逻辑失败时的降级策略，
+    确保即使部分失败也能提供有用的输出。
+  en: |
+    Subagent should define fallback strategy when primary logic fails,
+    ensuring useful output even with partial failures.
+
+rationale:
+  zh: "降级策略提高 Subagent 的健壮性和可用性。"
+  en: "Fallback strategy improves subagent robustness and availability."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(降级|Fallback|备用|Backup|失败处理|Failure)).*$'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加降级策略，说明主逻辑失败时的处理方式。"
+  en: "Add fallback strategy describing handling when primary logic fails."
+
+examples:
+  bad:
+    zh: |
+      ## 错误处理
+      如失败，返回错误信息。
+  en: |
+      ## Error Handling
+      If fails, return error message.
+  good:
+    zh: |
+      ## 降级策略
+
+      如主要分析失败：
+      1. 返回基础信息（文件大小、行数）
+      2. 标记分析不完整
+      3. 提供重试选项
+  en: |
+      ## Fallback Strategy
+
+      If primary analysis fails:
+      1. Return basic info (file size, line count)
+      2. Mark analysis as incomplete
+      3. Provide retry option
+
+tags: ["workflow", "fallback", "reliability", "subagent"]
+related_rules: []

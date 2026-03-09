@@ -1,0 +1,93 @@
+id: SKILL-005
+name: tools-undeclared
+severity: error
+component_type: skill
+category: metadata
+
+title:
+  zh: "使用了未声明的工具"
+  en: "Using undeclared tools"
+
+description:
+  zh: |
+    Skill 在文档中使用了某个工具（如 Bash、Write），
+    但未在 metadata 的 allowed-tools 中声明。
+  en: |
+    Skill uses a tool (e.g., Bash, Write) in documentation
+    but did not declare it in metadata allowed-tools.
+
+rationale:
+  zh: "工具声明是安全机制，防止 Skill 越权操作。"
+  en: "Tool declaration is a security mechanism to prevent unauthorized operations."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: custom
+  custom_function: "check_undeclared_tools"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      1. 在 metadata 中添加 allowed-tools 字段
+      2. 列出所有使用的工具
+      3. 遵循最小权限原则
+    en: |
+      1. Add allowed-tools field to metadata
+      2. List all tools used
+      3. Follow principle of least privilege
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: my-skill
+      description: 执行命令
+      ---
+
+      使用 Bash 执行：
+      ```bash
+      ls -la
+      ```
+      （错误：使用了 Bash 但未声明）
+    en: |
+      ---
+      name: my-skill
+      description: Execute commands
+      ---
+
+      Use Bash to execute:
+      ```bash
+      ls -la
+      ```
+      (Error: Bash used but not declared)
+  good:
+    zh: |
+      ---
+      name: my-skill
+      description: 执行命令
+      allowed-tools:
+        - Bash
+      ---
+
+      使用 Bash 执行：
+      ```bash
+      ls -la
+      ```
+    en: |
+      ---
+      name: my-skill
+      description: Execute commands
+      allowed-tools:
+        - Bash
+      ---
+
+      Use Bash to execute:
+      ```bash
+      ls -la
+      ```
+
+tags: ["metadata", "tools", "security", "skill"]
+related_rules: ["SKILL-013"]

@@ -1,0 +1,34 @@
+id: COMMON-003
+name: context-mode-invalid
+severity: error
+component_type: all
+category: metadata
+
+title:
+  zh: "无效的 context 模式"
+  en: "Invalid context mode"
+
+description:
+  zh: |
+    context 字段必须是有效值：fork、inline、none。
+  en: |
+    context field must be valid value: fork, inline, none.
+
+rationale:
+  zh: "基于 HANDBOOK 规范，context 必须是预定义值之一"
+  en: "Per HANDBOOK specification, context must be one of predefined values"
+
+detection:
+  method: field-validation
+  field: context
+  valid_values: ["fork", "inline", "none"]
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "将 context 改为 fork、inline 或 none"
+    en: "Change context to fork, inline, or none"
+
+tags: ["metadata", "context", "common"]
+related_rules: ["SKILL-007", "CMD-012"]

@@ -1,0 +1,59 @@
+id: SKILL-010
+name: no-pitfalls
+severity: info
+component_type: skill
+category: structure
+
+title:
+  zh: "缺少注意事项/陷阱提示"
+  en: "Missing pitfalls and cautions"
+
+description:
+  zh: |
+    Skill 应该列出使用时的常见陷阱和注意事项。
+    这帮助用户避免常见错误，提高使用效率。
+  en: |
+    Skill should list common pitfalls and cautions.
+    This helps users avoid common mistakes and improves efficiency.
+
+rationale:
+  zh: "主动提示陷阱可以减少用户咨询和误用。"
+  en: "Proactive pitfall warnings reduce user inquiries and misuse."
+
+handbook_reference: "Chapter 4.4"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(注意事项|Cautions|陷阱|Pitfalls|警告|Warnings)).*$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加注意事项章节，列出常见陷阱。"
+    en: "Add cautions/pitfalls section listing common traps."
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      ## 用法
+      /my-skill
+      （没有注意事项）
+    en: |
+      # My Skill
+      ## Usage
+      /my-skill
+      (No cautions)
+  good:
+    zh: |
+      ## 注意事项
+      - 此 Skill 会修改文件，请确保已备份
+      - 需要管理员权限才能执行某些操作
+    en: |
+      ## Pitfalls
+      - This skill modifies files; ensure backups exist
+      - Admin privileges required for some operations
+
+tags: ["structure", "documentation", "pitfalls", "skill"]
+related_rules: []

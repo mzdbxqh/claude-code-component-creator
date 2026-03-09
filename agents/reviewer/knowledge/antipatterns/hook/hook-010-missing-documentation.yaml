@@ -1,0 +1,91 @@
+id: HOOK-010
+name: missing-documentation
+severity: warning
+component_type: hook
+category: documentation
+
+title:
+  zh: "文档不完整"
+  en: "Incomplete documentation"
+
+description:
+  zh: |
+    Hook 应该包含完整的文档，说明：
+    - 触发时机
+    - 处理逻辑
+    - 副作用
+    - 错误处理
+  en: |
+    Hooks should include complete documentation describing:
+    - When it triggers
+    - Processing logic
+    - Side effects
+    - Error handling
+
+rationale:
+  zh: "完整的文档帮助用户理解 Hook 的行为和影响。"
+  en: "Complete documentation helps users understand hook behavior and impact."
+
+handbook_reference: "Chapter 6.4"
+
+detection:
+  method: custom
+  custom_function: "check_documentation_completeness"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加完整的文档章节，包括触发、处理、副作用说明。"
+    en: "Add complete documentation sections including trigger, handler, and side effects."
+
+examples:
+  bad:
+    zh: |
+      # My Hook
+      文件保存时触发。
+    en: |
+      # My Hook
+      Triggered on file save.
+  good:
+    zh: |
+      # My Hook
+
+      ## 描述
+      在 JavaScript 文件保存前验证代码格式。
+
+      ## 触发条件
+      - 事件：file-save
+      - 文件类型：*.js
+
+      ## 处理器
+      1. 运行 ESLint 检查
+      2. 如发现问题，阻止保存并显示错误
+
+      ## 副作用
+      无
+
+      ## 错误处理
+      如 ESLint 执行失败，记录错误但允许保存。
+    en: |
+      # My Hook
+
+      ## Description
+      Validate code format before saving JavaScript files.
+
+      ## Trigger Condition
+      - Event: file-save
+      - File type: *.js
+
+      ## Handler
+      1. Run ESLint check
+      2. If issues found, prevent save and show errors
+
+      ## Side Effects
+      None
+
+      ## Error Handling
+      If ESLint fails, log error but allow save.
+
+tags: ["documentation", "completeness", "hook"]
+related_rules: []

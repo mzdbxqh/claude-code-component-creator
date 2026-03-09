@@ -1,0 +1,88 @@
+{
+  "batchId": "batch-5-references",
+  "name": "文件引用规范检查",
+  "description": "检测 @文件引用机制的规范性和合法性（手册第4章：90.4% Skill使用外部引用）",
+  "category": "references",
+  "patterns": [
+    {
+      "id": "AP501",
+      "name": "外部引用缺少声明",
+      "severity": "error",
+      "layer": "rule",
+      "check": "missing_reference_declaration",
+      "message": "使用了 @path 引用但未在文档中声明引用的文件",
+      "impact": "引用关系不透明，维护困难",
+      "fix": "在文档中添加 ## 依赖文件 章节，列出所有引用的外部文件"
+    },
+    {
+      "id": "AP502",
+      "name": "@path语法错误",
+      "severity": "error",
+      "layer": "rule",
+      "check": "invalid_at_path_syntax",
+      "message": "@path 语法不符合规范（不能以 / 开头，不能包含 ..）",
+      "impact": "引用无法正确解析",
+      "fix": "使用相对路径格式：@./relative/path/file.md 或 @filename.md"
+    },
+    {
+      "id": "AP503",
+      "name": "引用文件不存在",
+      "severity": "error",
+      "layer": "rule",
+      "check": "reference_file_not_found",
+      "message": "引用的文件路径不存在",
+      "impact": "运行时引用失败",
+      "fix": "检查路径拼写，确保引用的文件存在"
+    },
+    {
+      "id": "AP504",
+      "name": "引用深度超过5层",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "reference_depth_exceeded",
+      "message": "文件引用链深度超过5层（手册限制）",
+      "impact": "可能导致性能问题或循环引用风险",
+      "fix": "重构引用结构，减少嵌套层级"
+    },
+    {
+      "id": "AP505",
+      "name": "循环引用",
+      "severity": "error",
+      "layer": "semantic",
+      "check": "circular_reference",
+      "message": "检测到循环引用（A引用B，B引用A）",
+      "impact": "导致无限递归，系统崩溃",
+      "fix": "重构文件结构，消除循环依赖"
+    },
+    {
+      "id": "AP506",
+      "name": "引用类型不当",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "invalid_reference_type",
+      "message": "引用了非文本文件（图片、二进制等）",
+      "impact": "无法正确解析引用内容",
+      "fix": "仅引用文本文件（.md, .txt, .json, .yaml 等）"
+    },
+    {
+      "id": "AP507",
+      "name": "相对路径不规范",
+      "severity": "info",
+      "layer": "rule",
+      "check": "non_relative_path",
+      "message": "使用了绝对路径而非相对路径",
+      "impact": "降低可移植性",
+      "fix": "使用相对路径：@./path/file.md"
+    },
+    {
+      "id": "AP508",
+      "name": "引用文件内容过长",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "referenced_file_too_large",
+      "message": "引用的文件 Token 数超过 1000",
+      "impact": "增加上下文负担，影响性能",
+      "fix": "拆分大文件，只引用必要的部分"
+    }
+  ]
+}

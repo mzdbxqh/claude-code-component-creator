@@ -1,0 +1,88 @@
+{
+  "batchId": "batch-8-integration",
+  "name": "Hook与错误处理检查",
+  "description": "检测 Hook 配置合法性和错误处理策略完整性（手册第6章：13种事件类型，第9.5章：三级错误分类）",
+  "category": "integration",
+  "patterns": [
+    {
+      "id": "AP801",
+      "name": "缺少集成测试说明",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "missing_integration_test",
+      "message": "未说明如何测试此 Skill/Command/Hook",
+      "impact": "无法验证组件功能正确性",
+      "fix": "添加 ## 测试 章节，说明测试步骤和预期结果"
+    },
+    {
+      "id": "AP802",
+      "name": "未考虑并发安全",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "concurrency_not_considered",
+      "message": "未说明多会话/并发场景下的行为",
+      "impact": "并发调用时可能产生冲突",
+      "fix": "添加并发安全说明，或使用锁机制"
+    },
+    {
+      "id": "AP803",
+      "name": "Hook配置格式错误",
+      "severity": "error",
+      "layer": "rule",
+      "check": "invalid_hook_config",
+      "message": "Hook 配置文件 YAML 格式错误",
+      "impact": "Hook 无法被正确加载和执行",
+      "fix": "检查 YAML 语法：缩进、冒号、列表格式"
+    },
+    {
+      "id": "AP804",
+      "name": "Hook事件类型无效",
+      "severity": "error",
+      "layer": "rule",
+      "check": "invalid_hook_event",
+      "message": "Hook 事件类型不在 13 种标准事件类型中",
+      "impact": "Hook 永远不会被触发",
+      "fix": "使用标准事件类型：PreToolUse, PostToolUse, PrePromptSend 等"
+    },
+    {
+      "id": "AP805",
+      "name": "Hook权限设置不当",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "inappropriate_hook_permissions",
+      "message": "Hook 使用了过度宽松的权限设置",
+      "impact": "安全风险，可能导致未授权操作",
+      "fix": "最小权限原则，仅申请必要的 allowed-tools"
+    },
+    {
+      "id": "AP806",
+      "name": "缺少错误处理策略",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "missing_error_handling_strategy",
+      "message": "未定义错误分类和处理方式（Fatal/Critical/Warning）",
+      "impact": "错误处理不一致，用户体验差",
+      "fix": "添加错误处理章节，定义三级错误分类"
+    },
+    {
+      "id": "AP807",
+      "name": "错误消息不友好",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "unfriendly_error_message",
+      "message": "错误消息未提供解决指导",
+      "impact": "用户不知道如何处理错误",
+      "fix": "错误消息包含：问题描述 + 解决步骤 + 参考文档"
+    },
+    {
+      "id": "AP808",
+      "name": "缺少故障恢复机制",
+      "severity": "warning",
+      "layer": "semantic",
+      "check": "missing_recovery_mechanism",
+      "message": "失败时无恢复/重试策略",
+      "impact": "一次失败后无法自动恢复",
+      "fix": "添加重试逻辑或降级方案"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+id: HOOK-009
+name: no-idempotency
+severity: warning
+component_type: hook
+category: workflow
+
+title:
+  zh: "缺少幂等性保证"
+  en: "Missing idempotency guarantee"
+
+description:
+  zh: |
+    Hook 可能被多次触发，处理器应该是幂等的
+    （多次执行结果与一次执行相同）。
+  en: |
+    Hooks may be triggered multiple times; handlers should be idempotent
+    (multiple executions produce same result as single execution).
+
+rationale:
+  zh: "幂等性确保即使 Hook 重复触发也不会产生副作用。"
+  en: "Idempotency ensures hooks don't produce side effects even if triggered multiple times."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: regex
+  pattern: "^(?!.*##\\s*(幂等|Idempotency|重复触发|Duplicate)).*$"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "确保处理器逻辑是幂等的，或使用去重机制。"
+    en: "Ensure handler logic is idempotent or use deduplication mechanisms."
+
+examples:
+  bad:
+    zh: |
+      ## 处理器
+      向日志文件追加一行记录。
+      （问题：重复触发会追加多条记录）
+    en: |
+      ## Handler
+      Append a line to log file.
+      (Issue: Duplicate triggers append multiple lines)
+  good:
+    zh: |
+      ## 处理器
+      检查是否已处理过该事件，
+      如未处理则追加记录。
+
+      ## 幂等性
+      使用事件 ID 去重，确保同一事件只处理一次。
+    en: |
+      ## Handler
+      Check if event was already processed,
+      append record only if not.
+
+      ## Idempotency
+      Use event ID for deduplication to ensure each event is processed once.
+
+tags: ["workflow", "idempotency", "reliability", "hook"]
+related_rules: []

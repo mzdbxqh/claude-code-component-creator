@@ -1,0 +1,22 @@
+id: IO-002
+name: output-format-mismatch
+severity: warning
+component_type: all
+category: linkage
+title:
+  zh: "输出格式不匹配"
+  en: "Output format mismatch"
+description:
+  zh: "Subagent输出格式与调用方期望不匹配"
+  en: "Subagent output format does not match caller expectations"
+detection:
+  method: custom
+  custom_function: check_output_format
+rationale:
+  zh: "确保组件间数据交换格式一致"
+  en: "Ensure consistent data exchange formats between components"
+fix:
+  automatic: false
+  suggestion:
+    zh: "协调调用方和被调用方的输出规范"
+    en: "Coordinate output specifications between caller and callee"

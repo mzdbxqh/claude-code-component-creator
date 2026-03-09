@@ -1,0 +1,68 @@
+id: INTENT-002
+name: insufficient-synonym-coverage
+severity: info
+component_type: skill
+category: intent-matching
+
+title:
+  zh: "技能描述同义词覆盖不足"
+  en: "Insufficient synonym coverage in skill description"
+
+description:
+  zh: |
+    用户可能用不同的词汇表达同一意图。技能描述应覆盖核心意图的多种表达方式，
+    以提高大模型匹配的准确率。
+  en: |
+    Users may express the same intent with different words. Skill descriptions should cover
+    multiple expressions of core intents to improve LLM matching accuracy.
+
+rationale:
+  zh: "基于意图匹配最佳实践，每个核心意图应至少有 3 种同义词覆盖"
+  en: "Per intent matching best practices, each core intent should have at least 3 synonym variations"
+
+detection:
+  method: synonym-analysis
+  min_synonyms_per_intent: 3
+  synonym_groups:
+    debugging: ["调试", "排查", "诊断", "修复", "debug", "troubleshoot"]
+    testing: ["测试", "验证", "检验", "test", "verify", "validate"]
+    design: ["设计", "规划", "架构", "design", "plan", "architect"]
+    implementation: ["实现", "编写", "开发", "implement", "code", "develop"]
+    creation: ["创建", "新建", "生成", "create", "new", "generate"]
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 description 中覆盖核心意图的多种表达方式。
+      示例：
+      - "在遇到 bug、测试失败或意外行为时使用"（覆盖了 bug/失败/异常）
+      - "用于调试、排查或诊断问题"（覆盖了调试的同义词）
+    en: |
+      Cover multiple expressions of core intents in description.
+      Examples:
+      - "Use when encountering bugs, test failures, or unexpected behavior"
+      - "For debugging, troubleshooting, or diagnosing issues"
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 调试技能
+      ---
+    en: |
+      ---
+      description: Debugging skill
+      ---
+  good:
+    zh: |
+      ---
+      description: 在遇到任何 bug、测试失败或意外行为时使用，用于调试、排查或诊断问题
+      ---
+    en: |
+      ---
+      description: Use when encountering any bug, test failure, or unexpected behavior, for debugging, troubleshooting, or diagnosing issues
+      ---
+
+tags: ["intent", "synonym", "skill", "matching"]
+related_rules: ["INTENT-001", "INTENT-003"]

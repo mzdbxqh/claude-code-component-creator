@@ -1,0 +1,59 @@
+id: HOOK-008
+name: trigger-too-broad
+severity: warning
+component_type: hook
+category: metadata
+
+title:
+  zh: "触发范围过于宽泛"
+  en: "Trigger scope too broad"
+
+description:
+  zh: |
+    Hook 的触发范围应该精确，避免过于宽泛的条件
+    （如监听所有文件类型的事件）。
+  en: |
+    Hook trigger scope should be precise, avoiding overly broad conditions
+    (e.g., listening to events for all file types).
+
+rationale:
+  zh: "过于宽泛的触发会导致 Hook 频繁执行，影响性能。"
+  en: "Overly broad triggers cause hooks to execute frequently, affecting performance."
+
+handbook_reference: "Chapter 6.2"
+
+detection:
+  method: custom
+  custom_function: "check_trigger_scope"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "缩小触发范围，使用更具体的条件。"
+    en: "Narrow trigger scope with more specific conditions."
+
+examples:
+  bad:
+    zh: |
+      ## 触发条件
+      event: file-change
+      pattern: "*"
+    en: |
+      ## Trigger Condition
+      event: file-change
+      pattern: "*"
+  good:
+    zh: |
+      ## 触发条件
+      event: file-change
+      pattern: "*.js"
+      path: "/src/"
+    en: |
+      ## Trigger Condition
+      event: file-change
+      pattern: "*.js"
+      path: "/src/"
+
+tags: ["metadata", "trigger", "performance", "hook"]
+related_rules: []

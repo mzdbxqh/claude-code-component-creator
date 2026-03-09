@@ -1,0 +1,22 @@
+id: LINK-001
+name: subagent-existence-check
+severity: error
+component_type: all
+category: linkage
+title:
+  zh: "调用的Subagent不存在"
+  en: "Called subagent does not exist"
+description:
+  zh: "Command或Subagent声明调用的Subagent文件不存在"
+  en: "The subagent file called by command or subagent does not exist"
+detection:
+  method: custom
+  custom_function: check_subagent_existence
+rationale:
+  zh: "确保所有调用链指向实际存在的组件"
+  en: "Ensure all call chains point to actual existing components"
+fix:
+  automatic: false
+  suggestion:
+    zh: "创建缺失的Subagent文件或更正调用名称"
+    en: "Create missing subagent file or correct the call name"

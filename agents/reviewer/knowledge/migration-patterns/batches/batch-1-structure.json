@@ -1,0 +1,53 @@
+{
+  "batchId": "batch-1-structure",
+  "name": "文档结构检查",
+  "description": "检测改造方案文档的章节结构完整性",
+  "category": "structure",
+  "patterns": [
+    {
+      "id": "MP001",
+      "name": "缺少概述章节",
+      "severity": "error",
+      "check": "missing_section:概述",
+      "message": "缺少必要的 ## 概述 章节",
+      "impact": "读者无法理解改造背景和总体目标",
+      "fix": "添加 ## 概述 章节，包含：改造背景、目标、范围"
+    },
+    {
+      "id": "MP002",
+      "name": "缺少Skill格式设计",
+      "severity": "error",
+      "check": "missing_section:Skill格式设计",
+      "message": "缺少 ## Skill格式设计 章节",
+      "impact": "无法评估Skill设计的合理性",
+      "fix": "添加章节说明 name、description、context、allowed-tools 等字段设计"
+    },
+    {
+      "id": "MP003",
+      "name": "缺少风险评估",
+      "severity": "error",
+      "check": "missing_section:风险评估",
+      "message": "缺少 ## 风险评估 章节",
+      "impact": "无法识别和规避改造过程中的风险",
+      "fix": "添加风险评估章节，列出可能的风险和缓解措施"
+    },
+    {
+      "id": "MP004",
+      "name": "缺少实施计划",
+      "severity": "error",
+      "check": "missing_section:实施计划",
+      "message": "缺少 ## 实施计划 章节",
+      "impact": "无法跟踪和管理改造进度",
+      "fix": "添加实施计划，包含阶段划分、时间节点、负责人"
+    },
+    {
+      "id": "MP005",
+      "name": "章节内容过短",
+      "severity": "warning",
+      "check": "section_content_length:概述:<100",
+      "message": "概述章节内容过短（少于100字符）",
+      "impact": "概述过于简略，无法传达足够信息",
+      "fix": "扩展概述内容，说明改造背景、目标和预期收益"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "ccc-marketplace",
+  "owner": {
+    "name": "showme.cc"
+  },
+  "plugins": [
+    {
+      "name": "ccc",
+      "source": "./",
+      "description": "Claude Code Component Creator v3.0 - Intent/Blueprint/Delivery workflow with meta-reflection",
+      "version": "3.0.0",
+      "author": {
+        "name": "mzdbxqh"
+      },
+      "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
+      "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
+      "license": "MIT",
+      "keywords": ["component", "design", "workflow", "reflection", "intent", "blueprint", "delivery"]
+    }
+  ]
+}

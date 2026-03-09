@@ -1,0 +1,127 @@
+{
+  "version": "1.0.0",
+  "description": "CCC Plugin Test Cases",
+  "testCases": [
+    {
+      "id": "TC-001",
+      "name": "简单技能创建 - TODO 查找器",
+      "prompt": "我想要一个技能来快速查找项目中的 TODO 注释",
+      "category": "simple-skill",
+      "expectedWorkflow": ["intent-core", "blueprint-core", "delivery-core"],
+      "expectedArtifacts": [
+        "docs/ccc/intent/INT-*.yaml",
+        "docs/ccc/blueprint/BLP-*.yaml",
+        "docs/ccc/delivery/*/SKILL.md"
+      ],
+      "qualityThresholds": {
+        "intentQuality": 80,
+        "blueprintQuality": 85,
+        "deliveryCompliance": 80
+      }
+    },
+    {
+      "id": "TC-002",
+      "name": "复杂 SubAgent 创建 - 代码审查器",
+      "prompt": "需要一个 SubAgent 自动化代码审查流程，包括读取变更文件、检查编码规范、生成审查报告",
+      "category": "complex-subagent",
+      "expectedWorkflow": ["intent-core", "blueprint-core", "delivery-core"],
+      "expectedArtifacts": [
+        "docs/ccc/intent/INT-*.yaml",
+        "docs/ccc/blueprint/BLP-*.yaml",
+        "docs/ccc/delivery/*/SKILL.md",
+        "docs/ccc/delivery/*/implementation/"
+      ],
+      "qualityThresholds": {
+        "intentQuality": 80,
+        "blueprintQuality": 85,
+        "deliveryCompliance": 80
+      }
+    },
+    {
+      "id": "TC-003",
+      "name": "数据转换技能 - YAML 转 JSON",
+      "prompt": "需要一个技能将 YAML 配置文件转换为 JSON 格式，保持数据结构完整",
+      "category": "data-transform-skill",
+      "expectedWorkflow": ["intent-core", "blueprint-core", "delivery-core"],
+      "expectedArtifacts": [
+        "docs/ccc/intent/INT-*.yaml",
+        "docs/ccc/blueprint/BLP-*.yaml",
+        "docs/ccc/delivery/*/SKILL.md"
+      ],
+      "qualityThresholds": {
+        "intentQuality": 80,
+        "blueprintQuality": 85,
+        "deliveryCompliance": 85
+      }
+    },
+    {
+      "id": "TC-004",
+      "name": "全面项目审查",
+      "prompt": "审查当前项目的所有组件",
+      "category": "comprehensive-review",
+      "expectedWorkflow": ["reviewer/review-core"],
+      "expectedArtifacts": [
+        "docs/reviews/*-comprehensive-review.md"
+      ],
+      "qualityThresholds": {
+        "reviewCoverage": 90,
+        "antipatternsChecked": 76
+      }
+    },
+    {
+      "id": "TC-005",
+      "name": "一键快速工作流",
+      "prompt": "快速创建一个自动部署工具，支持 Kubernetes",
+      "category": "quick-workflow",
+      "expectedWorkflow": ["intent-core", "blueprint-core", "delivery-core"],
+      "expectedArtifacts": [
+        "docs/ccc/intent/INT-*.yaml",
+        "docs/ccc/blueprint/BLP-*.yaml",
+        "docs/ccc/delivery/*/SKILL.md"
+      ],
+      "qualityThresholds": {
+        "intentQuality": 75,
+        "blueprintQuality": 80,
+        "deliveryCompliance": 75
+      }
+    }
+  ],
+  "shouldNotTriggerSkills": [
+    {
+      "id": "NT-001",
+      "name": "简单文件读取",
+      "prompt": "读取这个文件",
+      "reason": "单步骤操作，不需要技能介入"
+    },
+    {
+      "id": "NT-002",
+      "name": "简单问题回答",
+      "prompt": "今天天气怎么样",
+      "reason": "与组件创建无关的通用问题"
+    },
+    {
+      "id": "NT-003",
+      "name": "基础数学计算",
+      "prompt": "2 加 2 等于多少",
+      "reason": "基础计算不需要技能"
+    },
+    {
+      "id": "NT-004",
+      "name": "空输入边界测试",
+      "prompt": "",
+      "reason": "空输入应该返回友好的提示信息，说明需要提供输入"
+    },
+    {
+      "id": "NT-005",
+      "name": "超大输入边界测试",
+      "prompt": "我想要创建一个非常复杂的系统，需要用户管理、权限控制、数据持久化等功能",
+      "reason": "超大输入应该被截断处理或分页，返回友好的长度限制提示和核心需求摘要"
+    },
+    {
+      "id": "NT-006",
+      "name": "异常格式输入测试",
+      "prompt": "### 无效格式 ### 这不是一个有效的需求描述",
+      "reason": "异常格式输入应该被识别并引导用户提供规范输入，返回格式说明和正确示例"
+    }
+  ]
+}

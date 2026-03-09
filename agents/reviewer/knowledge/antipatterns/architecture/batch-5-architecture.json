@@ -1,0 +1,98 @@
+{
+  "batchId": "batch-5-architecture",
+  "name": "架构基础检查",
+  "name_zh": "架构基础检查",
+  "description": "检测基础架构规范：命名、输出、context、model 配置",
+  "description_zh": "检测基础架构规范：命名、输出、context、model 配置",
+  "category": "architecture",
+  "patterns": [
+    {
+      "id": "ARCH-002",
+      "name": "phase-handoff-unclear",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "missing_input_output",
+      "message": "缺少 Input 或 Output 章节，阶段交接不清晰",
+      "message_zh": "缺少 Input 或 Output 章节，阶段交接不清晰",
+      "impact": "工作流阶段间缺少清晰的输入输出交接，不利于会话恢复",
+      "fix": "在 Skill 文档中添加 ## Input 和 ## Output 章节，明确输入数据和输出产物"
+    },
+    {
+      "id": "ARCH-003",
+      "name": "missing-workflow-orchestrator",
+      "severity": "warning",
+      "layer": "pattern",
+      "check": "no_subagent_call",
+      "message": "Command 未调用任何 subagent，缺少工作流编排",
+      "message_zh": "Command 未调用任何 subagent，缺少工作流编排",
+      "impact": "Command 应该是工作流编排器，负责协调多个 Subagent 完成任务",
+      "fix": "在 Command 中使用 Task 工具调用相关的 Subagent，如 intent-core、planner-core 等"
+    },
+    {
+      "id": "ARCH-004",
+      "name": "phase-redundancy",
+      "severity": "info",
+      "layer": "semantic",
+      "check": "phase_similarity",
+      "message": "工作流阶段存在职责重叠，建议合并或明确区分",
+      "message_zh": "工作流阶段存在职责重叠，建议合并或明确区分",
+      "impact": "冗余阶段导致执行效率低下，增加认知负担",
+      "fix": "合并相似阶段或明确区分各阶段职责边界"
+    },
+    {
+      "id": "ARCH-008",
+      "name": "context-mode-mismatch",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "risky_tool_with_inline_context",
+      "message": "高风险工具 (Bash/Write) 使用了不安全的 context 模式",
+      "message_zh": "高风险工具 (Bash/Write) 使用了不安全的 context 模式",
+      "impact": "使用 inline 模式执行高风险操作可能污染父环境或造成安全隐患",
+      "fix": "高风险操作应使用 fork 或 isolated 模式，避免使用 inline"
+    },
+    {
+      "id": "ARCH-009",
+      "name": "tool-permission-overlap",
+      "severity": "info",
+      "layer": "rule",
+      "check": "unused_tools_declared",
+      "message": "allowed-tools 包含未在正文中使用的工具",
+      "message_zh": "allowed-tools 包含未在正文中使用的工具",
+      "impact": "权限范围过大，违反最小权限原则",
+      "fix": "移除未使用的工具声明，仅保留实际需要的工具权限"
+    },
+    {
+      "id": "ARCH-010",
+      "name": "model-task-mismatch",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "complex_task_with_lightweight_model",
+      "message": "复杂任务 (架构/设计/编排) 使用了轻量级模型",
+      "message_zh": "复杂任务 (架构/设计/编排) 使用了轻量级模型",
+      "impact": "轻量级模型可能无法正确处理复杂推理任务，影响输出质量",
+      "fix": "架构/设计类任务使用 sonnet 或 opus 模型"
+    },
+    {
+      "id": "ARCH-014",
+      "name": "command-naming-inconsistent",
+      "severity": "warning",
+      "layer": "rule",
+      "check": "invalid_command_name_pattern",
+      "message": "Command 名称不符合 ccc:* 或 glaf4:* 命名规范",
+      "message_zh": "Command 名称不符合 ccc:* 或 glaf4:* 命名规范",
+      "impact": "不规范的命名降低可用性和一致性",
+      "fix": "使用 ccc:<verb> 或 glaf4:<domain>-<verb> 格式，如 ccc:review、glaf4:deploy"
+    },
+    {
+      "id": "ARCH-015",
+      "name": "output-spec-incomplete",
+      "severity": "error",
+      "layer": "rule",
+      "check": "missing_output_specification",
+      "message": "缺少 Output Specification 章节或定义不完整",
+      "message_zh": "缺少 Output Specification 章节或定义不完整",
+      "impact": "用户不清楚输出格式、位置和访问方式",
+      "fix": "添加 Output Specification 章节，明确输出格式、目录、文件名和访问命令"
+    }
+  ]
+}

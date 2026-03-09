@@ -1,0 +1,65 @@
+id: SUB-005
+name: allowed-tools-overly-broad
+severity: warning
+component_type: subagent
+category: security
+
+title:
+  zh: "工具权限过于宽泛"
+  en: "Allowed tools overly broad"
+
+description:
+  zh: |
+    Subagent 不应该声明不需要的工具权限。
+    只应声明实际需要的工具，遵循最小权限原则。
+  en: |
+    Subagent should not declare unnecessary tool permissions.
+    Only declare actually needed tools, following principle of least privilege.
+
+rationale:
+  zh: "最小权限原则减少安全风险，提高可审计性。"
+  en: "Principle of least privilege reduces security risk and improves auditability."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: custom
+  custom_function: "check_overly_broad_tools"
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "移除未使用的工具，只保留必需的。"
+    en: "Remove unused tools, keep only essential ones."
+
+examples:
+  bad:
+    zh: |
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+        - WebFetch
+        - WebSearch
+      （但实际只使用了 Read）
+    en: |
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+        - WebFetch
+        - WebSearch
+      (But only uses Read)
+  good:
+    zh: |
+      allowed-tools:
+        - Read
+        - Grep
+    en: |
+      allowed-tools:
+        - Read
+        - Grep
+
+tags: ["security", "tools", "subagent"]
+related_rules: ["SUB-001"]

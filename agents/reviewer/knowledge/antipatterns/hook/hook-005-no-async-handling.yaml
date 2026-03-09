@@ -1,0 +1,61 @@
+id: HOOK-005
+name: no-async-handling
+severity: warning
+component_type: hook
+category: workflow
+
+title:
+  zh: "缺少异步处理说明"
+  en: "Missing async handling description"
+
+description:
+  zh: |
+    如果 Hook 执行异步操作，应该明确说明处理方式，
+    包括超时设置和错误处理。
+  en: |
+    If hook performs async operations, it should clearly describe the handling approach,
+    including timeout settings and error handling.
+
+rationale:
+  zh: "异步操作需要特殊处理以避免阻塞和超时问题。"
+  en: "Async operations require special handling to avoid blocking and timeout issues."
+
+handbook_reference: "Chapter 6.3"
+
+detection:
+  method: regex
+  pattern: "async|await|promise|callback"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加异步处理的说明，包括超时和错误处理策略。"
+    en: "Add async handling description including timeout and error handling strategies."
+
+examples:
+  bad:
+    zh: |
+      ## 处理器
+      调用外部 API 获取数据。
+      （没有说明如何处理异步）
+    en: |
+      ## Handler
+      Call external API to fetch data.
+      (No async handling described)
+  good:
+    zh: |
+      ## 处理器
+      异步调用外部 API（超时：5秒）：
+      - 成功：继续处理
+      - 超时：记录警告，使用缓存数据
+      - 错误：记录错误，不中断流程
+    en: |
+      ## Handler
+      Async call to external API (timeout: 5s):
+      - Success: Continue processing
+      - Timeout: Log warning, use cached data
+      - Error: Log error, don't interrupt flow
+
+tags: ["workflow", "async", "hook"]
+related_rules: []

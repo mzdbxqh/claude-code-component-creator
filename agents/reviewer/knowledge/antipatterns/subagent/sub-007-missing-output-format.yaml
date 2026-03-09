@@ -1,0 +1,67 @@
+id: SUB-007
+name: missing-output-format
+severity: warning
+component_type: subagent
+category: workflow
+
+title:
+  zh: "缺少输出格式说明"
+  en: "Missing output format specification"
+
+description:
+  zh: |
+    Subagent 应该明确说明输出数据的格式和结构，
+    以便调用者正确处理返回结果。
+  en: |
+    Subagent should clearly specify output data format and structure,
+    so callers can properly handle returned results.
+
+rationale:
+  zh: "明确的输出格式契约是 Subagent 可复用的基础。"
+  en: "Clear output format contract is the foundation of subagent reusability."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: regex
+  pattern: '^(?!.*##\s*(输出格式|Output Format|返回格式|Return Format)).*$'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加输出格式章节，描述返回数据的结构。"
+  en: "Add output format section describing returned data structure."
+
+examples:
+  bad:
+    zh: |
+      ## 输出
+      返回分析结果。
+  en: |
+      ## Output
+      Returns analysis results.
+  good:
+    zh: |
+      ## 输出格式
+
+      ```yaml
+      status: success | error
+      result:
+        items: []
+        summary: string
+      errors: []
+      ```
+  en: |
+      ## Output Format
+
+      ```yaml
+      status: success | error
+      result:
+        items: []
+        summary: string
+      errors: []
+      ```
+
+tags: ["workflow", "output", "format", "subagent"]
+related_rules: ["SUB-006"]

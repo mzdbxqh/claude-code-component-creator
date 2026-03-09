@@ -1,0 +1,1010 @@
+{
+  "version": "1.0.0",
+  "description": "Claude Code 组件核心反模式库",
+  "antipatterns": [
+    {
+      "id": "AP001",
+      "name": "缺少描述字段",
+      "category": "yaml",
+      "severity": "error",
+      "description": "YAML frontmatter 中缺少必需的 description 字段",
+      "impact": "Claude Code 无法正确理解组件用途",
+      "detection": {
+        "type": "rule",
+        "check": "missing_field:description"
+      },
+      "fix": {
+        "type": "auto",
+        "template": "description: [具体描述组件功能和触发场景]",
+        "guide": "描述应该简洁说明组件的功能和触发场景"
+      },
+      "examples": {
+        "bad": "---\nname: my-skill\n---",
+        "good": "---\nname: my-skill\ndescription: 当用户请求代码审查时，执行静态分析\n---"
+      }
+    },
+    {
+      "id": "AP002",
+      "name": "YAML语法错误",
+      "category": "yaml",
+      "severity": "error",
+      "description": "YAML frontmatter 语法错误，无法解析",
+      "impact": "组件无法加载",
+      "detection": {
+        "type": "rule",
+        "check": "yaml_parse_error"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "检查 YAML 缩进、引号、特殊字符是否正确"
+      },
+      "examples": {
+        "bad": "---\nname: my-skill\ndescription: 'unclosed quote\n---",
+        "good": "---\nname: my-skill\ndescription: 'properly closed quote'\n---"
+      }
+    },
+    {
+      "id": "AP003",
+      "name": "描述过于简短",
+      "category": "content",
+      "severity": "warning",
+      "description": "描述字段过于简短，缺少具体信息",
+      "impact": "Claude 难以理解何时调用组件",
+      "detection": {
+        "type": "pattern",
+        "check": "description.length < 20"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "描述应该至少20个字符，说明具体触发场景和功能"
+      },
+      "examples": {
+        "bad": "description: 审查代码",
+        "good": "description: 当用户请求Python/JS/Java代码审查时，执行静态分析和风格检查"
+      }
+    },
+    {
+      "id": "AP004",
+      "name": "Token数过多",
+      "category": "content",
+      "severity": "warning",
+      "description": "组件内容超过2000 tokens",
+      "impact": "影响加载性能，可能超出上下文限制",
+      "detection": {
+        "type": "rule",
+        "check": "tokens > 2000"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "考虑拆分为多个组件，或将详细文档移到 references/"
+      },
+      "examples": {
+        "bad": "单个 SKILL.md 包含 3000+ tokens",
+        "good": "主 SKILL.md 1500 tokens + references/详细文档"
+      }
+    },
+    {
+      "id": "AP005",
+      "name": "缺少使用示例",
+      "category": "content",
+      "severity": "warning",
+      "description": "组件缺少使用示例",
+      "impact": "用户难以理解如何使用",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 示例"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加至少1个使用示例，展示典型调用场景"
+      },
+      "examples": {
+        "bad": "只有功能描述，无示例",
+        "good": "包含 ## 示例 部分，展示输入输出"
+      },
+      "statistics": "90.6% 成功插件包含示例"
+    },
+    {
+      "id": "AP006",
+      "name": "工具权限过宽",
+      "category": "security",
+      "severity": "warning",
+      "description": "allowed-tools 包含不必要的工具权限",
+      "impact": "安全风险，可能执行危险操作",
+      "detection": {
+        "type": "pattern",
+        "check": "Bash in allowed-tools"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "只授予必要的工具权限，避免使用 Bash"
+      },
+      "examples": {
+        "bad": "allowed-tools: [Read, Write, Bash]",
+        "good": "allowed-tools: [Read, Grep]"
+      }
+    },
+    {
+      "id": "AP007",
+      "name": "缺少反模式说明",
+      "category": "content",
+      "severity": "info",
+      "description": "组件缺少常见陷阱或反模式说明",
+      "impact": "用户可能遇到已知问题",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 常见陷阱"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加常见陷阱部分，说明边界情况处理"
+      },
+      "examples": {
+        "bad": "只有正面示例",
+        "good": "包含 ## 常见陷阱 部分，说明错误用法"
+      },
+      "statistics": "70.2% 成功插件包含反模式说明"
+    },
+    {
+      "id": "AP008",
+      "name": "示例不完整",
+      "category": "content",
+      "severity": "warning",
+      "description": "示例只有基础场景，缺少错误处理和边界情况",
+      "impact": "用户难以处理复杂场景",
+      "detection": {
+        "type": "pattern",
+        "check": "example_count < 2"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加错误处理示例和边界情况示例"
+      },
+      "examples": {
+        "bad": "只有1个成功示例",
+        "good": "包含成功、失败、边界情况3个示例"
+      }
+    },
+    {
+      "id": "AP009",
+      "name": "命名不规范",
+      "category": "style",
+      "severity": "warning",
+      "description": "组件名称不符合 kebab-case 规范",
+      "impact": "影响可读性和一致性",
+      "detection": {
+        "type": "rule",
+        "check": "name_format != kebab-case"
+      },
+      "fix": {
+        "type": "auto",
+        "guide": "使用 kebab-case 命名（小写字母+连字符）"
+      },
+      "examples": {
+        "bad": "name: mySkill, name: my_skill",
+        "good": "name: my-skill"
+      }
+    },
+    {
+      "id": "AP010",
+      "name": "描述过于宽泛",
+      "category": "content",
+      "severity": "warning",
+      "description": "描述使用模糊词汇（etc, various, things）",
+      "impact": "Claude 难以准确判断调用时机",
+      "detection": {
+        "type": "pattern",
+        "check": "description.contains(['etc', 'various', 'things', '等等'])"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用具体的功能描述，避免模糊词汇"
+      },
+      "examples": {
+        "bad": "description: 处理各种文件等等",
+        "good": "description: 处理 Python、JavaScript、Java 源代码文件"
+      }
+    },
+    {
+      "id": "AP011",
+      "name": "缺少错误处理说明",
+      "category": "workflow",
+      "severity": "warning",
+      "description": "工作流程中缺少错误处理说明",
+      "impact": "遇到异常时行为不明确",
+      "detection": {
+        "type": "semantic",
+        "check": "missing_error_handling"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加错误处理部分，说明异常情况的处理方式"
+      },
+      "examples": {
+        "bad": "只描述正常流程",
+        "good": "包含错误处理和异常情况说明"
+      }
+    },
+    {
+      "id": "AP012",
+      "name": "工作流过于复杂",
+      "category": "workflow",
+      "severity": "warning",
+      "description": "工作流程步骤过多（>10步）",
+      "impact": "难以维护和理解",
+      "detection": {
+        "type": "rule",
+        "check": "workflow_steps > 10"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "考虑拆分为多个组件或简化流程"
+      },
+      "examples": {
+        "bad": "单个 Skill 包含 15 个步骤",
+        "good": "主 Skill 5 步 + 调用子 Skill"
+      }
+    },
+    {
+      "id": "AP013",
+      "name": "缺少触发条件说明",
+      "category": "content",
+      "severity": "info",
+      "description": "未明确说明何时触发组件",
+      "impact": "Claude 可能在不适当的时机调用",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:触发条件"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "在描述中明确说明触发场景"
+      },
+      "examples": {
+        "bad": "description: 代码审查工具",
+        "good": "description: 当用户明确请求代码审查时触发"
+      }
+    },
+    {
+      "id": "AP014",
+      "name": "重复内容",
+      "category": "content",
+      "severity": "info",
+      "description": "组件中存在重复的内容或说明",
+      "impact": "浪费 token，影响可读性",
+      "detection": {
+        "type": "pattern",
+        "check": "duplicate_content"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "移除重复内容，使用引用或链接"
+      },
+      "examples": {
+        "bad": "多处重复相同的说明",
+        "good": "使用引用避免重复"
+      }
+    },
+    {
+      "id": "AP015",
+      "name": "缺少版本声明",
+      "category": "yaml",
+      "severity": "info",
+      "description": "未声明组件版本",
+      "impact": "难以追踪变更和兼容性",
+      "detection": {
+        "type": "rule",
+        "check": "missing_field:version"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加 version 字段（如 1.0.0）"
+      },
+      "examples": {
+        "bad": "无 version 字段",
+        "good": "version: 1.0.0"
+      }
+    },
+    {
+      "id": "AP016",
+      "name": "不推荐的模型选择",
+      "category": "config",
+      "severity": "warning",
+      "description": "使用不适合的模型（如简单任务用 opus）",
+      "impact": "成本过高或性能不佳",
+      "detection": {
+        "type": "rule",
+        "check": "model_mismatch"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "简单任务用 haiku，复杂任务用 sonnet，创意任务用 opus"
+      },
+      "examples": {
+        "bad": "model: opus（用于简单文本处理）",
+        "good": "model: haiku（用于简单文本处理）"
+      }
+    },
+    {
+      "id": "AP017",
+      "name": "上下文配置不当",
+      "category": "config",
+      "severity": "error",
+      "description": "context 配置与任务复杂度不匹配",
+      "impact": "可能导致超时或资源浪费",
+      "detection": {
+        "type": "semantic",
+        "check": "context_mismatch"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "简单任务用 main，复杂任务用 fork"
+      },
+      "examples": {
+        "bad": "context: main（用于耗时任务）",
+        "good": "context: fork（用于耗时任务）"
+      }
+    },
+    {
+      "id": "AP018",
+      "name": "缺少测试说明",
+      "category": "content",
+      "severity": "info",
+      "description": "未提供测试或验证方法",
+      "impact": "用户难以验证组件是否正常工作",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 测试"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加测试部分，说明如何验证功能"
+      },
+      "examples": {
+        "bad": "无测试说明",
+        "good": "包含 ## 测试 部分，提供验证步骤"
+      }
+    },
+    {
+      "id": "AP019",
+      "name": "文档结构混乱",
+      "category": "structure",
+      "severity": "warning",
+      "description": "文档结构不清晰，缺少标准章节",
+      "impact": "难以理解和使用",
+      "detection": {
+        "type": "semantic",
+        "check": "structure_issues"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用标准结构：概述、工作流程、示例、常见陷阱"
+      },
+      "examples": {
+        "bad": "内容杂乱无章",
+        "good": "清晰的章节结构"
+      }
+    },
+    {
+      "id": "AP020",
+      "name": "缺少名称字段",
+      "category": "yaml",
+      "severity": "error",
+      "description": "YAML frontmatter 中缺少必需的 name 字段",
+      "impact": "组件无法识别",
+      "detection": {
+        "type": "rule",
+        "check": "missing_field:name"
+      },
+      "fix": {
+        "type": "auto",
+        "template": "name: [组件名称]",
+        "guide": "添加 name 字段，使用 kebab-case 命名"
+      },
+      "examples": {
+        "bad": "---\ndescription: 某个功能\n---",
+        "good": "---\nname: my-skill\ndescription: 某个功能\n---"
+      }
+    },
+    {
+      "id": "AP021",
+      "name": "Skill类型不明确",
+      "category": "skill",
+      "severity": "warning",
+      "description": "未明确说明是 Reference 还是 Task Skill",
+      "impact": "Claude 难以判断如何使用",
+      "detection": {
+        "type": "semantic",
+        "check": "skill_type_unclear"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "在描述中明确说明是提供知识还是执行任务"
+      },
+      "examples": {
+        "bad": "description: Python 相关功能",
+        "good": "description: 提供 Python 最佳实践参考（Reference）"
+      }
+    },
+    {
+      "id": "AP022",
+      "name": "工作流步骤不清晰",
+      "category": "skill",
+      "severity": "warning",
+      "description": "Task Skill 缺少清晰的工作流程说明",
+      "impact": "执行逻辑不明确",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 工作流程"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加工作流程部分，列出执行步骤"
+      },
+      "examples": {
+        "bad": "只有功能描述",
+        "good": "包含 ## 工作流程 部分，列出1-2-3步骤"
+      }
+    },
+    {
+      "id": "AP023",
+      "name": "Reference内容过时",
+      "category": "skill",
+      "severity": "info",
+      "description": "Reference Skill 包含过时的信息",
+      "impact": "提供错误的指导",
+      "detection": {
+        "type": "semantic",
+        "check": "outdated_content"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "定期更新参考内容，添加更新日期"
+      },
+      "examples": {
+        "bad": "Python 2.7 最佳实践",
+        "good": "Python 3.12 最佳实践（更新于2024）"
+      }
+    },
+    {
+      "id": "AP024",
+      "name": "缺少输入输出说明",
+      "category": "skill",
+      "severity": "warning",
+      "description": "Task Skill 未说明期望的输入和输出",
+      "impact": "用户不知道如何调用",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:输入|输出"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "在示例中明确展示输入和输出"
+      },
+      "examples": {
+        "bad": "只有功能描述",
+        "good": "示例包含输入和输出"
+      }
+    },
+    {
+      "id": "AP025",
+      "name": "过度依赖外部工具",
+      "category": "skill",
+      "severity": "warning",
+      "description": "Skill 过度依赖 Bash 或外部命令",
+      "impact": "可移植性差，安全风险",
+      "detection": {
+        "type": "pattern",
+        "check": "excessive_bash_usage"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "优先使用内置工具（Read、Write、Grep）"
+      },
+      "examples": {
+        "bad": "大量使用 bash 命令",
+        "good": "使用 Read 和 Grep 工具"
+      }
+    },
+    {
+      "id": "AP026",
+      "name": "Command参数设计不当",
+      "category": "command",
+      "severity": "warning",
+      "description": "Command 参数过多或设计不合理",
+      "impact": "用户难以使用",
+      "detection": {
+        "type": "rule",
+        "check": "parameter_count > 5"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "简化参数设计，使用合理的默认值"
+      },
+      "examples": {
+        "bad": "6个以上的参数",
+        "good": "2-3个核心参数 + 可选参数"
+      }
+    },
+    {
+      "id": "AP027",
+      "name": "Command缺少帮助信息",
+      "category": "command",
+      "severity": "warning",
+      "description": "Command 未提供使用帮助",
+      "impact": "用户不知道如何使用",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 使用方法"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加使用方法和参数说明"
+      },
+      "examples": {
+        "bad": "只有命令定义",
+        "good": "包含使用方法和示例"
+      }
+    },
+    {
+      "id": "AP028",
+      "name": "Command命名不直观",
+      "category": "command",
+      "severity": "info",
+      "description": "Command 名称不能直观表达功能",
+      "impact": "用户难以发现和记忆",
+      "detection": {
+        "type": "semantic",
+        "check": "unclear_command_name"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用动词开头，清晰表达功能"
+      },
+      "examples": {
+        "bad": "/tool, /helper",
+        "good": "/review-code, /generate-docs"
+      }
+    },
+    {
+      "id": "AP029",
+      "name": "Command缺少错误提示",
+      "category": "command",
+      "severity": "warning",
+      "description": "参数错误时没有友好的错误提示",
+      "impact": "用户不知道如何修正",
+      "detection": {
+        "type": "pattern",
+        "check": "missing_error_handling"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加参数验证和错误提示"
+      },
+      "examples": {
+        "bad": "直接失败，无提示",
+        "good": "提示参数错误和正确用法"
+      }
+    },
+    {
+      "id": "AP030",
+      "name": "Command功能过于复杂",
+      "category": "command",
+      "severity": "warning",
+      "description": "单个 Command 包含过多功能",
+      "impact": "难以维护和使用",
+      "detection": {
+        "type": "semantic",
+        "check": "command_too_complex"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "拆分为多个简单的 Command"
+      },
+      "examples": {
+        "bad": "一个 Command 做10件事",
+        "good": "每个 Command 专注一个功能"
+      }
+    },
+    {
+      "id": "AP031",
+      "name": "Hook触发条件不明确",
+      "category": "hook",
+      "severity": "error",
+      "description": "Hook 配置中触发条件不清晰",
+      "impact": "可能不触发或错误触发",
+      "detection": {
+        "type": "rule",
+        "check": "missing_trigger_condition"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "明确指定触发事件和条件"
+      },
+      "examples": {
+        "bad": "trigger: undefined",
+        "good": "trigger: pre-commit"
+      }
+    },
+    {
+      "id": "AP032",
+      "name": "Hook执行阻塞操作",
+      "category": "hook",
+      "severity": "warning",
+      "description": "Hook 中执行耗时操作",
+      "impact": "阻塞用户工作流",
+      "detection": {
+        "type": "semantic",
+        "check": "blocking_operation"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用异步执行或后台任务"
+      },
+      "examples": {
+        "bad": "Hook 中执行长时间任务",
+        "good": "Hook 触发后台任务"
+      }
+    },
+    {
+      "id": "AP033",
+      "name": "Hook缺少失败处理",
+      "category": "hook",
+      "severity": "warning",
+      "description": "Hook 失败时没有合理的处理策略",
+      "impact": "可能导致工作流中断",
+      "detection": {
+        "type": "pattern",
+        "check": "missing_failure_handling"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "定义失败时的行为（继续/中断/重试）"
+      },
+      "examples": {
+        "bad": "失败后无处理",
+        "good": "失败后记录日志并继续"
+      }
+    },
+    {
+      "id": "AP034",
+      "name": "Hook配置格式错误",
+      "category": "hook",
+      "severity": "error",
+      "description": "Hook 配置文件格式不正确",
+      "impact": "Hook 无法加载",
+      "detection": {
+        "type": "rule",
+        "check": "invalid_hook_config"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "检查 JSON 格式和必填字段"
+      },
+      "examples": {
+        "bad": "JSON 语法错误",
+        "good": "符合 Hook 配置规范"
+      }
+    },
+    {
+      "id": "AP035",
+      "name": "Hook过度使用",
+      "category": "hook",
+      "severity": "info",
+      "description": "配置了过多的 Hook",
+      "impact": "影响性能和可维护性",
+      "detection": {
+        "type": "rule",
+        "check": "hook_count > 5"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "合并相关 Hook 或使用 Skill 替代"
+      },
+      "examples": {
+        "bad": "10+ 个 Hook",
+        "good": "3-5 个核心 Hook"
+      }
+    },
+    {
+      "id": "AP036",
+      "name": "缺少概述部分",
+      "category": "structure",
+      "severity": "warning",
+      "description": "组件缺少简洁的概述说明",
+      "impact": "用户难以快速理解功能",
+      "detection": {
+        "type": "pattern",
+        "check": "missing_overview"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "在开头添加1-2段概述"
+      },
+      "examples": {
+        "bad": "直接进入细节",
+        "good": "先概述，再详细说明"
+      }
+    },
+    {
+      "id": "AP037",
+      "name": "章节顺序混乱",
+      "category": "structure",
+      "severity": "info",
+      "description": "文档章节顺序不合理",
+      "impact": "阅读体验差",
+      "detection": {
+        "type": "semantic",
+        "check": "section_order_issues"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "推荐顺序：概述→工作流程→示例→常见陷阱"
+      },
+      "examples": {
+        "bad": "示例在前，说明在后",
+        "good": "先说明，后示例"
+      }
+    },
+    {
+      "id": "AP038",
+      "name": "标题层级不当",
+      "category": "structure",
+      "severity": "info",
+      "description": "Markdown 标题层级使用不当",
+      "impact": "文档结构不清晰",
+      "detection": {
+        "type": "rule",
+        "check": "heading_level_issues"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用合理的标题层级（H1→H2→H3）"
+      },
+      "examples": {
+        "bad": "跳级使用 H1→H3",
+        "good": "递进使用 H1→H2→H3"
+      }
+    },
+    {
+      "id": "AP039",
+      "name": "代码块缺少语言标识",
+      "category": "structure",
+      "severity": "info",
+      "description": "代码块未指定语言",
+      "impact": "无语法高亮",
+      "detection": {
+        "type": "pattern",
+        "check": "code_block_no_language"
+      },
+      "fix": {
+        "type": "auto",
+        "guide": "使用 ```python 而非 ```"
+      },
+      "examples": {
+        "bad": "```\ncode\n```",
+        "good": "```python\ncode\n```"
+      }
+    },
+    {
+      "id": "AP040",
+      "name": "链接失效",
+      "category": "structure",
+      "severity": "warning",
+      "description": "文档中包含失效的链接",
+      "impact": "用户无法访问参考资源",
+      "detection": {
+        "type": "rule",
+        "check": "broken_links"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "检查并更新所有链接"
+      },
+      "examples": {
+        "bad": "链接返回 404",
+        "good": "所有链接可访问"
+      }
+    },
+    {
+      "id": "AP041",
+      "name": "未考虑性能影响",
+      "category": "performance",
+      "severity": "warning",
+      "description": "组件未考虑大规模数据的性能问题",
+      "impact": "处理大量数据时可能超时",
+      "detection": {
+        "type": "semantic",
+        "check": "no_performance_consideration"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加分页、限制或批处理机制"
+      },
+      "examples": {
+        "bad": "一次性处理所有文件",
+        "good": "分批处理，每批10个文件"
+      }
+    },
+    {
+      "id": "AP042",
+      "name": "缺少缓存机制",
+      "category": "performance",
+      "severity": "info",
+      "description": "重复计算相同结果",
+      "impact": "浪费资源",
+      "detection": {
+        "type": "semantic",
+        "check": "no_caching"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "对重复查询结果进行缓存"
+      },
+      "examples": {
+        "bad": "每次都重新计算",
+        "good": "缓存计算结果"
+      }
+    },
+    {
+      "id": "AP043",
+      "name": "过度使用正则表达式",
+      "category": "performance",
+      "severity": "info",
+      "description": "使用复杂的正则表达式",
+      "impact": "性能下降",
+      "detection": {
+        "type": "pattern",
+        "check": "complex_regex"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "简化正则或使用其他方法"
+      },
+      "examples": {
+        "bad": "嵌套多层的正则",
+        "good": "简单的字符串匹配"
+      }
+    },
+    {
+      "id": "AP044",
+      "name": "未设置超时限制",
+      "category": "performance",
+      "severity": "warning",
+      "description": "长时间运行的任务未设置超时",
+      "impact": "可能无限期等待",
+      "detection": {
+        "type": "pattern",
+        "check": "no_timeout"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "为耗时操作设置合理的超时时间"
+      },
+      "examples": {
+        "bad": "无超时限制",
+        "good": "设置30秒超时"
+      }
+    },
+    {
+      "id": "AP045",
+      "name": "内存使用不当",
+      "category": "performance",
+      "severity": "warning",
+      "description": "一次性加载大量数据到内存",
+      "impact": "可能导致内存溢出",
+      "detection": {
+        "type": "semantic",
+        "check": "memory_issues"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "使用流式处理或分块读取"
+      },
+      "examples": {
+        "bad": "读取整个大文件到内存",
+        "good": "逐行或分块读取"
+      }
+    },
+    {
+      "id": "AP046",
+      "name": "硬编码敏感信息",
+      "category": "security",
+      "severity": "error",
+      "description": "在代码中硬编码密码、API密钥等敏感信息",
+      "impact": "严重安全风险",
+      "detection": {
+        "type": "pattern",
+        "check": "hardcoded_secrets"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "使用环境变量或配置文件"
+      },
+      "examples": {
+        "bad": "api_key = 'sk-xxx'",
+        "good": "api_key = os.getenv('API_KEY')"
+      }
+    },
+    {
+      "id": "AP047",
+      "name": "未验证用户输入",
+      "category": "security",
+      "severity": "error",
+      "description": "直接使用用户输入而不验证",
+      "impact": "可能导致注入攻击",
+      "detection": {
+        "type": "semantic",
+        "check": "no_input_validation"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加输入验证和清理"
+      },
+      "examples": {
+        "bad": "直接执行用户输入",
+        "good": "验证后再执行"
+      }
+    },
+    {
+      "id": "AP048",
+      "name": "缺少依赖说明",
+      "category": "documentation",
+      "severity": "warning",
+      "description": "未说明组件的依赖要求",
+      "impact": "用户可能遇到运行错误",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:## 依赖"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加依赖说明部分"
+      },
+      "examples": {
+        "bad": "无依赖说明",
+        "good": "列出所需的工具和库"
+      }
+    },
+    {
+      "id": "AP049",
+      "name": "缺少许可证声明",
+      "category": "documentation",
+      "severity": "info",
+      "description": "未声明组件的许可证",
+      "impact": "法律风险",
+      "detection": {
+        "type": "pattern",
+        "check": "missing:license"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "添加许可证声明（如 MIT）"
+      },
+      "examples": {
+        "bad": "无许可证",
+        "good": "License: MIT"
+      }
+    },
+    {
+      "id": "AP050",
+      "name": "未遵循命名约定",
+      "category": "style",
+      "severity": "info",
+      "description": "文件名、变量名不符合约定",
+      "impact": "降低代码可读性",
+      "detection": {
+        "type": "rule",
+        "check": "naming_convention_violation"
+      },
+      "fix": {
+        "type": "suggestion",
+        "guide": "遵循 kebab-case（文件）和 camelCase（变量）"
+      },
+      "examples": {
+        "bad": "MySkill.md, my_var",
+        "good": "my-skill.md, myVar"
+      }
+    }
+  ]
+}

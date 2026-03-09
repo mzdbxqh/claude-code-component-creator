@@ -1,0 +1,65 @@
+id: SUB-012
+name: state-management-unclear
+severity: warning
+component_type: subagent
+category: workflow
+
+title:
+  zh: "状态管理不清晰"
+  en: "Unclear state management"
+
+description:
+  zh: |
+    如果 Subagent 需要维护状态，
+    应该明确说明状态的定义、修改和传递方式。
+  en: |
+    If subagent needs to maintain state,
+    it should clearly define how state is defined, modified, and passed.
+
+rationale:
+  zh: "清晰的状态管理避免副作用和数据不一致。"
+  en: "Clear state management prevents side effects and data inconsistency."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: custom
+  custom_function: "check_state_management"
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加状态管理说明，或改用无状态设计。"
+  en: "Add state management documentation, or use stateless design."
+
+examples:
+  bad:
+    zh: |
+      ## 处理
+      维护内部计数器跟踪进度。
+      （没有说明状态如何管理）
+  en: |
+      ## Processing
+      Maintain internal counter to track progress.
+      (No state management explained)
+  good:
+    zh: |
+      ## 状态管理
+
+      本 Subagent 为无状态设计，所有状态通过参数传递：
+      - progress: 当前进度对象
+      - results: 累积结果数组
+
+      不修改外部状态。
+  en: |
+      ## State Management
+
+      This subagent is stateless; all state passed via parameters:
+      - progress: Current progress object
+      - results: Accumulated results array
+
+      Does not modify external state.
+
+tags: ["workflow", "state", "management", "subagent"]
+related_rules: []

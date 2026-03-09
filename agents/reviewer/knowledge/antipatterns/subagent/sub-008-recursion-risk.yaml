@@ -1,0 +1,61 @@
+id: SUB-008
+name: recursion-risk
+severity: error
+component_type: subagent
+category: workflow
+
+title:
+  zh: "递归调用风险"
+  en: "Recursion risk"
+
+description:
+  zh: |
+    Subagent 不应该直接或间接调用自身，
+    这可能导致无限递归和栈溢出。
+  en: |
+    Subagent should not call itself directly or indirectly,
+    which could lead to infinite recursion and stack overflow.
+
+rationale:
+  zh: "递归调用会导致资源耗尽和系统不稳定。"
+  en: "Recursive calls cause resource exhaustion and system instability."
+
+handbook_reference: "Chapter 7.3"
+
+detection:
+  method: custom
+  custom_function: "check_recursion_risk"
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "移除递归调用，使用迭代或拆分任务给其他 Subagent。"
+  en: "Remove recursive calls, use iteration or delegate to other subagents."
+
+examples:
+  bad:
+    zh: |
+      ## 处理流程
+      1. 处理当前任务
+      2. 如有子任务，调用自身处理
+         （风险：可能导致无限递归）
+  en: |
+      ## Processing Flow
+      1. Process current task
+      2. If subtasks exist, call self to process
+          (Risk: May cause infinite recursion)
+  good:
+    zh: |
+      ## 处理流程
+      1. 收集所有任务到队列
+      2. 使用循环逐个处理
+      3. 如有嵌套，使用栈结构而非递归
+  en: |
+      ## Processing Flow
+      1. Collect all tasks to queue
+      2. Process iteratively using loop
+      3. For nesting, use stack structure instead of recursion
+
+tags: ["workflow", "recursion", "risk", "subagent"]
+related_rules: []

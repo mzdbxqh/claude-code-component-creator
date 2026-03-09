@@ -1,0 +1,80 @@
+id: ARCH-005
+name: component-count-excessive
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "组件数量超出合理范围"
+  en: "Excessive Component Count"
+
+description:
+  zh: |
+    项目组件数量过多，可能导致维护困难、认知负担增加和协调成本上升。
+    建议范围：Skill不超过50个，Command不超过20个，Agent不超过30个。
+  en: |
+    Too many components may cause maintenance difficulty, cognitive burden, and coordination costs.
+    Recommended limits: Skills <= 50, Commands <= 20, Agents <= 30.
+
+rationale:
+  zh: "适度的组件数量有助于保持项目可管理性，过多则适得其反"
+  en: "Moderate component count helps maintain project manageability"
+
+detection:
+  method: custom
+  custom_function: check_component_count
+  thresholds:
+    skill_max: 50
+    command_max: 20
+    agent_max: 30
+    hook_max: 15
+  criteria:
+    - 统计skills/目录下的SKILL.md数量
+    - 统计commands/目录下的.md文件数量
+    - 统计agents/目录下的SKILL.md数量
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      优化组件数量：
+      1. 合并功能高度相关的Skill
+      2. 将相关Command组合为子命令
+      3. 考虑拆分为独立子项目
+      4. 归档或删除未使用的组件
+    en: |
+      Optimize component count:
+      1. Merge highly related Skills
+      2. Group related Commands as subcommands
+      3. Consider splitting into independent sub-projects
+      4. Archive or remove unused components
+
+examples:
+  bad:
+    zh: |
+      skills/
+        ├── skill-001/    # 功能A-模块1
+        ├── skill-002/    # 功能A-模块2
+        ├── skill-003/    # 功能A-模块3
+        # ... 共67个Skill，大多相关
+    en: |
+      skills/
+        ├── skill-001/    # Feature A-Module 1
+        ├── skill-002/    # Feature A-Module 2
+        ├── skill-003/    # Feature A-Module 3
+        # ... 67 skills, mostly related
+  good:
+    zh: |
+      skills/
+        ├── feature-a-core/    # 统一功能A核心
+        ├── feature-b-core/    # 功能B核心
+        ├── utils-common/      # 通用工具
+        # ... 共25个Skill，职责清晰
+    en: |
+      skills/
+        ├── feature-a-core/    # Unified Feature A
+        ├── feature-b-core/    # Feature B core
+        ├── utils-common/      # Common utilities
+        # ... 25 skills, clear responsibilities
+
+tags: ["architecture", "granularity", "count", "maintenance"]

@@ -1,0 +1,105 @@
+id: SEC-005
+name: external-service-validation
+severity: info
+component_type: skill
+category: security
+
+title:
+  zh: "外部服务输入验证"
+  en: "External service input validation"
+
+description:
+  zh: |
+    技能如调用外部服务（API、数据库、消息队列等），应验证外部输入，
+    配置超时和熔断机制，防止外部服务故障影响系统。
+  en: |
+    Skills calling external services (API, database, message queue, etc.) should validate
+    external input, configure timeout and circuit breaker to prevent external service failures.
+
+rationale:
+  zh: "基于安全最佳实践，不应信任外部服务返回的数据"
+  en: "Per security best practices, never trust data returned from external services"
+
+detection:
+  method: section-check
+  required_when: "调用外部服务时"
+  required_sections:
+    - "超时配置"
+    - "熔断机制"
+    - "重试策略"
+    - "Timeout"
+    - "Retry"
+    - "Circuit Breaker"
+  check_items:
+    - 响应验证
+    - 超时配置
+    - 熔断/重试策略
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **外部服务安全实践**:
+
+      ```yaml
+      ## 外部服务安全
+
+      **超时配置**:
+      ```yaml
+      feign:
+        client:
+          config:
+            default:
+              connectTimeout: 5000  # 5 秒连接超时
+              readTimeout: 30000    # 30 秒读取超时
+      ```
+
+      **响应验证**:
+      - 检查 HTTP 状态码（2xx 为成功）
+      - 验证响应格式（JSON Schema 验证）
+      - 处理异常情况（超时、服务不可用）
+
+      **重试策略**:
+      - 仅对可重试错误重试（5xx、网络错误）
+      - 最大重试次数：3 次
+      - 使用指数退避：1s, 2s, 4s
+
+      **熔断机制**:
+      - 连续失败 5 次后熔断
+      - 熔断后直接返回降级响应
+      - 30 秒后尝试半开状态
+      ```
+    en: |
+      **External Service Security**:
+
+      ```yaml
+      ## External Service Security
+
+      **Timeout Configuration**:
+      ```yaml
+      feign:
+        client:
+          config:
+            default:
+              connectTimeout: 5000  # 5s connection timeout
+              readTimeout: 30000    # 30s read timeout
+      ```
+
+      **Response Validation**:
+      - Check HTTP status code (2xx for success)
+      - Validate response format (JSON Schema validation)
+      - Handle exceptions (timeout, service unavailable)
+
+      **Retry Strategy**:
+      - Retry only on retryable errors (5xx, network errors)
+      - Max retries: 3
+      - Use exponential backoff: 1s, 2s, 4s
+
+      **Circuit Breaker**:
+      - Open circuit after 5 consecutive failures
+      - Return fallback response when circuit is open
+      - Try half-open state after 30 seconds
+      ```
+
+tags: ["security", "external-service", "timeout", "circuit-breaker"]
+related_rules: ["SEC-001", "SEC-003"]

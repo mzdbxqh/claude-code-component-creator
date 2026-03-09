@@ -1,0 +1,105 @@
+id: SKILL-016
+name: references-integrity
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "引用完整性缺失"
+  en: "References integrity missing"
+
+description:
+  zh: |
+    当 Skill 文档超过 400 行或引用外部资源时，必须保证引用的完整性：
+
+    **触发条件**:
+    - 文档行数 > 400 行
+    - 或文档中包含@path 引用
+    - 或文档中提到 references/、examples/等目录
+
+    **要求**:
+    1. references/目录必须存在（如果文档中引用）
+    2. 引用的文件路径必须有效且可读
+    3. references/中的示例文件应包含实际内容（非空）
+    4. 外部链接应该是有效的 URL
+
+    **官方参考**: Anthropic skill-creator Progressive Disclosure 原则允许使用引用目录替代内嵌内容
+  en: |
+    When Skill document exceeds 400 lines or references external resources, reference integrity must be maintained:
+
+    **Triggers**:
+    - Document lines > 400
+    - Or document contains @path references
+    - Or document mentions references/, examples/, etc. directories
+
+    **Requirements**:
+    1. references/ directory must exist (if referenced in document)
+    2. Referenced file paths must be valid and readable
+    3. Example files in references/ should contain actual content (non-empty)
+    4. External links should be valid URLs
+
+    **Official reference**: Anthropic skill-creator Progressive Disclosure principle allows using reference directories instead of inline content
+
+rationale:
+  zh: "根据官方 skill-creator 的 Progressive Disclosure 原则，使用引用目录是推荐做法。但引用的资源必须真实存在且有效，否则会导致用户无法获取完整信息。"
+  en: "Following official skill-creator Progressive Disclosure principle, using reference directories is recommended. However, referenced resources must exist and be valid, otherwise users cannot access complete information."
+
+handbook_reference: "Official skill-creator Progressive Disclosure"
+
+detection:
+  method: custom
+  custom_function: "check_references_integrity"
+  file_pattern: '*.md'
+  checks:
+    - references_dir_exists: "Check if references/ directory exists when referenced"
+    - examples_dir_exists: "Check if examples/ directory exists when referenced"
+    - path_references_valid: "Verify @path references point to existing files"
+    - referenced_files_non_empty: "Ensure referenced files contain actual content"
+    - external_links_format: "Validate external URL format"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      如果引用完整性检查失败:
+      1. 创建缺失的 references/或 examples/目录
+      2. 确保引用的文件路径正确（相对路径）
+      3. 为引用文件添加实际内容
+      4. 如果引用不再需要，从文档中移除相关引用
+    en: |
+      If reference integrity check fails:
+      1. Create missing references/ or examples/ directory
+      2. Ensure referenced file paths are correct (relative paths)
+      3. Add actual content to referenced files
+      4. If reference is no longer needed, remove it from document
+
+examples:
+  bad:
+    zh: |
+      # My Skill
+      详细说明请参见 references/detailed-guide.md
+
+      （但 references/detailed-guide.md 不存在）
+    en: |
+      # My Skill
+      For detailed instructions, see references/detailed-guide.md
+
+      (But references/detailed-guide.md does not exist)
+  good:
+    zh: |
+      # My Skill
+      详细说明请参见 references/detailed-guide.md
+
+      ## References
+      - [Detailed Guide](references/detailed-guide.md) - 完整的使用指南和示例
+      - [API Reference](references/api-reference.md) - API 接口详细说明
+    en: |
+      # My Skill
+      For detailed instructions, see references/detailed-guide.md
+
+      ## References
+      - [Detailed Guide](references/detailed-guide.md) - Complete usage guide and examples
+      - [API Reference](references/api-reference.md) - Detailed API specification
+
+tags: ["structure", "references", "documentation", "skill", "progressive-disclosure"]
+related_rules: ["SKILL-003", "SKILL-014", "SCALE-005"]

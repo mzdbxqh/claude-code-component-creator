@@ -1,0 +1,77 @@
+id: ARCH-008
+name: context-mode-mismatch
+severity: warning
+component_type: all
+category: architecture
+
+title:
+  zh: "Context模式与风险不匹配"
+  en: "Context Mode Risk Mismatch"
+
+description:
+  zh: |
+    高风险操作使用了不安全的context模式，可能导致环境污染或安全风险。
+    例如：使用inline模式执行Bash命令会直接影响父环境。
+  en: |
+    High-risk operations use unsafe context mode, potentially causing environment pollution or security risks.
+
+rationale:
+  zh: "高风险操作应使用fork或isolated模式保护父环境"
+  en: "High-risk operations should use fork or isolated mode to protect parent environment"
+
+detection:
+  method: custom
+  custom_function: check_context_risk_match
+  risk_matrix:
+    high_risk_tools: ["Bash", "Write", "Edit"]
+    medium_risk_tools: ["Task", "Glob"]
+    safe_context: ["fork", "isolated"]
+    unsafe_context: ["inline"]
+  criteria:
+    - 检查声明的context模式
+    - 检查使用的工具风险等级
+    - 评估Bash命令的风险程度
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      调整context模式：
+      1. 使用Bash/Write时选择fork或isolated
+      2. 仅在读取操作时考虑inline模式
+      3. 确保高风险操作有错误隔离
+    en: |
+      Adjust context mode:
+      1. Use fork or isolated for Bash/Write
+      2. Consider inline only for read-only operations
+      3. Ensure error isolation for high-risk operations
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: risky-deployer
+      context: inline  # 危险！Bash会影响父环境
+      allowed-tools: ["Bash", "Write"]
+      ---
+    en: |
+      ---
+      name: risky-deployer
+      context: inline  # Dangerous! Bash affects parent
+      allowed-tools: ["Bash", "Write"]
+      ---
+  good:
+    zh: |
+      ---
+      name: safe-deployer
+      context: fork    # 安全：Bash在隔离环境执行
+      allowed-tools: ["Bash", "Write"]
+      ---
+    en: |
+      ---
+      name: safe-deployer
+      context: fork    # Safe: Bash runs in isolated environment
+      allowed-tools: ["Bash", "Write"]
+      ---
+
+tags: ["architecture", "context", "security", "isolation"]

@@ -1,0 +1,50 @@
+id: WORKFLOW-001
+name: cross-component-dataflow
+severity: warning
+component_type: workflow
+category: workflow
+
+title:
+  zh: "跨组件数据流验证失败"
+  en: "Cross-component dataflow validation failed"
+
+description:
+  zh: |
+    验证跨组件数据流是否正确传递。
+
+    **检查项**:
+    - 上游组件的输出是否是下游组件的输入
+    - 数据格式是否一致
+    - 数据内容是否完整传递
+
+    **工作流示例**:
+    - brainstorm → architecture.md → phase-plan
+    - phase-plan → design.md → plan
+    - plan → feat-*.md → execute
+
+    **问题场景**:
+    - brainstorm 输出 architecture.md，但 phase-plan 不读取该文件
+    - design.md 包含 Phase 列表，但 plan 不使用该列表
+    - feat-*.md 包含 Task，但 execute 不读取
+
+  en: |
+    Validates that cross-component dataflow is correctly passed.
+
+    **Checks**:
+    - Upstream component output is downstream component input
+    - Data format is consistent
+    - Data content is completely passed
+
+check_logic:
+  type: workflow_analysis
+  conditions:
+    - has_upstream_output: true
+    - has_downstream_input: true
+    - format_consistent: true
+
+suggestion:
+  zh: "确保下游组件正确引用上游组件的输出文件"
+  en: "Ensure downstream components correctly reference upstream component output files"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

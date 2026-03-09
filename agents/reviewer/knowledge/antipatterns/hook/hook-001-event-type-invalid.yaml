@@ -1,0 +1,57 @@
+id: HOOK-001
+name: event-type-invalid
+severity: error
+component_type: hook
+category: metadata
+
+title:
+  zh: "无效的事件类型"
+  en: "Invalid event type"
+
+description:
+  zh: |
+    Hook 的 event-type 必须是系统支持的预定义事件类型。
+    无效的事件类型会导致 Hook 永远不会触发。
+  en: |
+    Hook event-type must be a system-supported predefined event type.
+    Invalid event types will cause the hook to never trigger.
+
+rationale:
+  zh: "事件类型决定 Hook 的触发时机，必须是系统已定义的事件。"
+  en: "Event type determines when hook triggers; must be a system-defined event."
+
+handbook_reference: "Chapter 6.2"
+
+detection:
+  method: custom
+  custom_function: "check_valid_event_type"
+  file_pattern: "hooks/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "使用系统支持的有效事件类型。"
+    en: "Use a valid system-supported event type."
+
+examples:
+  bad:
+    zh: |
+      ---
+      event-type: user-action-undefined
+      ---
+    en: |
+      ---
+      event-type: user-action-undefined
+      ---
+  good:
+    zh: |
+      ---
+      event-type: file-save
+      ---
+    en: |
+      ---
+      event-type: file-save
+      ---
+
+tags: ["metadata", "event", "hook"]
+related_rules: []

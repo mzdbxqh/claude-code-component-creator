@@ -1,0 +1,63 @@
+id: CMD-009
+name: permission-check-missing
+severity: error
+component_type: command
+category: security
+
+title:
+  zh: "缺少权限检查"
+  en: "Missing permission check"
+
+description:
+  zh: |
+    需要特定权限的 Command 必须在文档中说明权限要求，
+    并在执行前进行权限检查。
+  en: |
+    Commands requiring specific permissions must document permission requirements
+    and perform checks before execution.
+
+rationale:
+  zh: "权限检查防止未授权访问，是安全最佳实践。"
+  en: "Permission checks prevent unauthorized access, a security best practice."
+
+handbook_reference: "Chapter 5.4"
+
+detection:
+  method: regex
+  pattern: "^(?!.*##\\s*(权限|Permissions|要求|Requirements)).*$"
+  file_pattern: "commands/*.md"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加权限要求说明，描述需要的权限和检查逻辑。"
+    en: "Add permission requirements describing needed permissions and check logic."
+
+examples:
+  bad:
+    zh: |
+      # admin-only
+      管理员命令。
+    en: |
+      # admin-only
+      Admin command.
+  good:
+    zh: |
+      ## 权限要求
+
+      - 需要管理员权限
+      - 执行前会检查当前用户角色
+
+      ## 错误
+      如果权限不足，返回错误：E002 权限不足
+    en: |
+      ## Permission Requirements
+
+      - Admin privileges required
+      - User role checked before execution
+
+      ## Errors
+      If insufficient permissions, returns: E002 Permission denied
+
+tags: ["security", "permissions", "command"]
+related_rules: ["CMD-008"]

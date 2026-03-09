@@ -1,0 +1,77 @@
+id: ARCH-012
+name: circular-dependency-risk
+severity: error
+component_type: all
+category: architecture
+
+title:
+  zh: "组件循环依赖"
+  en: "Circular Component Dependency"
+
+description:
+  zh: |
+    组件间存在循环调用关系，如A->B->C->A。
+    这会导致初始化困难、死锁风险、测试复杂度和理解困难。
+  en: |
+    Components have circular call relationships, causing initialization difficulty and deadlock risk.
+
+rationale:
+  zh: "无环依赖结构更清晰，支持分层架构"
+  en: "Acyclic dependency structure is clearer and supports layered architecture"
+
+detection:
+  method: custom
+  custom_function: detect_circular_dependency
+  algorithm: "DFS cycle detection"
+  criteria:
+    - 构建调用关系有向图
+    - 使用DFS检测回边
+    - 记录完整循环路径
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      打破循环依赖：
+      1. 提取共同逻辑到新组件
+      2. 使用依赖倒置，引入抽象层
+      3. 将循环依赖改为事件驱动
+      4. 合并相互依赖的组件
+    en: |
+      Break circular dependency:
+      1. Extract common logic to new component
+      2. Use dependency inversion with abstraction layer
+      3. Convert to event-driven architecture
+      4. Merge mutually dependent components
+
+examples:
+  bad:
+    zh: |
+      # 循环依赖
+      skill-A: 调用 skill-B
+      skill-B: 调用 skill-C
+      skill-C: 调用 skill-A  # 循环！
+    en: |
+      # Circular dependency
+      skill-A: calls skill-B
+      skill-B: calls skill-C
+      skill-C: calls skill-A  # Cycle!
+  good:
+    zh: |
+      # 无环结构
+      skill-A: 调用 skill-B
+      skill-B: 调用 skill-C
+      skill-C: 不调用A或B
+
+      # 或使用协调器
+      coordinator: 调用 [skill-A, skill-B, skill-C]
+    en: |
+      # Acyclic structure
+      skill-A: calls skill-B
+      skill-B: calls skill-C
+      skill-C: no calls to A or B
+
+      # Or use coordinator
+      coordinator: calls [skill-A, skill-B, skill-C]
+
+tags: ["architecture", "dependency", "cycle", "coupling"]

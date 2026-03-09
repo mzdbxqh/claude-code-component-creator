@@ -1,0 +1,52 @@
+id: GATE-002
+name: phase-plan-quality-gate
+severity: warning
+component_type: workflow
+category: quality-gate
+
+title:
+  zh: "Phase-Plan 阶段质量卡点验证缺失"
+  en: "Phase-Plan phase quality gate missing"
+
+description:
+  zh: |
+    验证 phase-plan 阶段完成后的质量卡点。
+
+    **检查项**:
+    - design.md 是否已生成
+    - Phase 列表是否与服务匹配
+    - 工作流类型匹配是否正确
+    - Phase 状态标注是否正确
+    - 测试场景矩阵是否完整
+
+    **Gate 2 通过标准**:
+    - ✅ 每个服务都有对应的 Phase
+    - ✅ 工作流类型匹配正确 (wf_new_service/wf_feature_iteration 等)
+    - ✅ Phase 状态标注清晰 (pending/in-progress/completed)
+    - ✅ 测试场景矩阵覆盖所有 Phase
+
+  en: |
+    Validates quality gate after phase-plan phase.
+
+    **Checks**:
+    - design.md exists
+    - Phase list matches services
+    - Workflow type matching is correct
+    - Phase status is properly labeled
+    - Test scenario matrix is complete
+
+check_logic:
+  type: file_content_check
+  target_file: "design.md"
+  conditions:
+    - file_exists: true
+    - has_phase_list: true
+    - workflow_matching_correct: true
+    - test_scenario_matrix_complete: true
+
+suggestion:
+  zh: "在 phase-plan 完成后运行质量检查，确保 design.md 符合标准"
+  en: "Run quality check after phase-plan to ensure design.md meets standards"
+
+references:
+  - "docs/analysis/2026-03-08-ccc-plugin-design-gap-analysis.md"

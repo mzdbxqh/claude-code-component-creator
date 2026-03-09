@@ -1,0 +1,49 @@
+id: SUB-004
+name: description-vague
+severity: warning
+component_type: subagent
+category: metadata
+
+title:
+  zh: "描述过于模糊"
+  en: "Description too vague"
+
+description:
+  zh: |
+    Subagent 的 description 应该具体说明其职责和适用范围，
+    避免使用"处理"、"管理"等模糊词汇。
+  en: |
+    Subagent description should specifically state its responsibilities and scope,
+    avoiding vague words like "handle", "manage".
+
+rationale:
+  zh: "清晰的描述帮助调用者理解 Subagent 的功能边界。"
+  en: "Clear description helps callers understand subagent's functional boundaries."
+
+handbook_reference: "Chapter 7.2"
+
+detection:
+  method: regex
+  pattern: '^description:\s*.*(处理|管理|操作|做|handle|manage|process|do).*'
+  file_pattern: 'subagents/*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "使用具体的动词和名词描述功能。"
+    en: "Use specific verbs and nouns to describe functionality."
+
+examples:
+  bad:
+    zh: |
+      description: 处理文件相关任务
+    en: |
+      description: Handle file-related tasks
+  good:
+    zh: |
+      description: 分析代码文件中的函数依赖关系，生成依赖图
+    en: |
+      description: Analyze function dependencies in code files and generate dependency graph
+
+tags: ["metadata", "description", "clarity", "subagent"]
+related_rules: []

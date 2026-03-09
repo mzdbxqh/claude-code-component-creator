@@ -1,0 +1,61 @@
+id: MCP-004
+name: timeout-not-set
+severity: warning
+component_type: mcp
+category: config
+
+title:
+  zh: "未设置超时"
+  en: "Timeout not set"
+
+description:
+  zh: |
+    MCP 服务器应该配置请求超时时间，
+    防止请求无限期挂起。
+  en: |
+    MCP servers should configure request timeout,
+    to prevent requests from hanging indefinitely.
+
+rationale:
+  zh: "超时设置确保资源及时释放，提高系统稳定性。"
+  en: "Timeout settings ensure timely resource release and improve system stability."
+
+handbook_reference: "Chapter 8.2"
+
+detection:
+  method: regex
+  pattern: '^server:(?!.*timeout:).*$'
+  file_pattern: '*.yaml'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "添加 timeout 配置，设置合理的超时时间（如 30s）。"
+    en: "Add timeout configuration with reasonable value (e.g., 30s)."
+
+examples:
+  bad:
+    zh: |
+      server:
+        name: my-server
+        transport: stdio
+        # 没有超时设置
+    en: |
+      server:
+        name: my-server
+        transport: stdio
+        # no timeout set
+  good:
+    zh: |
+      server:
+        name: my-server
+        transport: stdio
+        timeout: 30s
+    en: |
+      server:
+        name: my-server
+        transport: stdio
+        timeout: 30s
+
+tags: ["config", "timeout", "reliability", "mcp"]
+related_rules: []

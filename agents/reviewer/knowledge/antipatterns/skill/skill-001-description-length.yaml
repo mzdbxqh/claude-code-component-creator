@@ -1,0 +1,61 @@
+id: SKILL-001
+name: description-length
+severity: error
+component_type: skill
+category: metadata
+
+title:
+  zh: "描述长度过短或缺失"
+  en: "Description too short or missing"
+
+description:
+  zh: |
+    Skill 的 description 字段是用户理解组件用途的第一信息源。
+    长度小于 30 字符或大于 300 字符都属于不规范。
+  en: |
+    Skill description is the primary source for users to understand component purpose.
+    Length less than 30 or greater than 300 characters is non-compliant.
+
+rationale:
+  zh: "基于 HANDBOOK 第 4 章 Skill 规范，description 必须清晰简洁。"
+  en: "Per HANDBOOK Chapter 4 Skill specification, description must be clear and concise."
+
+handbook_reference: "Chapter 4.2"
+
+detection:
+  method: regex
+  pattern: '^description:\s*(.{0,29}|.{301,})$'
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: "将 description 长度控制在 30-300 字符之间，清晰描述组件用途。"
+    en: "Keep description length between 30-300 characters, clearly describing the component purpose."
+
+examples:
+  bad:
+    zh: |
+      ---
+      description: 部署工具
+      ---
+    en: |
+      ---
+      description: Deploy tool
+      ---
+  good:
+    zh: |
+      ---
+      description: |
+        自动化部署工具，支持 Docker 容器和 Kubernetes 集群的部署。
+        适用于 CI/CD 流程集成，支持滚动更新和回滚操作。
+      ---
+    en: |
+      ---
+      description: |
+        Automated deployment tool supporting Docker containers and Kubernetes clusters.
+        Suitable for CI/CD pipeline integration with rolling updates and rollback.
+      ---
+
+tags: ["metadata", "description", "skill"]
+related_rules: ["SKILL-014"]

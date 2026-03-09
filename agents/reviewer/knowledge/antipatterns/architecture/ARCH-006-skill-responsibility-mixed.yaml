@@ -1,0 +1,85 @@
+id: ARCH-006
+name: skill-responsibility-mixed
+severity: error
+component_type: skill
+category: architecture
+
+title:
+  zh: "Skill职责不单一"
+  en: "Mixed Skill Responsibilities"
+
+description:
+  zh: |
+    一个Skill承担了多个不相关或弱相关的职责，违反单一职责原则(SRP)。
+    这会导致Skill难以维护、测试困难、复用性降低。
+    例如：一个Skill既处理数据分析又负责报表生成还管理用户通知。
+  en: |
+    Single Skill handles multiple unrelated responsibilities, violating Single Responsibility Principle.
+    This makes skills hard to maintain, test, and reuse.
+
+rationale:
+  zh: "单一职责原则确保Skill聚焦一个任务，易于理解、维护和测试"
+  en: "SRP ensures skills focus on one task, making them understandable and maintainable"
+
+detection:
+  method: custom
+  custom_function: check_responsibility_cohesion
+  criteria:
+    - 分析SKILL.md中的Responsibilities章节
+    - 检查功能关键词的语义聚类
+    - 统计输入输出类型多样性
+  threshold:
+    max_concepts: 3  # 超过3个不相关概念触发
+    min_cohesion: 0.6  # 内聚度低于60%触发
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      按职责拆分Skill：
+      1. 识别Skill中的独立功能模块
+      2. 为每个功能创建独立Skill
+      3. 使用父Skill或Command协调调用
+      4. 保持新Skill之间的松耦合
+    en: |
+      Split skill by responsibility:
+      1. Identify independent functional modules
+      2. Create separate skills for each function
+      3. Use parent skill or command to coordinate
+      4. Keep new skills loosely coupled
+
+examples:
+  bad:
+    zh: |
+      ## 职责
+      1. 解析用户上传的CSV文件
+      2. 执行数据清洗和转换
+      3. 生成统计报表
+      4. 发送邮件通知相关人员
+      5. 更新数据库记录
+    en: |
+      ## Responsibilities
+      1. Parse user-uploaded CSV files
+      2. Perform data cleaning and transformation
+      3. Generate statistical reports
+      4. Send email notifications
+      5. Update database records
+  good:
+    zh: |
+      ## 职责
+      1. 解析CSV文件并转换为结构化数据
+
+      # 其他职责由独立Skill处理：
+      # - data-processor: 数据清洗和转换
+      # - report-generator: 报表生成
+      # - notification-sender: 邮件通知
+    en: |
+      ## Responsibilities
+      1. Parse CSV files and convert to structured data
+
+      # Other responsibilities handled by separate skills:
+      # - data-processor: data cleaning
+      # - report-generator: report generation
+      # - notification-sender: email notifications
+
+tags: ["architecture", "srp", "responsibility", "cohesion"]

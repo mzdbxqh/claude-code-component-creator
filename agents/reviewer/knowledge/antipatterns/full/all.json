@@ -1,0 +1,397 @@
+{
+  "version": "1.0.0",
+  "description": "完整的50个反模式定义库（详细版）",
+  "totalPatterns": 50,
+  "categories": {
+    "yaml": {"count": 5, "description": "YAML结构和语法相关"},
+    "content": {"count": 10, "description": "内容质量和完整性"},
+    "structure": {"count": 10, "description": "文档结构和格式"},
+    "semantic": {"count": 10, "description": "语义质量和设计"},
+    "security": {"count": 5, "description": "安全和权限"},
+    "performance": {"count": 5, "description": "性能和优化"},
+    "skill-specific": {"count": 5, "description": "Skill专用"}
+  },
+  "patterns": [
+    {
+      "id": "AP001",
+      "name": "缺少描述字段",
+      "category": "yaml",
+      "severity": "error",
+      "layer": "rule",
+      "description": "YAML frontmatter 中缺少必需的 description 字段",
+      "impact": "Claude Code 无法正确理解组件用途，可能导致误触发或无法触发",
+      "detection": {
+        "method": "rule",
+        "check": "missing_field:description"
+      },
+      "fix": {
+        "type": "auto",
+        "template": "description: [简洁描述组件功能，20-100字符]",
+        "guide": "描述应包含触发场景和主要功能"
+      },
+      "examples": {
+        "bad": "---\nname: my-skill\n---",
+        "good": "---\nname: my-skill\ndescription: 当用户请求代码审查时，执行静态分析和风格检查\n---"
+      },
+      "batch": "batch-1-yaml"
+    },
+    {
+      "id": "AP002",
+      "name": "YAML语法错误",
+      "category": "yaml",
+      "severity": "error",
+      "layer": "rule",
+      "description": "YAML frontmatter 存在语法错误",
+      "impact": "组件无法被 Claude Code 正确解析和加载",
+      "detection": {
+        "method": "rule",
+        "check": "yaml_parse"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "检查缩进（统一使用2空格）、引号匹配、特殊字符转义"
+      },
+      "examples": {
+        "bad": "---\nname: my-skill\ndescription: 包含\"未转义引号\n---",
+        "good": "---\nname: my-skill\ndescription: \"正确使用引号\"\n---"
+      },
+      "batch": "batch-1-yaml"
+    },
+    {
+      "id": "AP003",
+      "name": "描述过于简短",
+      "category": "content",
+      "severity": "warning",
+      "layer": "pattern",
+      "description": "description 字段内容过短，不足20字符",
+      "impact": "Claude 难以准确理解组件用途，匹配精度下降",
+      "detection": {
+        "method": "pattern",
+        "check": "length(description) < 20"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "扩展描述至20-100字符，说明具体触发场景和功能"
+      },
+      "examples": {
+        "bad": "description: 代码审查",
+        "good": "description: 当用户请求Python代码审查时，执行静态分析和风格检查"
+      },
+      "batch": "batch-2-content"
+    },
+    {
+      "id": "AP004",
+      "name": "Token数过多",
+      "category": "content",
+      "severity": "warning",
+      "layer": "rule",
+      "description": "组件内容超过2000 tokens",
+      "impact": "可能导致上下文溢出，影响性能和成本",
+      "detection": {
+        "method": "rule",
+        "check": "token_count > 2000"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "精简内容，拆分为多个组件，或使用 Subagent"
+      },
+      "examples": {
+        "bad": "2500+ tokens 的巨型Skill",
+        "good": "800-1500 tokens 的适中Skill"
+      },
+      "batch": "batch-2-content"
+    },
+    {
+      "id": "AP005",
+      "name": "缺少使用示例",
+      "category": "content",
+      "severity": "warning",
+      "layer": "pattern",
+      "description": "缺少使用示例部分（90.6%成功插件包含示例）",
+      "impact": "用户难以理解如何使用该组件",
+      "detection": {
+        "method": "pattern",
+        "check": "missing_section:## 示例 OR ## Examples"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "添加 ## 示例 部分，展示2-3个典型使用场景"
+      },
+      "examples": {
+        "bad": "只有功能描述，没有示例",
+        "good": "包含 ## 示例 章节，展示具体使用代码"
+      },
+      "batch": "batch-2-content"
+    },
+    {
+      "id": "AP006",
+      "name": "工具权限过宽",
+      "category": "security",
+      "severity": "warning",
+      "layer": "pattern",
+      "description": "包含 Bash 工具权限但未限制具体命令",
+      "impact": "安全风险，可能执行危险命令",
+      "detection": {
+        "method": "pattern",
+        "check": "Bash in allowed-tools AND not restricted"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "限制 Bash 权限范围，如：Bash(git*), Bash(ls*)"
+      },
+      "examples": {
+        "bad": "allowed-tools: [Read, Write, Bash]",
+        "good": "allowed-tools: [Read, Write, Bash(git status, git diff)]"
+      },
+      "batch": "batch-2-content"
+    },
+    {
+      "id": "AP007",
+      "name": "缺少反模式说明",
+      "category": "content",
+      "severity": "info",
+      "layer": "pattern",
+      "description": "缺少反模式/常见陷阱说明（70.2%成功插件包含）",
+      "impact": "用户可能重复常见错误",
+      "detection": {
+        "method": "pattern",
+        "check": "missing_section:## 常见陷阱 OR ## Anti-patterns"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "添加 ## 常见陷阱 部分，说明应避免的做法"
+      },
+      "examples": {
+        "bad": "只描述正确做法",
+        "good": "同时说明常见错误和正确做法对比"
+      },
+      "batch": "batch-2-content"
+    },
+    {
+      "id": "AP011",
+      "name": "缺少错误处理说明",
+      "category": "semantic",
+      "severity": "warning",
+      "layer": "semantic",
+      "description": "未说明错误处理和边界情况",
+      "impact": "用户不知道如何处理异常情况",
+      "detection": {
+        "method": "semantic",
+        "check": "missing_error_handling_discussion"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "添加错误处理说明，列出常见错误场景和应对方法"
+      },
+      "batch": "batch-4-semantic"
+    },
+    {
+      "id": "AP015",
+      "name": "缺少版本声明",
+      "category": "yaml",
+      "severity": "info",
+      "layer": "rule",
+      "description": "未声明版本号",
+      "impact": "不利于追踪组件变更和兼容性管理",
+      "detection": {
+        "method": "rule",
+        "check": "missing_field:version"
+      },
+      "fix": {
+        "type": "auto",
+        "template": "version: 1.0.0"
+      },
+      "batch": "batch-1-yaml"
+    },
+    {
+      "id": "AP016",
+      "name": "模型选择不当",
+      "category": "semantic",
+      "severity": "info",
+      "layer": "semantic",
+      "description": "模型选择可能不适合任务复杂度",
+      "impact": "成本浪费或性能不足",
+      "detection": {
+        "method": "semantic",
+        "check": "model_complexity_mismatch"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "简单任务用 haiku，标准任务用 sonnet，复杂任务用 opus"
+      },
+      "examples": {
+        "bad": "简单格式化任务却使用 model: opus",
+        "good": "格式化任务使用 model: haiku"
+      },
+      "batch": "batch-4-semantic"
+    },
+    {
+      "id": "AP019",
+      "name": "文档结构混乱",
+      "category": "structure",
+      "severity": "warning",
+      "layer": "semantic",
+      "description": "文档结构不清晰，章节顺序混乱",
+      "impact": "用户难以快速找到所需信息",
+      "detection": {
+        "method": "semantic",
+        "check": "disorganized_structure"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "遵循标准结构：目的 → 使用场景 → 工作流程 → 示例 → 最佳实践 → 常见陷阱"
+      },
+      "batch": "batch-3-structure"
+    },
+    {
+      "id": "AP020",
+      "name": "缺少名称字段",
+      "category": "yaml",
+      "severity": "error",
+      "layer": "rule",
+      "description": "YAML frontmatter 缺少必需的 name 字段",
+      "impact": "组件无法被识别和调用",
+      "detection": {
+        "method": "rule",
+        "check": "missing_field:name"
+      },
+      "fix": {
+        "type": "auto",
+        "template": "name: [kebab-case-name]"
+      },
+      "batch": "batch-1-yaml"
+    },
+    {
+      "id": "AP021",
+      "name": "Skill类型不明确",
+      "category": "skill-specific",
+      "severity": "warning",
+      "layer": "semantic",
+      "description": "未明确说明是 Reference/Tool/Task 类型",
+      "impact": "Claude 加载策略可能不优化",
+      "detection": {
+        "method": "semantic",
+        "check": "unclear_skill_type"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "在描述中明确 Skill 类型和主要用途"
+      },
+      "batch": "batch-4-semantic"
+    },
+    {
+      "id": "AP022",
+      "name": "工作流程不清晰",
+      "category": "skill-specific",
+      "severity": "warning",
+      "layer": "semantic",
+      "description": "工作流程步骤不清晰或过于复杂",
+      "impact": "执行结果不稳定，用户困惑",
+      "detection": {
+        "method": "semantic",
+        "check": "unclear_workflow"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "使用 numbered list 明确步骤，每个步骤单一职责"
+      },
+      "batch": "batch-4-semantic"
+    },
+    {
+      "id": "AP025",
+      "name": "过度依赖外部工具",
+      "category": "skill-specific",
+      "severity": "warning",
+      "layer": "semantic",
+      "description": "过度使用 Bash 工具执行本可用 Claude 能力完成的任务",
+      "impact": "降低可移植性，增加安全风险",
+      "detection": {
+        "method": "semantic",
+        "check": "over_reliance_on_bash"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "优先使用 Claude 的代码分析和编辑能力"
+      },
+      "batch": "batch-4-semantic"
+    },
+    {
+      "id": "AP036",
+      "name": "缺少概述部分",
+      "category": "structure",
+      "severity": "info",
+      "layer": "pattern",
+      "description": "缺少概述/目的部分",
+      "impact": "用户无法快速了解组件价值",
+      "detection": {
+        "method": "pattern",
+        "check": "missing_section:## 目的 OR ## Overview"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "添加 ## 目的 部分，说明组件解决什么问题"
+      },
+      "batch": "batch-3-structure"
+    },
+    {
+      "id": "AP038",
+      "name": "标题层级错误",
+      "category": "structure",
+      "severity": "warning",
+      "layer": "rule",
+      "description": "标题层级使用不当（如跳过H2直接使用H3）",
+      "impact": "文档结构层次不清晰",
+      "detection": {
+        "method": "rule",
+        "check": "heading_level_incorrect"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "使用正确的Markdown标题层级"
+      },
+      "batch": "batch-3-structure"
+    },
+    {
+      "id": "AP039",
+      "name": "代码块无语言标识",
+      "category": "structure",
+      "severity": "info",
+      "layer": "pattern",
+      "description": "代码块未指定语言标识",
+      "impact": "语法高亮失效，阅读体验差",
+      "detection": {
+        "method": "pattern",
+        "check": "code_block_no_language"
+      },
+      "fix": {
+        "type": "auto",
+        "guide": "在代码块开头添加语言标识"
+      },
+      "batch": "batch-3-structure"
+    },
+    {
+      "id": "AP040",
+      "name": "链接失效",
+      "category": "structure",
+      "severity": "info",
+      "layer": "pattern",
+      "description": "文档中包含失效链接",
+      "impact": "用户无法访问引用的资源",
+      "detection": {
+        "method": "pattern",
+        "check": "broken_links"
+      },
+      "fix": {
+        "type": "manual",
+        "guide": "检查并修复所有链接"
+      },
+      "batch": "batch-3-structure"
+    }
+  ],
+  "batchMapping": {
+    "batch-1-yaml": ["AP001", "AP002", "AP009", "AP015", "AP020"],
+    "batch-2-content": ["AP003", "AP004", "AP005", "AP006", "AP007"],
+    "batch-3-structure": ["AP019", "AP036", "AP038", "AP039", "AP040"],
+    "batch-4-semantic": ["AP011", "AP016", "AP021", "AP022", "AP025"]
+  }
+}

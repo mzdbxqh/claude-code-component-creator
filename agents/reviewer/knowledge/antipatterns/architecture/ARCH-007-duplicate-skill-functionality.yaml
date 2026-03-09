@@ -1,0 +1,74 @@
+id: ARCH-007
+name: duplicate-skill-functionality
+severity: warning
+component_type: skill
+category: architecture
+
+title:
+  zh: "Skill功能重复"
+  en: "Duplicate Skill Functionality"
+
+description:
+  zh: |
+    多个Skill提供了高度相似的功能，造成维护负担和用户使用困惑。
+    可能由于不同开发者独立创建或缺乏统一规划导致。
+  en: |
+    Multiple skills provide highly similar functionality, causing maintenance burden and user confusion.
+
+rationale:
+  zh: "合并重复功能可减少维护成本，提供一致用户体验"
+  en: "Consolidating duplicates reduces maintenance cost and provides consistent UX"
+
+detection:
+  method: custom
+  custom_function: check_skill_duplication
+  criteria:
+    - 对比Skill name和description的语义相似度
+    - 检查输入参数格式相似性
+    - 检查输出格式相似性
+    - 对比工具权限列表
+  threshold:
+    similarity_threshold: 0.8  # 相似度超过80%触发
+    min_shared_tools: 3  # 共享3+个工具加强判定
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      处理重复Skill：
+      1. 分析各Skill的使用场景差异
+      2. 保留最通用/维护最好的版本
+      3. 迁移其他版本的特有功能
+      4. 更新调用方使用统一Skill
+      5. 归档或删除被合并的Skill
+    en: |
+      Handle duplicate skills:
+      1. Analyze usage scenario differences
+      2. Keep the most general/best maintained version
+      3. Migrate unique features from other versions
+      4. Update callers to use unified skill
+      5. Archive or remove merged skills
+
+examples:
+  bad:
+    zh: |
+      skills/
+        ├── file-reader/     # 读取文件内容
+        ├── file-loader/     # 加载文件数据
+        └── file-parser/     # 解析文件 (功能高度相似)
+    en: |
+      skills/
+        ├── file-reader/     # Read file content
+        ├── file-loader/     # Load file data
+        └── file-parser/     # Parse file (highly similar)
+  good:
+    zh: |
+      skills/
+        └── file-processor/  # 统一的文件处理Skill
+             # 支持多种模式：read/load/parse
+    en: |
+      skills/
+        └── file-processor/  # Unified file processing skill
+             # Supports multiple modes: read/load/parse
+
+tags: ["architecture", "duplication", "consolidation", "dry"]
