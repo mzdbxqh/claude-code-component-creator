@@ -119,3 +119,13 @@ Copyright (c) 2026 showme.cc
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## Skill 拆分策略
+
+当 skill 超过 400 行时，参考 `skill-splitting-strategy-analysis.md`：
+- 5 维度诊断框架
+- 5 种拆分策略
+- 实战案例
+
+**已完成拆分**:
+- report-renderer → 4 个专用 renderers (Token 降低 87-92%)
