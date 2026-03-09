@@ -9,6 +9,11 @@ allowed-tools:
   - Write
   - Bash
 ---
+> **⚠️ DEPRECATED**: 本 skill 已拆分为专用渲染器：
+> - `/review-report-renderer` - 审阅报告
+> - `/architecture-report-renderer` - 架构报告
+> - `/dependency-report-renderer` - 依赖报告
+> - `/migration-report-renderer` - 改造方案报告
 
 # Report Renderer
 
