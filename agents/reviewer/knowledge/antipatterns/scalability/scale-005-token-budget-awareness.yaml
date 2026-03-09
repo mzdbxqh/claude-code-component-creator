@@ -76,27 +76,69 @@ fix:
   automatic: false
   suggestion:
     zh: |
-      如果 Token 预算超标:
-      1. 识别并精简冗余描述
-      2. 将详细内容移至 references/目录
-      3. 使用简洁的表格替代冗长文字
-      4. 移除重复的说明和示例
+      **系统化拆分流程**:
 
-      如果章节比例失衡:
-      1. Workflow 应保持 30-40%（核心流程）
-      2. Examples 应保持 15-20%（足够指导用户）
-      3. Error Handling 应保持 10-15%（完整覆盖）
+      1. **运行诊断**: 使用 5 维度评分框架
+         - 输入差异度 (25%): 是否处理多种输入类型？
+         - 知识域分离度 (25%): 是否需要多个独立知识体系？
+         - 工作流分支度 (20%): 工作流是否早期分叉？
+         - 触发互斥度 (15%): 触发场景是否互斥？
+         - Token 共享率 (15%): 场景间 token 共享率如何？
+
+      2. **选择策略**: 根据评分选择拆分策略
+         - 策略 1: 按输入类型拆分 (输入差异度高)
+         - 策略 2: 按知识域拆分 (知识域分离度高)
+         - 策略 3: 按工作流阶段拆分 (工作流分支度高)
+         - 策略 4: 按复杂度分层 (新手/专家场景)
+         - 策略 5: 按触发频率分层 (高频/低频场景)
+
+      3. **制定方案**: 定义拆分边界和共享逻辑
+         - 识别共享逻辑 (应占 15-30%)
+         - 提取到 references/common-*.md
+         - 定义每个拆分 skill 的边界
+
+      4. **渐进实施**: 分阶段拆分和验证
+         - 第一轮: 拆分 2-3 个 skill
+         - 验证: 观察 token 消耗和用户反馈
+         - 第二轮: 根据数据决定是否进一步拆分
+
+      5. **质量验证**: 使用 ccc:review 验证结果
+         - 每个 skill < 300 行
+         - Token 降低 ≥ 40%
+         - 触发词差异化 > 50%
+
+      **参考文档**: skill-splitting-strategy-analysis.md
+
+      **如果评分 < 60**: 考虑其他优化手段
+      - 精简冗余描述
+      - 将详细内容移至 references/
+      - 使用简洁表格替代冗长文字
     en: |
-      If token budget exceeded:
-      1. Identify and streamline redundant descriptions
-      2. Move detailed content to references/ directory
-      3. Use concise tables instead of verbose text
-      4. Remove duplicate explanations and examples
+      **Systematic Splitting Process**:
 
-      If section proportions imbalanced:
-      1. Workflow should be 30-40% (core process)
-      2. Examples should be 15-20% (enough to guide users)
-      3. Error Handling should be 10-15% (complete coverage)
+      1. **Run Diagnosis**: Use 5-dimension scoring framework
+         - Input diversity (25%)
+         - Knowledge domain separation (25%)
+         - Workflow branching (20%)
+         - Trigger exclusivity (15%)
+         - Token sharing rate (15%)
+
+      2. **Select Strategy**: Choose splitting strategy based on score
+         - Strategy 1: Split by input type
+         - Strategy 2: Split by knowledge domain
+         - Strategy 3: Split by workflow stage
+         - Strategy 4: Split by complexity layer
+         - Strategy 5: Split by trigger frequency
+
+      3. **Define Plan**: Define splitting boundaries and shared logic
+
+      4. **Progressive Implementation**: Split and validate in stages
+
+      5. **Quality Validation**: Verify results using ccc:review
+
+      **Reference**: skill-splitting-strategy-analysis.md
+
+      **If score < 60**: Consider other optimization methods
 
 examples:
   bad:
