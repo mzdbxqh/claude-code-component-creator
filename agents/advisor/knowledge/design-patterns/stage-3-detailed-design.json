@@ -1,7 +1,7 @@
 {
   "stageId": "stage-3-detailed-design",
   "name": "详细设计核心知识",
-  "description": "设计 YAML 配置、工作流步骤、工具权限",
+  "description": "设计 YAML 配置、工作流步骤、工具权限、证据链",
   "handbookReferences": ["chapter-4", "chapter-5", "chapter-6", "chapter-7"],
   "coreKnowledge": {
     "yamlFrontmatter": {
@@ -10,6 +10,12 @@
     },
     "fileReferences": {"syntax": "@path/to/file.md", "rules": ["使用相对路径", "不能是绝对路径", "最大深度5层"], "usageRate": "90.4%"},
     "workflowDesign": {"stepStructure": ["明确目标", "具体操作", "期望输出", "错误处理"], "errorHandling": {"levels": ["Fatal", "Critical", "Warning"]}},
-    "toolPermissions": {"guidelines": ["最小权限原则", "Bash 需谨慎", "Task 仅用于 fork"]}
+    "toolPermissions": {"guidelines": ["最小权限原则", "Bash 需谨慎", "Task 仅用于 fork"]},
+    "evidenceChain": {
+      "required": true,
+      "components": ["能力需求表", "Skill映射表", "验证清单"],
+      "reference": "docs/evidence-chain-specification.md"
+    }
   }
 }
+
