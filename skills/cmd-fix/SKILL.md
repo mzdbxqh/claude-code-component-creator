@@ -1,0 +1,252 @@
+---
+name: ccc:fix
+model: sonnet
+context: fork
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+description: "Interactive repair workflow with AskUserQuestion strategy selection and SubAgent factory execution"
+argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
+---
+
+# /ccc:fix
+
+交互式修复命令，基于审查报告执行批量修复。
+
+## 参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `--artifact-id` | 指定要修复的 artifact ID | 当前上下文 |
+| `--auto` | 自动修复所有 P0 问题 | false |
+| `--dry-run` | 预览修复内容，不实际写入 | false |
+
+## 交互流程
+
+### 步骤 1: 加载审查报告
+
+```bash
+/ccc:fix --artifact-id=DLV-001
+```
+
+系统加载最近的审查报告：
+```
+加载审查报告：docs/reviews/2026-03-03-DLV-001-review.md
+
+问题摘要:
+  - Errors:   2 个 (P0 - 必须修复)
+  - Warnings: 5 个 (P1 - 建议修复)
+  - Infos:    5 个 (P2 - 可选优化)
+
+影响文件:
+  - command/deploy.md (3 个问题)
+  - skills/reviewer/SKILL.md (2 个问题)
+  - agents/builder/SKILL.md (2 个问题)
+```
+
+### 步骤 2: 策略选择 (AskUserQuestion)
+
+```yaml
+AskUserQuestion(
+  questions=[{
+    question: "发现 12 个问题，请选择修复策略：",
+    header: "修复策略",
+    options: [
+      {
+        label: "全自动修复",
+        description: "派遣 SubAgent 工厂批量修复所有 P0/P1 问题（推荐）"
+      },
+      {
+        label: "交互式修复",
+        description: "逐类问题确认修复方案和范围"
+      },
+      {
+        label: "手动修复",
+        description: "仅生成修复建议，不执行修复"
+      }
+    ],
+    multiSelect: false
+  }]
+)
+```
+
+### 步骤 3: 范围确认 (如选择交互式)
+
+```yaml
+AskUserQuestion(
+  questions=[{
+    question: "请选择要修复的问题类型：",
+    header: "修复范围",
+    options: [
+      {
+        label: "仅 P0 错误",
+        description: "修复 2 个 Error 级别问题（元数据缺失、工具权限未声明）"
+      },
+      {
+        label: "P0 + P1",
+        description: "修复 7 个问题（包含 description 过短、缺少示例）"
+      },
+      {
+        label: "全部修复",
+        description: "修复所有 12 个问题（包含 Info 级别优化）"
+      }
+    ],
+    multiSelect: false
+  }]
+)
+```
+
+### 步骤 4: 执行确认
+
+```yaml
+AskUserQuestion(
+  questions=[{
+    question: "确认修复策略，开始执行？",
+    header: "执行确认",
+    options: [
+      {label: "开始修复", description: "派遣 SubAgent 工厂执行批量修复"},
+      {label: "修改策略", description: "返回上一步重新选择"},
+      {label: "暂停", description: "暂不执行，保留审查报告"}
+    ],
+    multiSelect: false
+  }]
+)
+```
+
+### 步骤 5: 并行修复执行
+
+使用 `Task` 工具并行调用 SubAgent 工厂：
+
+```yaml
+# 调用 metadata-fix-agent
+Task(
+  subagent_type: "general-purpose",
+  prompt: "修复以下文件的元数据问题：
+    - command/deploy.md: 添加 argument-hint
+    - skills/reviewer/SKILL.md: 添加 model 声明"
+)
+
+# 调用 tool-declare-agent
+Task(
+  subagent_type: "general-purpose",
+  prompt: "为以下文件添加工具权限声明：
+    - skills/reviewer/SKILL.md: allowed-tools"
+)
+
+# 调用 doc-complete-agent
+Task(
+  subagent_type: "general-purpose",
+  prompt: "为以下文件添加使用示例：
+    - agents/builder/SKILL.md"
+)
+```
+
+**注意**: 实际执行时使用 `Task` 工具，参数格式为：
+- `subagent_type`: 指定子代理类型（如 `general-purpose`）
+- `prompt`: 详细的修复指令
+
+或者使用专用 SubAgent（如已定义）:
+```yaml
+Task(
+  subagent_type: "metadata-fix-agent",
+  arguments: {
+    files: ["command/deploy.md", "skills/reviewer/SKILL.md"],
+    fix_types: ["argument-hint", "model"],
+    dry_run: false
+  }
+)
+```
+
+### 步骤 6: 修复报告
+
+```
+修复完成！
+
+修复摘要:
+  - 修复文件数：3 个
+  - 修复问题数：12 个
+  - 修复耗时：2 分 35 秒
+
+变更详情:
+  ✓ command/deploy.md
+    - 添加 argument-hint 字段
+    - 补充错误处理文档
+
+  ✓ skills/reviewer/SKILL.md
+    - 添加 model: sonnet 声明
+    - 添加 allowed-tools 声明
+
+  ✓ agents/builder/SKILL.md
+    - 添加使用示例章节
+
+Git Commits:
+  - chore: fix metadata issues in deploy.md
+  - chore: add tool declarations in reviewer skill
+  - docs: add examples to builder skill
+
+修复报告：docs/fixes/2026-03-03-DLV-001-fix.md
+```
+
+## 输出规范
+
+### 修复报告文件
+
+| 属性 | 值 |
+|------|-----|
+| **目录** | `docs/fixes/` |
+| **文件名** | `YYYY-MM-DD-<artifact-id>-fix.md` |
+| **格式** | Markdown |
+
+### 报告结构
+
+| 章节 | 内容 |
+|------|------|
+| 修复摘要 | 修复文件数、问题数、耗时 |
+| 变更详情 | 每个文件的变更列表 |
+| Git Commits | 生成的提交记录 |
+| 修复前后对比 | 合规评分对比 |
+
+## 错误处理
+
+| 错误场景 | 处理方式 |
+|----------|----------|
+| 审查报告不存在 | 提示先执行 /ccc:review |
+| 无可修复问题 | 报告"无需修复"，退出 |
+| 文件写入失败 | 回滚已修改文件，报告错误 |
+| SubAgent 执行失败 | 重试 1 次，失败后报告部分成功 |
+| Git 提交失败 | 保留修改，提示用户手动提交 |
+
+## 示例
+
+### 示例 1: 交互式修复
+
+```bash
+/ccc:fix --artifact-id=DLV-001
+```
+
+### 示例 2: 自动修复 P0 问题
+
+```bash
+/ccc:fix --artifact-id=DLV-001 --auto
+```
+
+### 示例 3: 预览修复内容
+
+```bash
+/ccc:fix --artifact-id=DLV-001 --dry-run
+```
+
+### 示例 4: 与审查命令连用
+
+```bash
+# 先审查
+/ccc:review --artifact-id=DLV-001
+
+# 后修复
+/ccc:fix --artifact-id=DLV-001
+```
+
+## 下一步
+
+修复完成后：
+1. 查看修复报告：`cat docs/fixes/YYYY-MM-DD-<artifact-id>-fix.md`
+2. 验证修复结果：`/ccc:review --artifact-id=DLV-002` (新生成的 delivery)
+3. 提交变更：`git add . && git commit -m "fix: 修复审查问题"`
