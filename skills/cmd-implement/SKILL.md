@@ -62,6 +62,97 @@ Implementation report: docs/implementations/2026-03-10-my-refactor-impl.md
 | **Filename** | `YYYY-MM-DD-<plan-name>-impl.md` |
 | **Format** | Markdown |
 
+## Examples
+
+### Example 1: 实施完整的重构计划
+
+```bash
+/ccc:implement --plan=docs/designs/component-extraction.md
+```
+
+**场景**: 将混杂的代码重构为模块化组件
+
+**输入**: 包含 3 个阶段的迭代计划（提取接口、创建实现、更新调用方）
+
+**执行过程**:
+1. 验证当前代码状态与计划假设一致
+2. 阶段 1: 提取接口定义到独立文件
+3. 阶段 2: 创建实现类并迁移逻辑
+4. 阶段 3: 更新所有调用方使用新接口
+5. 运行测试套件验证功能正常
+6. 生成实施报告
+
+**输出文件**:
+- 修改 12 个源文件
+- `docs/implementations/2026-03-10-component-extraction-impl.md`
+
+### Example 2: 分阶段实施（仅执行第一阶段）
+
+```bash
+/ccc:implement --plan=docs/designs/database-migration.md --phase=1
+```
+
+**场景**: 大型数据库迁移分阶段执行，避免风险
+
+**用例**: 计划包含 5 个阶段，先执行第 1 阶段（添加新列），验证后再执行后续阶段
+
+**输出**:
+```
+Implementation Complete: database-migration (Phase 1/5)
+
+Phase 1 Executed: Add migration columns
+Files Modified: 3
+Tests Passed: ✓
+
+Next: Run /ccc:implement --plan=docs/designs/database-migration.md --phase=2
+```
+
+### Example 3: 预览模式（Dry Run）
+
+```bash
+/ccc:implement --plan=docs/designs/api-refactor.md --dry-run
+```
+
+**场景**: 在正式执行前预览将要进行的修改
+
+**输出**:
+```
+DRY RUN: api-refactor
+
+Planned Changes:
+  Phase 1: Rename endpoints
+    - src/api/routes.ts: 8 changes
+    - src/api/handlers.ts: 12 changes
+
+  Phase 2: Update request schemas
+    - src/schemas/request.ts: 5 changes
+    - tests/api.test.ts: 15 changes
+
+Files to modify: 4
+Estimated changes: 40
+
+Run without --dry-run to apply changes
+```
+
+### Example 4: 处理阶段依赖关系
+
+```bash
+/ccc:implement --plan=docs/designs/multi-module-upgrade.md --phase=3
+```
+
+**场景**: 尝试执行第 3 阶段，但第 1、2 阶段尚未完成
+
+**输出**:
+```
+Error: Phase dependency not satisfied
+
+Phase 3 "Integrate modules" requires:
+  ✗ Phase 1: Update core module (not completed)
+  ✗ Phase 2: Update util module (not completed)
+
+Suggestion: Run without --phase to execute in order
+```
+
 ## Error Handling
 
 | Error | Handling |

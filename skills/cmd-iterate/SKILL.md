@@ -105,6 +105,150 @@ Iteration report: docs/iterations/2026-03-02-BLP-001-iteration.md
 | New Artifact | Reference to BLP-002 |
 | Summary | Status and next steps |
 
+## Examples
+
+### Example 1: 改进 Blueprint 的工具选择
+
+```bash
+/ccc:iterate --artifact-id=BLP-001
+```
+
+**场景**: 初始设计使用了过多工具，导致复杂度过高
+
+**输入**: BLP-001 使用了 Read、Write、Edit、Bash、Grep 五个工具
+
+**执行过程**:
+1. 加载 BLP-001
+2. 分析发现工具选择冗余（可用 Edit 代替 Write+Read）
+3. 应用改进：简化为 Edit、Bash、Grep 三个工具
+4. 生成 BLP-002
+5. 创建迭代报告
+
+**输出**:
+```
+Iteration Complete: BLP-001 → BLP-002
+
+Changes Applied:
+  ✓ Simplified tool selection (5 → 3 tools)
+  ✓ Consolidated file operations
+  ✓ Updated workflow steps
+
+New Artifact: BLP-002
+Status: READY for build
+
+Quality improvement: 85/100 → 92/100
+Iteration report: docs/iterations/2026-03-10-BLP-001-iteration.md
+```
+
+### Example 2: 增强错误处理
+
+```bash
+/ccc:iterate --artifact-id=BLP-003
+```
+
+**场景**: 初始设计缺少完善的错误处理和边界情况处理
+
+**改进内容**:
+- 添加文件不存在时的 fallback 策略
+- 增加超时机制
+- 补充异常场景的恢复逻辑
+
+**输出**:
+```
+Iteration Complete: BLP-003 → BLP-004
+
+Changes Applied:
+  ✓ Added error handling for missing files
+  ✓ Implemented timeout mechanism (30s)
+  ✓ Added 3 fallback strategies
+  ✓ Enhanced workflow robustness
+
+New Artifact: BLP-004
+Status: READY for build
+
+Iteration report: docs/iterations/2026-03-10-BLP-003-iteration.md
+```
+
+### Example 3: 优化工作流程顺序
+
+```bash
+/ccc:iterate --artifact-id=BLP-005 --lang=en-us
+```
+
+**场景**: 工作流步骤顺序不合理，导致重复操作
+
+**改进前**:
+```
+1. Read file
+2. Process data
+3. Read file again (for validation)
+4. Write result
+```
+
+**改进后**:
+```
+1. Read file
+2. Process data
+3. Validate in-memory
+4. Write result
+```
+
+**输出**:
+```
+Iteration Complete: BLP-005 → BLP-006
+
+Changes Applied:
+  ✓ Reordered workflow steps
+  ✓ Eliminated redundant file read
+  ✓ Added in-memory validation
+
+Performance improvement: ~40% faster execution
+
+New Artifact: BLP-006
+Status: READY for build
+
+Iteration report: docs/iterations/2026-03-10-BLP-005-iteration.md
+```
+
+### Example 4: 无需改进的情况
+
+```bash
+/ccc:iterate --artifact-id=BLP-008
+```
+
+**场景**: Blueprint 已经是最优设计
+
+**输出**:
+```
+Iteration Analysis: BLP-008
+
+No improvements detected. The artifact is already well-designed:
+  ✓ Tool selection optimal
+  ✓ Workflow efficient
+  ✓ Error handling comprehensive
+  ✓ Quality score: 95/100
+
+Status: No changes needed
+```
+
+### Example 5: 处理不支持的制品类型
+
+```bash
+/ccc:iterate --artifact-id=INT-001
+```
+
+**场景**: 尝试迭代 Intent 制品（不支持）
+
+**输出**:
+```
+Error: Invalid artifact type for iteration
+
+Artifact INT-001 is of type "Intent"
+Only Blueprint artifacts support iteration.
+
+Suggestion: Create a Blueprint first using /ccc:design
+```
+
 ## Error Handling
 
 | Error Scenario | Handling Strategy |

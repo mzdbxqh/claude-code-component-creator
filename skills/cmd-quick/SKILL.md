@@ -165,6 +165,180 @@ cat docs/ccc/delivery/YYYY-MM-DD-DLV-*/SKILL.md
 ls -la docs/ccc/delivery/YYYY-MM-DD-DLV-*/
 ```
 
+## Examples
+
+### Example 1: 快速创建简单的搜索工具
+
+```bash
+/ccc:quick "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
+```
+
+**场景**: 从需求到交付的一键完成
+
+**执行过程**:
+```
+┌─────────────────────────────────────────────────────┐
+│ 📋 Stage 1: Intent Creation ✓ COMPLETED            │
+├─────────────────────────────────────────────────────┤
+│ ID: INT-2026-03-07-001                              │
+│ Quality: 89/100  [█████████████████░░] 优秀         │
+└─────────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────────┐
+│ 📐 Stage 2: Blueprint Design ✓ COMPLETED           │
+├─────────────────────────────────────────────────────┤
+│ ID: BLP-2026-03-07-001                              │
+│ Quality: 92/100  [██████████████████░] 优秀         │
+│ Status: ✓ Auto-approved (质量 > 85)                 │
+└─────────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────────┐
+│ 📦 Stage 3: Delivery ✓ COMPLETED                   │
+├─────────────────────────────────────────────────────┤
+│ ID: DLV-2026-03-07-001                              │
+│ Compliance: 88/100                                  │
+│ Files: SKILL.md, README.md, tests/                  │
+└─────────────────────────────────────────────────────┘
+
+🚀 Quick Workflow Complete!
+Total time: 3m 45s
+Status: ✅ Ready to use
+```
+
+**生成文件**:
+- `docs/ccc/intent/2026-03-07-INT-001.yaml`
+- `docs/ccc/blueprint/2026-03-07-BLP-001.yaml`
+- `docs/ccc/delivery/2026-03-07-DLV-001/SKILL.md`
+
+### Example 2: 创建复杂工具（部分阶段需要人工审查）
+
+```bash
+/ccc:quick "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要回滚功能"
+```
+
+**场景**: 复杂需求，Blueprint 质量未达到自动批准阈值
+
+**执行过程**:
+```
+┌─────────────────────────────────────────────────────┐
+│ 📋 Stage 1: Intent Creation ✓ COMPLETED            │
+│ Quality: 78/100                                     │
+└─────────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────────┐
+│ 📐 Stage 2: Blueprint Design ✓ COMPLETED           │
+│ Quality: 82/100  [████████████████░░░] 良好         │
+│ Status: ⚠ Manual review required (质量 < 85)        │
+└─────────────────────────────────────────────────────┘
+
+⚠ Blueprint quality below auto-approval threshold (82/100)
+
+Suggestions:
+1. Review workflow complexity (8 steps detected)
+2. Consider adding more error handling
+3. Validate tool selection rationale
+
+Options:
+- Press Enter to continue anyway
+- Type 'stop' to pause and iterate
+- Run /ccc:iterate --artifact-id=BLP-002 to improve
+
+> [User presses Enter]
+
+┌─────────────────────────────────────────────────────┐
+│ 📦 Stage 3: Delivery ✓ COMPLETED                   │
+└─────────────────────────────────────────────────────┘
+
+⚠ Completed with warnings - Review recommended
+```
+
+### Example 3: 多语言支持（英文）
+
+```bash
+/ccc:quick "I want to create a log analyzer that parses nginx logs" --lang=en-us
+```
+
+**输出**:
+```
+🚀 Quick Workflow Complete!
+
+┌─────────────────────────────────────────────────────┐
+│ Full Pipeline Summary                               │
+├─────────────────────────────────────────────────────┤
+│ Intent    →  Blueprint   →  Delivery               │
+│ 91/100 ✓     94/100 ✓      90/100 ✓                │
+│                                                     │
+│ Total time: 4m 12s                                  │
+│ Status: ✅ All stages passed                        │
+└─────────────────────────────────────────────────────┘
+
+Next steps:
+   1. 📖 Review the generated SKILL.md
+   2. 🧪 Test with sample nginx logs
+   3. 🔄 Iterate if needed with /ccc:iterate
+```
+
+### Example 4: 处理 Intent 质量过低的情况
+
+```bash
+/ccc:quick "做个工具"
+```
+
+**场景**: 需求描述过于模糊
+
+**输出**:
+```
+┌─────────────────────────────────────────────────────┐
+│ 📋 Stage 1: Intent Creation ✓ COMPLETED            │
+│ Quality: 48/100  [█████░░░░░░░░░░░░░░░] 差          │
+└─────────────────────────────────────────────────────┘
+
+❌ Intent quality too low (48/100 < 60)
+
+Issues detected:
+- Requirement too vague
+- Missing constraints
+- Unclear objectives
+
+⛔ Workflow stopped. Please provide more details:
+1. What problem does it solve?
+2. What are the inputs and outputs?
+3. Any technical constraints?
+
+Try again with: /ccc:quick "更详细的描述"
+```
+
+### Example 5: 处理构建失败并保留中间制品
+
+```bash
+/ccc:quick "创建一个数据迁移工具，支持 MySQL 和 PostgreSQL"
+```
+
+**场景**: 前两个阶段成功，构建阶段失败
+
+**输出**:
+```
+┌─────────────────────────────────────────────────────┐
+│ 📋 Stage 1: Intent ✓ | 📐 Stage 2: Blueprint ✓    │
+└─────────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────────┐
+│ 📦 Stage 3: Delivery ✗ FAILED                      │
+└─────────────────────────────────────────────────────┘
+
+❌ Build failed: Template rendering error
+
+Partial completion:
+  ✓ Intent created: INT-2026-03-07-005
+  ✓ Blueprint created: BLP-2026-03-07-005
+  ✗ Delivery failed at stage 3
+
+Recovery options:
+  1. Review Blueprint: cat docs/ccc/blueprint/2026-03-07-BLP-005.yaml
+  2. Retry build: /ccc:build --artifact-id=BLP-005
+  3. Iterate design: /ccc:iterate --artifact-id=BLP-005
+```
+
 ## Options
 
 ```bash
