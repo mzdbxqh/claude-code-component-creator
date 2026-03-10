@@ -7,6 +7,8 @@ model: sonnet
 allowed-tools:
   - Read
   - Write
+skills:
+  - ccc:std-naming-rules
 ---
 
 # Review Report Renderer

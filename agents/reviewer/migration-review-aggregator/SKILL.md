@@ -6,6 +6,8 @@ model: haiku
 allowed-tools:
   - Task
 argument-hint: "<file-path> [--format=json|markdown]"
+skills:
+  - ccc:std-component-selection
 ---
 
 # 改造方案审阅聚合器

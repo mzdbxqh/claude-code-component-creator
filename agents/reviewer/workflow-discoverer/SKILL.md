@@ -10,6 +10,8 @@ allowed-tools:
   - Glob
   - Bash
 argument-hint: '<project-path> [--depth=shallow|full|deep] [--output=json|markdown|mermaid]'
+skills:
+  - ccc:std-component-selection
 ---
 
 # Workflow Discoverer

@@ -7,6 +7,8 @@ allowed-tools:
   - Read
   - Grep
   - Glob
+skills:
+  - ccc:std-component-selection
 ---
 
 # Dependency Analyzer

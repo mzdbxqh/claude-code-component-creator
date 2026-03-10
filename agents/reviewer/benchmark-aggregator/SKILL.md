@@ -7,6 +7,8 @@ allowed-tools:
   - Read
   - Write
 argument-hint: '<graded-results-path> [--execution-results=<path>] [--output-dir=<path>]'
+skills:
+  - ccc:std-component-selection
 ---
 
 # Benchmark Aggregator

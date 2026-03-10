@@ -7,6 +7,8 @@ allowed-tools:
   - Read
   - Write
   - Task
+skills:
+  - ccc:std-naming-rules
 ---
 
 # Review-Fix Connector

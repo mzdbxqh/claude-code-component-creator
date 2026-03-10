@@ -10,6 +10,8 @@ allowed-tools:
   - Bash
   - Grep
   - Glob
+skills:
+  - ccc:std-component-selection
 ---
 
 # Linkage Validator

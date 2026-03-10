@@ -10,6 +10,8 @@ allowed-tools:
   - Grep
   - Glob
 argument-hint: "[--target=<path>] [--artifact-id=current] [--no-arch] [--workflow-check=auto|full|off] [--linkage-check=auto] [--lang=zh-cn|en-us|ja-jp] [--with-eval] [--eval-only] [--optimize-description]"
+skills:
+  - ccc:std-component-selection
 ---
 
 # 审阅结果聚合器

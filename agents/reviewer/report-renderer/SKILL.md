@@ -8,6 +8,8 @@ allowed-tools:
   - Read
   - Write
   - Bash
+skills:
+  - ccc:std-naming-rules
 ---
 > **⚠️ DEPRECATED**: 本 skill 已拆分为专用渲染器：
 > - `/review-report-renderer` - 审阅报告
