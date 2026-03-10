@@ -1,5 +1,5 @@
 ---
-name: lib-antipatterns
+name: ccc:lib-antipatterns
 description: "反模式知识库。包含 CCC 收集的 76+ 个反模式定义，覆盖 8 个维度（intent, config, dependency, security, environment, llm, scalability, testability）。由 Subagent 通过 skills: 字段加载。"
 model: sonnet
 context: main

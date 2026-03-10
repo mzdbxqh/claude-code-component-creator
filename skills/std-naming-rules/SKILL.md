@@ -1,5 +1,5 @@
 ---
-name: std-naming-rules
+name: ccc:std-naming-rules
 description: "命名规则检查标准。适用于审阅 Claude Code 插件时的命名规范检查。包含 Skill 命名规则（cmd-/std-/lib-前缀）、Subagent 命名规则、触发路径规则。Use when reviewing Claude Code plugins."
 model: sonnet
 context: main

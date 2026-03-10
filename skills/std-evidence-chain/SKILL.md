@@ -1,5 +1,5 @@
 ---
-name: std-evidence-chain
+name: ccc:std-evidence-chain
 description: "证据链规范。确保从工作流需求到 Skill 实现的完整可追溯性。Use when designing or reviewing components."
 model: sonnet
 context: main

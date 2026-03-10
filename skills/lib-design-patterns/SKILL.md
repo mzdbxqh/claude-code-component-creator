@@ -1,5 +1,5 @@
 ---
-name: lib-design-patterns
+name: ccc:lib-design-patterns
 description: "设计模式知识库。包含 CCC 5 阶段设计流程的模式库（需求分析、架构选型、详细设计、验证、规划）。由 Subagent 通过 skills: 字段加载。"
 model: sonnet
 context: main
