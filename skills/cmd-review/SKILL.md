@@ -1,5 +1,5 @@
 ---
-name: ccc:review
+name: ccc:cmd-review
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

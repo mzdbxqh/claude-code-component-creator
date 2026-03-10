@@ -1,5 +1,5 @@
 ---
-name: ccc:status-graph
+name: ccc:cmd-status-graph
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

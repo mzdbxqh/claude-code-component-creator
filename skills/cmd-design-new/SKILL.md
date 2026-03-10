@@ -1,5 +1,5 @@
 ---
-name: ccc:design-new
+name: ccc:cmd-design-new
 description: |
   从零开始设计新组件 - 通过 5 阶段流程（需求→架构→设计→验证→规划）
   创建完整的组件设计方案。

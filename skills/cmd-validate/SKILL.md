@@ -1,5 +1,5 @@
 ---
-name: ccc:validate
+name: ccc:cmd-validate
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

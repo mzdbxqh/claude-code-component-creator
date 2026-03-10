@@ -1,5 +1,5 @@
 ---
-name: ccc:init
+name: ccc:cmd-init
 description: |
   Create Intent artifact using 4-question framework.
   Analyzes user requirement and generates structured Intent with cognitive load management.

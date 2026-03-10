@@ -1,5 +1,5 @@
 ---
-name: ccc:iterate
+name: ccc:cmd-iterate
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

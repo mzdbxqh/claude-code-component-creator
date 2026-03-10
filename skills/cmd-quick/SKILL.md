@@ -1,5 +1,5 @@
 ---
-name: ccc:quick
+name: ccc:cmd-quick
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

@@ -1,5 +1,5 @@
 ---
-name: ccc:design-iterate
+name: ccc:cmd-design-iterate
 description: |
   基于现有组件迭代优化 - 分析现状与目标差异，生成增量变更方案。
   Iterate on existing components - analyze current vs target state,

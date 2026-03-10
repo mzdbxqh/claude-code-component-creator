@@ -1,5 +1,5 @@
 ---
-name: ccc:diff
+name: ccc:cmd-diff
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

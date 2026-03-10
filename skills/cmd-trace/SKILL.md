@@ -1,5 +1,5 @@
 ---
-name: ccc:trace
+name: ccc:cmd-trace
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep

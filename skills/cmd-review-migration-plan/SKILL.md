@@ -1,5 +1,5 @@
 ---
-name: ccc:review-migration-plan
+name: ccc:cmd-review-migration-plan
 description: 改造方案审阅模式 - 检查 Agent → Skill 改造方案质量
 argument-hint: "<file-path> [--format=json|markdown] [--lang=zh-cn|en-us|ja-jp]"
 ---
