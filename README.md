@@ -59,9 +59,11 @@ Review (Quality assurance)
 | `/ccc:init` | Create intent artifact using 4-question framework |
 | `/ccc:design` | Generate blueprint from intent |
 | `/ccc:build` | Create production-ready deliverable |
+| `/ccc:implement` | Implement iteration plans with validation |
 | `/ccc:review` | Comprehensive quality review (76+ checks) |
 | `/ccc:quick` | Execute complete workflow in one command |
 | `/ccc:iterate` | Iterate on existing blueprint |
+| `/ccc:design-iterate` | Iterate on existing components |
 | `/ccc:status` | Display project workflow state |
 | `/ccc:trace` | Generate traceability matrix |
 | `/ccc:validate` | Validate artifacts with external tools |
