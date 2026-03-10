@@ -26,11 +26,35 @@ Iterates on an existing blueprint artifact, creating a new version with improvem
 
 ## Workflow
 
-1. Load the specified artifact (or current context artifact)
-2. Analyze the artifact for improvement opportunities
-3. Apply refinements based on feedback or detected issues
-4. Generate a new artifact with incremented ID (e.g., BLP-001 → BLP-002)
-5. Create iteration report documenting changes
+### Step 1: Load Artifact
+**目标**: 加载指定的制品
+**操作**: 从 docs/ccc/blueprint/ 读取指定制品或使用上下文制品
+**输出**: 制品数据结构
+**错误处理**: 制品不存在时列出可用制品并建议选择；制品类型不支持迭代时提示仅支持 Blueprint 类型
+
+### Step 2: Analyze Improvement Opportunities
+**目标**: 分析改进机会
+**操作**: 检测制品中的问题和优化点
+**输出**: 改进建议列表
+**错误处理**: 未检测到改进点时报告"无需修改"并优雅退出；分析超时时使用已收集的部分结果继续执行
+
+### Step 3: Apply Refinements
+**目标**: 应用改进方案
+**操作**: 基于反馈或检测到的问题应用改进
+**输出**: 修改后的制品数据
+**错误处理**: 改进应用失败时回滚到原始版本并报告具体错误；部分改进失败时标记失败项并继续应用其他改进
+
+### Step 4: Generate New Artifact
+**目标**: 生成新的制品 ID
+**操作**: 创建递增 ID 的新制品（例如 BLP-001 → BLP-002）
+**输出**: 新的制品文件
+**错误处理**: 文件生成失败时显示具体错误并回滚变更；ID 冲突时自动查找下一个可用 ID
+
+### Step 5: Create Iteration Report
+**目标**: 生成迭代报告
+**操作**: 记录所有变更和改进依据
+**输出**: 迭代报告文件
+**错误处理**: 报告生成失败时显示警告但不影响制品生成；目录不存在时自动创建 docs/iterations/
 
 ## Output Specification
 

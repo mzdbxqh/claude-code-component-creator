@@ -26,11 +26,35 @@ Generates deliverable files from a blueprint artifact.
 
 ## Workflow
 
-1. **Load Blueprint** - Read and parse the blueprint
-2. **Generate SKILL.md** - Create skill definition
-3. **Generate Implementation** - Create code files
-4. **Generate Tests** - Create test files
-5. **Package Delivery** - Create DLV artifact
+### Step 1: Load Blueprint
+**目标**: 读取并解析蓝图文件
+**操作**: 从 docs/ccc/blueprint/ 加载指定的 BLP 文件
+**输出**: 解析后的蓝图数据结构
+**错误处理**: 蓝图文件不存在时列出可用蓝图并建议选择；蓝图格式无效时显示具体的解析错误位置
+
+### Step 2: Generate SKILL.md
+**目标**: 生成技能定义文件
+**操作**: 根据蓝图生成 SKILL.md 文件
+**输出**: SKILL.md 文件
+**错误处理**: 模板缺失时使用默认模板并记录警告；生成失败时显示错误详情并跳过该文件继续执行
+
+### Step 3: Generate Implementation
+**目标**: 生成实现代码文件
+**操作**: 根据蓝图规范创建代码文件
+**输出**: implementation/ 目录下的代码文件
+**错误处理**: 代码生成失败时记录具体文件错误并继续生成其他文件；目录创建失败时显示权限错误并终止
+
+### Step 4: Generate Tests
+**目标**: 生成测试文件
+**操作**: 创建测试文件和夹具
+**输出**: tests/ 目录下的测试文件
+**错误处理**: 测试生成失败时记录警告并继续；缺少测试模板时创建基础测试框架
+
+### Step 5: Package Delivery
+**目标**: 创建交付物制品
+**操作**: 打包所有生成的文件
+**输出**: DLV 制品目录和构建报告
+**错误处理**: 文件打包失败时回滚已创建文件并报告错误；部分文件缺失时标记为部分成功并生成不完整报告
 
 ## Output Specification
 

@@ -142,6 +142,32 @@ Blueprint: BLP-001 (Auth Flow)
 | Delivery | Leaf node linked to Blueprint |
 | Status | Indicator: [completed], [in_progress], [pending] |
 
+## Workflow
+
+### Step 1: Load Project Artifacts
+**目标**: 加载项目的所有制品
+**操作**: 扫描并读取 Intent、Blueprint、Delivery 制品
+**输出**: 制品数据集合
+**错误处理**: 项目不存在时提示运行 /ccc:status 查看可用项目；无制品时提示运行 /ccc:init 创建首个制品
+
+### Step 2: Build Dependency Graph
+**目标**: 构建依赖关系图
+**操作**: 分析制品间的链接关系
+**输出**: 依赖图数据结构
+**错误处理**: 依赖链断裂时标记为部分关系并在图中显示警告；循环依赖时记录错误并尝试打破循环显示
+
+### Step 3: Generate ASCII Visualization
+**目标**: 生成 ASCII 可视化图
+**操作**: 将依赖图渲染为文本格式
+**输出**: ASCII 格式的依赖图
+**错误处理**: 图生成超时（>30秒）时提示使用 --simple 标志简化视图；图过于复杂时自动切换为简化模式并提示用户
+
+### Step 4: Output and Save
+**目标**: 输出并保存图形
+**操作**: 显示到控制台并保存到文件
+**输出**: 控制台输出和图形文件
+**错误处理**: 文件保存失败时仅显示到控制台并提示权限问题；目录不存在时自动创建 docs/ccc/graphs/
+
 ### File Access
 
 ```bash

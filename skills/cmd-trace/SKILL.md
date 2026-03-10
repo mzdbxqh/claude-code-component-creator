@@ -57,6 +57,38 @@ Coverage: 95% (19/20 requirements traced)
 | Gaps | Untraced or partially traced items |
 | Summary | Overall coverage status |
 
+## Workflow
+
+### Step 1: Validate Project
+**目标**: 验证项目存在性
+**操作**: 检查项目 ID 是否有效
+**输出**: 验证结果
+**错误处理**: 项目不存在时使用 /ccc:projects 列出可用项目；项目 ID 格式无效时显示正确格式示例
+
+### Step 2: Collect Traceable Artifacts
+**目标**: 收集可追溯制品
+**操作**: 扫描项目中的 Intent、Blueprint、Delivery
+**输出**: 制品列表
+**错误处理**: 无可追溯制品时提示使用 /ccc:init 创建制品并用 /ccc:link 建立链接；制品链接缺失时记录警告并继续处理其他制品
+
+### Step 3: Generate Traceability Matrix
+**目标**: 生成完整的可追溯性矩阵
+**操作**: 映射需求到实现的完整链路
+**输出**: 可追溯性矩阵
+**错误处理**: 矩阵生成失败时显示错误并提供部分矩阵；需求映射不完整时标记缺口并在报告中突出显示
+
+### Step 4: Analyze Coverage
+**目标**: 分析覆盖率
+**操作**: 计算追溯覆盖百分比和缺口
+**输出**: 覆盖率分析报告
+**错误处理**: 分析失败时使用基础统计并记录警告；数据不一致时进行数据清洗并标注可信度
+
+### Step 5: Write Report
+**目标**: 输出追溯报告
+**操作**: 生成报告文件
+**输出**: docs/traces/ 下的报告文件
+**错误处理**: 输出目录缺失时自动创建 docs/traces/ 目录；文件写入权限被拒时显示权限错误并建议手动创建目录
+
 ### File Access
 
 ```bash

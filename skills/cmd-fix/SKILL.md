@@ -44,6 +44,11 @@ argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 
 ### 步骤 2: 策略选择 (AskUserQuestion)
 
+**目标**: 让用户选择修复策略
+**操作**: 使用 AskUserQuestion 展示策略选项
+**输出**: 用户选择的修复策略
+**错误处理**: 用户取消选择时保留审查报告并退出；无有效选项时默认使用"手动修复"模式
+
 ```yaml
 AskUserQuestion(
   questions=[{

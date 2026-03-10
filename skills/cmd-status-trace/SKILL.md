@@ -151,6 +151,32 @@ Coverage: 75% (3/4 requirements)
 | Coverage Analysis | Percentage and gap statistics |
 | Action Items | Recommended fixes for gaps |
 
+## Workflow
+
+### Step 1: Load Project Artifacts
+**目标**: 加载项目的所有制品
+**操作**: 读取 Intent、Blueprint、Delivery 制品
+**输出**: 制品数据集合
+**错误处理**: 项目不存在时列出可用项目并建议选择；无制品时提示先创建制品
+
+### Step 2: Build Traceability Matrix
+**目标**: 构建可追溯性矩阵
+**操作**: 映射 Intent → Blueprint → Delivery 链接
+**输出**: 可追溯性矩阵数据
+**错误处理**: 链接不完整时标记为"部分追溯"并在报告中注明缺失环节；链接信息缺失时尝试自动推断并标记为"推断"
+
+### Step 3: Calculate Coverage
+**目标**: 计算覆盖率
+**操作**: 统计已追溯和未追溯需求
+**输出**: 覆盖率百分比和缺口分析
+**错误处理**: 统计数据不一致时记录警告并使用保守估算；无法计算覆盖率时显示原始追溯数据
+
+### Step 4: Generate Report
+**目标**: 生成追溯报告
+**操作**: 输出矩阵、覆盖率和行动项
+**输出**: 追溯报告文件
+**错误处理**: 报告生成失败时显示到控制台并提示文件权限问题；目录不存在时自动创建 docs/traces/
+
 ### File Access
 
 ```bash

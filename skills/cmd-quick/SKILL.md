@@ -26,12 +26,41 @@ Runs full workflow: init → design → build in sequence.
 
 ## Workflow
 
-1. Run `/ccc:init` with description
-2. Auto-approve Intent
-3. Run `/ccc:design`
-4. Auto-approve Blueprint if quality > 85
-5. Run `/ccc:build`
-6. Show final Delivery summary
+### Step 1: Run /ccc:init
+**目标**: 初始化 Intent 制品
+**操作**: 使用用户描述创建 Intent
+**输出**: Intent 制品（INT-xxx）
+**错误处理**: 描述为空时提示用户提供需求描述；Intent 生成失败时显示错误并建议重新描述或分解需求
+
+### Step 2: Auto-approve Intent
+**目标**: 自动批准 Intent
+**操作**: 验证 Intent 质量并自动批准
+**输出**: 已批准的 Intent
+**错误处理**: Intent 质量过低（<60分）时暂停并要求用户确认是否继续；验证失败时显示具体问题并提供修改建议
+
+### Step 3: Run /ccc:design
+**目标**: 生成 Blueprint 制品
+**操作**: 基于 Intent 创建 Blueprint
+**输出**: Blueprint 制品（BLP-xxx）
+**错误处理**: Blueprint 生成失败时显示错误和 Intent ID 供手动重试；生成超时时保存进度并提供从该阶段继续的命令
+
+### Step 4: Auto-approve Blueprint
+**目标**: 自动批准 Blueprint（质量 > 85）
+**操作**: 检查 Blueprint 质量分数
+**输出**: 批准状态
+**错误处理**: 质量低于 85 分时暂停供手动审查并提供改进建议；质量极低（<70分）时建议使用 /ccc:iterate 重新设计
+
+### Step 5: Run /ccc:build
+**目标**: 构建 Delivery 制品
+**操作**: 从 Blueprint 生成交付物
+**输出**: Delivery 制品（DLV-xxx）
+**错误处理**: 构建失败时显示错误和 Blueprint ID 供手动构建；文件写入权限被拒时建议检查目录权限或指定其他输出目录
+
+### Step 6: Show Final Summary
+**目标**: 展示最终汇总
+**操作**: 显示全流程结果
+**输出**: 汇总报告
+**错误处理**: 任一阶段失败时显示部分完成报告并标记失败阶段；生成的制品 ID 无效时列出可用制品供验证
 
 ## Output Specification
 
