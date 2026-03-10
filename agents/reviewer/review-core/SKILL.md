@@ -7,6 +7,10 @@ allowed-tools:
   - Read
   - Grep
   - Glob
+skills:
+  - ccc:std-component-selection
+  - ccc:std-naming-rules
+  - ccc:lib-antipatterns
 ---
 
 # Review Core

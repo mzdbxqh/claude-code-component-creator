@@ -7,6 +7,9 @@ model: sonnet
 allowed-tools:
   - Read
   - Write
+skills:
+  - ccc:std-component-selection
+  - ccc:lib-design-patterns
 ---
 
 # 设计顾问核心
