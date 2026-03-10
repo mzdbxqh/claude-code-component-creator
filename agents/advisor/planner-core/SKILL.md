@@ -7,6 +7,8 @@ model: sonnet
 allowed-tools:
   - Read
   - Write
+skills:
+  - ccc:std-component-selection
 ---
 
 # 实施规划核心

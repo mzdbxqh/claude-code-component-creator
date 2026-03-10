@@ -7,6 +7,8 @@ model: sonnet
 allowed-tools:
   - Read
   - Write
+skills:
+  - ccc:std-evidence-chain
 ---
 
 # 需求分析核心

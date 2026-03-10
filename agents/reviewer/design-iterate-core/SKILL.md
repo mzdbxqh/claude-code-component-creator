@@ -8,6 +8,9 @@ allowed-tools:
   - Write
   - Bash
   - Grep
+skills:
+  - ccc:std-component-selection
+  - ccc:lib-design-patterns
 ---
 
 # Design Iterate Core

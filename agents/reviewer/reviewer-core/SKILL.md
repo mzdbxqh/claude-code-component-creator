@@ -7,6 +7,8 @@ allowed-tools:
   - Read
   - Grep
 argument-hint: "<batch-id> <file-path>"
+skills:
+  - ccc:lib-antipatterns
 ---
 
 # Reviewer Core

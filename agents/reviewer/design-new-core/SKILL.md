@@ -8,6 +8,10 @@ allowed-tools:
   - Write
   - Bash
   - Task
+skills:
+  - ccc:std-component-selection
+  - ccc:lib-design-patterns
+  - ccc:std-evidence-chain
 ---
 
 # Design New Core

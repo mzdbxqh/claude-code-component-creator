@@ -8,6 +8,9 @@ allowed-tools:
   - Read
   - Write
   - Bash
+skills:
+  - ccc:std-naming-rules
+  - ccc:std-evidence-chain
 ---
 
 # checkpoint-core Subagent

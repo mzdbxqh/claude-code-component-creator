@@ -9,6 +9,8 @@ allowed-tools:
   - Write
   - Bash
   - Task
+skills:
+  - ccc:std-component-selection
 ---
 
 # delivery-core Subagent

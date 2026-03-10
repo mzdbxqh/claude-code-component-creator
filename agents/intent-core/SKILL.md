@@ -8,6 +8,8 @@ allowed-tools:
   - Read
   - Write
   - AskUserQuestion
+skills:
+  - ccc:std-evidence-chain
 ---
 
 # intent-core Subagent

@@ -7,6 +7,9 @@ model: sonnet
 allowed-tools:
   - Read
   - Write
+skills:
+  - ccc:std-component-selection
+  - ccc:lib-design-patterns
 ---
 
 # Design Core (Stage 3)

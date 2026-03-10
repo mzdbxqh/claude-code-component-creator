@@ -7,6 +7,9 @@ model: sonnet
 allowed-tools:
   - Read
   - Bash
+skills:
+  - ccc:std-naming-rules
+  - ccc:std-component-selection
 ---
 
 # 规范验证核心
