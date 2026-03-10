@@ -19,6 +19,13 @@ argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
 
 直接运行命令，Claude 将引导你完成交互式设计流程。
 
+## 输出 (Output)
+
+设计文档将包含：
+- 5阶段设计结果（需求→架构→设计→验证→规划）
+- **完整证据链**（能力需求表、Skill映射表、验证清单）
+- Blueprint artifact
+
 ## Global Parameter
 
 | Parameter | Values | Default | Description |

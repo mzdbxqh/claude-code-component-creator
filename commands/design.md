@@ -30,8 +30,9 @@ Creates a blueprint from intent through a 5-stage workflow.
 1. **Analyze Intent** - Parse requirements and constraints
 2. **Design Workflow** - Create execution flow
 3. **Select Tools** - Choose appropriate tools
-4. **Define Policies** - Set constraints and rules
-5. **Generate Blueprint** - Create BLP artifact
+4. **Generate Evidence Chain** - Create traceability (capability→skill→status)
+5. **Define Policies** - Set constraints and rules
+6. **Generate Blueprint** - Create BLP artifact
 
 ## Output Specification
 
@@ -76,6 +77,7 @@ Blueprint artifact: docs/ccc/blueprint/2026-03-02-BLP-003.yaml
 | Design Decisions | Key architectural choices |
 | Component Structure | High-level component breakdown |
 | Workflow | Execution flow description |
+| Evidence Chain | Capability table, Skill mapping, Verification checklist |
 | Blueprint Reference | Link to BLP artifact |
 | Next Steps | Recommended actions |
 

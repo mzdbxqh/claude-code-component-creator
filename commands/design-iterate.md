@@ -27,3 +27,11 @@ argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"
 - `component-path`: 现有组件文件路径
   - 示例：`commands/deploy.md`
   - 示例：`subagents/docker-builder.md`
+
+## 输出 (Output)
+
+迭代设计文档将包含：
+- 差异分析
+- 影响评估
+- 增量方案
+- **变更证据链**（变更的能力需求、影响的skill、变更原因）
