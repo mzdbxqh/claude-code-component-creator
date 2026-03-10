@@ -115,3 +115,64 @@ ls -la docs/ccc/diffs/
 2. **Check artifact details**: `/ccc:show --artifact-id=<id>`
 3. **Compare with different targets**: `/ccc:diff --from=<id1> --to=<id2>`
 4. **Export diff for analysis**: `/ccc:diff --from=<id1> --to=<id2> --export=diff.json`
+
+## 使用示例 (Examples)
+
+### Example 1: Blueprint 版本对比
+
+```bash
+/ccc:diff --from=BLP-001 --to=BLP-002
+```
+
+**输入**: 两个 Blueprint artifact ID
+
+**输出**:
+```
+Diff: BLP-001 → BLP-002
+
+Added:
+  + rollback configuration
+  + multi-env support
+
+Modified:
+  ~ deployment strategy: sequential → parallel
+
+Removed:
+  - deprecated field: legacy_trigger
+
+Report saved to: docs/ccc/diffs/2026-03-11-BLP-001-diff.md
+```
+
+### Example 2: Intent 迭代对比（JSON 导出）
+
+```bash
+/ccc:diff --from=INT-001 --to=current --export=json
+```
+
+**输入**: 旧版本 Intent 和当前版本对比，导出 JSON 格式
+
+**输出**:
+- 控制台显示简要差异摘要
+- 生成 JSON 文件：`docs/ccc/diffs/2026-03-11-INT-001-diff.json`，包含：
+  - 新增需求列表
+  - 修改的需求对比（before/after）
+  - 删除的需求列表
+  - 变更影响分析数据（用于程序化处理）
+
+### Example 3: 跨制品类型差异分析（错误示例）
+
+```bash
+/ccc:diff --from=INT-001 --to=BLP-001
+```
+
+**输入**: 尝试对比不同类型的制品
+
+**输出**: 错误提示
+```
+❌ Error: Cannot diff 'INTENT' with 'BLUEPRINT' types
+   → Only diff same artifact types (Intent↔Intent, Blueprint↔Blueprint, etc.)
+
+Suggestion:
+   - Compare Intent versions: /ccc:diff --from=INT-001 --to=INT-002
+   - Compare Blueprint versions: /ccc:diff --from=BLP-001 --to=BLP-002
+```

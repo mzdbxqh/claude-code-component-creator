@@ -105,6 +105,121 @@ Top Gaps:
 3. "Notification preferences" - Not started
 ```
 
+### Example 4: 特定需求追溯
+
+```bash
+/ccc:status-trace --project-id=e-commerce --requirement=REQ-001
+```
+
+**输入**: 电商项目，追溯特定需求 REQ-001（购物车功能）
+
+**输出**:
+```
+Traceability for Requirement: REQ-001 (Shopping Cart)
+
+Intent: INT-005 (E-commerce Core)
+   └─ Requirement: Shopping Cart Management
+       │
+       ▼
+Blueprint: BLP-012 (Cart Service Design)
+   ├─ Component: cart-state-manager
+   ├─ Component: cart-persistence
+   └─ Component: cart-api
+       │
+       ▼
+Delivery: Multiple implementations
+   ├─ DLV-023 (Cart State Manager) [completed] ✓
+   │   └─ File: skills/cart/state-manager.md:34-89
+   ├─ DLV-024 (Cart Persistence) [completed] ✓
+   │   └─ File: skills/cart/persistence.md:12-67
+   └─ DLV-025 (Cart API) [in_progress] ⏳
+       └─ File: commands/cart-api.md:45-120
+
+Trace Status: ⚠️ Partially Complete
+   - Intent → Blueprint: ✓ Complete
+   - Blueprint → Delivery: ⚠️ 2/3 components delivered
+
+Next Action: Complete DLV-025 (Cart API) implementation
+
+Report saved to: docs/traces/2026-03-11-REQ-001-trace.md
+```
+
+### Example 5: JSON 导出用于自动化
+
+```bash
+/ccc:status-trace --project-id=banking --export=trace.json --coverage
+```
+
+**输入**: 银行系统项目，导出 JSON 格式的追溯数据
+
+**输出**:
+- 控制台显示简要的覆盖率摘要
+- 生成 `trace.json` 文件：
+```json
+{
+  "project": "banking",
+  "generatedAt": "2026-03-11T10:30:00Z",
+  "coverage": {
+    "total": 45,
+    "fullyTraced": 38,
+    "partiallyTraced": 5,
+    "notTraced": 2,
+    "percentage": 84.4
+  },
+  "traces": [
+    {
+      "requirement": "Account Management",
+      "intentId": "INT-010",
+      "blueprintId": "BLP-025",
+      "deliveryIds": ["DLV-050", "DLV-051"],
+      "status": "complete",
+      "files": [
+        "skills/account/manager.md:23",
+        "skills/account/validator.md:45"
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "requirement": "Real-time Fraud Detection",
+      "issue": "No Blueprint linked",
+      "severity": "high"
+    }
+  ]
+}
+```
+- 可用于 CI/CD 管道、质量门禁、自动化报告生成
+
+### Example 6: 边界情况 - 无追溯数据
+
+```bash
+/ccc:status-trace --project-id=legacy-system
+```
+
+**输入**: 遗留系统项目（制品缺少链接信息）
+
+**输出**:
+```
+❌ Error: No traceability data found for project 'legacy-system'
+   → Ensure artifacts are properly linked with '/ccc:link'
+
+Diagnostics:
+   ✓ Found 5 Intent artifacts
+   ✓ Found 8 Blueprint artifacts
+   ✓ Found 12 Delivery artifacts
+   ❌ No links between artifacts
+
+Recovery Steps:
+   1. Review artifacts: /ccc:list --project-id=legacy-system
+   2. Link Intent to Blueprint: /ccc:link --from=INT-001 --to=BLP-001
+   3. Link Blueprint to Delivery: /ccc:link --from=BLP-001 --to=DLV-001
+   4. Retry trace: /ccc:status-trace --project-id=legacy-system
+
+Alternative:
+   - Generate partial matrix: /ccc:status-trace --partial
+   - Export raw data: /ccc:status-trace --export=raw.json
+```
+
 ## Output Specification
 
 ### Console Output

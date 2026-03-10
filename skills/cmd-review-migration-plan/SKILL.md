@@ -177,3 +177,97 @@ ls -la docs/reviews/
 - **migration-review-aggregator**: 结果聚合器 (`reviewer/migration-review-aggregator/SKILL.md`)
 - **migration-reviewer-core**: 检测核心 (`reviewer/migration-reviewer-core/SKILL.md`)
 - **检测模式定义**: (`reviewer/knowledge/migration-patterns/batches/`)
+
+## 使用示例 (Examples)
+
+### Example 1: 快速审阅（JSON 格式）
+
+```bash
+/review-migration-plan agent-to-skill-detailed-plan.md
+```
+
+**输入**: Agent 到 Skill 改造方案文档
+
+**输出**: JSON 格式审阅报告（控制台输出）
+```json
+{
+  "file": "agent-to-skill-detailed-plan.md",
+  "totalBatches": 5,
+  "completed": 5,
+  "issues": {
+    "errors": 3,
+    "warnings": 4,
+    "info": 1
+  },
+  "details": [
+    {"id": "MP001", "severity": "error", "message": "缺少概述章节"},
+    {"id": "MP005", "severity": "warning", "message": "章节内容过短"}
+  ]
+}
+```
+- 报告同时保存至：`docs/reviews/2026-03-11-agent-to-skill-detailed-plan-migration-review.md`
+
+### Example 2: 人类可读报告（Markdown 格式）
+
+```bash
+/review-migration-plan docs/plans/refactor-plan.md --format=markdown
+```
+
+**输入**: 重构计划文档，指定 Markdown 输出格式
+
+**输出**: 人类可读的 Markdown 报告
+```
+Migration Plan Review: refactor-plan.md
+
+总体状态: ⚠️ COMPLETED with issues
+
+批次完成情况:
+  ✓ batch-1-structure (5/5 检测点)
+  ✓ batch-2-dependency (4/4 检测点)
+  ⚠️ batch-3-risk (2/4 检测点) - 2 个问题
+  ✓ batch-4-practice (4/4 检测点)
+  ✓ batch-5-planning (4/4 检测点)
+
+关键问题:
+  [ERROR] MP003: 缺少风险评估章节
+  [ERROR] MP011: 高风险项缺少缓解措施
+  [WARNING] MP012: 缺少风险优先级排序
+
+建议操作:
+  1. 补充完整的风险评估章节
+  2. 为每个高风险项添加具体缓解措施
+  3. 按优先级排序风险列表
+
+Report saved to: docs/reviews/2026-03-11-refactor-plan-migration-review.md
+```
+
+### Example 3: 英文审阅（国际化输出）
+
+```bash
+/review-migration-plan migration-proposal.md --format=markdown --lang=en-us
+```
+
+**输入**: 改造提案文档，英文输出
+
+**输出**: 英文 Markdown 格式的审阅报告
+```
+Migration Plan Review: migration-proposal.md
+
+Status: ✓ PASSED
+
+Batch Results:
+  ✓ batch-1-structure (5/5 checks passed)
+  ✓ batch-2-dependency (4/4 checks passed)
+  ✓ batch-3-risk (4/4 checks passed)
+  ✓ batch-4-practice (4/4 checks passed)
+  ✓ batch-5-planning (4/4 checks passed)
+
+Total Issues: 0
+
+Quality Grade: A (Excellent)
+
+The migration plan meets all quality standards.
+Ready for implementation.
+
+Report saved to: docs/reviews/2026-03-11-migration-proposal-migration-review.md
+```

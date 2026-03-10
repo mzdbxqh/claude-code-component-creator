@@ -133,3 +133,197 @@ ls -la docs/traces/
 3. **Create output directory**: `mkdir -p docs/traces/`
 4. **Generate partial trace**: `/ccc:trace <project-id> --partial`
 5. **Export to alternative location**: `/ccc:trace <project-id> --output=/tmp/trace.md`
+
+## 使用示例 (Examples)
+
+### Example 1: 基础追溯矩阵生成
+
+```bash
+/ccc:trace payment-system
+```
+
+**输入**: 支付系统项目 ID
+
+**输出**:
+```
+Traceability Matrix: payment-system
+
+Intent Requirement          │ Blueprint Element      │ Delivery File:Line
+────────────────────────────┼────────────────────────┼───────────────────
+Process credit card payment │ payment-processor      │ payment-skill.md:45
+Handle refunds              │ refund-handler         │ refund-skill.md:67
+Validate card details       │ card-validator         │ validation-skill.md:23
+GitOps workflow             │ git-trigger            │ deploy-skill.md:120
+Support multiple currencies │ currency-converter     │ currency-skill.md:34
+Error handling & retry      │ error-handler          │ error-skill.md:78
+Fraud detection             │ fraud-detector         │ fraud-skill.md:90
+Webhook notifications       │ webhook-dispatcher     │ webhook-skill.md:56
+
+Coverage: 100% (8/8 requirements traced)
+
+Report saved to: docs/traces/2026-03-11-payment-system-trace.md
+```
+
+### Example 2: 多语言输出
+
+```bash
+/ccc:trace api-gateway --lang=en-us
+```
+
+**输入**: API 网关项目，英文输出
+
+**输出**:
+```
+Traceability Matrix: api-gateway
+
+Intent Requirement       │ Blueprint Element   │ Delivery File:Line
+─────────────────────────┼─────────────────────┼────────────────────
+Rate limiting            │ rate-limiter        │ limiter-skill.md:12
+Authentication & Auth    │ auth-middleware     │ auth-skill.md:34
+Request routing          │ router-config       │ router-skill.md:56
+API versioning           │ version-handler     │ version-skill.md:23
+Error handling           │ error-middleware    │ error-skill.md:45
+
+Coverage: 100% (5/5 requirements traced)
+
+Report saved to: docs/traces/2026-03-11-api-gateway-trace.md
+```
+
+### Example 3: 部分追溯场景（有缺口）
+
+```bash
+/ccc:trace microservices-platform
+```
+
+**输入**: 微服务平台项目（开发中，部分需求未完成）
+
+**输出**:
+```
+Traceability Matrix: microservices-platform
+
+Intent Requirement          │ Blueprint Element      │ Delivery File:Line
+────────────────────────────┼────────────────────────┼───────────────────
+Service discovery           │ discovery-service      │ discovery-skill.md:34
+Load balancing              │ load-balancer          │ lb-skill.md:56
+Circuit breaker             │ circuit-breaker        │ breaker-skill.md:78
+Distributed tracing         │ tracing-integration    │ [MISSING]
+Config management           │ config-server          │ config-skill.md:90
+API gateway                 │ gateway-service        │ gateway-skill.md:123
+Service mesh                │ [MISSING]              │ [MISSING]
+Health monitoring           │ health-checker         │ [PARTIAL: health-skill.md:45]
+
+Coverage: 62.5% (5/8 requirements traced)
+
+Gaps Identified:
+  ❌ "Distributed tracing" - Blueprint exists, no Delivery
+  ❌ "Service mesh" - No Blueprint or Delivery
+  ⚠️ "Health monitoring" - Delivery incomplete
+
+Recommended Actions:
+  1. Implement Delivery for "Distributed tracing" (Priority: High)
+  2. Create Blueprint for "Service mesh" (Priority: Medium)
+  3. Complete "Health monitoring" Delivery (Priority: Low)
+
+Report saved to: docs/traces/2026-03-11-microservices-platform-trace.md
+```
+
+### Example 4: 大型项目追溯
+
+```bash
+/ccc:trace enterprise-erp
+```
+
+**输入**: 企业 ERP 系统（50+ 需求）
+
+**输出**:
+```
+Traceability Matrix: enterprise-erp
+
+Analyzing 52 requirements across 15 modules...
+
+Intent Requirement            │ Blueprint Element        │ Delivery File:Line
+──────────────────────────────┼──────────────────────────┼────────────────────
+[Module: Finance]
+  Invoice generation          │ invoice-generator        │ invoice-skill.md:23
+  Payment processing          │ payment-processor        │ payment-skill.md:45
+  Budget tracking             │ budget-tracker           │ budget-skill.md:67
+  Financial reporting         │ report-generator         │ report-skill.md:89
+
+[Module: Inventory]
+  Stock management            │ stock-manager            │ stock-skill.md:34
+  Warehouse operations        │ warehouse-controller     │ warehouse-skill.md:56
+  Supplier integration        │ supplier-api             │ supplier-skill.md:78
+
+[Module: HR]
+  Employee management         │ employee-manager         │ employee-skill.md:45
+  Payroll processing          │ payroll-processor        │ payroll-skill.md:67
+  Attendance tracking         │ attendance-tracker       │ attendance-skill.md:89
+
+... (showing 10/52 requirements, see full report for details)
+
+Coverage Summary:
+  ✓ Finance Module: 95% (19/20)
+  ✓ Inventory Module: 100% (12/12)
+  ⚠️ HR Module: 80% (8/10)
+  ⚠️ Sales Module: 75% (6/8)
+  ❌ CRM Module: 50% (1/2)
+
+Overall Coverage: 88.5% (46/52 requirements traced)
+
+Report saved to: docs/traces/2026-03-11-enterprise-erp-trace.md
+(Full matrix with all 52 requirements available in report)
+```
+
+### Example 5: 错误场景 - 项目不存在
+
+```bash
+/ccc:trace non-existent-project
+```
+
+**输入**: 不存在的项目 ID
+
+**输出**:
+```
+❌ Error: Project 'non-existent-project' not found
+   → Use '/ccc:projects' to list available projects
+
+Available Projects:
+  1. payment-system
+  2. api-gateway
+  3. microservices-platform
+  4. enterprise-erp
+
+Suggestions:
+  - Check project ID spelling
+  - Run: /ccc:projects
+  - Create new project: /ccc:init --project-id=your-project
+```
+
+### Example 6: 边界情况 - 无制品项目
+
+```bash
+/ccc:trace empty-project
+```
+
+**输入**: 已创建但无任何制品的项目
+
+**输出**:
+```
+❌ Error: No traceable artifacts in project 'empty-project'
+   → Create artifacts with '/ccc:init' and link with '/ccc:link'
+
+Current Project Status:
+  ✓ Project exists
+  ❌ No Intent artifacts
+  ❌ No Blueprint artifacts
+  ❌ No Delivery artifacts
+
+Getting Started:
+  1. Create Intent: /ccc:init --type=intent --project-id=empty-project
+  2. Create Blueprint: /ccc:design --intent-id=INT-001
+  3. Create Delivery: /ccc:build --blueprint-id=BLP-001
+  4. Generate trace: /ccc:trace empty-project
+
+Alternative:
+  - Import from template: /ccc:import --template=starter --project-id=empty-project
+```

@@ -93,6 +93,88 @@ Blueprint: BLP-005 (Circuit Breaker)
 Delivery: DLV-005 (Circuit Breaker) [in_progress]
 ```
 
+### Example 4: 复杂依赖关系图
+
+```bash
+/ccc:status-graph --project-id=microservices --max-depth=5
+```
+
+**输入**: 微服务架构项目，最大深度5层
+
+**输出**:
+```
+Project: microservices
+
+Intent: INT-001 (API Gateway)
+    │
+    ▼
+Blueprint: BLP-001 (Gateway Core)
+    │
+    ├─▶ Delivery: DLV-001 (Gateway Service) [completed] ✓
+    │
+    └─▶ Blueprint: BLP-002 (Auth Module)
+         │
+         ├─▶ Delivery: DLV-002 (JWT Handler) [completed] ✓
+         │
+         └─▶ Blueprint: BLP-003 (OAuth Integration)
+              │
+              └─▶ Delivery: DLV-003 (OAuth Client) [in_progress] ⏳
+
+Intent: INT-002 (Service Mesh)
+    │
+    ▼
+Blueprint: BLP-004 (Istio Config)
+    │
+    └─▶ Delivery: DLV-004 (Mesh Setup) [pending] →
+
+Graph saved to: docs/ccc/graphs/microservices-graph.md
+```
+
+### Example 5: 导出 JSON 格式
+
+```bash
+/ccc:status-graph --export=graph.json
+```
+
+**输入**: 当前项目，导出 JSON 格式
+
+**输出**:
+- 控制台显示简化的文本图
+- 生成 JSON 文件：`graph.json`，包含：
+```json
+{
+  "project": "current-project",
+  "nodes": [
+    {"id": "INT-001", "type": "intent", "label": "User Authentication"},
+    {"id": "BLP-001", "type": "blueprint", "label": "Auth Flow"},
+    {"id": "DLV-001", "type": "delivery", "label": "Login Component", "status": "completed"}
+  ],
+  "edges": [
+    {"from": "INT-001", "to": "BLP-001"},
+    {"from": "BLP-001", "to": "DLV-001"}
+  ]
+}
+```
+- 可用于程序化处理或可视化工具导入
+
+### Example 6: 边界情况 - 空项目
+
+```bash
+/ccc:status-graph --project-id=new-project
+```
+
+**输入**: 新创建的空项目
+
+**输出**:
+```
+❌ Error: No artifacts found in project 'new-project'
+   → Run '/ccc:init' to create your first artifact
+
+Suggestions:
+  1. Create an Intent: /ccc:init --type=intent
+  2. Or import existing project: /ccc:import --from=template
+```
+
 ## Output Specification
 
 ### Console Output
