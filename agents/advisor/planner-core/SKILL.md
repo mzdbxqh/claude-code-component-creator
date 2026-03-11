@@ -1,12 +1,11 @@
 ---
 name: planner-core
 description: "实施规划 (Planner)：生成详细实施计划→任务分解 + 时间估算。原则：无计划不执行。触发：计划/实施/任务列表/planner/estimate"
-argument-hint: "<stage-4-output-path>"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
 ---
@@ -132,11 +131,11 @@ dependencies:
 ---
 name: todo-finder
 description: "查找并排序 TODO 注释"
-context: main
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
+permissionMode: prompt
 ---
 ```
 

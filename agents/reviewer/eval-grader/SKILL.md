@@ -1,14 +1,16 @@
 ---
 name: eval-grader
 description: "Eval 评估器：根据 assertions 评估测试结果→生成 graded_results→提供失败原因说明。触发：eval/评估/评分/grading/eval-grader"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Write
   - Grep
   - Glob
-argument-hint: '<execution-results-path> [--evals-json=<path>] [--output-dir=<path>]'
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Grader
@@ -21,7 +23,7 @@ Eval Grader 是 Eval 执行机制的评估组件，负责：
 3. **生成** graded_results.json（包含 passed/actual/evidence）
 4. **说明** 失败原因和改进建议
 
-本组件接收 eval-executor 的输出，根据 assertions 评估测试结果，为 benchmark-aggregator 提供结构化数据。
+本组件接收 eval-executor 的输出，根据 assertions 评估测试结果，为 ccc:benchmark-aggregator 提供结构化数据。
 
 ## Workflow
 

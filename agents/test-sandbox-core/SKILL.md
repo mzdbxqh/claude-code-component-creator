@@ -1,15 +1,17 @@
 ---
 name: test-sandbox-core
 description: "沙箱测试核心：执行自动化测试验证 CCC 功能→运行测试用例→生成测试报告。触发：测试/sandbox/验证/test/verify"
-argument-hint: "[--test-case=<id>] [--dry-run] [--verbose]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Glob
   - Grep
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Test Sandbox Core

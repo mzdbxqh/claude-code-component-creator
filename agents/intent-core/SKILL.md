@@ -1,13 +1,12 @@
 ---
 name: intent-core
 description: "意图创建 (Intent)：5 问框架澄清需求→认知负荷管理→硬/软约束分离。原则：先理解后执行。触发：意图/需求/目标/想要什么/clarify/requirement"
-argument-hint: "[user-requirement-description]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - AskUserQuestion
+permissionMode: prompt
 skills:
   - ccc:std-evidence-chain
 ---

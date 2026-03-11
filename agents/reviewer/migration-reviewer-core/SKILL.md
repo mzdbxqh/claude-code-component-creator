@@ -1,12 +1,11 @@
 ---
 name: migration-reviewer-core
 description: "改造方案审阅核心：分批检测改造方案质量→返回结构化结果。触发：改造/迁移/迁移检查/migration-reviewer"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
-argument-hint: "<batch-id> <file-path>"
+permissionMode: prompt
 skills:
   - ccc:lib-antipatterns
 ---

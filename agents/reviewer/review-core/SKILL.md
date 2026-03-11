@@ -1,12 +1,12 @@
 ---
 name: review-core
 description: "智能审阅核心：基于组件类型加载反模式库→执行深度质量检查→返回结构化结果。触发：审查/检查/review-core/智能审阅"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
   - Glob
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
   - ccc:std-naming-rules

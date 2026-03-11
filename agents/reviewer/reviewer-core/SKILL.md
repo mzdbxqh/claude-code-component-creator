@@ -1,12 +1,11 @@
 ---
 name: reviewer-core
 description: "架构审阅核心：分批加载反模式→执行检测→返回结构化结果。触发：审阅/架构检查/reviewer-core"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
-argument-hint: "<batch-id> <file-path>"
+permissionMode: prompt
 skills:
   - ccc:lib-antipatterns
 ---

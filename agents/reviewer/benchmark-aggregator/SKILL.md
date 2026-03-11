@@ -1,12 +1,11 @@
 ---
 name: benchmark-aggregator
 description: "Benchmark 聚合器：整合 graded results→生成 benchmark.json→计算 pass_rate/tokens/duration 对比。触发：benchmark/聚合/对比/benchmark-aggregator"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Write
-argument-hint: '<graded-results-path> [--execution-results=<path>] [--output-dir=<path>]'
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
 ---

@@ -1,14 +1,16 @@
 ---
 name: eval-executor
 description: "Eval 执行器：并行执行测试用例→捕获 timing 数据→区分 with-skill/baseline 模式。触发：eval/执行/测试/eval-executor"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Task
   - Glob
-argument-hint: '<evals-json-path> [--mode=with-skill|baseline|both] [--skill-path=<path>] [--output-dir=<path>]'
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Executor
@@ -30,7 +32,7 @@ Eval Executor 是 Eval 执行机制的核心组件，负责：
 **操作**:
 ```
 1. 读取 evals-json-path
-2. 调用 eval-parser 验证格式（可选）
+2. 调用 ccc:eval-parser 验证格式（可选）
 3. 提取 evals 数组
 4. 准备执行队列
 ```
@@ -256,7 +258,7 @@ execute:
 
 | 场景 | 处理 |
 |------|------|
-| evals.json 无效 | 返回错误，建议先运行 eval-parser |
+| evals.json 无效 | 返回错误，建议先运行 ccc:eval-parser |
 | Task 创建失败 | 记录错误，继续其他 |
 | Task 超时 | 标记 timeout，继续其他 |
 | skill-path 不存在 | 降级为 baseline |

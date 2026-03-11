@@ -1,17 +1,18 @@
 ---
 name: workflow-discoverer
 description: "工作流发现器：扫描 commands/目录识别入口→构建工作流调用图→验证连贯性。触发：工作流/流程/调用链/workflow/discoverer"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Grep
   - Glob
   - Bash
-argument-hint: '<project-path> [--depth=shallow|full|deep] [--output=json|markdown|mermaid]'
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:std-workflow-attribution
+  - ccc:lib-antipatterns
 ---
 
 # Workflow Discoverer

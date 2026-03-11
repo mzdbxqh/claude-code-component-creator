@@ -1,17 +1,18 @@
 ---
 name: linkage-validator
 description: "链路验证器：解析调用链→构建调用图→验证链路规则。原则：调用必须连贯。触发：链路/调用链/依赖/linkage/validator"
-context: fork
-argument-hint: '<entry-point-path> [--depth=full|shallow|deep]'
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Grep
   - Glob
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:lib-antipatterns
+  - ccc:std-workflow-attribution
 ---
 
 # Linkage Validator
@@ -137,13 +138,13 @@ validation:
   "depth": "full",
   "callGraph": {
     "nodes": [
-      {"id": "advisor-core", "type": "subagent"},
-      {"id": "architect-core", "type": "subagent"},
+      {"id": "ccc:advisor-core", "type": "subagent"},
+      {"id": "ccc:architect-core", "type": "subagent"},
       {"id": "Read", "type": "tool"}
     ],
     "edges": [
-      {"from": "advisor-core", "to": "architect-core", "type": "task"},
-      {"from": "advisor-core", "to": "Read", "type": "tool"}
+      {"from": "ccc:advisor-core", "to": "ccc:architect-core", "type": "task"},
+      {"from": "ccc:advisor-core", "to": "Read", "type": "tool"}
     ]
   },
   "statistics": {
@@ -164,7 +165,7 @@ validation:
   "implicitCalls": [
     {
       "caller": "review-aggregator",
-      "callee": "review-core",
+      "callee": "ccc:review-core",
       "evidence": "Task 调用匹配",
       "confidence": 0.85
     }
@@ -210,10 +211,10 @@ graph TD
 
 ### ⚠️ 权限检查规则
 1 个问题：
-- review-core 调用 Write 但缺少 fork 上下文标注
+- ccc:review-core 调用 Write 但缺少 fork 上下文标注
 
 ## 隐式调用
-1. **review-aggregator → review-core**
+1. **ccc:review-aggregator → ccc:review-core**
    - 证据：Task 调用匹配
    - 置信度：85%
    - 建议：显式声明调用关系
@@ -250,7 +251,7 @@ agents/advisor/advisor-core/SKILL.md
 **输出**:
 ```json
 {
-  "entryPoint": "advisor-core",
+  "entryPoint": "ccc:advisor-core",
   "statistics": {"totalNodes": 3, "totalEdges": 2},
   "ruleViolations": [],
   "status": "PASSED"
@@ -267,7 +268,7 @@ agents/reviewer/review-aggregator/SKILL.md --depth=deep
 **输出**:
 ```json
 {
-  "entryPoint": "review-aggregator",
+  "entryPoint": "ccc:review-aggregator",
   "statistics": {"totalNodes": 12, "totalEdges": 18, "maxDepth": 5},
   "ruleViolations": [],
   "implicitCalls": 3

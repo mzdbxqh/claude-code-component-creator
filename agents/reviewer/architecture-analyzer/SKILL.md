@@ -1,17 +1,18 @@
 ---
 name: architecture-analyzer
 description: "架构分析器：评估 5 维度 (工作流/组件/职责/协作/命令)→生成架构评分。触发：架构/结构/工作流/组件/architecture/analyzer"
-argument-hint: '<project-path> [--depth=shallow|full] [--arch-only]'
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Grep
   - Glob
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:lib-design-patterns
+  - ccc:std-workflow-attribution
 ---
 
 # Architecture Analyzer

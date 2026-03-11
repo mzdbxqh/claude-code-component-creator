@@ -1,14 +1,15 @@
 ---
 name: dependency-analyzer
 description: "依赖分析器：递归分析依赖关系→构建依赖图→发现隐式调用。触发：依赖/依赖图/调用链/dependency/analyzer"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
   - Glob
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:lib-antipatterns
 ---
 
 # Dependency Analyzer
@@ -128,14 +129,14 @@ analysis:
   "depth": "full",
   "dependencyGraph": {
     "nodes": [
-      {"id": "advisor-core", "type": "subagent"},
-      {"id": "architect-core", "type": "subagent"},
+      {"id": "ccc:advisor-core", "type": "subagent"},
+      {"id": "ccc:architect-core", "type": "subagent"},
       {"id": "Read", "type": "tool"},
       {"id": "Write", "type": "tool"}
     ],
     "edges": [
-      {"from": "advisor-core", "to": "architect-core", "type": "explicit"},
-      {"from": "advisor-core", "to": "Read", "type": "tool"}
+      {"from": "ccc:advisor-core", "to": "ccc:architect-core", "type": "explicit"},
+      {"from": "ccc:advisor-core", "to": "Read", "type": "tool"}
     ]
   },
   "statistics": {
@@ -148,7 +149,7 @@ analysis:
   "implicitCalls": [
     {
       "caller": "review-aggregator",
-      "callee": "review-core",
+      "callee": "ccc:review-core",
       "evidence": "Grep 匹配 Task 调用",
       "confidence": 0.85
     }
@@ -190,12 +191,12 @@ graph TD
 ```
 
 ## 直接依赖
-1. **architect-core** (SubAgent) - 显式
+1. **ccc:architect-core** (SubAgent) - 显式
 2. **Read** (Tool) - 显式
 3. **Write** (Tool) - 显式
 
 ## 隐式调用
-1. **review-aggregator → review-core**
+1. **ccc:review-aggregator → ccc:review-core**
    - 证据：Task 调用匹配
    - 置信度：85%
 
@@ -208,7 +209,7 @@ graph TD
 无
 
 ### 中风险
-- advisor-core 依赖 5 个组件，耦合度中等
+- ccc:advisor-core 依赖 5 个组件，耦合度中等
 
 ### 低风险
 - 无深依赖链

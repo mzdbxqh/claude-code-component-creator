@@ -1,16 +1,17 @@
 ---
 name: delivery-core
 description: "交付生成 (Delivery)：从蓝图生成完整交付包→SKILL.md+ 实现代码 + 测试 + 文档。触发：交付/构建/生成/实现/delivery"
-argument-hint: "<blueprint-path> [--output-dir=<path>]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Task
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:std-naming-rules
+  - ccc:std-evidence-chain
 ---
 
 # delivery-core Subagent

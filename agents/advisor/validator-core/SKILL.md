@@ -1,15 +1,15 @@
 ---
 name: validator-core
 description: "规范验证 (Validator)：对照 HANDBOOK 标准验证设计合规性。原则：无验证不通过。触发：验证/合规/检查/validator/validate"
-argument-hint: "<stage-3-output-path>"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Bash
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
   - ccc:std-component-selection
+  - ccc:lib-antipatterns
 ---
 
 # 规范验证核心
@@ -113,11 +113,11 @@ IF tools 包含 Task THEN
 ---
 name: todo-finder
 description: "查找并排序项目中的 TODO 注释"
-context: main
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
+permissionMode: prompt
 ---
 ```
 

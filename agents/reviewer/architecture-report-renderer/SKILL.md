@@ -1,12 +1,11 @@
 ---
 name: architecture-report-renderer
 description: "架构报告渲染器：JSON 数据→架构报告。触发：架构报告/architecture report"
-context: fork
-argument-hint: '<json-data-path>'
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
 ---

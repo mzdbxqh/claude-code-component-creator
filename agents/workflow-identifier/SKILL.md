@@ -1,13 +1,15 @@
 ---
 name: workflow-identifier
 description: "工作流识别器：从蓝图提取工作流定义，解析阶段和组件依赖。触发：工作流/识别/蓝图/parse"
-argument-hint: "<blueprint-path>"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Grep
   - Glob
+permissionMode: prompt
+skills:
+  - ccc:std-workflow-attribution
+  - ccc:std-component-selection
 ---
 
 # Workflow Identifier
@@ -109,7 +111,7 @@ options:
         "order": 1,
         "description": "Intent 创建阶段",
         "components": [
-          {"id": "intent-core", "type": "subagent", "path": "agents/intent-core/SKILL.md"}
+          {"id": "ccc:intent-core", "type": "subagent", "path": "agents/intent-core/SKILL.md"}
         ]
       },
       {
@@ -117,15 +119,15 @@ options:
         "order": 2,
         "description": "设计阶段",
         "components": [
-          {"id": "advisor-core", "type": "subagent", "path": "agents/advisor/advisor-core/SKILL.md"},
-          {"id": "architect-core", "type": "subagent", "path": "agents/advisor/architect-core/SKILL.md"}
+          {"id": "ccc:advisor-core", "type": "subagent", "path": "agents/advisor/advisor-core/SKILL.md"},
+          {"id": "ccc:architect-core", "type": "subagent", "path": "agents/advisor/architect-core/SKILL.md"}
         ],
-        "parallel_opportunities": ["advisor-core", "architect-core"]
+        "parallel_opportunities": ["ccc:advisor-core", "ccc:architect-core"]
       }
     ],
     "dependency_graph": {
-      "nodes": [{"id": "intent-core", "type": "subagent", "phase": "intent"}],
-      "edges": [{"from": "intent-core", "to": "advisor-core", "type": "sequential"}]
+      "nodes": [{"id": "ccc:intent-core", "type": "subagent", "phase": "intent"}],
+      "edges": [{"from": "ccc:intent-core", "to": "ccc:advisor-core", "type": "sequential"}]
     }
   }
 }
@@ -143,14 +145,14 @@ options:
 ## 阶段
 
 ### 阶段 1: Intent
-- 组件：intent-core
+- 组件：ccc:intent-core
 
 ### 阶段 2: Design
-- 组件：advisor-core, architect-core, design-core
+- 组件：ccc:advisor-core, architect-core, design-core
 - 并行：advisor-core || architect-core
 
 ### 阶段 3: Build
-- 组件：delivery-core
+- 组件：ccc:delivery-core
 
 ## 依赖图
 ```mermaid
@@ -188,9 +190,9 @@ docs/ccc/blueprint/2026-03-03-BLP-001.yaml
     "total_phases": 3,
     "total_components": 5,
     "phases": [
-      {"name": "intent", "order": 1, "components": [{"id": "intent-core", "type": "subagent"}]},
-      {"name": "design", "order": 2, "components": [{"id": "advisor-core", "type": "subagent"}]},
-      {"name": "build", "order": 3, "components": [{"id": "delivery-core", "type": "subagent"}]}
+      {"name": "intent", "order": 1, "components": [{"id": "ccc:intent-core", "type": "subagent"}]},
+      {"name": "design", "order": 2, "components": [{"id": "ccc:advisor-core", "type": "subagent"}]},
+      {"name": "build", "order": 3, "components": [{"id": "ccc:delivery-core", "type": "subagent"}]}
     ]
   }
 }
@@ -212,7 +214,7 @@ docs/ccc/blueprint/2026-03-03-BLP-002.yaml
     "phases": [
       {
         "name": "review",
-        "parallel_opportunities": ["review-core", "architecture-analyzer"]
+        "parallel_opportunities": ["ccc:review-core", "ccc:architecture-analyzer"]
       }
     ]
   }
@@ -267,13 +269,13 @@ docs/ccc/blueprint/2026-03-03-BLP-005.yaml
   "workflow": {
     "dependency_graph": {
       "nodes": [
-        {"id": "intent-core", "type": "subagent", "phase": "intent"},
-        {"id": "advisor-core", "type": "subagent", "phase": "design"},
-        {"id": "delivery-core", "type": "subagent", "phase": "build"}
+        {"id": "ccc:intent-core", "type": "subagent", "phase": "intent"},
+        {"id": "ccc:advisor-core", "type": "subagent", "phase": "design"},
+        {"id": "ccc:delivery-core", "type": "subagent", "phase": "build"}
       ],
       "edges": [
-        {"from": "intent-core", "to": "advisor-core", "type": "sequential"},
-        {"from": "advisor-core", "to": "delivery-core", "type": "sequential"}
+        {"from": "ccc:intent-core", "to": "ccc:advisor-core", "type": "sequential"},
+        {"from": "ccc:advisor-core", "to": "ccc:delivery-core", "type": "sequential"}
       ]
     }
   }

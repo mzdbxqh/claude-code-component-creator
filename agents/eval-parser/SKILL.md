@@ -2,11 +2,14 @@
 name: eval-parser
 description: "Eval 解析器：解析 evals/evals.json 文件，验证格式，提取测试用例"
 model: haiku
-context: fork
-allowed-tools:
+tools:
   - Read
   - Grep
   - Glob
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Parser

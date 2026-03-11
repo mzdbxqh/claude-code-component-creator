@@ -2,10 +2,13 @@
 name: eval-grader
 description: "Eval 评分器：评估测试结果，判断是否通过，生成证据"
 model: sonnet
-context: fork
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Grader
@@ -17,7 +20,7 @@ allowed-tools:
 ## Workflow
 
 ### Step 1: 接收执行结果
-**目标**: 从 eval-executor 获取执行结果
+**目标**: 从 ccc:eval-executor 获取执行结果
 **操作**:
 1. 读取执行结果
 2. 解析 with-skill 和 baseline 结果

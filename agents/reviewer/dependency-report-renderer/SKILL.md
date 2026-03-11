@@ -1,12 +1,11 @@
 ---
 name: dependency-report-renderer
 description: "依赖报告渲染器：JSON 数据→依赖报告。触发：依赖报告/dependency report"
-context: fork
-argument-hint: '<json-data-path>'
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
 ---

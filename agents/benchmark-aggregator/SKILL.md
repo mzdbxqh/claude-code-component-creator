@@ -2,10 +2,13 @@
 name: benchmark-aggregator
 description: "Benchmark 聚合器：聚合所有测试结果，生成 benchmark.json 和 benchmark.md"
 model: haiku
-context: fork
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Benchmark Aggregator
@@ -17,7 +20,7 @@ allowed-tools:
 ## Workflow
 
 ### Step 1: 收集评分结果
-**目标**: 从 eval-grader 获取所有评分
+**目标**: 从 ccc:eval-grader 获取所有评分
 **操作**:
 1. 读取所有测试用例评分
 2. 按配置分组 (with-skill, baseline)

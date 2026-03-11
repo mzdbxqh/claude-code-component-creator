@@ -1,14 +1,18 @@
 ---
 name: review-core
 description: "智能审阅核心 (Review)：基于组件类型加载反模式库→执行深度质量检查→返回结构化报告。触发：审查/检查/review/合规/quality"
-argument-hint: "[component-path] [--type=auto|skill|command|hook|subagent|mcp]"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
   - Glob
   - Write
+permissionMode: prompt
+skills:
+  - ccc:lib-antipatterns
+  - ccc:std-naming-rules
+  - ccc:std-component-selection
+  - ccc:std-evidence-chain
 ---
 
 # review-core Subagent
@@ -261,8 +265,8 @@ agents/advisor/ --type=auto
   "componentsReviewed": 6,
   "averageScore": 91,
   "results": [
-    {"name": "advisor-core", "score": 95},
-    {"name": "architect-core", "score": 92}
+    {"name": "ccc:advisor-core", "score": 95},
+    {"name": "ccc:architect-core", "score": 92}
   ]
 }
 ```

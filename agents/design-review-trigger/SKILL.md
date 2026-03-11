@@ -2,11 +2,14 @@
 name: design-review-trigger
 description: "Design→Review 触发器：检测 Design 完成，自动触发 Review 验证"
 model: haiku
-context: fork
-allowed-tools:
+tools:
   - Read
   - Write
   - Glob
+permissionMode: prompt
+skills:
+  - ccc:lib-antipatterns
+  - ccc:std-evidence-chain
 ---
 
 # Design-Review Trigger
@@ -34,9 +37,9 @@ allowed-tools:
 **输出**: 质量检查点状态
 
 ### Step 3: 自动触发 Review
-**目标**: 调用 review-core 进行验证
+**目标**: 调用 ccc:review-core 进行验证
 **操作**:
-1. 调用 review-core 子代理
+1. 调用 ccc:review-core 子代理
 2. 传递设计文件路径
 3. 等待审查结果
 **输出**: Review 报告

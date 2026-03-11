@@ -1,13 +1,12 @@
 ---
 name: report-renderer
 description: "报告渲染器：JSON 审查数据→填充模板→生成 Markdown 报告。原则：模板驱动渲染。触发：报告/渲染/生成文档/report/renderer"
-context: fork
-argument-hint: '<json-data-path>'
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
 ---
@@ -188,8 +187,8 @@ INFO    ████████████████████████
 
 | 组件 | 分数 | 问题数 | 状态 |
 |------|------|--------|------|
-| design-core | 96 | 1 | ✅ |
-| advisor-core | 92 | 2 | ✅ |
+| ccc:design-core | 96 | 1 | ✅ |
+| ccc:advisor-core | 92 | 2 | ✅ |
 
 ## 改进建议
 

@@ -1,13 +1,15 @@
 ---
 name: eval-parser
 description: "Eval 解析器：解析 evals/evals.json 文件→验证 schema 合规性→提取测试用例和 assertions。触发：eval/解析/测试用例/eval-parser"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Glob
   - Grep
-argument-hint: '<skill-path> [--strict=true|false] [--output=json|markdown]'
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Parser
@@ -20,7 +22,7 @@ Eval Parser 是 Eval 执行机制的第一个组件，负责：
 3. **提取** 测试用例和 assertions
 4. **报告** 格式错误和缺失字段
 
-本组件是阶段 3（Eval 执行机制）的基础，为 eval-executor 提供结构化的测试用例输入。
+本组件是阶段 3（Eval 执行机制）的基础，为 ccc:eval-executor 提供结构化的测试用例输入。
 
 ## Workflow
 

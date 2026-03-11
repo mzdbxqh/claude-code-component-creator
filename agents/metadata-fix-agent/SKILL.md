@@ -1,13 +1,15 @@
 ---
 name: metadata-fix-agent
 description: "元数据修复代理：自动修复组件元数据字段（name/description/argument-hint/context/model）。触发：metadata/fix/repair/headers"
-argument-hint: "<files...> [--dry-run]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Edit
+permissionMode: prompt
+skills:
+  - ccc:std-naming-rules
+  - ccc:std-component-selection
 ---
 
 # Metadata Fix Agent
@@ -128,8 +130,6 @@ dry_run: false
 ---
 name: deploy
 description: "Deploy application to target environment"
-argument-hint: "[--target=<env>]"
-context: fork
 model: sonnet
 ---
 ```
@@ -253,7 +253,7 @@ agents/nonexistent/SKILL.md
 
 | Field | Required | Format | Example |
 |-------|----------|--------|---------|
-| name | Yes | kebab-case | `doc-complete-agent` |
+| name | Yes | kebab-case | `ccc:doc-complete-agent` |
 | description | Yes | 50-150 chars + trigger | "Do something. Trigger: keyword" |
 | description_zh | Recommended | Chinese translation | "做某事。触发：keyword" |
 | argument-hint | Yes | `<required> [--optional]` | `[--dry-run]` |

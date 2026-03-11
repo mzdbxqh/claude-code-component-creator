@@ -1,14 +1,16 @@
 ---
 name: tool-declare-agent
 description: "工具声明代理：分析文件工具使用情况，添加缺失的 allowed-tools 声明。触发：tool/declare/permission/allowed-tools"
-argument-hint: "<files...> [--dry-run]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Edit
   - Grep
+permissionMode: prompt
+skills:
+  - ccc:std-naming-rules
+  - ccc:std-component-selection
 ---
 
 # Tool Declare Agent
@@ -132,11 +134,12 @@ dry_run: false
 
 ### Updated Declaration
 ```yaml
-allowed-tools:
+tools:
   - Bash
   - Read
   - Skill
   - Write
+permissionMode: prompt
 ```
 ```
 

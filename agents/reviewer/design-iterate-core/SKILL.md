@@ -1,13 +1,13 @@
 ---
 name: design-iterate-core
 description: "设计迭代核心：现有组件差异分析→生成增量优化方案。原则：小步迭代。触发：迭代/优化/重构/扩展/design-iterate"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Grep
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
   - ccc:lib-design-patterns

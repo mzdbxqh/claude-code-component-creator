@@ -1,12 +1,11 @@
 ---
 name: review-report-renderer
 description: "审阅报告渲染器：JSON 审查数据→审阅报告。触发：审阅报告/review report/渲染审阅"
-context: fork
-argument-hint: '<json-data-path>'
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
 ---

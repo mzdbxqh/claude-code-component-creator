@@ -1,17 +1,18 @@
 ---
 name: review-aggregator
 description: "审阅结果聚合器：聚合多个 review-core 结果→组件级 + 依赖级 issue 聚合→生成完整报告。触发：聚合/汇总/总结/review/aggregate"
-context: fork
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Write
   - Task
   - Grep
   - Glob
-argument-hint: "[--target=<path>] [--artifact-id=current] [--no-arch] [--workflow-check=auto|full|off] [--linkage-check=auto] [--lang=zh-cn|en-us|ja-jp] [--with-eval] [--eval-only] [--optimize-description]"
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
+  - ccc:lib-antipatterns
+  - ccc:std-workflow-attribution
 ---
 
 # 审阅结果聚合器
@@ -21,9 +22,9 @@ skills:
 Review Aggregator 是审阅系统的结果聚合组件，负责：
 1. 收集多个 review-core 实例的检测结果
 2. 进行组件级和依赖级的 issue 聚合去重
-3. **调用 workflow-discoverer 自动发现工作流**（新增，默认启用）
-4. **调用 linkage-validator 构建调用链路图**（默认启用）
-5. **调用 architecture-analyzer 进行 5 维度架构分析**（默认启用）
+3. **调用 ccc:workflow-discoverer 自动发现工作流**（新增，默认启用）
+4. **调用 ccc:linkage-validator 构建调用链路图**（默认启用）
+5. **调用 ccc:architecture-analyzer 进行 5 维度架构分析**（默认启用）
 6. 生成完整的审阅报告
 
 作为审阅流程的协调器，本组件确保所有检测结果被正确整合和呈现。
@@ -94,7 +95,7 @@ END FOR
 **目标**: 自动发现目标插件的整体工作流
 
 **操作**:
-1. 调用 `workflow-discoverer` 扫描 commands/目录
+1. 调用 `ccc:workflow-discoverer` 扫描 commands/目录
 2. 识别所有入口命令和触发场景
 3. 递归追踪从命令到 Skills/SubAgents 的调用链
 4. 构建完整的工作流调用图
@@ -109,7 +110,7 @@ END FOR
 **目标**: 构建完整的调用链路图并验证
 
 **操作**:
-1. 调用 `linkage-validator` 分析组件间调用关系
+1. 调用 `ccc:linkage-validator` 分析组件间调用关系
 2. 构建调用图（Call Graph）
 3. 检测循环依赖
 4. 验证调用参数匹配
@@ -123,7 +124,7 @@ END FOR
 **目标**: 5 维度架构质量评估
 
 **操作**:
-1. 调用 `architecture-analyzer` 进行评估
+1. 调用 `ccc:architecture-analyzer` 进行评估
 2. 工作流架构分析（流程清晰度、异常处理）
 3. 组件设计分析（内聚性、接口设计）
 4. 职责分配分析（重叠、缺失、粒度）
@@ -223,7 +224,7 @@ aggregation:
   },
   "componentAggregation": [
     {
-      "component": "advisor-core",
+      "component": "ccc:advisor-core",
       "score": 85,
       "issueCount": 3,
       "topIssues": ["SKILL-003", "SKILL-005"]
@@ -276,11 +277,11 @@ INFO    ████████████████████████
 
 | 组件 | 分数 | 问题数 | 状态 |
 |------|------|--------|------|
-| design-core | 96 | 1 | ✅ |
-| advisor-core | 92 | 2 | ✅ |
-| review-core | 88 | 3 | ⚠️ |
-| validator-core | 85 | 4 | ⚠️ |
-| planner-core | 78 | 6 | ❌ |
+| ccc:design-core | 96 | 1 | ✅ |
+| ccc:advisor-core | 92 | 2 | ✅ |
+| ccc:review-core | 88 | 3 | ⚠️ |
+| ccc:validator-core | 85 | 4 | ⚠️ |
+| ccc:planner-core | 78 | 6 | ❌ |
 
 ## 高频问题 TOP 5
 
@@ -293,7 +294,7 @@ INFO    ████████████████████████
 ### HIGH 优先级
 1. **错误处理文档** - 5 个组件缺少错误处理说明
    - 预计工时：2 小时
-   - 影响组件：advisor-core, review-core, ...
+   - 影响组件：ccc:advisor-core, review-core, ...
 
 ### MEDIUM 优先级
 2. **示例补充** - 4 个组件缺少使用示例

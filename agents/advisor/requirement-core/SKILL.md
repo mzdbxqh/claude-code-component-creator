@@ -1,12 +1,11 @@
 ---
 name: requirement-core
 description: "需求分析 (Requirement)：澄清技术 +5Why 方法论→挖掘真实需求。原则：问为什么直到根因。触发：需求/想要什么/目标/requirement/clarify"
-argument-hint: "<user-requirement> [context-files...]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-evidence-chain
 ---

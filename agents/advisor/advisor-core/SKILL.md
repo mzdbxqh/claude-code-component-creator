@@ -1,12 +1,11 @@
 ---
 name: advisor-core
 description: "设计顾问 (Advisor)：4 个诊断问题→决策树→推荐架构方案。原则：先诊断后建议。触发：设计/架构/建议/咨询/怎么选/advisor"
-argument-hint: "<user-requirement>"
-context: main
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
   - ccc:lib-design-patterns
@@ -187,11 +186,11 @@ requirement:
 ---
 name: std-todo-finder
 description: "查找并排序项目中的 TODO 注释。Use when searching for TODO comments."
-context: main
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Grep
+permissionMode: prompt
 ---
 ```
 

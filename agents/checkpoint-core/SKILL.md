@@ -1,16 +1,16 @@
 ---
 name: checkpoint-core
 description: "检查点验证 (Checkpoint)：状态转换验证→制品完整性检查→生成检查点报告。原则：每阶段必须验证。触发：检查点/验证/状态确认/checkpoint"
-argument-hint: "<checkpoint-type> [--artifact-id=<id>]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
   - ccc:std-evidence-chain
+  - ccc:lib-antipatterns
 ---
 
 # checkpoint-core Subagent

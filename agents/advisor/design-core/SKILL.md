@@ -1,12 +1,11 @@
 ---
 name: design-core
 description: "阶段 3 详细设计核心：基于架构决策创建 YAML 配置、工作流步骤和工具权限。触发：设计/详细/配置/workflow"
-argument-hint: "<stage-2-output-path>"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
   - ccc:lib-design-patterns
@@ -176,13 +175,13 @@ options:
 ---
 name: data-processor
 description: "处理数据文件，包含验证和转换"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Task
+permissionMode: prompt
 ---
 ```
 
@@ -301,7 +300,7 @@ docs/designs/reviewer/stage-2-architecture.md
   "status": "completed",
   "design": {
     "execution_phases": 2,
-    "parallel_components": ["review-core", "architecture-analyzer"]
+    "parallel_components": ["ccc:review-core", "ccc:architecture-analyzer"]
   }
 }
 ```

@@ -2,12 +2,15 @@
 name: eval-executor
 description: "Eval 执行器：并行执行测试用例 (with-skill vs baseline)，捕获 timing 数据"
 model: sonnet
-context: fork
-allowed-tools:
+tools:
   - Task
   - Read
   - Write
   - Bash
+permissionMode: prompt
+skills:
+  - ccc:std-evidence-chain
+  - ccc:std-component-selection
 ---
 
 # Eval Executor
@@ -19,7 +22,7 @@ allowed-tools:
 ## Workflow
 
 ### Step 1: 接收测试用例
-**目标**: 从 eval-parser 获取测试用例
+**目标**: 从 ccc:eval-parser 获取测试用例
 **操作**:
 1. 读取测试用例列表
 2. 准备执行环境

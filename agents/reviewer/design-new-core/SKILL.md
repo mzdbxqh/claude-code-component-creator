@@ -1,13 +1,13 @@
 ---
 name: design-new-core
 description: "设计新组件核心：协调 5 阶段设计流程→从零创建完整方案→关键决策透明。触发：新建设计/从零开始/design-new/core"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Task
+permissionMode: prompt
 skills:
   - ccc:std-component-selection
   - ccc:lib-design-patterns
@@ -35,7 +35,7 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 ### Step 2: Stage 1 - 需求分析协调
 **目标**: 执行需求分析阶段
 **操作**:
-1. 调用 requirement-core 进行 5Why 分析
+1. 调用 ccc:requirement-core 进行 5Why 分析
 2. 等待需求分析完成
 3. 读取 stage-1-requirement.md
 4. 验证需求分析质量
@@ -45,7 +45,7 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 ### Step 3: Stage 2 - 架构选型协调
 **目标**: 执行架构选型阶段
 **操作**:
-1. 调用 architect-core 进行架构决策
+1. 调用 ccc:architect-core 进行架构决策
 2. 等待架构选型完成
 3. 读取 stage-2-architecture.md
 4. 验证架构决策合理性
@@ -55,7 +55,7 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 ### Step 4: Stage 3 - 详细设计协调
 **目标**: 执行详细设计阶段
 **操作**:
-1. 调用 design-core 进行详细设计
+1. 调用 ccc:design-core 进行详细设计
 2. 等待设计完成
 3. 读取 stage-3-detailed-design.md
 4. 验证设计完整性（包括证据链）
@@ -75,7 +75,7 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 ### Step 5: Stage 4 - 规范验证协调
 **目标**: 执行规范验证阶段
 **操作**:
-1. 调用 validator-core 进行规范验证
+1. 调用 ccc:validator-core 进行规范验证
 2. 等待验证完成
 3. 读取 stage-4-validation.md
 4. 处理验证发现的问题
@@ -85,7 +85,7 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 ### Step 6: Stage 5 - 实施规划协调
 **目标**: 执行实施规划阶段
 **操作**:
-1. 调用 planner-core 进行实施规划
+1. 调用 ccc:planner-core 进行实施规划
 2. 等待规划完成
 3. 读取 stage-5-implementation.md
 4. 验证规划可行性

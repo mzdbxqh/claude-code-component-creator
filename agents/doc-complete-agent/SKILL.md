@@ -1,13 +1,15 @@
 ---
 name: doc-complete-agent
 description: "文档完善代理：分析文件并补充缺失的文档章节（示例、错误处理、注意事项）。触发：doc/complete/documentation/add-examples"
-argument-hint: "<files...> [--sections=examples,error_handling,notes]"
-context: fork
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Edit
+permissionMode: prompt
+skills:
+  - ccc:std-naming-rules
+  - ccc:std-component-selection
 ---
 
 # Doc Complete Agent

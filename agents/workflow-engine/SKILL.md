@@ -1,13 +1,14 @@
 ---
 name: workflow-engine
 description: "工作流引擎：外部状态管理→处理状态转换 + 错误恢复 + 恢复能力。触发：工作流/状态/进度/阶段/workflow/engine"
-argument-hint: "<action> [args...]"
-context: main
 model: haiku
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
+permissionMode: prompt
+skills:
+  - ccc:std-workflow-attribution
 ---
 
 # Workflow Engine

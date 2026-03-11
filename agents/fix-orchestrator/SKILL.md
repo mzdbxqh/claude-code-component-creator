@@ -1,16 +1,17 @@
 ---
 name: fix-orchestrator
 description: "修复编排器：协调交互式修复流程，分派 SubAgent 工厂执行批量修复。触发：fix/orchestrate/repair/batch-fix"
-argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
-context: main
 model: sonnet
-allowed-tools:
+tools:
   - Read
   - Write
   - Bash
   - Task
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
+  - ccc:lib-antipatterns
+  - ccc:std-evidence-chain
 ---
 
 # Fix Orchestrator
@@ -73,9 +74,9 @@ Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解
 ### Step 5: 分派 SubAgent 工厂
 **目标**: 使用 Task 工具执行并行修复
 **操作**:
-1. 分派 metadata-fix-agent 修复元数据问题
-2. 分派 tool-declare-agent 修复工具权限问题
-3. 分派 doc-complete-agent 修复文档缺口
+1. 分派 ccc:metadata-fix-agent 修复元数据问题
+2. 分派 ccc:tool-declare-agent 修复工具权限问题
+3. 分派 ccc:doc-complete-agent 修复文档缺口
 4. 监控执行进度
 **输出**: SubAgent 执行结果
 **错误处理**: 失败的 agent 重试一次，记录部分成功

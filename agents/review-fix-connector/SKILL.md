@@ -2,13 +2,15 @@
 name: review-fix-connector
 description: "Review→Fix 连接器：解析 Review 报告，生成 Fix 输入，触发修复流程"
 model: sonnet
-context: fork
-allowed-tools:
+tools:
   - Read
   - Write
   - Task
+permissionMode: prompt
 skills:
   - ccc:std-naming-rules
+  - ccc:lib-antipatterns
+  - ccc:std-evidence-chain
 ---
 
 # Review-Fix Connector
@@ -36,7 +38,7 @@ skills:
 ### Step 3: 触发 Fix 流程
 **目标**: 执行 Fix 子代理
 **操作**:
-1. 使用 Task 工具调用 fix-orchestrator
+1. 使用 Task 工具调用 ccc:fix-orchestrator
 2. 传递 Fix 任务列表
 **输出**: Fix 执行结果
 
