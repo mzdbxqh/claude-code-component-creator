@@ -12,14 +12,15 @@ description:
   zh: |
     Hook 的 event 字段必须是系统支持的预定义事件类型。
 
-    **官方支持的事件类型**：
+    **官方支持的事件类型（15种）**：
     1. **会话生命周期**：SessionStart, SessionEnd, PreCompact
     2. **用户交互**：UserPromptSubmit, InstructionsLoaded
     3. **工具调用**：PreToolUse, PostToolUse
-    4. **SubAgent 生命周期**：SubagentStart, SubagentStop
-    5. **Git 工作树**：WorktreeCreate, WorktreeRemove
-    6. **配置变更**：ConfigChange
-    7. **团队协作**：TeammateIdle, TaskCompleted
+    4. **权限请求**：PermissionRequest
+    5. **SubAgent 生命周期**：SubagentStart, SubagentStop
+    6. **Git 工作树**：WorktreeCreate, WorktreeRemove
+    7. **配置变更**：ConfigChange
+    8. **团队协作**：TeammateIdle, TaskCompleted
 
     **Hook 类型限制**：
     - command hooks：支持所有事件
@@ -31,14 +32,15 @@ description:
   en: |
     Hook's event field must be a system-supported predefined event type.
 
-    **Official Supported Event Types**:
+    **Official Supported Event Types (15 types)**:
     1. **Session Lifecycle**: SessionStart, SessionEnd, PreCompact
     2. **User Interaction**: UserPromptSubmit, InstructionsLoaded
     3. **Tool Invocation**: PreToolUse, PostToolUse
-    4. **SubAgent Lifecycle**: SubagentStart, SubagentStop
-    5. **Git Worktrees**: WorktreeCreate, WorktreeRemove
-    6. **Config Changes**: ConfigChange
-    7. **Team Collaboration**: TeammateIdle, TaskCompleted
+    4. **Permission Request**: PermissionRequest
+    5. **SubAgent Lifecycle**: SubagentStart, SubagentStop
+    6. **Git Worktrees**: WorktreeCreate, WorktreeRemove
+    7. **Config Changes**: ConfigChange
+    8. **Team Collaboration**: TeammateIdle, TaskCompleted
 
     **Hook Type Restrictions**:
     - command hooks: Support all events
@@ -67,6 +69,7 @@ detection:
       - UserPromptSubmit
       - PreToolUse
       - PostToolUse
+      - PermissionRequest
       - SubagentStart
       - SubagentStop
       - WorktreeCreate
