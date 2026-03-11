@@ -1,0 +1,728 @@
+id: SKILL-024
+name: context-field-missing
+severity: info
+component_type: skill
+category: interaction
+
+title:
+  zh: "Skill 缺少 context 上下文说明"
+  en: "Skill missing context field"
+
+description:
+  zh: |
+    Skills 应该使用 context 字段说明使用场景和前置条件。
+
+    **context 字段作用**：
+    - 说明 Skill 适用的使用场景
+    - 列出前置条件和依赖
+    - 帮助 Claude 理解何时推荐此 Skill
+    - 改善 Skill 的可发现性
+
+    **适用场景**：
+    - ✅ 有特定使用场景的 Skill
+    - ✅ 需要前置条件的 Skill
+    - ✅ 与其他工具/流程配合的 Skill
+    - ❌ 通用工具型 Skill（可选）
+
+    **最佳实践**：
+    - 清晰描述使用场景
+    - 列出必需的前置条件
+    - 说明与其他工具的关系
+    - 避免冗长，保持简洁
+
+  en: |
+    Skills should use context field to explain usage scenarios and prerequisites.
+
+    **context field purpose**:
+    - Explain applicable usage scenarios
+    - List prerequisites and dependencies
+    - Help Claude understand when to recommend this Skill
+    - Improve Skill discoverability
+
+    **Use cases**:
+    - ✅ Skills with specific usage scenarios
+    - ✅ Skills needing prerequisites
+    - ✅ Skills working with other tools/workflows
+    - ❌ General-purpose utility Skills (optional)
+
+    **Best practices**:
+    - Clearly describe usage scenarios
+    - List required prerequisites
+    - Explain relationship with other tools
+    - Avoid verbosity, keep concise
+
+rationale:
+  zh: "基于官方功能 (skills.md OFF-INT-013)，context 提升 Skill 的可发现性和适用性判断"
+  en: "Per official features (skills.md OFF-INT-013), context improves Skill discoverability and applicability judgment"
+
+detection:
+  method: frontmatter-check
+  indicators:
+    - missing_field: "复杂 Skill 未声明 context"
+    - has_prerequisites: "有前置条件但未在 context 说明"
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "上下文说明"
+  lines: "213-245"
+  quote: "context 说明 Skill 使用场景和前置条件。帮助 Claude 判断何时推荐。"
+
+examples:
+  bad:
+    zh: |
+      错误1：有前置条件但未说明
+      ```yaml
+      ---
+      name: deploy-to-prod
+      description: "部署到生产环境"
+      allowed-tools:
+        - Bash
+      ---
+
+      # Deploy to Production
+
+      运行部署脚本...
+
+      ❌ 未说明需要在 Git 仓库中
+      ❌ 未说明需要配置凭证
+      用户可能在错误场景使用
+      ```
+
+      错误2：复杂工作流无上下文
+      ```yaml
+      ---
+      name: migration-runner
+      description: "运行数据库迁移"
+      ---
+
+      ❌ 未说明何时应该运行
+      ❌ 未说明前置条件
+      ❌ 未说明与其他步骤的关系
+      ```
+
+      错误3：context 太冗长
+      ```yaml
+      ---
+      name: simple-tool
+      context: |
+        这是一个非常简单的工具，用于执行基本的文件操作。
+        它可以在任何时候使用，不需要任何前置条件。
+        主要功能包括读取文件、写入文件、复制文件等等。
+        建议在需要处理文件时使用此工具。
+        它与其他文件处理工具兼容...
+      ---
+
+      ❌ 过于冗长
+      ❌ 信息重复
+      应该简洁明了
+      ```
+    en: |
+      Error 1: Has prerequisites but not explained
+      ```yaml
+      ---
+      name: deploy-to-prod
+      description: "Deploy to production"
+      allowed-tools:
+        - Bash
+      ---
+
+      # Deploy to Production
+
+      Run deployment script...
+
+      ❌ Doesn't mention need to be in Git repo
+      ❌ Doesn't mention need configured credentials
+      User may use in wrong scenario
+      ```
+
+      Error 2: Complex workflow without context
+      ```yaml
+      ---
+      name: migration-runner
+      description: "Run database migrations"
+      ---
+
+      ❌ Doesn't explain when to run
+      ❌ Doesn't list prerequisites
+      ❌ Doesn't explain relationship with other steps
+      ```
+
+      Error 3: context too verbose
+      ```yaml
+      ---
+      name: simple-tool
+      context: |
+        This is a very simple tool for basic file operations.
+        It can be used anytime without prerequisites.
+        Main features include reading files, writing files, copying files, etc.
+        Recommended when you need to process files.
+        It's compatible with other file processing tools...
+      ---
+
+      ❌ Too verbose
+      ❌ Redundant information
+      Should be concise
+      ```
+
+  good:
+    zh: |
+      正确1：清晰的场景说明
+      ```yaml
+      ---
+      name: pre-commit-check
+      description: "提交前检查"
+      context: "在 git commit 之前运行，验证代码质量"
+      allowed-tools:
+        - Bash
+        - Read
+      ---
+
+      # Pre-commit Check
+
+      ## When to use
+      Before running `git commit`, this skill:
+      - Checks code formatting
+      - Runs linters
+      - Validates tests
+
+      ✅ 清晰的使用时机
+      ✅ 说明用途
+      ```
+
+      正确2：列出前置条件
+      ```yaml
+      ---
+      name: docker-deploy
+      description: "Docker 部署"
+      context: |
+        Prerequisites:
+        - Docker installed and running
+        - .env file configured
+        - In project root directory
+      allowed-tools:
+        - Bash
+      ---
+
+      # Docker Deploy
+
+      ## Prerequisites Check
+      Before using this skill:
+      1. Docker daemon running: `docker ps`
+      2. Environment configured: `.env` exists
+      3. Current directory: Project root
+
+      ✅ 明确前置条件
+      ✅ 提供检查方法
+      ```
+
+      正确3：说明工作流位置
+      ```yaml
+      ---
+      name: test-runner
+      description: "运行测试套件"
+      context: |
+        Use after code changes, before commit.
+        Part of pre-commit workflow:
+        1. Code changes
+        2. Run tests (this skill)
+        3. Fix failures
+        4. Commit
+      ---
+
+      # Test Runner
+
+      ## Workflow Position
+      This skill fits in the development workflow:
+      ```
+      Edit code → Run tests → Fix issues → Commit
+                     ↑
+                  You are here
+      ```
+
+      ✅ 说明在工作流中的位置
+      ✅ 展示上下文
+      ```
+
+      正确4：多场景 Skill
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "代码分析"
+      context: |
+        Use in these scenarios:
+        - Pre-commit: Quick analysis
+        - Code review: Deep analysis
+        - Refactoring: Impact assessment
+      ---
+
+      # Code Analyzer
+
+      ## Usage Scenarios
+
+      ### 1. Pre-commit (Quick)
+      ```
+      /analyze changed-files
+      ```
+      Fast check before commit.
+
+      ### 2. Code Review (Deep)
+      ```
+      /analyze --deep pull-request
+      ```
+      Comprehensive analysis for PR.
+
+      ### 3. Refactoring (Impact)
+      ```
+      /analyze --impact module/
+      ```
+      Assess refactoring impact.
+
+      ✅ 多场景清晰区分
+      ✅ 每个场景有示例
+      ```
+
+      正确5：依赖关系说明
+      ```yaml
+      ---
+      name: api-integration-test
+      description: "API 集成测试"
+      context: |
+        Requires:
+        - API server running (port 3000)
+        - Test database seeded
+        - .env.test configured
+
+        Run after: unit tests pass
+        Before: deployment
+      ---
+
+      # API Integration Test
+
+      ## Prerequisites
+
+      ### 1. Start API server
+      ```bash
+      npm run dev  # Port 3000
+      ```
+
+      ### 2. Seed test database
+      ```bash
+      npm run db:seed:test
+      ```
+
+      ### 3. Configure environment
+      ```bash
+      cp .env.example .env.test
+      # Edit .env.test
+      ```
+
+      ## In Workflow
+      ```
+      Unit tests → Integration tests → Deploy
+                         ↑
+                    You are here
+      ```
+
+      ✅ 清晰的依赖关系
+      ✅ 工作流位置明确
+      ```
+
+      正确6：条件使用说明
+      ```yaml
+      ---
+      name: performance-profiler
+      description: "性能分析"
+      context: |
+        Use when:
+        - App is slow (>2s load time)
+        - Memory usage high (>500MB)
+        - Before optimization work
+
+        Don't use for:
+        - Production debugging (use logs)
+        - Initial development
+      ---
+
+      # Performance Profiler
+
+      ## When to Use
+
+      ✅ **Use this skill when**:
+      - Application feels slow
+      - Users report performance issues
+      - Before starting optimization
+
+      ❌ **Don't use when**:
+      - App works fine (unnecessary overhead)
+      - In production (use monitoring tools)
+      - During initial prototyping
+
+      ## Decision Tree
+      ```
+      Performance issue?
+        ├─ Yes → Use profiler
+        └─ No → Skip (premature optimization)
+      ```
+
+      ✅ 明确使用/不使用场景
+      ✅ 决策树辅助判断
+      ```
+
+      正确7：简洁有效的 context
+      ```yaml
+      ---
+      name: git-commit-helper
+      context: "After staging changes, before pushing"
+      ---
+
+      ✅ 简洁明了
+      ✅ 说明时机
+
+      ---
+      name: db-migration
+      context: "After schema changes, requires backup"
+      ---
+
+      ✅ 关键信息齐全
+      ✅ 提醒风险
+
+      ---
+      name: code-formatter
+      context: "Before commit, safe for any file"
+      ---
+
+      ✅ 使用时机
+      ✅ 安全性说明
+      ```
+    en: |
+      Good 1: Clear scenario explanation
+      ```yaml
+      ---
+      name: pre-commit-check
+      description: "Pre-commit check"
+      context: "Run before git commit to validate code quality"
+      allowed-tools:
+        - Bash
+        - Read
+      ---
+
+      # Pre-commit Check
+
+      ## When to use
+      Before running `git commit`, this skill:
+      - Checks code formatting
+      - Runs linters
+      - Validates tests
+
+      ✅ Clear usage timing
+      ✅ Explains purpose
+      ```
+
+      Good 2: List prerequisites
+      ```yaml
+      ---
+      name: docker-deploy
+      description: "Docker deployment"
+      context: |
+        Prerequisites:
+        - Docker installed and running
+        - .env file configured
+        - In project root directory
+      allowed-tools:
+        - Bash
+      ---
+
+      # Docker Deploy
+
+      ## Prerequisites Check
+      Before using this skill:
+      1. Docker daemon running: `docker ps`
+      2. Environment configured: `.env` exists
+      3. Current directory: Project root
+
+      ✅ Clear prerequisites
+      ✅ Provides check method
+      ```
+
+      Good 3: Explain workflow position
+      ```yaml
+      ---
+      name: test-runner
+      description: "Run test suite"
+      context: |
+        Use after code changes, before commit.
+        Part of pre-commit workflow:
+        1. Code changes
+        2. Run tests (this skill)
+        3. Fix failures
+        4. Commit
+      ---
+
+      # Test Runner
+
+      ## Workflow Position
+      This skill fits in the development workflow:
+      ```
+      Edit code → Run tests → Fix issues → Commit
+                     ↑
+                  You are here
+      ```
+
+      ✅ Explains position in workflow
+      ✅ Shows context
+      ```
+
+      Good 4: Multi-scenario Skill
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "Code analysis"
+      context: |
+        Use in these scenarios:
+        - Pre-commit: Quick analysis
+        - Code review: Deep analysis
+        - Refactoring: Impact assessment
+      ---
+
+      # Code Analyzer
+
+      ## Usage Scenarios
+
+      ### 1. Pre-commit (Quick)
+      ```
+      /analyze changed-files
+      ```
+      Fast check before commit.
+
+      ### 2. Code Review (Deep)
+      ```
+      /analyze --deep pull-request
+      ```
+      Comprehensive analysis for PR.
+
+      ### 3. Refactoring (Impact)
+      ```
+      /analyze --impact module/
+      ```
+      Assess refactoring impact.
+
+      ✅ Multiple scenarios clearly distinguished
+      ✅ Each scenario has example
+      ```
+
+      Good 5: Dependency relationship explained
+      ```yaml
+      ---
+      name: api-integration-test
+      description: "API integration test"
+      context: |
+        Requires:
+        - API server running (port 3000)
+        - Test database seeded
+        - .env.test configured
+
+        Run after: unit tests pass
+        Before: deployment
+      ---
+
+      # API Integration Test
+
+      ## Prerequisites
+
+      ### 1. Start API server
+      ```bash
+      npm run dev  # Port 3000
+      ```
+
+      ### 2. Seed test database
+      ```bash
+      npm run db:seed:test
+      ```
+
+      ### 3. Configure environment
+      ```bash
+      cp .env.example .env.test
+      # Edit .env.test
+      ```
+
+      ## In Workflow
+      ```
+      Unit tests → Integration tests → Deploy
+                         ↑
+                    You are here
+      ```
+
+      ✅ Clear dependencies
+      ✅ Workflow position explicit
+      ```
+
+      Good 6: Conditional usage explanation
+      ```yaml
+      ---
+      name: performance-profiler
+      description: "Performance profiling"
+      context: |
+        Use when:
+        - App is slow (>2s load time)
+        - Memory usage high (>500MB)
+        - Before optimization work
+
+        Don't use for:
+        - Production debugging (use logs)
+        - Initial development
+      ---
+
+      # Performance Profiler
+
+      ## When to Use
+
+      ✅ **Use this skill when**:
+      - Application feels slow
+      - Users report performance issues
+      - Before starting optimization
+
+      ❌ **Don't use when**:
+      - App works fine (unnecessary overhead)
+      - In production (use monitoring tools)
+      - During initial prototyping
+
+      ## Decision Tree
+      ```
+      Performance issue?
+        ├─ Yes → Use profiler
+        └─ No → Skip (premature optimization)
+      ```
+
+      ✅ Clear use/don't use scenarios
+      ✅ Decision tree aids judgment
+      ```
+
+      Good 7: Concise effective context
+      ```yaml
+      ---
+      name: git-commit-helper
+      context: "After staging changes, before pushing"
+      ---
+
+      ✅ Concise and clear
+      ✅ Explains timing
+
+      ---
+      name: db-migration
+      context: "After schema changes, requires backup"
+      ---
+
+      ✅ Key info complete
+      ✅ Risk reminder
+
+      ---
+      name: code-formatter
+      context: "Before commit, safe for any file"
+      ---
+
+      ✅ Usage timing
+      ✅ Safety note
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加 context 字段**:
+
+      1. **识别使用场景**：
+         - 何时使用？
+         - 前置条件？
+         - 工作流位置？
+
+      2. **添加到 frontmatter**：
+         ```yaml
+         ---
+         name: my-skill
+         context: "使用时机和前置条件"
+         ---
+         ```
+
+      3. **简洁原则**：
+         - ✅ 1-3 句话说明关键信息
+         - ✅ 使用列表格式
+         - ❌ 避免冗长段落
+
+      **示例模板**:
+
+      **简单 Skill**:
+      ```yaml
+      context: "Before commit, checks code quality"
+      ```
+
+      **需要前置条件**:
+      ```yaml
+      context: |
+        Prerequisites:
+        - Docker running
+        - .env configured
+      ```
+
+      **工作流场景**:
+      ```yaml
+      context: |
+        Use in workflow:
+        Test → Review → Deploy (this skill)
+      ```
+
+      **检查清单**:
+      - [ ] 复杂 Skill 有 context
+      - [ ] 说明使用时机
+      - [ ] 列出前置条件
+      - [ ] 保持简洁（<5 行）
+    en: |
+      **Add context field**:
+
+      1. **Identify usage scenarios**:
+         - When to use?
+         - Prerequisites?
+         - Workflow position?
+
+      2. **Add to frontmatter**:
+         ```yaml
+         ---
+         name: my-skill
+         context: "Usage timing and prerequisites"
+         ---
+         ```
+
+      3. **Concise principle**:
+         - ✅ 1-3 sentences with key info
+         - ✅ Use list format
+         - ❌ Avoid long paragraphs
+
+      **Example Templates**:
+
+      **Simple Skill**:
+      ```yaml
+      context: "Before commit, checks code quality"
+      ```
+
+      **Needs prerequisites**:
+      ```yaml
+      context: |
+        Prerequisites:
+        - Docker running
+        - .env configured
+      ```
+
+      **Workflow scenario**:
+      ```yaml
+      context: |
+        Use in workflow:
+        Test → Review → Deploy (this skill)
+      ```
+
+      **Checklist**:
+      - [ ] Complex Skills have context
+      - [ ] Explains usage timing
+      - [ ] Lists prerequisites
+      - [ ] Stays concise (<5 lines)
+
+tags: ["skill", "interaction", "context", "scenarios", "prerequisites", "discoverability"]
+related_rules: ["SKILL-023", "SKILL-001", "DOC-001"]

@@ -1,0 +1,608 @@
+id: SKILL-023
+name: argument-hint-missing
+severity: info
+component_type: skill
+category: interaction
+
+title:
+  zh: "Skill 缺少 argument-hint 声明"
+  en: "Skill missing argument-hint declaration"
+
+description:
+  zh: |
+    接受参数的 Skills 应该声明 argument-hint 指导用户输入。
+
+    **argument-hint 作用**：
+    - 提示用户需要提供什么参数
+    - 改善命令行自动补全体验
+    - 减少用户错误输入
+
+    **格式规范**：
+    - 使用尖括号表示必需参数: `<filename>`
+    - 使用方括号表示可选参数: `[options]`
+    - 多个参数用空格分隔: `<source> <dest> [flags]`
+    - 清晰描述参数含义
+
+    **最佳实践**：
+    - 所有接受参数的 Skill 都应声明 argument-hint
+    - 参数名称应该语义清晰
+    - 在 SKILL.md 中详细说明参数用法
+
+  en: |
+    Skills accepting arguments should declare argument-hint to guide user input.
+
+    **argument-hint purpose**:
+    - Prompt users what arguments to provide
+    - Improve CLI auto-completion experience
+    - Reduce user input errors
+
+    **Format conventions**:
+    - Use angle brackets for required params: `<filename>`
+    - Use square brackets for optional params: `[options]`
+    - Separate multiple params with space: `<source> <dest> [flags]`
+    - Clear parameter meaning description
+
+    **Best practices**:
+    - All Skills accepting arguments should declare argument-hint
+    - Parameter names should be semantically clear
+    - Detail parameter usage in SKILL.md
+
+rationale:
+  zh: "基于官方功能 (skills.md OFF-INT-011~012)，argument-hint 提升用户体验和可发现性"
+  en: "Per official features (skills.md OFF-INT-011~012), argument-hint improves UX and discoverability"
+
+detection:
+  method: frontmatter-check
+  indicators:
+    - uses_arguments: "SKILL.md 使用 $ARGUMENTS 但未声明 argument-hint"
+    - missing_field: "接受参数但无 argument-hint"
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "参数提示"
+  lines: "178-212"
+  quote: "argument-hint 提示用户参数格式。使用 <> 表示必需，[] 表示可选。"
+
+examples:
+  bad:
+    zh: |
+      错误1：使用 $ARGUMENTS 但未声明 hint
+      ```yaml
+      ---
+      name: file-reader
+      description: "读取文件内容"
+      allowed-tools:
+        - Read
+      ---
+
+      # File Reader
+
+      读取文件: $ARGUMENTS
+
+      ❌ 未声明 argument-hint
+      用户不知道应该提供什么
+      ```
+
+      错误2：argument-hint 不清晰
+      ```yaml
+      ---
+      name: transformer
+      argument-hint: "<input>"
+      ---
+
+      ❌ "input" 太模糊
+      应该是 "<source-file>" 或 "<data>"
+      ```
+
+      错误3：参数格式错误
+      ```yaml
+      ---
+      name: converter
+      argument-hint: "source dest"
+      ---
+
+      ❌ 缺少尖括号
+      应该是 "<source> <dest>"
+      ```
+    en: |
+      Error 1: Uses $ARGUMENTS without hint
+      ```yaml
+      ---
+      name: file-reader
+      description: "Read file contents"
+      allowed-tools:
+        - Read
+      ---
+
+      # File Reader
+
+      Read file: $ARGUMENTS
+
+      ❌ No argument-hint declared
+      User doesn't know what to provide
+      ```
+
+      Error 2: Unclear argument-hint
+      ```yaml
+      ---
+      name: transformer
+      argument-hint: "<input>"
+      ---
+
+      ❌ "input" too vague
+      Should be "<source-file>" or "<data>"
+      ```
+
+      Error 3: Wrong parameter format
+      ```yaml
+      ---
+      name: converter
+      argument-hint: "source dest"
+      ---
+
+      ❌ Missing angle brackets
+      Should be "<source> <dest>"
+      ```
+
+  good:
+    zh: |
+      正确1：清晰的参数提示
+      ```yaml
+      ---
+      name: file-analyzer
+      description: "分析文件"
+      argument-hint: "<filename>"
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+
+      # File Analyzer
+
+      分析文件: $ARGUMENTS
+
+      ## Usage
+      `/analyze src/utils.js`
+
+      ✅ 清晰的 argument-hint
+      用户知道需要提供文件名
+      ```
+
+      正确2：必需和可选参数
+      ```yaml
+      ---
+      name: code-formatter
+      argument-hint: "<file> [--style=google]"
+      ---
+
+      # Code Formatter
+
+      格式化文件: $ARGUMENTS
+
+      ## Parameters
+      - `<file>`: 要格式化的文件（必需）
+      - `[--style]`: 代码风格（可选，默认 google）
+
+      ## Examples
+      ```
+      /format src/app.js
+      /format src/app.js --style=airbnb
+      ```
+
+      ✅ 区分必需和可选参数
+      ```
+
+      正确3：多参数提示
+      ```yaml
+      ---
+      name: file-copier
+      argument-hint: "<source> <destination> [--overwrite]"
+      ---
+
+      # File Copier
+
+      复制文件: $ARGUMENTS
+
+      ## Parameters
+      - `<source>`: 源文件路径
+      - `<destination>`: 目标路径
+      - `[--overwrite]`: 覆盖已存在文件（可选）
+
+      ## Examples
+      ```
+      /copy file.txt backup/
+      /copy file.txt backup/ --overwrite
+      ```
+
+      ✅ 多参数清晰标注
+      ✅ 详细说明每个参数
+      ```
+
+      正确4：复杂参数说明
+      ```yaml
+      ---
+      name: search-replace
+      argument-hint: "<pattern> <replacement> [--regex] [--file=<path>]"
+      ---
+
+      # Search and Replace
+
+      搜索替换: $ARGUMENTS
+
+      ## Parameters
+
+      ### Required
+      - `<pattern>`: 搜索模式（字符串或正则）
+      - `<replacement>`: 替换文本
+
+      ### Optional
+      - `[--regex]`: 将 pattern 视为正则表达式
+      - `[--file=<path>]`: 指定文件路径（默认当前文件）
+
+      ## Examples
+
+      **Simple replacement**:
+      ```
+      /search-replace "old" "new"
+      ```
+
+      **Regex replacement**:
+      ```
+      /search-replace "user\\d+" "user_$1" --regex
+      ```
+
+      **Specific file**:
+      ```
+      /search-replace "TODO" "DONE" --file=src/app.js
+      ```
+
+      ✅ 参数分类清晰
+      ✅ 示例覆盖各种用法
+      ```
+
+      正确5：动态参数提示
+      ```yaml
+      ---
+      name: git-helper
+      argument-hint: "<command> [args...]"
+      ---
+
+      # Git Helper
+
+      Git 命令助手: $ARGUMENTS
+
+      ## Supported Commands
+
+      ### commit
+      ```
+      /git commit "<message>"
+      ```
+
+      ### push
+      ```
+      /git push [branch]
+      ```
+
+      ### status
+      ```
+      /git status
+      ```
+
+      ## Parameter Format
+      - `<command>`: Git 子命令 (commit, push, status, etc.)
+      - `[args...]`: 命令特定参数
+
+      ✅ 灵活的参数结构
+      ✅ 子命令清晰列举
+      ```
+
+      正确6：参数验证说明
+      ```yaml
+      ---
+      name: json-validator
+      argument-hint: "<json-file>"
+      ---
+
+      # JSON Validator
+
+      验证 JSON 文件: $ARGUMENTS
+
+      ## Parameter
+      - `<json-file>`: JSON 文件路径
+
+      ## Validation
+      - File must exist
+      - File must have `.json` extension
+      - Content must be valid JSON
+
+      ## Examples
+
+      **Valid**:
+      ```
+      /validate config.json
+      /validate data/settings.json
+      ```
+
+      **Invalid**:
+      ```
+      /validate missing.json     # File not found
+      /validate file.txt         # Not .json extension
+      /validate broken.json      # Invalid JSON syntax
+      ```
+
+      ✅ 明确参数要求
+      ✅ 列出验证规则
+      ```
+    en: |
+      Good 1: Clear parameter hint
+      ```yaml
+      ---
+      name: file-analyzer
+      description: "Analyze file"
+      argument-hint: "<filename>"
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+
+      # File Analyzer
+
+      Analyze file: $ARGUMENTS
+
+      ## Usage
+      `/analyze src/utils.js`
+
+      ✅ Clear argument-hint
+      User knows to provide filename
+      ```
+
+      Good 2: Required and optional parameters
+      ```yaml
+      ---
+      name: code-formatter
+      argument-hint: "<file> [--style=google]"
+      ---
+
+      # Code Formatter
+
+      Format file: $ARGUMENTS
+
+      ## Parameters
+      - `<file>`: File to format (required)
+      - `[--style]`: Code style (optional, default google)
+
+      ## Examples
+      ```
+      /format src/app.js
+      /format src/app.js --style=airbnb
+      ```
+
+      ✅ Distinguish required vs optional
+      ```
+
+      Good 3: Multiple parameter hint
+      ```yaml
+      ---
+      name: file-copier
+      argument-hint: "<source> <destination> [--overwrite]"
+      ---
+
+      # File Copier
+
+      Copy file: $ARGUMENTS
+
+      ## Parameters
+      - `<source>`: Source file path
+      - `<destination>`: Destination path
+      - `[--overwrite]`: Overwrite existing file (optional)
+
+      ## Examples
+      ```
+      /copy file.txt backup/
+      /copy file.txt backup/ --overwrite
+      ```
+
+      ✅ Multiple params clearly marked
+      ✅ Each param explained
+      ```
+
+      Good 4: Complex parameter explanation
+      ```yaml
+      ---
+      name: search-replace
+      argument-hint: "<pattern> <replacement> [--regex] [--file=<path>]"
+      ---
+
+      # Search and Replace
+
+      Search and replace: $ARGUMENTS
+
+      ## Parameters
+
+      ### Required
+      - `<pattern>`: Search pattern (string or regex)
+      - `<replacement>`: Replacement text
+
+      ### Optional
+      - `[--regex]`: Treat pattern as regex
+      - `[--file=<path>]`: Specify file path (default current file)
+
+      ## Examples
+
+      **Simple replacement**:
+      ```
+      /search-replace "old" "new"
+      ```
+
+      **Regex replacement**:
+      ```
+      /search-replace "user\\d+" "user_$1" --regex
+      ```
+
+      **Specific file**:
+      ```
+      /search-replace "TODO" "DONE" --file=src/app.js
+      ```
+
+      ✅ Clear parameter categorization
+      ✅ Examples cover all usage
+      ```
+
+      Good 5: Dynamic parameter hint
+      ```yaml
+      ---
+      name: git-helper
+      argument-hint: "<command> [args...]"
+      ---
+
+      # Git Helper
+
+      Git command helper: $ARGUMENTS
+
+      ## Supported Commands
+
+      ### commit
+      ```
+      /git commit "<message>"
+      ```
+
+      ### push
+      ```
+      /git push [branch]
+      ```
+
+      ### status
+      ```
+      /git status
+      ```
+
+      ## Parameter Format
+      - `<command>`: Git subcommand (commit, push, status, etc.)
+      - `[args...]`: Command-specific arguments
+
+      ✅ Flexible parameter structure
+      ✅ Subcommands clearly listed
+      ```
+
+      Good 6: Parameter validation explained
+      ```yaml
+      ---
+      name: json-validator
+      argument-hint: "<json-file>"
+      ---
+
+      # JSON Validator
+
+      Validate JSON file: $ARGUMENTS
+
+      ## Parameter
+      - `<json-file>`: JSON file path
+
+      ## Validation
+      - File must exist
+      - File must have `.json` extension
+      - Content must be valid JSON
+
+      ## Examples
+
+      **Valid**:
+      ```
+      /validate config.json
+      /validate data/settings.json
+      ```
+
+      **Invalid**:
+      ```
+      /validate missing.json     # File not found
+      /validate file.txt         # Not .json extension
+      /validate broken.json      # Invalid JSON syntax
+      ```
+
+      ✅ Clear parameter requirements
+      ✅ Validation rules listed
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加 argument-hint**:
+
+      1. **识别参数类型**：
+         - 必需参数 → `<name>`
+         - 可选参数 → `[name]`
+         - 多个参数 → 空格分隔
+
+      2. **添加到 frontmatter**：
+         ```yaml
+         ---
+         name: my-skill
+         argument-hint: "<file> [options]"
+         ---
+         ```
+
+      3. **文档说明**：
+         ```markdown
+         ## Parameters
+         - `<file>`: 文件路径（必需）
+         - `[options]`: 额外选项（可选）
+
+         ## Examples
+         /my-skill file.txt
+         /my-skill file.txt --verbose
+         ```
+
+      **格式规范**:
+      - ✅ `<filename>` - 必需参数
+      - ✅ `[--flag]` - 可选参数
+      - ✅ `<source> <dest>` - 多参数
+      - ❌ `filename` - 缺少括号
+      - ❌ `<input>` - 名称太模糊
+
+      **检查清单**:
+      - [ ] 使用 $ARGUMENTS 的 Skill 有 argument-hint
+      - [ ] 参数格式正确 (<> 或 [])
+      - [ ] 参数名称清晰
+      - [ ] 文档中详细说明
+    en: |
+      **Add argument-hint**:
+
+      1. **Identify parameter types**:
+         - Required params → `<name>`
+         - Optional params → `[name]`
+         - Multiple params → space-separated
+
+      2. **Add to frontmatter**:
+         ```yaml
+         ---
+         name: my-skill
+         argument-hint: "<file> [options]"
+         ---
+         ```
+
+      3. **Document**:
+         ```markdown
+         ## Parameters
+         - `<file>`: File path (required)
+         - `[options]`: Extra options (optional)
+
+         ## Examples
+         /my-skill file.txt
+         /my-skill file.txt --verbose
+         ```
+
+      **Format conventions**:
+      - ✅ `<filename>` - Required param
+      - ✅ `[--flag]` - Optional param
+      - ✅ `<source> <dest>` - Multiple params
+      - ❌ `filename` - Missing brackets
+      - ❌ `<input>` - Name too vague
+
+      **Checklist**:
+      - [ ] Skills using $ARGUMENTS have argument-hint
+      - [ ] Parameter format correct (<> or [])
+      - [ ] Parameter names clear
+      - [ ] Detailed documentation
+
+tags: ["skill", "interaction", "argument-hint", "parameters", "user-experience"]
+related_rules: ["SKILL-019", "SKILL-001", "DOC-001"]
