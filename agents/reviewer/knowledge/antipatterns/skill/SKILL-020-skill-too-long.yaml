@@ -1,0 +1,406 @@
+id: SKILL-020
+name: skill-too-long
+severity: warning
+component_type: skill
+category: scalability
+
+title:
+  zh: "SKILL.md 文件过长（超过 500 行）"
+  en: "SKILL.md file too long (exceeds 500 lines)"
+
+description:
+  zh: |
+    SKILL.md 文件应保持在 500 行以下，以确保：
+    1. Token 预算控制（占用上下文窗口 <2%）
+    2. 可读性和可维护性
+    3. 加载性能
+    4. 扩展性（避免单一巨型文件）
+
+    超长文件应拆分为：
+    - 支持文件：template.md, examples/, scripts/
+    - 多个 Skill：按功能拆分成独立 Skill
+    - SubAgent：复杂逻辑委托给 SubAgent
+  en: |
+    SKILL.md files should stay under 500 lines to ensure:
+    1. Token budget control (occupies <2% context window)
+    2. Readability and maintainability
+    3. Loading performance
+    4. Scalability (avoid single monolithic file)
+
+    Over-long files should be split into:
+    - Support files: template.md, examples/, scripts/
+    - Multiple Skills: Split by functionality
+    - SubAgents: Delegate complex logic to SubAgents
+
+rationale:
+  zh: "基于官方最佳实践 (skills.md OFF-CFG-011, OFF-SCA-001)，500 行是 SKILL.md 的推荐上限"
+  en: "Per official best practices (skills.md OFF-CFG-011, OFF-SCA-001), 500 lines is the recommended limit for SKILL.md"
+
+detection:
+  method: line-count
+  threshold: 500
+  action: warn
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "文件大小限制"
+  lines: "285-298"
+  quote: "SKILL.md 保持在 500 行以下。使用支持文件减少主 skill 大小。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 违反：单个 SKILL.md 包含所有内容（850 行）
+      ```markdown
+      ---
+      name: mega-skill
+      description: "包含所有功能的巨型 Skill"
+      ---
+
+      # Mega Skill (850 lines total)
+
+      ## Feature 1: Code Analysis
+      [200 lines of analysis workflow]
+
+      ## Feature 2: Code Generation
+      [250 lines of generation templates]
+
+      ## Feature 3: Testing
+      [150 lines of test workflows]
+
+      ## Feature 4: Deployment
+      [200 lines of deployment steps]
+
+      ## All Examples Inline
+      [50 lines of examples]
+
+      # ❌ 问题：
+      # 1. 超过 500 行限制
+      # 2. Token 占用过大
+      # 3. 难以维护
+      # 4. 功能耦合
+      ```
+
+      ❌ 违反：内联大量示例代码
+      ```markdown
+      ---
+      name: template-skill
+      ---
+
+      # Code Templates
+
+      ## React Component Template
+      [100 lines of React code]
+
+      ## Vue Component Template
+      [100 lines of Vue code]
+
+      ## Angular Component Template
+      [100 lines of Angular code]
+
+      [Total: 600+ lines]
+      # ❌ 应该使用外部 template.md
+      ```
+    en: |
+      ❌ Bad: Single SKILL.md contains everything (850 lines)
+      ```markdown
+      ---
+      name: mega-skill
+      description: "Monolithic Skill with all features"
+      ---
+
+      # Mega Skill (850 lines total)
+
+      ## Feature 1: Code Analysis
+      [200 lines of analysis workflow]
+
+      ## Feature 2: Code Generation
+      [250 lines of generation templates]
+
+      ## Feature 3: Testing
+      [150 lines of test workflows]
+
+      ## Feature 4: Deployment
+      [200 lines of deployment steps]
+
+      ## All Examples Inline
+      [50 lines of examples]
+
+      # ❌ Issues:
+      # 1. Exceeds 500 line limit
+      # 2. Too much token usage
+      # 3. Hard to maintain
+      # 4. Feature coupling
+      ```
+
+      ❌ Bad: Inline massive example code
+      ```markdown
+      ---
+      name: template-skill
+      ---
+
+      # Code Templates
+
+      ## React Component Template
+      [100 lines of React code]
+
+      ## Vue Component Template
+      [100 lines of Vue code]
+
+      ## Angular Component Template
+      [100 lines of Angular code]
+
+      [Total: 600+ lines]
+      # ❌ Should use external template.md
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：拆分为多个 Skill
+      ```
+      skills/
+        code-analysis/
+          SKILL.md (180 lines)
+        code-generation/
+          SKILL.md (220 lines)
+          template.md (templates here)
+        testing/
+          SKILL.md (150 lines)
+        deployment/
+          SKILL.md (190 lines)
+
+      # ✅ 每个 Skill < 500 行
+      # ✅ 功能独立
+      # ✅ 易于维护
+      ```
+
+      ✅ 正确2：使用支持文件
+      ```markdown
+      ---
+      name: component-generator
+      description: "生成组件代码"
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # Component Generator (Main SKILL.md: 280 lines)
+
+      ## Workflow
+      1. 读取模板文件
+      2. 替换占位符
+      3. 生成组件代码
+
+      ## Templates
+      模板文件位于：
+      - `template.md` - 主模板文档
+      - `examples/react.md` - React 示例
+      - `examples/vue.md` - Vue 示例
+
+      [引用支持文件而非内联]
+
+      # ✅ 主文件保持简洁
+      ```
+
+      ✅ 正确3：复杂逻辑委托给 SubAgent
+      ```markdown
+      ---
+      name: complex-workflow-coordinator
+      description: "协调复杂工作流"
+      allowed-tools:
+        - Task
+      ---
+
+      # Workflow Coordinator (150 lines)
+
+      ## Steps
+      1. 调用 analysis-agent 进行代码分析
+      2. 调用 generation-agent 生成代码
+      3. 调用 testing-agent 运行测试
+
+      使用 Task(subagent_type="...") 委托复杂逻辑
+
+      # ✅ 主 Skill 轻量
+      # ✅ 复杂逻辑在 SubAgent 中
+      ```
+
+      ✅ 正确4：参考型 Skill（知识库）
+      ```markdown
+      ---
+      name: lib-coding-standards
+      description: "编码标准知识库"
+      allowed-tools: []
+      ---
+
+      # Coding Standards (420 lines)
+
+      ## JavaScript Standards
+      [100 lines]
+
+      ## Python Standards
+      [100 lines]
+
+      ## Java Standards
+      [100 lines]
+
+      [其他章节...]
+
+      # ✅ 纯参考内容，无工具调用
+      # ✅ < 500 行
+      ```
+    en: |
+      ✅ Good 1: Split into multiple Skills
+      ```
+      skills/
+        code-analysis/
+          SKILL.md (180 lines)
+        code-generation/
+          SKILL.md (220 lines)
+          template.md (templates here)
+        testing/
+          SKILL.md (150 lines)
+        deployment/
+          SKILL.md (190 lines)
+
+      # ✅ Each Skill < 500 lines
+      # ✅ Independent functionality
+      # ✅ Easy to maintain
+      ```
+
+      ✅ Good 2: Use support files
+      ```markdown
+      ---
+      name: component-generator
+      description: "Generate component code"
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # Component Generator (Main SKILL.md: 280 lines)
+
+      ## Workflow
+      1. Read template file
+      2. Replace placeholders
+      3. Generate component code
+
+      ## Templates
+      Template files located at:
+      - `template.md` - Main template doc
+      - `examples/react.md` - React examples
+      - `examples/vue.md` - Vue examples
+
+      [Reference support files instead of inlining]
+
+      # ✅ Main file stays concise
+      ```
+
+      ✅ Good 3: Delegate complex logic to SubAgent
+      ```markdown
+      ---
+      name: complex-workflow-coordinator
+      description: "Coordinate complex workflows"
+      allowed-tools:
+        - Task
+      ---
+
+      # Workflow Coordinator (150 lines)
+
+      ## Steps
+      1. Call analysis-agent for code analysis
+      2. Call generation-agent to generate code
+      3. Call testing-agent to run tests
+
+      Use Task(subagent_type="...") to delegate complex logic
+
+      # ✅ Main Skill is lightweight
+      # ✅ Complex logic in SubAgents
+      ```
+
+      ✅ Good 4: Reference-type Skill (knowledge library)
+      ```markdown
+      ---
+      name: lib-coding-standards
+      description: "Coding standards knowledge library"
+      allowed-tools: []
+      ---
+
+      # Coding Standards (420 lines)
+
+      ## JavaScript Standards
+      [100 lines]
+
+      ## Python Standards
+      [100 lines]
+
+      ## Java Standards
+      [100 lines]
+
+      [Other sections...]
+
+      # ✅ Pure reference content, no tool calls
+      # ✅ < 500 lines
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **重构策略**:
+
+      1. **功能拆分**（首选）：
+         - 识别独立功能模块
+         - 拆分为多个独立 Skill
+         - 使用 Skill 相互引用
+
+      2. **支持文件**：
+         - 创建 template.md 存放模板
+         - 创建 examples/ 目录存放示例
+         - 创建 scripts/ 目录存放脚本
+         - 在主 SKILL.md 中引用
+
+      3. **SubAgent 委托**：
+         - 复杂工作流 → SubAgent
+         - 主 Skill 作为协调器
+         - 降低 Token 占用
+
+      4. **内容精简**：
+         - 移除冗余说明
+         - 合并重复章节
+         - 使用引用而非内联
+
+      **优先级**:
+      - 600+ 行：必须重构
+      - 500-600 行：建议重构
+      - < 500 行：保持现状
+    en: |
+      **Refactoring Strategy**:
+
+      1. **Feature Split** (preferred):
+         - Identify independent feature modules
+         - Split into multiple independent Skills
+         - Use Skill cross-references
+
+      2. **Support Files**:
+         - Create template.md for templates
+         - Create examples/ directory for examples
+         - Create scripts/ directory for scripts
+         - Reference in main SKILL.md
+
+      3. **SubAgent Delegation**:
+         - Complex workflows → SubAgent
+         - Main Skill as coordinator
+         - Reduce token usage
+
+      4. **Content Streamlining**:
+         - Remove redundant explanations
+         - Merge duplicate sections
+         - Use references instead of inlining
+
+      **Priority**:
+      - 600+ lines: Must refactor
+      - 500-600 lines: Should refactor
+      - < 500 lines: Keep as is
+
+tags: ["skill", "scalability", "size-limit", "token-budget", "maintainability"]
+related_rules: ["skill-004", "ARCH-001", "ARCH-006"]

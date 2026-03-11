@@ -1,0 +1,393 @@
+id: ARCH-015
+name: component-in-plugin-dir
+severity: error
+component_type: plugin
+category: architecture
+
+title:
+  zh: "组件错误地放置在 .claude-plugin/ 目录内"
+  en: "Components incorrectly placed inside .claude-plugin/ directory"
+
+description:
+  zh: |
+    .claude-plugin/ 目录仅用于插件元数据配置，不应包含实际的组件代码。
+
+    **正确的目录用途**：
+    - ✅ .claude-plugin/plugin.json - 插件元数据
+    - ❌ .claude-plugin/skills/ - 错误，应在根目录
+    - ❌ .claude-plugin/agents/ - 错误，应在根目录
+    - ❌ .claude-plugin/commands/ - 错误，应在根目录
+    - ❌ .claude-plugin/hooks/ - 错误，应在根目录
+
+    **正确的插件结构**：
+    ```
+    my-plugin/
+      .claude-plugin/
+        plugin.json         ← 仅元数据文件
+      skills/               ← 在根目录
+      agents/               ← 在根目录
+      hooks/                ← 在根目录
+    ```
+
+    这样设计的原因：
+    1. 分离元数据和实现代码
+    2. 避免目录嵌套过深
+    3. 与 Claude Code 的加载机制一致
+  en: |
+    .claude-plugin/ directory is only for plugin metadata config, should not contain actual component code.
+
+    **Correct Directory Usage**:
+    - ✅ .claude-plugin/plugin.json - Plugin metadata
+    - ❌ .claude-plugin/skills/ - Wrong, should be at root
+    - ❌ .claude-plugin/agents/ - Wrong, should be at root
+    - ❌ .claude-plugin/commands/ - Wrong, should be at root
+    - ❌ .claude-plugin/hooks/ - Wrong, should be at root
+
+    **Correct Plugin Structure**:
+    ```
+    my-plugin/
+      .claude-plugin/
+        plugin.json         ← Only metadata files
+      skills/               ← At root level
+      agents/               ← At root level
+      hooks/                ← At root level
+    ```
+
+    Design rationale:
+    1. Separate metadata from implementation code
+    2. Avoid overly deep directory nesting
+    3. Consistent with Claude Code loading mechanism
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-CFG-004, OFF-ARC-005)，组件代码必须在插件根目录，不应嵌套在 .claude-plugin/ 内"
+  en: "Per official specs (plugins.md OFF-CFG-004, OFF-ARC-005), component code must be at plugin root level, not nested inside .claude-plugin/"
+
+detection:
+  method: directory-structure-check
+  forbidden_paths:
+    - ".claude-plugin/skills/"
+    - ".claude-plugin/agents/"
+    - ".claude-plugin/commands/"
+    - ".claude-plugin/hooks/"
+    - ".claude-plugin/*/SKILL.md"
+  allowed_in_claude_plugin:
+    - "plugin.json"
+    - "*.md" # README等文档
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "插件目录结构"
+  lines: "58-85"
+  quote: "不要将 commands/agents/skills 放在 .claude-plugin/ 内。这些目录应在插件根目录。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：skills 在 .claude-plugin/ 内
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ 错误位置
+            my-skill/
+              SKILL.md
+      ```
+
+      ❌ 错误2：所有组件都在 .claude-plugin/ 内
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ 应该在根目录
+            skill-1/
+          agents/           ← ❌ 应该在根目录
+            agent-1/
+          hooks/            ← ❌ 应该在根目录
+            hooks.json
+      ```
+
+      ❌ 错误3：嵌套过深
+      ```
+      my-plugin/
+        .claude-plugin/
+          src/              ← ❌ 不必要的嵌套
+            skills/
+              my-skill/
+                SKILL.md
+      ```
+
+      ❌ 错误4：混合正确和错误的结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ 错误位置
+            skill-1/
+        agents/             ← ✅ 但不一致
+          agent-1/
+      ```
+    en: |
+      ❌ Error 1: skills inside .claude-plugin/
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ Wrong location
+            my-skill/
+              SKILL.md
+      ```
+
+      ❌ Error 2: All components inside .claude-plugin/
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ Should be at root
+            skill-1/
+          agents/           ← ❌ Should be at root
+            agent-1/
+          hooks/            ← ❌ Should be at root
+            hooks.json
+      ```
+
+      ❌ Error 3: Overly nested
+      ```
+      my-plugin/
+        .claude-plugin/
+          src/              ← ❌ Unnecessary nesting
+            skills/
+              my-skill/
+                SKILL.md
+      ```
+
+      ❌ Error 4: Mixed correct and incorrect structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+          skills/           ← ❌ Wrong location
+            skill-1/
+        agents/             ← ✅ But inconsistent
+          agent-1/
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：标准插件结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 仅元数据
+        skills/             ← ✅ 在根目录
+          my-skill/
+            SKILL.md
+        agents/             ← ✅ 在根目录
+          my-agent/
+            SKILL.md
+      ```
+
+      ✅ 正确2：只有 skills 的插件
+      ```
+      simple-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 元数据
+        skills/             ← ✅ 根目录
+          skill-1/
+            SKILL.md
+          skill-2/
+            SKILL.md
+      ```
+
+      ✅ 正确3：带 hooks 的插件
+      ```
+      hooks-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 元数据
+        skills/             ← ✅ 根目录
+          integration-skill/
+            SKILL.md
+        hooks/              ← ✅ 根目录
+          hooks.json
+          scripts/
+            validate.sh
+      ```
+
+      ✅ 正确4：完整插件结构
+      ```
+      full-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 仅元数据
+        skills/             ← ✅ 功能入口
+          main-skill/
+          helper-skill/
+        agents/             ← ✅ 复杂逻辑
+          analyzer/
+          generator/
+        hooks/              ← ✅ 生命周期管理
+          hooks.json
+        docs/               ← ✅ 文档（可选）
+          guide.md
+        README.md           ← ✅ 说明文档
+      ```
+
+      ✅ 正确5：.claude-plugin/ 只包含配置
+      ```
+      .claude-plugin/
+        plugin.json         ← ✅ 必需
+        README.md           ← ✅ 可选，插件说明
+        LICENSE             ← ✅ 可选，许可证
+
+      # 不包含任何代码或组件目录
+      ```
+    en: |
+      ✅ Good 1: Standard plugin structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Metadata only
+        skills/             ← ✅ At root
+          my-skill/
+            SKILL.md
+        agents/             ← ✅ At root
+          my-agent/
+            SKILL.md
+      ```
+
+      ✅ Good 2: Skills-only plugin
+      ```
+      simple-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Metadata
+        skills/             ← ✅ Root level
+          skill-1/
+            SKILL.md
+          skill-2/
+            SKILL.md
+      ```
+
+      ✅ Good 3: Plugin with hooks
+      ```
+      hooks-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Metadata
+        skills/             ← ✅ Root level
+          integration-skill/
+            SKILL.md
+        hooks/              ← ✅ Root level
+          hooks.json
+          scripts/
+            validate.sh
+      ```
+
+      ✅ Good 4: Complete plugin structure
+      ```
+      full-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Metadata only
+        skills/             ← ✅ Feature entry points
+          main-skill/
+          helper-skill/
+        agents/             ← ✅ Complex logic
+          analyzer/
+          generator/
+        hooks/              ← ✅ Lifecycle management
+          hooks.json
+        docs/               ← ✅ Documentation (optional)
+          guide.md
+        README.md           ← ✅ Description
+      ```
+
+      ✅ Good 5: .claude-plugin/ contains only config
+      ```
+      .claude-plugin/
+        plugin.json         ← ✅ Required
+        README.md           ← ✅ Optional, plugin description
+        LICENSE             ← ✅ Optional, license
+
+      # No code or component directories
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检测 .claude-plugin/ 内的组件目录
+
+      2. 移动到插件根目录：
+         ```bash
+         # 移动 skills
+         mv .claude-plugin/skills/ ./
+
+         # 移动 agents
+         mv .claude-plugin/agents/ ./
+
+         # 移动 hooks
+         mv .claude-plugin/hooks/ ./
+         ```
+
+      3. 验证 .claude-plugin/ 只包含配置文件
+
+      **手动检查**:
+
+      1. 确认所有组件路径更新
+      2. 测试插件加载：
+         ```bash
+         claude --plugin-dir . --version
+         ```
+      3. 验证组件可以被正确发现
+
+      **目录结构检查**:
+      ```bash
+      # 应该看到这样的结构
+      tree -L 2 -a
+      # .claude-plugin/
+      #   plugin.json
+      # skills/
+      #   ...
+      # agents/
+      #   ...
+      ```
+    en: |
+      **Automatic Fix**:
+
+      1. Detect component directories inside .claude-plugin/
+
+      2. Move to plugin root:
+         ```bash
+         # Move skills
+         mv .claude-plugin/skills/ ./
+
+         # Move agents
+         mv .claude-plugin/agents/ ./
+
+         # Move hooks
+         mv .claude-plugin/hooks/ ./
+         ```
+
+      3. Verify .claude-plugin/ contains only config files
+
+      **Manual Review**:
+
+      1. Confirm all component paths updated
+      2. Test plugin loading:
+         ```bash
+         claude --plugin-dir . --version
+         ```
+      3. Verify components are correctly discovered
+
+      **Directory Structure Check**:
+      ```bash
+      # Should see this structure
+      tree -L 2 -a
+      # .claude-plugin/
+      #   plugin.json
+      # skills/
+      #   ...
+      # agents/
+      #   ...
+      ```
+
+tags: ["plugin", "architecture", "structure", "directory", "organization"]
+related_rules: ["ARCH-014", "ARCH-001"]

@@ -10,48 +10,341 @@ title:
 
 description:
   zh: |
-    Hook 的 event-type 必须是系统支持的预定义事件类型。
+    Hook 的 event 字段必须是系统支持的预定义事件类型。
+
+    **官方支持的事件类型**：
+    1. **会话生命周期**：SessionStart, SessionEnd, PreCompact
+    2. **用户交互**：UserPromptSubmit, InstructionsLoaded
+    3. **工具调用**：PreToolUse, PostToolUse
+    4. **SubAgent 生命周期**：SubagentStart, SubagentStop
+    5. **Git 工作树**：WorktreeCreate, WorktreeRemove
+    6. **配置变更**：ConfigChange
+    7. **团队协作**：TeammateIdle, TaskCompleted
+
+    **Hook 类型限制**：
+    - command hooks：支持所有事件
+    - http hooks：支持所有事件
+    - prompt hooks：仅支持 PreToolUse, PostToolUse, UserPromptSubmit
+    - agent hooks：仅支持 PreToolUse, PostToolUse, UserPromptSubmit
+
     无效的事件类型会导致 Hook 永远不会触发。
   en: |
-    Hook event-type must be a system-supported predefined event type.
+    Hook's event field must be a system-supported predefined event type.
+
+    **Official Supported Event Types**:
+    1. **Session Lifecycle**: SessionStart, SessionEnd, PreCompact
+    2. **User Interaction**: UserPromptSubmit, InstructionsLoaded
+    3. **Tool Invocation**: PreToolUse, PostToolUse
+    4. **SubAgent Lifecycle**: SubagentStart, SubagentStop
+    5. **Git Worktrees**: WorktreeCreate, WorktreeRemove
+    6. **Config Changes**: ConfigChange
+    7. **Team Collaboration**: TeammateIdle, TaskCompleted
+
+    **Hook Type Restrictions**:
+    - command hooks: Support all events
+    - http hooks: Support all events
+    - prompt hooks: Only PreToolUse, PostToolUse, UserPromptSubmit
+    - agent hooks: Only PreToolUse, PostToolUse, UserPromptSubmit
+
     Invalid event types will cause the hook to never trigger.
 
 rationale:
-  zh: "事件类型决定 Hook 的触发时机，必须是系统已定义的事件。"
-  en: "Event type determines when hook triggers; must be a system-defined event."
+  zh: "基于官方标准 (hooks.md OFF-CFG-015, OFF-ARC-008, OFF-ARC-036, OFF-ARC-037)，事件类型决定 Hook 的触发时机，必须是系统已定义的事件"
+  en: "Per official standards (hooks.md OFF-CFG-015, OFF-ARC-008, OFF-ARC-036, OFF-ARC-037), event type determines when hook triggers; must be a system-defined event"
 
-handbook_reference: "Chapter 6.2"
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "事件类型"
+  lines: "85-142"
+  quote: "Hook 事件类型包括 SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, SubagentStart, SubagentStop 等。prompt/agent hooks 仅支持特定事件。"
 
 detection:
-  method: custom
-  custom_function: "check_valid_event_type"
-  file_pattern: "hooks/*.md"
+  method: validation
+  valid_events:
+    all_hooks:
+      - SessionStart
+      - SessionEnd
+      - UserPromptSubmit
+      - PreToolUse
+      - PostToolUse
+      - SubagentStart
+      - SubagentStop
+      - WorktreeCreate
+      - WorktreeRemove
+      - ConfigChange
+      - InstructionsLoaded
+      - TeammateIdle
+      - TaskCompleted
+      - PreCompact
+    prompt_agent_only:
+      - PreToolUse
+      - PostToolUse
+      - UserPromptSubmit
+  check: |
+    1. 验证 event 字段存在
+    2. 验证 event 值在有效列表中
+    3. 如果是 prompt/agent hook，验证事件在受限列表中
 
 fix:
-  automatic: false
+  automatic: true
   suggestion:
-    zh: "使用系统支持的有效事件类型。"
-    en: "Use a valid system-supported event type."
+    zh: |
+      **自动修复**：
+
+      1. 检测拼写错误并修正：
+         - UserPromtSubmit → UserPromptSubmit
+         - PreTooluse → PreToolUse
+         - SubAgentStart → SubagentStart
+
+      2. 移除不存在的事件类型
+
+      3. 为 prompt/agent hooks 验证事件限制
+
+      **手动检查**：
+
+      1. 确认事件类型符合业务需求
+      2. 检查 hook 类型与事件兼容性
+      3. 更新文档说明
+    en: |
+      **Automatic Fix**:
+
+      1. Detect and fix typos:
+         - UserPromtSubmit → UserPromptSubmit
+         - PreTooluse → PreToolUse
+         - SubAgentStart → SubagentStart
+
+      2. Remove non-existent event types
+
+      3. Validate event restrictions for prompt/agent hooks
+
+      **Manual Review**:
+
+      1. Confirm event type matches business needs
+      2. Check hook type compatibility with event
+      3. Update documentation
 
 examples:
   bad:
     zh: |
-      ---
-      event-type: user-action-undefined
-      ---
+      ❌ 错误1：使用不存在的事件类型
+      ```json
+      {
+        "hooks": [{
+          "event": "FileChanged",  // ❌ 不存在
+          "type": "command",
+          "command": "echo 'file changed'"
+        }]
+      }
+      ```
+
+      ❌ 错误2：prompt hook 使用不支持的事件
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",  // ❌ prompt hook 不支持
+          "type": "prompt",
+          "prompt": "Session started"
+        }]
+      }
+      ```
+
+      ❌ 错误3：拼写错误
+      ```json
+      {
+        "hooks": [{
+          "event": "PreTooluse",  // ❌ 应该是 PreToolUse
+          "type": "command",
+          "command": "validate.sh"
+        }]
+      }
+      ```
+
+      ❌ 错误4：SubAgent 生命周期混淆
+      ```json
+      {
+        "hooks": [{
+          "event": "Stop",  // ❌ 应该是 SubagentStop
+          "type": "command",
+          "command": "cleanup.sh"
+        }]
+      }
+      ```
     en: |
-      ---
-      event-type: user-action-undefined
-      ---
+      ❌ Error 1: Non-existent event type
+      ```json
+      {
+        "hooks": [{
+          "event": "FileChanged",  // ❌ Doesn't exist
+          "type": "command",
+          "command": "echo 'file changed'"
+        }]
+      }
+      ```
+
+      ❌ Error 2: prompt hook with unsupported event
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",  // ❌ Not supported by prompt hooks
+          "type": "prompt",
+          "prompt": "Session started"
+        }]
+      }
+      ```
+
+      ❌ Error 3: Typo
+      ```json
+      {
+        "hooks": [{
+          "event": "PreTooluse",  // ❌ Should be PreToolUse
+          "type": "command",
+          "command": "validate.sh"
+        }]
+      }
+      ```
+
+      ❌ Error 4: SubAgent lifecycle confusion
+      ```json
+      {
+        "hooks": [{
+          "event": "Stop",  // ❌ Should be SubagentStop
+          "type": "command",
+          "command": "cleanup.sh"
+        }]
+      }
+      ```
+
   good:
     zh: |
-      ---
-      event-type: file-save
-      ---
+      ✅ 正确1：会话生命周期 hook
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh",
+          "description": "初始化会话环境"
+        }]
+      }
+      ```
+
+      ✅ 正确2：工具调用 hook（command）
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "security-check.sh",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      ```
+
+      ✅ 正确3：工具调用 hook（prompt）
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",  // ✅ prompt hook 支持
+          "type": "prompt",
+          "prompt": "验证工具使用是否安全",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      ```
+
+      ✅ 正确4：SubAgent 生命周期
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "SubagentStart",
+            "type": "command",
+            "command": "log-start.sh"
+          },
+          {
+            "event": "SubagentStop",
+            "type": "command",
+            "command": "log-stop.sh"
+          }
+        ]
+      }
+      ```
+
+      ✅ 正确5：Git 工作树管理
+      ```json
+      {
+        "hooks": [{
+          "event": "WorktreeCreate",
+          "type": "command",
+          "command": "setup-worktree.sh"
+        }]
+      }
+      ```
     en: |
-      ---
-      event-type: file-save
-      ---
+      ✅ Good 1: Session lifecycle hook
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh",
+          "description": "Initialize session environment"
+        }]
+      }
+      ```
+
+      ✅ Good 2: Tool invocation hook (command)
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "security-check.sh",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      ```
+
+      ✅ Good 3: Tool invocation hook (prompt)
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",  // ✅ Supported by prompt hooks
+          "type": "prompt",
+          "prompt": "Validate tool usage is safe",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      ```
+
+      ✅ Good 4: SubAgent lifecycle
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "SubagentStart",
+            "type": "command",
+            "command": "log-start.sh"
+          },
+          {
+            "event": "SubagentStop",
+            "type": "command",
+            "command": "log-stop.sh"
+          }
+        ]
+      }
+      ```
+
+      ✅ Good 5: Git worktree management
+      ```json
+      {
+        "hooks": [{
+          "event": "WorktreeCreate",
+          "type": "command",
+          "command": "setup-worktree.sh"
+        }]
+      }
+      ```
 
 tags: ["metadata", "event", "hook"]
 related_rules: []

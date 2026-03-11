@@ -1,0 +1,295 @@
+id: SKILL-019
+name: arguments-placeholder-misuse
+severity: warning
+component_type: skill
+category: config
+
+title:
+  zh: "$ARGUMENTS 占位符使用不当"
+  en: "$ARGUMENTS placeholder misuse"
+
+description:
+  zh: |
+    $ARGUMENTS 占位符用于捕获 Skill 调用时的用户输入，支持以下语法：
+
+    1. $ARGUMENTS - 捕获所有参数为单个字符串
+    2. $ARGUMENTS[0] - 按位置访问第一个参数
+    3. $ARGUMENTS[1] - 按位置访问第二个参数
+    4. $0, $1, $2 - 简写形式
+
+    常见错误：
+    - 使用 ${ARGUMENTS} 而不是 $ARGUMENTS
+    - 索引越界未处理
+    - 未验证参数内容
+    - 混淆 $ARGUMENTS 和环境变量语法
+  en: |
+    $ARGUMENTS placeholder captures user input when Skill is invoked, supporting:
+
+    1. $ARGUMENTS - Capture all arguments as single string
+    2. $ARGUMENTS[0] - Access first argument by position
+    3. $ARGUMENTS[1] - Access second argument by position
+    4. $0, $1, $2 - Shorthand form
+
+    Common errors:
+    - Using ${ARGUMENTS} instead of $ARGUMENTS
+    - Unhandled index out of bounds
+    - No argument content validation
+    - Confusing $ARGUMENTS with environment variable syntax
+
+rationale:
+  zh: "基于官方规范 (skills.md OFF-CFG-007, OFF-CFG-008, OFF-CFG-009)，$ARGUMENTS 是 Skill 参数传递的标准机制"
+  en: "Per official specs (skills.md OFF-CFG-007, OFF-CFG-008, OFF-CFG-009), $ARGUMENTS is the standard mechanism for Skill parameter passing"
+
+detection:
+  method: pattern-matching
+  patterns:
+    - invalid: "\\${ARGUMENTS}"
+      correct: "$ARGUMENTS"
+      reason: "不应使用大括号"
+    - invalid: "\\$\\{ARGUMENTS\\[\\d+\\]\\}"
+      correct: "$ARGUMENTS[N]"
+      reason: "索引访问不需要外层大括号"
+    - check: "\\$ARGUMENTS\\[(\\d+)\\]"
+      validation: "检查索引是否有边界处理"
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "参数占位符"
+  lines: "145-168"
+  quote: "$ARGUMENTS 占位符捕获用户输入。$ARGUMENTS[N] 按位置访问参数。$N 简写访问参数。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：使用错误的大括号语法
+      ```markdown
+      # Skill: process-file
+
+      处理文件：${ARGUMENTS}
+      # ❌ 应该是 $ARGUMENTS
+      ```
+
+      ❌ 错误2：索引越界未处理
+      ```markdown
+      分析文件：$ARGUMENTS[0]
+      使用选项：$ARGUMENTS[1]
+      # ❌ 如果用户只提供一个参数，$ARGUMENTS[1] 会失败
+      ```
+
+      ❌ 错误3：未验证参数内容
+      ```markdown
+      删除文件：$ARGUMENTS
+      # ❌ 直接使用用户输入，可能导致路径遍历攻击
+      ```
+
+      ❌ 错误4：混淆环境变量和参数
+      ```markdown
+      使用 ${ARGUMENTS[0]} 作为输入
+      # ❌ 外层大括号是环境变量语法，不适用于 $ARGUMENTS
+      ```
+    en: |
+      ❌ Error 1: Wrong brace syntax
+      ```markdown
+      # Skill: process-file
+
+      Process file: ${ARGUMENTS}
+      # ❌ Should be $ARGUMENTS
+      ```
+
+      ❌ Error 2: Unhandled index out of bounds
+      ```markdown
+      Analyze file: $ARGUMENTS[0]
+      Use options: $ARGUMENTS[1]
+      # ❌ If user provides only one argument, $ARGUMENTS[1] will fail
+      ```
+
+      ❌ Error 3: No argument validation
+      ```markdown
+      Delete file: $ARGUMENTS
+      # ❌ Using user input directly, could lead to path traversal
+      ```
+
+      ❌ Error 4: Confusing environment variables with arguments
+      ```markdown
+      Use ${ARGUMENTS[0]} as input
+      # ❌ Outer braces are env var syntax, not for $ARGUMENTS
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：基本参数捕获
+      ```markdown
+      ---
+      name: analyze-file
+      description: "分析指定文件"
+      argument-hint: "<file-path>"
+      ---
+
+      # File Analysis
+
+      分析文件：$ARGUMENTS
+
+      1. 验证文件路径合法性
+      2. 读取文件内容
+      3. 生成分析报告
+      ```
+
+      ✅ 正确2：位置参数访问带默认值
+      ```markdown
+      ---
+      name: compare-files
+      description: "比较两个文件"
+      argument-hint: "<file1> <file2> [options]"
+      ---
+
+      # File Comparison
+
+      文件1：$ARGUMENTS[0]
+      文件2：$ARGUMENTS[1]
+      选项：${ARGUMENTS[2]:-默认选项}  # ✅ 提供默认值
+
+      如果参数少于2个，提示用户正确用法...
+      ```
+
+      ✅ 正确3：参数验证
+      ```markdown
+      ---
+      name: safe-delete
+      description: "安全删除文件"
+      argument-hint: "<file-path>"
+      disable-model-invocation: true
+      ---
+
+      # Safe File Deletion
+
+      目标文件：$ARGUMENTS
+
+      **安全检查**:
+      1. 验证路径不包含 ../
+      2. 确认文件在允许的目录内
+      3. 提示用户确认删除操作
+      ```
+
+      ✅ 正确4：简写形式
+      ```markdown
+      ---
+      name: git-commit-with-message
+      description: "提交代码并指定消息"
+      argument-hint: "<commit-message>"
+      ---
+
+      提交消息：$0  # ✅ 等同于 $ARGUMENTS[0]
+
+      执行 git commit -m "$0"
+      ```
+    en: |
+      ✅ Good 1: Basic argument capture
+      ```markdown
+      ---
+      name: analyze-file
+      description: "Analyze specified file"
+      argument-hint: "<file-path>"
+      ---
+
+      # File Analysis
+
+      Analyze file: $ARGUMENTS
+
+      1. Validate file path
+      2. Read file content
+      3. Generate analysis report
+      ```
+
+      ✅ Good 2: Positional arguments with defaults
+      ```markdown
+      ---
+      name: compare-files
+      description: "Compare two files"
+      argument-hint: "<file1> <file2> [options]"
+      ---
+
+      # File Comparison
+
+      File 1: $ARGUMENTS[0]
+      File 2: $ARGUMENTS[1]
+      Options: ${ARGUMENTS[2]:-default}  # ✅ Provide default
+
+      If fewer than 2 arguments, prompt user for correct usage...
+      ```
+
+      ✅ Good 3: Argument validation
+      ```markdown
+      ---
+      name: safe-delete
+      description: "Safely delete file"
+      argument-hint: "<file-path>"
+      disable-model-invocation: true
+      ---
+
+      # Safe File Deletion
+
+      Target file: $ARGUMENTS
+
+      **Safety checks**:
+      1. Validate path doesn't contain ../
+      2. Ensure file is in allowed directory
+      3. Prompt user for deletion confirmation
+      ```
+
+      ✅ Good 4: Shorthand form
+      ```markdown
+      ---
+      name: git-commit-with-message
+      description: "Commit code with message"
+      argument-hint: "<commit-message>"
+      ---
+
+      Commit message: $0  # ✅ Equivalent to $ARGUMENTS[0]
+
+      Execute git commit -m "$0"
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 替换错误语法：
+         - ${ARGUMENTS} → $ARGUMENTS
+         - ${ARGUMENTS[N]} → $ARGUMENTS[N]
+
+      2. 添加参数验证模板：
+         ```markdown
+         如果 $ARGUMENTS 为空，提示：用法: /skill-name <required-arg>
+         ```
+
+      3. 添加索引边界检查（针对位置访问）
+
+      **手动检查**:
+
+      1. 确认 argument-hint 与实际参数使用一致
+      2. 添加参数内容验证（路径、命令等）
+      3. 考虑是否需要 disable-model-invocation: true
+    en: |
+      **Automatic Fix**:
+
+      1. Replace wrong syntax:
+         - ${ARGUMENTS} → $ARGUMENTS
+         - ${ARGUMENTS[N]} → $ARGUMENTS[N]
+
+      2. Add argument validation template:
+         ```markdown
+         If $ARGUMENTS is empty, prompt: Usage: /skill-name <required-arg>
+         ```
+
+      3. Add index bounds checking (for positional access)
+
+      **Manual Review**:
+
+      1. Verify argument-hint matches actual argument usage
+      2. Add argument content validation (paths, commands, etc.)
+      3. Consider if disable-model-invocation: true is needed
+
+tags: ["skill", "config", "arguments", "placeholder", "parameters"]
+related_rules: ["skill-011", "SEC-001"]

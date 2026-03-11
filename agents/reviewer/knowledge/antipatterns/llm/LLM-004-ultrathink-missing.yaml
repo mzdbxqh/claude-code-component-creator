@@ -1,0 +1,372 @@
+id: SKILL-021
+name: ultrathink-field-missing
+severity: info
+component_type: skill
+category: llm
+
+title:
+  zh: "复杂推理任务缺少 ultrathink 字段"
+  en: "Complex reasoning task missing ultrathink field"
+
+description:
+  zh: |
+    ultrathink: true 启用扩展思考模式，适用于需要深度推理的任务：
+    1. 复杂算法设计
+    2. 架构决策
+    3. 多步骤问题解决
+    4. 系统设计
+
+    启用 ultrathink 后，Claude 会进行更深入的思考，但会消耗更多时间和 Token。
+
+    使用场景：
+    - ✅ 架构设计、系统规划
+    - ✅ 复杂算法实现
+    - ✅ 多约束优化问题
+    - ❌ 简单 CRUD 操作
+    - ❌ 模板生成
+    - ❌ 纯读取操作
+  en: |
+    ultrathink: true enables extended thinking mode for tasks requiring deep reasoning:
+    1. Complex algorithm design
+    2. Architectural decisions
+    3. Multi-step problem solving
+    4. System design
+
+    With ultrathink enabled, Claude performs deeper thinking but consumes more time and tokens.
+
+    Use cases:
+    - ✅ Architecture design, system planning
+    - ✅ Complex algorithm implementation
+    - ✅ Multi-constraint optimization
+    - ❌ Simple CRUD operations
+    - ❌ Template generation
+    - ❌ Pure read operations
+
+rationale:
+  zh: "基于官方功能 (skills.md OFF-LLM-015)，ultrathink 是可选配置，用于需要深度推理的复杂任务"
+  en: "Per official features (skills.md OFF-LLM-015), ultrathink is optional config for complex tasks requiring deep reasoning"
+
+detection:
+  method: keyword-analysis
+  indicators:
+    - keyword: "架构|architecture|design|设计"
+      weight: 2
+    - keyword: "算法|algorithm|optimization|优化"
+      weight: 2
+    - keyword: "复杂|complex|advanced|高级"
+      weight: 1
+    - keyword: "规划|planning|strategy|策略"
+      weight: 1
+  threshold: 3
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "ultrathink 扩展思考"
+  lines: "312-325"
+  quote: "ultrathink 启用扩展思考。适用于复杂推理任务。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误：复杂架构设计未启用 ultrathink
+      ```yaml
+      ---
+      name: system-architecture-designer
+      description: "设计分布式系统架构"
+      # ❌ 缺少 ultrathink: true
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # System Architecture Design
+
+      分析需求并设计：
+      1. 微服务拆分策略
+      2. 数据库架构
+      3. 缓存策略
+      4. 消息队列设计
+      5. 负载均衡方案
+
+      # 这是复杂推理任务，应启用 ultrathink
+      ```
+
+      ❌ 错误：算法优化未启用
+      ```yaml
+      ---
+      name: algorithm-optimizer
+      description: "优化复杂算法性能"
+      ---
+
+      # Algorithm Optimization
+
+      分析算法复杂度，提出优化方案：
+      - 时间复杂度分析
+      - 空间复杂度优化
+      - 并行化可能性
+      - 缓存策略
+
+      # ❌ 需要深度推理，应启用 ultrathink
+      ```
+    en: |
+      ❌ Bad: Complex architecture design without ultrathink
+      ```yaml
+      ---
+      name: system-architecture-designer
+      description: "Design distributed system architecture"
+      # ❌ Missing ultrathink: true
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # System Architecture Design
+
+      Analyze requirements and design:
+      1. Microservice decomposition strategy
+      2. Database architecture
+      3. Caching strategy
+      4. Message queue design
+      5. Load balancing solution
+
+      # This is complex reasoning task, should enable ultrathink
+      ```
+
+      ❌ Bad: Algorithm optimization without enable
+      ```yaml
+      ---
+      name: algorithm-optimizer
+      description: "Optimize complex algorithm performance"
+      ---
+
+      # Algorithm Optimization
+
+      Analyze algorithm complexity, propose optimization:
+      - Time complexity analysis
+      - Space complexity optimization
+      - Parallelization possibilities
+      - Caching strategies
+
+      # ❌ Needs deep reasoning, should enable ultrathink
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：架构设计启用 ultrathink
+      ```yaml
+      ---
+      name: system-architecture-designer
+      description: "设计分布式系统架构"
+      ultrathink: true  # ✅ 启用扩展思考
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # System Architecture Design
+
+      ## Design Process
+      1. 需求分析
+      2. 架构选型
+      3. 组件设计
+      4. 性能评估
+      5. 安全考虑
+
+      使用 ultrathink 进行深度推理...
+      ```
+
+      ✅ 正确：复杂问题解决
+      ```yaml
+      ---
+      name: multi-constraint-optimizer
+      description: "解决多约束优化问题"
+      ultrathink: true  # ✅ 深度推理
+      allowed-tools:
+        - Read
+        - Bash
+      ---
+
+      # Multi-Constraint Optimization
+
+      考虑多个约束条件：
+      - 性能要求
+      - 成本限制
+      - 可维护性
+      - 扩展性
+
+      需要权衡各种因素...
+      ```
+
+      ✅ 正确：简单任务不启用
+      ```yaml
+      ---
+      name: file-formatter
+      description: "格式化代码文件"
+      # ✅ 简单任务，不需要 ultrathink
+      allowed-tools:
+        - Read
+        - Edit
+      ---
+
+      # Code Formatter
+
+      读取文件并应用格式化规则...
+      ```
+
+      ✅ 正确：模板生成不启用
+      ```yaml
+      ---
+      name: boilerplate-generator
+      description: "生成项目模板代码"
+      # ✅ 模板生成，不需要深度推理
+      allowed-tools:
+        - Write
+      ---
+
+      # Boilerplate Generator
+
+      从模板生成代码...
+      ```
+    en: |
+      ✅ Good: Architecture design with ultrathink
+      ```yaml
+      ---
+      name: system-architecture-designer
+      description: "Design distributed system architecture"
+      ultrathink: true  # ✅ Enable extended thinking
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # System Architecture Design
+
+      ## Design Process
+      1. Requirements analysis
+      2. Architecture selection
+      3. Component design
+      4. Performance evaluation
+      5. Security considerations
+
+      Use ultrathink for deep reasoning...
+      ```
+
+      ✅ Good: Complex problem solving
+      ```yaml
+      ---
+      name: multi-constraint-optimizer
+      description: "Solve multi-constraint optimization problems"
+      ultrathink: true  # ✅ Deep reasoning
+      allowed-tools:
+        - Read
+        - Bash
+      ---
+
+      # Multi-Constraint Optimization
+
+      Consider multiple constraints:
+      - Performance requirements
+      - Cost limitations
+      - Maintainability
+      - Scalability
+
+      Need to balance various factors...
+      ```
+
+      ✅ Good: Simple task without enable
+      ```yaml
+      ---
+      name: file-formatter
+      description: "Format code files"
+      # ✅ Simple task, no need for ultrathink
+      allowed-tools:
+        - Read
+        - Edit
+      ---
+
+      # Code Formatter
+
+      Read file and apply formatting rules...
+      ```
+
+      ✅ Good: Template generation without enable
+      ```yaml
+      ---
+      name: boilerplate-generator
+      description: "Generate project boilerplate code"
+      # ✅ Template generation, no deep reasoning needed
+      allowed-tools:
+        - Write
+      ---
+
+      # Boilerplate Generator
+
+      Generate code from templates...
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估标准**:
+
+      **应该启用 ultrathink** 的场景：
+      1. 架构设计和系统规划
+      2. 复杂算法设计和优化
+      3. 多约束条件的权衡决策
+      4. 需要深度分析的问题
+      5. 多步骤推理任务
+
+      **不需要 ultrathink** 的场景：
+      1. 简单 CRUD 操作
+      2. 模板代码生成
+      3. 文件格式化
+      4. 纯读取或搜索
+      5. 标准工作流执行
+
+      **修复步骤**:
+
+      1. 分析 Skill 的任务复杂度
+      2. 如果涉及复杂推理，添加：
+         ```yaml
+         ultrathink: true
+         ```
+      3. 在文档中说明为何需要深度推理
+
+      **性能考虑**:
+      - ultrathink 会增加响应时间
+      - 消耗更多 Token
+      - 仅用于确实需要的场景
+    en: |
+      **Evaluation Criteria**:
+
+      **Should enable ultrathink** for:
+      1. Architecture design and system planning
+      2. Complex algorithm design and optimization
+      3. Multi-constraint trade-off decisions
+      4. Problems requiring deep analysis
+      5. Multi-step reasoning tasks
+
+      **No ultrathink needed** for:
+      1. Simple CRUD operations
+      2. Template code generation
+      3. File formatting
+      4. Pure read or search
+      5. Standard workflow execution
+
+      **Fix Steps**:
+
+      1. Analyze Skill task complexity
+      2. If involves complex reasoning, add:
+         ```yaml
+         ultrathink: true
+         ```
+      3. Document why deep reasoning is needed
+
+      **Performance Considerations**:
+      - ultrathink increases response time
+      - Consumes more tokens
+      - Use only for scenarios that truly need it
+
+tags: ["skill", "llm", "ultrathink", "reasoning", "performance"]
+related_rules: ["skill-006", "LLM-001"]

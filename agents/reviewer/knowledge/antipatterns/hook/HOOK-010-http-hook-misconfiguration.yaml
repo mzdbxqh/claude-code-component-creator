@@ -1,0 +1,433 @@
+id: HOOK-010
+name: http-hook-misconfiguration
+severity: error
+component_type: hook
+category: config
+
+title:
+  zh: "HTTP Hook 配置错误"
+  en: "HTTP Hook misconfiguration"
+
+description:
+  zh: |
+    HTTP Hook 的配置必须遵循官方规范：
+
+    **必需字段**：
+    1. event: 事件类型
+    2. type: "http"
+    3. url: 目标 URL
+
+    **HTTP 请求规范**：
+    1. 方法：始终使用 POST
+    2. Content-Type: application/json
+    3. Body：JSON 格式的事件数据
+
+    **响应处理**：
+    - 2xx：成功，继续执行
+    - 非 2xx：记录错误但不阻止（非阻塞错误）
+
+    **常见错误**：
+    - 缺少 url 字段
+    - 假设可以配置 HTTP 方法（实际总是 POST）
+    - 未正确设置 headers
+  en: |
+    HTTP Hook configuration must follow official specs:
+
+    **Required Fields**:
+    1. event: Event type
+    2. type: "http"
+    3. url: Target URL
+
+    **HTTP Request Spec**:
+    1. Method: Always POST
+    2. Content-Type: application/json
+    3. Body: JSON-formatted event data
+
+    **Response Handling**:
+    - 2xx: Success, continue execution
+    - Non-2xx: Log error but don't block (non-blocking error)
+
+    **Common Errors**:
+    - Missing url field
+    - Assuming configurable HTTP method (always POST)
+    - Incorrect headers setup
+
+rationale:
+  zh: "基于官方标准 (hooks.md OFF-CFG-017, OFF-DEP-009, OFF-DEP-010, OFF-DEP-011)，HTTP Hook 使用固定的 POST + JSON 格式"
+  en: "Per official standards (hooks.md OFF-CFG-017, OFF-DEP-009, OFF-DEP-010, OFF-DEP-011), HTTP Hooks use fixed POST + JSON format"
+
+detection:
+  method: schema-validation
+  checks:
+    - field: url
+      required: true
+      type: string
+      pattern: "^https?://"
+    - field: method
+      forbidden: true
+      reason: "HTTP Hooks 总是使用 POST，不可配置"
+    - field: headers
+      optional: true
+      validation: "可选，但 Content-Type 由系统自动设置"
+
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "HTTP Hooks"
+  lines: "195-225"
+  quote: "HTTP hooks 发送 POST 请求。Content-Type 为 application/json。非 2xx 响应为非阻止错误。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：缺少 url 字段
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http"
+          // ❌ 缺少必需的 url 字段
+        }]
+      }
+      ```
+
+      ❌ 错误2：尝试配置 HTTP 方法
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hook",
+          "method": "GET"  // ❌ 不支持，总是 POST
+        }]
+      }
+      ```
+
+      ❌ 错误3：手动设置 Content-Type（冗余）
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hook",
+          "headers": {
+            "Content-Type": "application/json"  // ❌ 系统自动设置
+          }
+        }]
+      }
+      ```
+
+      ❌ 错误4：期望阻塞行为
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate"
+          // ❌ HTTP Hooks 是非阻塞的，不能阻止操作
+          // 应该使用 command hook 返回 exit code 2
+        }]
+      }
+      ```
+
+      ❌ 错误5：URL 格式错误
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "http",
+          "url": "api.example.com/hook"  // ❌ 缺少协议 https://
+        }]
+      }
+      ```
+    en: |
+      ❌ Error 1: Missing url field
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http"
+          // ❌ Missing required url field
+        }]
+      }
+      ```
+
+      ❌ Error 2: Trying to configure HTTP method
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hook",
+          "method": "GET"  // ❌ Not supported, always POST
+        }]
+      }
+      ```
+
+      ❌ Error 3: Manually setting Content-Type (redundant)
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hook",
+          "headers": {
+            "Content-Type": "application/json"  // ❌ Auto-set by system
+          }
+        }]
+      }
+      ```
+
+      ❌ Error 4: Expecting blocking behavior
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate"
+          // ❌ HTTP Hooks are non-blocking, can't prevent operations
+          // Should use command hook with exit code 2
+        }]
+      }
+      ```
+
+      ❌ Error 5: Malformed URL
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "http",
+          "url": "api.example.com/hook"  // ❌ Missing protocol https://
+        }]
+      }
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：基本 HTTP Hook 配置
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hooks/pretooluse",
+          "description": "记录工具使用"
+        }]
+      }
+      ```
+
+      ✅ 正确2：带认证 headers
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "http",
+          "url": "https://webhook.example.com/session",
+          "headers": {
+            "Authorization": "Bearer $WEBHOOK_TOKEN",
+            "X-Client-ID": "claude-code"
+          }
+        }],
+        "allowedEnvVars": ["WEBHOOK_TOKEN"]  // ✅ 声明环境变量
+      }
+      ```
+
+      ✅ 正确3：工具过滤 + HTTP Hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://audit.example.com/tool-usage",
+          "matcher": {
+            "tool": "Bash"
+          },
+          "description": "审计 Bash 命令使用"
+        }]
+      }
+      ```
+
+      ✅ 正确4：多个 HTTP Hooks
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "SessionStart",
+            "type": "http",
+            "url": "https://analytics.example.com/session/start"
+          },
+          {
+            "event": "SessionEnd",
+            "type": "http",
+            "url": "https://analytics.example.com/session/end"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://audit.example.com/tool-use",
+            "headers": {
+              "X-Environment": "production"
+            }
+          }
+        ]
+      }
+      ```
+
+      ✅ 正确5：理解非阻塞特性
+      ```json
+      {
+        "hooks": [
+          {
+            // HTTP Hook 用于日志记录（非阻塞）
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://logs.example.com/tooluse",
+            "description": "记录工具调用"
+          },
+          {
+            // Command Hook 用于验证（可阻塞）
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate-tool.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "验证 Bash 命令安全性"
+          }
+        ]
+      }
+      ```
+    en: |
+      ✅ Good 1: Basic HTTP Hook config
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/hooks/pretooluse",
+          "description": "Log tool usage"
+        }]
+      }
+      ```
+
+      ✅ Good 2: With authentication headers
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "http",
+          "url": "https://webhook.example.com/session",
+          "headers": {
+            "Authorization": "Bearer $WEBHOOK_TOKEN",
+            "X-Client-ID": "claude-code"
+          }
+        }],
+        "allowedEnvVars": ["WEBHOOK_TOKEN"]  // ✅ Declare env vars
+      }
+      ```
+
+      ✅ Good 3: Tool filtering + HTTP Hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://audit.example.com/tool-usage",
+          "matcher": {
+            "tool": "Bash"
+          },
+          "description": "Audit Bash command usage"
+        }]
+      }
+      ```
+
+      ✅ Good 4: Multiple HTTP Hooks
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "SessionStart",
+            "type": "http",
+            "url": "https://analytics.example.com/session/start"
+          },
+          {
+            "event": "SessionEnd",
+            "type": "http",
+            "url": "https://analytics.example.com/session/end"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://audit.example.com/tool-use",
+            "headers": {
+              "X-Environment": "production"
+            }
+          }
+        ]
+      }
+      ```
+
+      ✅ Good 5: Understanding non-blocking nature
+      ```json
+      {
+        "hooks": [
+          {
+            // HTTP Hook for logging (non-blocking)
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://logs.example.com/tooluse",
+            "description": "Log tool invocations"
+          },
+          {
+            // Command Hook for validation (can block)
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate-tool.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "Validate Bash command safety"
+          }
+        ]
+      }
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 添加缺失的 url 字段（需要人工提供）
+
+      2. 移除 method 字段（总是 POST）
+
+      3. 移除冗余的 Content-Type header
+
+      4. 验证 URL 格式（https?://）
+
+      5. 添加 description 字段说明用途
+
+      **手动检查**:
+
+      1. 确认 webhook 端点是否支持 POST 请求
+      2. 验证 headers 中的环境变量已声明
+      3. 理解非阻塞特性，需要阻塞时使用 command hook
+      4. 测试 webhook 端点的响应处理
+    en: |
+      **Automatic Fix**:
+
+      1. Add missing url field (requires manual input)
+
+      2. Remove method field (always POST)
+
+      3. Remove redundant Content-Type header
+
+      4. Validate URL format (https?://)
+
+      5. Add description field for purpose
+
+      **Manual Review**:
+
+      1. Confirm webhook endpoint supports POST requests
+      2. Verify env vars in headers are declared
+      3. Understand non-blocking nature, use command hook for blocking
+      4. Test webhook endpoint response handling
+
+tags: ["hook", "http", "webhook", "configuration", "validation"]
+related_rules: ["HOOK-001", "HOOK-002", "HOOK-009"]

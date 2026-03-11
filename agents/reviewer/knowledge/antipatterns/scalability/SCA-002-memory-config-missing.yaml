@@ -1,0 +1,572 @@
+id: SUB-012
+name: memory-config-missing
+severity: info
+component_type: subagent
+category: scalability
+
+title:
+  zh: "SubAgent 缺少 memory 配置"
+  en: "SubAgent missing memory config"
+
+description:
+  zh: |
+    memory 字段启用 SubAgent 的持久化记忆功能，允许跨会话保存和访问数据。
+
+    **memory 范围**：
+    1. **user** - 跨所有项目，用户级别
+    2. **project** - 仅当前项目
+    3. **local** - 仅当前会话
+
+    **使用场景**：
+    - ✅ 需要记住用户偏好（user 范围）
+    - ✅ 需要缓存项目特定数据（project 范围）
+    - ✅ 需要跨会话累积知识
+    - ❌ 一次性任务不需要 memory
+    - ❌ 无状态操作不需要 memory
+
+    **注意事项**：
+    - memory 是可选功能
+    - 增加了复杂性和存储需求
+    - 需要明确的数据管理策略
+  en: |
+    memory field enables SubAgent's persistent memory feature, allowing saving and accessing data across sessions.
+
+    **memory Scopes**:
+    1. **user** - Across all projects, user-level
+    2. **project** - Current project only
+    3. **local** - Current session only
+
+    **Use Cases**:
+    - ✅ Need to remember user preferences (user scope)
+    - ✅ Need to cache project-specific data (project scope)
+    - ✅ Need to accumulate knowledge across sessions
+    - ❌ One-time tasks don't need memory
+    - ❌ Stateless operations don't need memory
+
+    **Considerations**:
+    - memory is optional feature
+    - Adds complexity and storage requirements
+    - Needs clear data management strategy
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-SCA-011, OFF-SCA-012)，memory 是 SubAgent 的可选持久化功能"
+  en: "Per official features (sub-agents.md OFF-SCA-011, OFF-SCA-012), memory is optional persistence feature for SubAgents"
+
+detection:
+  method: context-analysis
+  indicators:
+    - keyword: "记住|remember|记录|cache|persist"
+      weight: 2
+    - keyword: "偏好|preference|设置|config|历史|history"
+      weight: 2
+    - keyword: "累积|accumulate|学习|learn"
+      weight: 1
+  threshold: 2
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "memory 持久化"
+  lines: "368-395"
+  quote: "memory 字段启用持久内存。memory 范围 user/project/local。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：需要记住用户偏好但未配置 memory
+      ```yaml
+      ---
+      name: preference-manager
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      # ❌ 描述提到记住偏好，但没有 memory 配置
+      ---
+
+      # Preference Manager
+
+      记住用户的编码风格偏好...
+      ```
+
+      ❌ 错误2：缓存数据但未指定范围
+      ```yaml
+      ---
+      name: project-cache
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      memory: true  # ❌ 应该指定范围（user/project/local）
+      ---
+
+      # Project Cache
+
+      缓存项目的配置和依赖信息...
+      ```
+
+      ❌ 错误3：一次性任务配置了 memory
+      ```yaml
+      ---
+      name: file-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      memory:
+        scope: user  # ❌ 格式化是无状态操作，不需要 memory
+      ---
+
+      # File Formatter
+
+      格式化代码文件...
+      ```
+
+      ❌ 错误4：范围选择不当
+      ```yaml
+      ---
+      name: project-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: user  # ❌ 项目分析数据应该用 project 范围
+      ---
+
+      # Project Analyzer
+
+      分析项目结构和依赖...
+      ```
+    en: |
+      ❌ Error 1: Needs to remember preferences but no memory config
+      ```yaml
+      ---
+      name: preference-manager
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      # ❌ Description mentions remembering preferences, but no memory config
+      ---
+
+      # Preference Manager
+
+      Remember user's coding style preferences...
+      ```
+
+      ❌ Error 2: Caching data but no scope specified
+      ```yaml
+      ---
+      name: project-cache
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      memory: true  # ❌ Should specify scope (user/project/local)
+      ---
+
+      # Project Cache
+
+      Cache project config and dependency info...
+      ```
+
+      ❌ Error 3: One-time task configured with memory
+      ```yaml
+      ---
+      name: file-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      memory:
+        scope: user  # ❌ Formatting is stateless, doesn't need memory
+      ---
+
+      # File Formatter
+
+      Format code files...
+      ```
+
+      ❌ Error 4: Wrong scope choice
+      ```yaml
+      ---
+      name: project-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: user  # ❌ Project analysis data should use project scope
+      ---
+
+      # Project Analyzer
+
+      Analyze project structure and dependencies...
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：用户偏好使用 user 范围
+      ```yaml
+      ---
+      name: style-preference-manager
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      memory:
+        scope: user  # ✅ 跨项目的用户偏好
+      maxTurns: 10
+      permissionMode: prompt
+      ---
+
+      # Style Preference Manager
+
+      记住并应用用户的编码风格偏好
+
+      ## Memory Usage
+      - 保存：缩进风格、引号偏好、命名约定
+      - 范围：user（跨所有项目）
+      - 更新：用户明确修改偏好时
+      ```
+
+      ✅ 正确2：项目缓存使用 project 范围
+      ```yaml
+      ---
+      name: dependency-cache
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+      memory:
+        scope: project  # ✅ 项目特定的依赖信息
+      maxTurns: 15
+      ---
+
+      # Dependency Cache
+
+      缓存项目的依赖解析结果，加速后续分析
+
+      ## Memory Usage
+      - 保存：依赖树、版本信息
+      - 范围：project（仅当前项目）
+      - 更新：检测到 package.json 变化时
+      ```
+
+      ✅ 正确3：会话临时数据使用 local 范围
+      ```yaml
+      ---
+      name: workflow-coordinator
+      model: sonnet
+      tools:
+        - Task
+      memory:
+        scope: local  # ✅ 仅当前会话的中间状态
+      maxTurns: 20
+      ---
+
+      # Workflow Coordinator
+
+      协调多步骤工作流
+
+      ## Memory Usage
+      - 保存：工作流状态、中间结果
+      - 范围：local（仅当前会话）
+      - 清理：会话结束时自动清除
+      ```
+
+      ✅ 正确4：无状态操作不使用 memory
+      ```yaml
+      ---
+      name: code-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      maxTurns: 5
+      permissionMode: prompt
+      # ✅ 无 memory 配置，纯无状态操作
+      ---
+
+      # Code Formatter
+
+      格式化代码，无需保存状态
+      ```
+
+      ✅ 正确5：累积学习使用 user 范围
+      ```yaml
+      ---
+      name: code-pattern-learner
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: user  # ✅ 跨项目累积模式知识
+      maxTurns: 25
+      ---
+
+      # Code Pattern Learner
+
+      学习并记住用户常用的代码模式
+
+      ## Memory Usage
+      - 保存：代码模式、使用频率
+      - 范围：user（跨项目学习）
+      - 更新：每次使用时累积
+      - 隐私：仅保存模式，不保存具体代码
+      ```
+
+      ✅ 正确6：文档中说明 memory 策略
+      ```yaml
+      ---
+      name: test-result-tracker
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      memory:
+        scope: project
+      maxTurns: 15
+      ---
+
+      # Test Result Tracker
+
+      跟踪测试结果历史，识别不稳定测试
+
+      ## Memory Strategy
+
+      ### 保存内容
+      - 每次测试运行的结果
+      - 测试失败频率
+      - 不稳定测试列表
+
+      ### 数据管理
+      - 最多保存最近 100 次运行
+      - 定期清理过期数据（30天）
+      - 项目删除时自动清除
+
+      ### 隐私考虑
+      - 仅保存测试名称和结果状态
+      - 不保存具体错误消息（可能包含敏感信息）
+      ```
+    en: |
+      ✅ Good 1: User preferences with user scope
+      ```yaml
+      ---
+      name: style-preference-manager
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      memory:
+        scope: user  # ✅ Cross-project user preferences
+      maxTurns: 10
+      permissionMode: prompt
+      ---
+
+      # Style Preference Manager
+
+      Remember and apply user's coding style preferences
+
+      ## Memory Usage
+      - Save: Indentation style, quote preference, naming conventions
+      - Scope: user (across all projects)
+      - Update: When user explicitly changes preferences
+      ```
+
+      ✅ Good 2: Project cache with project scope
+      ```yaml
+      ---
+      name: dependency-cache
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+      memory:
+        scope: project  # ✅ Project-specific dependency info
+      maxTurns: 15
+      ---
+
+      # Dependency Cache
+
+      Cache project dependency resolution results to speed up analysis
+
+      ## Memory Usage
+      - Save: Dependency tree, version info
+      - Scope: project (current project only)
+      - Update: When package.json changes detected
+      ```
+
+      ✅ Good 3: Session temp data with local scope
+      ```yaml
+      ---
+      name: workflow-coordinator
+      model: sonnet
+      tools:
+        - Task
+      memory:
+        scope: local  # ✅ Current session intermediate state only
+      maxTurns: 20
+      ---
+
+      # Workflow Coordinator
+
+      Coordinate multi-step workflow
+
+      ## Memory Usage
+      - Save: Workflow state, intermediate results
+      - Scope: local (current session only)
+      - Cleanup: Auto-clear when session ends
+      ```
+
+      ✅ Good 4: Stateless operation without memory
+      ```yaml
+      ---
+      name: code-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      maxTurns: 5
+      permissionMode: prompt
+      # ✅ No memory config, pure stateless operation
+      ---
+
+      # Code Formatter
+
+      Format code, no need to save state
+      ```
+
+      ✅ Good 5: Cumulative learning with user scope
+      ```yaml
+      ---
+      name: code-pattern-learner
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: user  # ✅ Accumulate pattern knowledge across projects
+      maxTurns: 25
+      ---
+
+      # Code Pattern Learner
+
+      Learn and remember user's common code patterns
+
+      ## Memory Usage
+      - Save: Code patterns, usage frequency
+      - Scope: user (cross-project learning)
+      - Update: Accumulate on each use
+      - Privacy: Only save patterns, not specific code
+      ```
+
+      ✅ Good 6: Document memory strategy
+      ```yaml
+      ---
+      name: test-result-tracker
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      memory:
+        scope: project
+      maxTurns: 15
+      ---
+
+      # Test Result Tracker
+
+      Track test result history, identify flaky tests
+
+      ## Memory Strategy
+
+      ### Saved Content
+      - Each test run result
+      - Test failure frequency
+      - Flaky test list
+
+      ### Data Management
+      - Keep max 100 recent runs
+      - Regular cleanup of expired data (30 days)
+      - Auto-clear when project deleted
+
+      ### Privacy Considerations
+      - Only save test names and result status
+      - Don't save specific error messages (may contain sensitive info)
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要 memory**:
+
+      ✅ **需要 memory**：
+      - 需要记住用户偏好/设置
+      - 需要缓存数据加速后续操作
+      - 需要跨会话累积知识
+      - 需要跟踪历史/趋势
+
+      ❌ **不需要 memory**：
+      - 一次性操作
+      - 纯计算任务
+      - 无状态转换
+      - 简单查询
+
+      **选择正确的范围**:
+
+      - **user**: 跨项目的用户相关数据
+      - **project**: 项目特定数据
+      - **local**: 仅当前会话的临时数据
+
+      **添加配置**:
+
+      ```yaml
+      memory:
+        scope: <user|project|local>
+      ```
+
+      **文档要求**:
+
+      1. 说明为何需要 memory
+      2. 说明保存什么数据
+      3. 说明数据管理策略（过期、清理）
+      4. 考虑隐私和安全
+    en: |
+      **Evaluate if memory is needed**:
+
+      ✅ **Need memory**:
+      - Need to remember user preferences/settings
+      - Need to cache data to speed up operations
+      - Need to accumulate knowledge across sessions
+      - Need to track history/trends
+
+      ❌ **Don't need memory**:
+      - One-time operations
+      - Pure computation tasks
+      - Stateless transformations
+      - Simple queries
+
+      **Choose correct scope**:
+
+      - **user**: Cross-project user-related data
+      - **project**: Project-specific data
+      - **local**: Temp data for current session only
+
+      **Add config**:
+
+      ```yaml
+      memory:
+        scope: <user|project|local>
+      ```
+
+      **Documentation requirements**:
+
+      1. Explain why memory is needed
+      2. Explain what data is saved
+      3. Explain data management strategy (expiration, cleanup)
+      4. Consider privacy and security
+
+tags: ["subagent", "scalability", "memory", "persistence", "state"]
+related_rules: ["SUB-011", "LLM-001"]

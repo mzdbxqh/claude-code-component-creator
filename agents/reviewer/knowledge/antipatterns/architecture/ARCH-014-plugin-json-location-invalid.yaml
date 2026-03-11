@@ -1,0 +1,352 @@
+id: ARCH-014
+name: plugin-json-location-invalid
+severity: error
+component_type: plugin
+category: architecture
+
+title:
+  zh: "plugin.json 位置错误"
+  en: "plugin.json location invalid"
+
+description:
+  zh: |
+    plugin.json 必须位于插件根目录的 .claude-plugin/ 目录中。
+
+    **正确的插件结构**：
+    ```
+    my-plugin/
+      .claude-plugin/
+        plugin.json         ← 必须在这里
+      skills/
+        my-skill/
+          SKILL.md
+      agents/
+        my-agent/
+          SKILL.md
+      hooks/
+        hooks.json
+    ```
+
+    **plugin.json 的作用**：
+    1. 定义插件元数据（name, description, version）
+    2. 声明插件命名空间
+    3. 配置插件级别设置
+
+    **常见错误**：
+    - 放在根目录（❌）
+    - 放在 skills/ 目录（❌）
+    - 文件名拼写错误（❌ Plugin.json）
+  en: |
+    plugin.json must be located in .claude-plugin/ directory at plugin root.
+
+    **Correct Plugin Structure**:
+    ```
+    my-plugin/
+      .claude-plugin/
+        plugin.json         ← Must be here
+      skills/
+        my-skill/
+          SKILL.md
+      agents/
+        my-agent/
+          SKILL.md
+      hooks/
+        hooks.json
+    ```
+
+    **plugin.json Purpose**:
+    1. Define plugin metadata (name, description, version)
+    2. Declare plugin namespace
+    3. Configure plugin-level settings
+
+    **Common Errors**:
+    - In root directory (❌)
+    - In skills/ directory (❌)
+    - Filename typo (❌ Plugin.json)
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-CFG-003, OFF-ARC-001)，Claude Code 通过 .claude-plugin/plugin.json 识别和加载插件"
+  en: "Per official specs (plugins.md OFF-CFG-003, OFF-ARC-001), Claude Code identifies and loads plugins via .claude-plugin/plugin.json"
+
+detection:
+  method: file-location-check
+  checks:
+    - path: ".claude-plugin/plugin.json"
+      required: true
+    - path: "plugin.json"
+      forbidden: true
+      reason: "应该在 .claude-plugin/ 目录中"
+    - path: "skills/plugin.json"
+      forbidden: true
+    - path: "agents/plugin.json"
+      forbidden: true
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "插件结构"
+  lines: "45-78"
+  quote: "plugin.json 必须在 .claude-plugin/ 目录。插件结构：.claude-plugin/plugin.json 为必需。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：plugin.json 在根目录
+      ```
+      my-plugin/
+        plugin.json         ← ❌ 错误位置
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+
+      ❌ 错误2：放在 skills 目录
+      ```
+      my-plugin/
+        skills/
+          plugin.json       ← ❌ 错误位置
+          my-skill/
+            SKILL.md
+      ```
+
+      ❌ 错误3：文件名大小写错误
+      ```
+      my-plugin/
+        .claude-plugin/
+          Plugin.json       ← ❌ 应该是小写 plugin.json
+      ```
+
+      ❌ 错误4：目录名拼写错误
+      ```
+      my-plugin/
+        .claude-plugins/    ← ❌ 应该是 .claude-plugin (单数)
+          plugin.json
+      ```
+
+      ❌ 错误5：缺少 .claude-plugin 目录
+      ```
+      my-plugin/
+        plugin.json         ← ❌ 缺少 .claude-plugin/ 目录
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+    en: |
+      ❌ Error 1: plugin.json in root directory
+      ```
+      my-plugin/
+        plugin.json         ← ❌ Wrong location
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+
+      ❌ Error 2: In skills directory
+      ```
+      my-plugin/
+        skills/
+          plugin.json       ← ❌ Wrong location
+          my-skill/
+            SKILL.md
+      ```
+
+      ❌ Error 3: Filename case error
+      ```
+      my-plugin/
+        .claude-plugin/
+          Plugin.json       ← ❌ Should be lowercase plugin.json
+      ```
+
+      ❌ Error 4: Directory name typo
+      ```
+      my-plugin/
+        .claude-plugins/    ← ❌ Should be .claude-plugin (singular)
+          plugin.json
+      ```
+
+      ❌ Error 5: Missing .claude-plugin directory
+      ```
+      my-plugin/
+        plugin.json         ← ❌ Missing .claude-plugin/ directory
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：标准插件结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 正确位置
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+
+      ✅ 正确2：完整插件结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 插件元数据
+        skills/
+          skill-1/
+            SKILL.md
+          skill-2/
+            SKILL.md
+        agents/
+          agent-1/
+            SKILL.md
+        hooks/
+          hooks.json
+        README.md
+      ```
+
+      ✅ 正确3：最小插件结构
+      ```
+      minimal-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ 最小必需
+        skills/
+          simple-skill/
+            SKILL.md
+      ```
+
+      ✅ 正确4：plugin.json 内容示例
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "My awesome plugin",
+        "version": "1.0.0",
+        "author": "Your Name"
+      }
+      ```
+
+      文件位置：`my-plugin/.claude-plugin/plugin.json`
+
+      ✅ 正确5：检查插件加载
+      ```bash
+      # 测试插件是否正确加载
+      claude --plugin-dir ./my-plugin --version
+
+      # 应该能看到插件被识别
+      ```
+    en: |
+      ✅ Good 1: Standard plugin structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Correct location
+        skills/
+          my-skill/
+            SKILL.md
+      ```
+
+      ✅ Good 2: Complete plugin structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Plugin metadata
+        skills/
+          skill-1/
+            SKILL.md
+          skill-2/
+            SKILL.md
+        agents/
+          agent-1/
+            SKILL.md
+        hooks/
+          hooks.json
+        README.md
+      ```
+
+      ✅ Good 3: Minimal plugin structure
+      ```
+      minimal-plugin/
+        .claude-plugin/
+          plugin.json       ← ✅ Minimum required
+        skills/
+          simple-skill/
+            SKILL.md
+      ```
+
+      ✅ Good 4: plugin.json content example
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "My awesome plugin",
+        "version": "1.0.0",
+        "author": "Your Name"
+      }
+      ```
+
+      File location: `my-plugin/.claude-plugin/plugin.json`
+
+      ✅ Good 5: Check plugin loading
+      ```bash
+      # Test if plugin loads correctly
+      claude --plugin-dir ./my-plugin --version
+
+      # Should see plugin recognized
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检测 plugin.json 的当前位置
+
+      2. 如果在根目录或其他位置：
+         - 创建 .claude-plugin/ 目录
+         - 移动 plugin.json 到正确位置
+
+      3. 如果文件名大小写错误：
+         - 重命名为 plugin.json（小写）
+
+      4. 如果目录名错误：
+         - 重命名为 .claude-plugin（单数）
+
+      **验证步骤**:
+
+      ```bash
+      # 1. 检查文件存在
+      test -f .claude-plugin/plugin.json && echo "✓ 位置正确"
+
+      # 2. 验证 JSON 格式
+      jq . .claude-plugin/plugin.json
+
+      # 3. 测试插件加载
+      claude --plugin-dir . --version
+      ```
+    en: |
+      **Automatic Fix**:
+
+      1. Detect current plugin.json location
+
+      2. If in root or other location:
+         - Create .claude-plugin/ directory
+         - Move plugin.json to correct location
+
+      3. If filename case is wrong:
+         - Rename to plugin.json (lowercase)
+
+      4. If directory name is wrong:
+         - Rename to .claude-plugin (singular)
+
+      **Verification Steps**:
+
+      ```bash
+      # 1. Check file exists
+      test -f .claude-plugin/plugin.json && echo "✓ Location correct"
+
+      # 2. Validate JSON format
+      jq . .claude-plugin/plugin.json
+
+      # 3. Test plugin loading
+      claude --plugin-dir . --version
+      ```
+
+tags: ["plugin", "architecture", "structure", "configuration", "file-location"]
+related_rules: ["ARCH-015", "ARCH-001"]

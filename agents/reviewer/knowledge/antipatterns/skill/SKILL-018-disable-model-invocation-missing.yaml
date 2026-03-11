@@ -1,0 +1,249 @@
+id: SKILL-018
+name: disable-model-invocation-missing
+severity: warning
+component_type: skill
+category: intent
+
+title:
+  zh: "副作用工作流缺少 disable-model-invocation 声明"
+  en: "Side-effect workflow missing disable-model-invocation declaration"
+
+description:
+  zh: |
+    具有副作用的工作流（如 git commit、database migration、file deletion）应设置 disable-model-invocation: true，防止 Claude 自动触发。
+
+    副作用操作示例：
+    1. 修改远程状态（git push、API POST/PUT/DELETE）
+    2. 不可逆操作（文件删除、数据库迁移）
+    3. 消耗资源（发送邮件、创建云资源）
+
+    这些操作应该由用户显式触发，而不是 Claude 主动调用。
+  en: |
+    Workflows with side effects (like git commit, database migration, file deletion) should set disable-model-invocation: true to prevent Claude from auto-triggering.
+
+    Side effect examples:
+    1. Modify remote state (git push, API POST/PUT/DELETE)
+    2. Irreversible operations (file deletion, database migration)
+    3. Resource consumption (send email, create cloud resources)
+
+    These operations should be explicitly triggered by users, not proactively invoked by Claude.
+
+rationale:
+  zh: "基于官方标准 (skills.md OFF-INT-003, OFF-SEC-011)，副作用工作流需要用户显式触发以避免意外执行"
+  en: "Per official standards (skills.md OFF-INT-003, OFF-SEC-011), side-effect workflows need explicit user triggering to avoid accidental execution"
+
+detection:
+  method: content-analysis
+  indicators:
+    - pattern: "git (commit|push|merge|rebase|reset)"
+      category: git-operations
+    - pattern: "rm|delete|drop|truncate"
+      category: destructive-operations
+    - pattern: "POST|PUT|DELETE|PATCH"
+      category: state-modifying-api
+    - pattern: "send|publish|deploy|migrate"
+      category: resource-operations
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "disable-model-invocation"
+  lines: "78-95"
+  quote: "有副作用工作流使用 disable-model-invocation: true"
+
+examples:
+  bad:
+    zh: |
+      ❌ 违反：git commit 工作流缺少保护
+      ```yaml
+      ---
+      name: auto-commit
+      description: "自动提交代码变更"
+      # ❌ 缺少 disable-model-invocation: true
+      allowed-tools:
+        - Bash
+      ---
+
+      执行 git add 和 git commit 操作...
+      ```
+
+      ❌ 违反：数据库迁移工作流
+      ```yaml
+      ---
+      name: db-migrate
+      description: "执行数据库迁移脚本"
+      # ❌ 可能被 Claude 自动触发
+      allowed-tools:
+        - Bash
+      ---
+
+      运行 migration scripts...
+      ```
+    en: |
+      ❌ Bad: git commit workflow without protection
+      ```yaml
+      ---
+      name: auto-commit
+      description: "Auto commit code changes"
+      # ❌ Missing disable-model-invocation: true
+      allowed-tools:
+        - Bash
+      ---
+
+      Execute git add and git commit...
+      ```
+
+      ❌ Bad: database migration workflow
+      ```yaml
+      ---
+      name: db-migrate
+      description: "Execute database migration scripts"
+      # ❌ Could be auto-triggered by Claude
+      allowed-tools:
+        - Bash
+      ---
+
+      Run migration scripts...
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：副作用工作流显式禁用自动触发
+      ```yaml
+      ---
+      name: git-commit
+      description: "提交代码变更（仅手动触发）"
+      disable-model-invocation: true  # ✅ 防止自动触发
+      allowed-tools:
+        - Bash
+      ---
+
+      # Git Commit Workflow
+
+      执行 git commit 前会提示用户确认...
+      ```
+
+      ✅ 正确：资源创建工作流
+      ```yaml
+      ---
+      name: deploy-to-prod
+      description: "部署到生产环境（仅手动触发）"
+      disable-model-invocation: true  # ✅ 高风险操作
+      allowed-tools:
+        - Bash
+      ---
+
+      ## Deployment Steps
+
+      1. 验证构建状态
+      2. 执行部署脚本
+      3. 运行健康检查
+      ```
+
+      ✅ 正确：无副作用的工作流可以省略
+      ```yaml
+      ---
+      name: analyze-code
+      description: "分析代码质量（只读操作）"
+      # ✅ 纯读取操作，可以被 Claude 主动调用
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      ```
+    en: |
+      ✅ Good: Side-effect workflow explicitly disables auto-trigger
+      ```yaml
+      ---
+      name: git-commit
+      description: "Commit code changes (manual trigger only)"
+      disable-model-invocation: true  # ✅ Prevent auto-trigger
+      allowed-tools:
+        - Bash
+      ---
+
+      # Git Commit Workflow
+
+      Prompt user for confirmation before git commit...
+      ```
+
+      ✅ Good: Resource creation workflow
+      ```yaml
+      ---
+      name: deploy-to-prod
+      description: "Deploy to production (manual trigger only)"
+      disable-model-invocation: true  # ✅ High-risk operation
+      allowed-tools:
+        - Bash
+      ---
+
+      ## Deployment Steps
+
+      1. Verify build status
+      2. Execute deployment script
+      3. Run health checks
+      ```
+
+      ✅ Good: Side-effect-free workflow can omit
+      ```yaml
+      ---
+      name: analyze-code
+      description: "Analyze code quality (read-only)"
+      # ✅ Pure read operations, safe for Claude to invoke
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. 识别副作用操作：
+         - Git 操作：commit, push, merge, rebase
+         - 文件删除：rm, delete
+         - API 修改：POST, PUT, DELETE
+         - 资源创建：deploy, publish, send
+
+      2. 在 frontmatter 中添加：
+         ```yaml
+         disable-model-invocation: true
+         ```
+
+      3. 在 description 中说明需要手动触发
+
+      4. 添加用户确认步骤
+
+      **判断标准**:
+
+      - 有副作用：添加 disable-model-invocation: true
+      - 纯读取：不需要（Read, Grep, Glob）
+      - 本地修改（Write, Edit）：根据场景决定
+    en: |
+      **Fix Steps**:
+
+      1. Identify side-effect operations:
+         - Git ops: commit, push, merge, rebase
+         - File deletion: rm, delete
+         - API modification: POST, PUT, DELETE
+         - Resource creation: deploy, publish, send
+
+      2. Add to frontmatter:
+         ```yaml
+         disable-model-invocation: true
+         ```
+
+      3. Document manual trigger requirement in description
+
+      4. Add user confirmation steps
+
+      **Decision Criteria**:
+
+      - Has side effects: Add disable-model-invocation: true
+      - Pure read: Not needed (Read, Grep, Glob)
+      - Local modification (Write, Edit): Depends on context
+
+tags: ["skill", "intent", "side-effects", "disable-model-invocation", "safety"]
+related_rules: ["skill-001", "SEC-001"]

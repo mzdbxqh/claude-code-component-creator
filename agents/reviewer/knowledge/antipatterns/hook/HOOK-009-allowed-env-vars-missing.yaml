@@ -1,0 +1,418 @@
+id: HOOK-009
+name: allowed-env-vars-missing
+severity: error
+component_type: hook
+category: security
+
+title:
+  zh: "环境变量插值缺少 allowedEnvVars 声明"
+  en: "Environment variable interpolation missing allowedEnvVars declaration"
+
+description:
+  zh: |
+    Hook 配置中使用环境变量插值时，必须在 allowedEnvVars 字段中显式声明可以使用的环境变量。
+
+    **插值语法**：
+    - $VAR_NAME
+    - ${VAR_NAME}
+
+    **安全原则**：
+    1. 仅允许显式声明的环境变量
+    2. 未声明的变量不会被解析
+    3. 防止意外泄露敏感环境变量
+
+    **常见场景**：
+    - HTTP hook headers 中的 token
+    - MCP 服务器配置中的 API keys
+    - Command 参数中的路径变量
+  en: |
+    When using environment variable interpolation in hook config, must explicitly declare allowed variables in allowedEnvVars field.
+
+    **Interpolation Syntax**:
+    - $VAR_NAME
+    - ${VAR_NAME}
+
+    **Security Principle**:
+    1. Only allow explicitly declared environment variables
+    2. Undeclared variables won't be parsed
+    3. Prevent accidental leakage of sensitive env vars
+
+    **Common Scenarios**:
+    - Tokens in HTTP hook headers
+    - API keys in MCP server config
+    - Path variables in command arguments
+
+rationale:
+  zh: "基于官方安全标准 (hooks.md OFF-DEP-005, OFF-DEP-006, OFF-SEC-024)，环境变量插值需要显式声明以防止安全漏洞"
+  en: "Per official security standards (hooks.md OFF-DEP-005, OFF-DEP-006, OFF-SEC-024), environment variable interpolation requires explicit declaration to prevent security vulnerabilities"
+
+detection:
+  method: pattern-matching
+  patterns:
+    - pattern: "\\$[A-Z_][A-Z0-9_]*"
+      type: simple
+    - pattern: "\\$\\{[A-Z_][A-Z0-9_]*\\}"
+      type: braced
+  validation: |
+    对于检测到的每个环境变量：
+    1. 检查 allowedEnvVars 字段是否存在
+    2. 检查变量是否在 allowedEnvVars 列表中
+    3. 如果缺失，报告错误
+
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "环境变量插值"
+  lines: "268-295"
+  quote: "环境变量插值使用 $VAR_NAME 或 ${VAR_NAME}。allowedEnvVars 列出可插值变量。仅解析 allowedEnvVars 中的变量。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：使用环境变量但未声明 allowedEnvVars
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate",
+          "headers": {
+            "Authorization": "Bearer $API_TOKEN"
+          }
+          // ❌ 缺少 allowedEnvVars 声明
+        }]
+      }
+      ```
+
+      ❌ 错误2：使用了未声明的环境变量
+      ```json
+      {
+        "mcpServers": {
+          "my-server": {
+            "command": "node",
+            "args": ["server.js"],
+            "env": {
+              "API_KEY": "$SECRET_KEY",  // ❌ 未在 allowedEnvVars 中
+              "DB_HOST": "$DATABASE_URL"  // ❌ 未在 allowedEnvVars 中
+            }
+          }
+        },
+        "allowedEnvVars": ["PATH"]  // ❌ 不包含实际使用的变量
+      }
+      ```
+
+      ❌ 错误3：命令参数中的环境变量未声明
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh $PROJECT_ROOT"
+          // ❌ $PROJECT_ROOT 未在 allowedEnvVars 中声明
+        }]
+      }
+      ```
+
+      ❌ 错误4：MCP配置中使用环境变量
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"  // ❌ 未声明
+            }
+          }
+        }
+      }
+      ```
+    en: |
+      ❌ Error 1: Using env vars without allowedEnvVars declaration
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate",
+          "headers": {
+            "Authorization": "Bearer $API_TOKEN"
+          }
+          // ❌ Missing allowedEnvVars declaration
+        }]
+      }
+      ```
+
+      ❌ Error 2: Using undeclared env vars
+      ```json
+      {
+        "mcpServers": {
+          "my-server": {
+            "command": "node",
+            "args": ["server.js"],
+            "env": {
+              "API_KEY": "$SECRET_KEY",  // ❌ Not in allowedEnvVars
+              "DB_HOST": "$DATABASE_URL"  // ❌ Not in allowedEnvVars
+            }
+          }
+        },
+        "allowedEnvVars": ["PATH"]  // ❌ Doesn't include actually used vars
+      }
+      ```
+
+      ❌ Error 3: Command args env vars undeclared
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh $PROJECT_ROOT"
+          // ❌ $PROJECT_ROOT not in allowedEnvVars
+        }]
+      }
+      ```
+
+      ❌ Error 4: MCP config using env vars
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"  // ❌ Not declared
+            }
+          }
+        }
+      }
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：HTTP hook 正确声明环境变量
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate",
+          "headers": {
+            "Authorization": "Bearer $API_TOKEN"
+          }
+        }],
+        "allowedEnvVars": ["API_TOKEN"]  // ✅ 显式声明
+      }
+      ```
+
+      ✅ 正确2：MCP 服务器正确声明
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}",
+              "GITHUB_ORG": "${ORG_NAME}"
+            }
+          }
+        },
+        "allowedEnvVars": [
+          "GITHUB_PAT",   // ✅ 声明所有使用的变量
+          "ORG_NAME"
+        ]
+      }
+      ```
+
+      ✅ 正确3：Command hook 使用内置变量
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh $CLAUDE_PROJECT_DIR"
+        }],
+        "allowedEnvVars": [
+          "CLAUDE_PROJECT_DIR",   // ✅ 内置变量也需声明
+          "CLAUDE_PLUGIN_ROOT"
+        ]
+      }
+      ```
+
+      ✅ 正确4：完整配置示例
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://webhook.example.com",
+            "headers": {
+              "X-API-Key": "$WEBHOOK_KEY",
+              "X-Project": "$PROJECT_ID"
+            }
+          },
+          {
+            "event": "SessionStart",
+            "type": "command",
+            "command": "setup.sh $WORK_DIR"
+          }
+        ],
+        "allowedEnvVars": [
+          "WEBHOOK_KEY",          // ✅ 所有使用的变量
+          "PROJECT_ID",
+          "WORK_DIR",
+          "CLAUDE_PROJECT_DIR"    // ✅ 包含内置变量
+        ]
+      }
+      ```
+
+      ✅ 正确5：不使用环境变量时无需声明
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate.sh"
+          // ✅ 无环境变量，无需 allowedEnvVars
+        }]
+      }
+      ```
+    en: |
+      ✅ Good 1: HTTP hook with proper env var declaration
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "http",
+          "url": "https://api.example.com/validate",
+          "headers": {
+            "Authorization": "Bearer $API_TOKEN"
+          }
+        }],
+        "allowedEnvVars": ["API_TOKEN"]  // ✅ Explicitly declared
+      }
+      ```
+
+      ✅ Good 2: MCP server with proper declaration
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}",
+              "GITHUB_ORG": "${ORG_NAME}"
+            }
+          }
+        },
+        "allowedEnvVars": [
+          "GITHUB_PAT",   // ✅ Declare all used vars
+          "ORG_NAME"
+        ]
+      }
+      ```
+
+      ✅ Good 3: Command hook using built-in vars
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "init.sh $CLAUDE_PROJECT_DIR"
+        }],
+        "allowedEnvVars": [
+          "CLAUDE_PROJECT_DIR",   // ✅ Built-in vars need declaration too
+          "CLAUDE_PLUGIN_ROOT"
+        ]
+      }
+      ```
+
+      ✅ Good 4: Complete config example
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "http",
+            "url": "https://webhook.example.com",
+            "headers": {
+              "X-API-Key": "$WEBHOOK_KEY",
+              "X-Project": "$PROJECT_ID"
+            }
+          },
+          {
+            "event": "SessionStart",
+            "type": "command",
+            "command": "setup.sh $WORK_DIR"
+          }
+        ],
+        "allowedEnvVars": [
+          "WEBHOOK_KEY",          // ✅ All used variables
+          "PROJECT_ID",
+          "WORK_DIR",
+          "CLAUDE_PROJECT_DIR"    // ✅ Include built-in vars
+        ]
+      }
+      ```
+
+      ✅ Good 5: No env vars, no need for declaration
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate.sh"
+          // ✅ No env vars, no need for allowedEnvVars
+        }]
+      }
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 扫描配置中的所有环境变量引用：
+         - 命令字符串
+         - HTTP headers
+         - MCP env 配置
+         - 其他字符串字段
+
+      2. 提取所有 $VAR 和 ${VAR} 模式
+
+      3. 生成或更新 allowedEnvVars 列表
+
+      4. 添加常用内置变量：
+         - CLAUDE_PROJECT_DIR
+         - CLAUDE_PLUGIN_ROOT
+         - CLAUDE_ENV_FILE
+
+      **手动验证**:
+
+      1. 检查环境变量是否真实存在
+      2. 确认敏感变量的安全性
+      3. 添加文档说明每个变量的用途
+    en: |
+      **Automatic Fix**:
+
+      1. Scan all env var references in config:
+         - Command strings
+         - HTTP headers
+         - MCP env config
+         - Other string fields
+
+      2. Extract all $VAR and ${VAR} patterns
+
+      3. Generate or update allowedEnvVars list
+
+      4. Add common built-in vars:
+         - CLAUDE_PROJECT_DIR
+         - CLAUDE_PLUGIN_ROOT
+         - CLAUDE_ENV_FILE
+
+      **Manual Verification**:
+
+      1. Check if env vars actually exist
+      2. Verify security of sensitive vars
+      3. Document purpose of each variable
+
+tags: ["hook", "security", "environment", "configuration", "allowedEnvVars"]
+related_rules: ["HOOK-001", "SEC-001", "MCP-003"]

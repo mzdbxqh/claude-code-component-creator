@@ -1,0 +1,478 @@
+id: SUB-011
+name: max-turns-missing
+severity: warning
+component_type: subagent
+category: llm
+
+title:
+  zh: "SubAgent 缺少 maxTurns 限制"
+  en: "SubAgent missing maxTurns limit"
+
+description:
+  zh: |
+    SubAgent 应配置 maxTurns 限制其执行轮数，防止无限循环。
+
+    **maxTurns 作用**：
+    - 限制 SubAgent 的最大执行轮数（API 调用次数）
+    - 防止死循环和资源耗尽
+    - 提供可预测的执行时间
+
+    **推荐值**：
+    - 简单任务：5-10 轮
+    - 中等复杂度：10-20 轮
+    - 复杂任务：20-30 轮
+    - 开放式探索：30-50 轮
+
+    **何时必需**：
+    - ✅ 包含循环逻辑的 SubAgent
+    - ✅ 可能需要多轮交互的任务
+    - ✅ 使用 Bash/Write/Edit 等工具
+    - ❌ 知识库类型（tools: []）可以省略
+  en: |
+    SubAgent should configure maxTurns to limit execution rounds and prevent infinite loops.
+
+    **maxTurns Purpose**:
+    - Limit max execution rounds (API calls) for SubAgent
+    - Prevent infinite loops and resource exhaustion
+    - Provide predictable execution time
+
+    **Recommended Values**:
+    - Simple tasks: 5-10 turns
+    - Medium complexity: 10-20 turns
+    - Complex tasks: 20-30 turns
+    - Open exploration: 30-50 turns
+
+    **When Required**:
+    - ✅ SubAgents with loop logic
+    - ✅ Tasks requiring multi-round interaction
+    - ✅ Using Bash/Write/Edit tools
+    - ❌ Knowledge library type (tools: []) can omit
+
+rationale:
+  zh: "基于官方最佳实践 (sub-agents.md OFF-LLM-016)，maxTurns 是控制 SubAgent 行为的重要配置"
+  en: "Per official best practices (sub-agents.md OFF-LLM-016), maxTurns is important config for controlling SubAgent behavior"
+
+detection:
+  method: field-check
+  checks:
+    - field: maxTurns
+      required: conditional
+      condition: "tools 字段非空"
+    - field: tools
+      when_empty: "可以省略 maxTurns"
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "maxTurns 配置"
+  lines: "285-302"
+  quote: "maxTurns 限制代理轮数。推荐设置合理上限，防止无限循环。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：复杂 SubAgent 未设置 maxTurns
+      ```yaml
+      ---
+      name: code-refactorer
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Edit
+        - Bash
+      permissionMode: prompt
+      # ❌ 缺少 maxTurns，可能执行过多轮次
+      ---
+
+      # Code Refactorer
+
+      多轮分析和修改代码...
+      ```
+
+      ❌ 错误2：循环逻辑未限制轮数
+      ```yaml
+      ---
+      name: iterative-optimizer
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+      # ❌ 迭代优化可能无限循环
+      ---
+
+      # Iterative Optimizer
+
+      1. 运行测试
+      2. 如果失败，分析并修复
+      3. 重复直到通过
+
+      # 没有 maxTurns，可能永远重试
+      ```
+
+      ❌ 错误3：maxTurns 值过大
+      ```yaml
+      ---
+      name: simple-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 100  # ❌ 简单任务不需要这么多轮次
+      ---
+      ```
+
+      ❌ 错误4：maxTurns 值过小
+      ```yaml
+      ---
+      name: complex-workflow
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 3  # ❌ 复杂工作流3轮不够
+      ---
+
+      # 需要：分析 → 计划 → 执行 → 验证 → 修复
+      # 至少需要 10+ 轮
+      ```
+    en: |
+      ❌ Error 1: Complex SubAgent without maxTurns
+      ```yaml
+      ---
+      name: code-refactorer
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Edit
+        - Bash
+      permissionMode: prompt
+      # ❌ Missing maxTurns, could execute too many rounds
+      ---
+
+      # Code Refactorer
+
+      Multi-round code analysis and modification...
+      ```
+
+      ❌ Error 2: Loop logic without turn limit
+      ```yaml
+      ---
+      name: iterative-optimizer
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+      # ❌ Iterative optimization could loop infinitely
+      ---
+
+      # Iterative Optimizer
+
+      1. Run tests
+      2. If failed, analyze and fix
+      3. Repeat until pass
+
+      # No maxTurns, might retry forever
+      ```
+
+      ❌ Error 3: maxTurns value too large
+      ```yaml
+      ---
+      name: simple-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 100  # ❌ Simple task doesn't need this many rounds
+      ---
+      ```
+
+      ❌ Error 4: maxTurns value too small
+      ```yaml
+      ---
+      name: complex-workflow
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 3  # ❌ Complex workflow needs more than 3
+      ---
+
+      # Needs: analyze → plan → execute → verify → fix
+      # At least 10+ turns
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：简单任务合理限制
+      ```yaml
+      ---
+      name: file-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 5  # ✅ 读取和分析，5轮足够
+      permissionMode: prompt
+      ---
+
+      # File Analyzer
+
+      读取文件并生成分析报告
+      ```
+
+      ✅ 正确2：中等复杂度任务
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      maxTurns: 15  # ✅ 分析 + 审查 + 生成报告
+      permissionMode: prompt
+      ---
+
+      # Code Reviewer
+
+      审查代码质量并生成报告
+      ```
+
+      ✅ 正确3：复杂工作流
+      ```yaml
+      ---
+      name: build-and-test
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+        - Write
+      maxTurns: 25  # ✅ 构建 + 测试 + 修复循环
+      permissionMode: prompt
+      ---
+
+      # Build and Test Workflow
+
+      构建项目、运行测试、分析失败、修复问题
+      ```
+
+      ✅ 正确4：探索型任务
+      ```yaml
+      ---
+      name: codebase-explorer
+      model: haiku  # ✅ 使用 haiku 降低成本
+      tools:
+        - Glob
+        - Read
+        - Grep
+      maxTurns: 40  # ✅ 探索需要更多轮次
+      permissionMode: auto
+      ---
+
+      # Codebase Explorer
+
+      探索代码库结构、发现模式
+      ```
+
+      ✅ 正确5：知识库类型无需 maxTurns
+      ```yaml
+      ---
+      name: lib-coding-standards
+      model: sonnet
+      tools: []  # ✅ 无工具调用，不需要 maxTurns
+      ---
+
+      # Coding Standards Knowledge Base
+
+      提供编码标准参考信息
+      ```
+
+      ✅ 正确6：文档中说明限制原因
+      ```yaml
+      ---
+      name: migration-executor
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      maxTurns: 30  # 迁移步骤：分析(5) + 计划(3) + 执行(15) + 验证(7)
+      permissionMode: prompt
+      ---
+
+      # Migration Executor
+
+      执行代码迁移，包含多个阶段...
+      ```
+    en: |
+      ✅ Good 1: Simple task with reasonable limit
+      ```yaml
+      ---
+      name: file-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 5  # ✅ Read and analyze, 5 rounds enough
+      permissionMode: prompt
+      ---
+
+      # File Analyzer
+
+      Read file and generate analysis report
+      ```
+
+      ✅ Good 2: Medium complexity task
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      maxTurns: 15  # ✅ Analyze + review + generate report
+      permissionMode: prompt
+      ---
+
+      # Code Reviewer
+
+      Review code quality and generate report
+      ```
+
+      ✅ Good 3: Complex workflow
+      ```yaml
+      ---
+      name: build-and-test
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+        - Write
+      maxTurns: 25  # ✅ Build + test + fix loop
+      permissionMode: prompt
+      ---
+
+      # Build and Test Workflow
+
+      Build project, run tests, analyze failures, fix issues
+      ```
+
+      ✅ Good 4: Exploration task
+      ```yaml
+      ---
+      name: codebase-explorer
+      model: haiku  # ✅ Use haiku to reduce cost
+      tools:
+        - Glob
+        - Read
+        - Grep
+      maxTurns: 40  # ✅ Exploration needs more rounds
+      permissionMode: auto
+      ---
+
+      # Codebase Explorer
+
+      Explore codebase structure, discover patterns
+      ```
+
+      ✅ Good 5: Knowledge library type no maxTurns needed
+      ```yaml
+      ---
+      name: lib-coding-standards
+      model: sonnet
+      tools: []  # ✅ No tool calls, no need for maxTurns
+      ---
+
+      # Coding Standards Knowledge Base
+
+      Provide coding standards reference
+      ```
+
+      ✅ Good 6: Document limit reasoning
+      ```yaml
+      ---
+      name: migration-executor
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      maxTurns: 30  # Migration steps: analyze(5) + plan(3) + execute(15) + verify(7)
+      permissionMode: prompt
+      ---
+
+      # Migration Executor
+
+      Execute code migration with multiple phases...
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. 评估 SubAgent 复杂度：
+         - 简单（单一操作）：5-10
+         - 中等（多步骤）：10-20
+         - 复杂（循环/迭代）：20-30
+         - 探索（开放式）：30-50
+
+      2. 添加 maxTurns 字段：
+         ```yaml
+         maxTurns: <合适的值>
+         ```
+
+      3. 在注释中说明选择该值的原因
+
+      4. 测试验证是否足够
+
+      **调优建议**:
+
+      - 从较小值开始，逐步增加
+      - 监控实际使用的轮数
+      - 考虑使用 haiku 降低成本（探索型任务）
+      - 知识库类型无需设置
+
+      **特殊情况**:
+
+      - 循环逻辑：确保 maxTurns 大于最大迭代次数
+      - 错误重试：预留足够轮次用于失败重试
+      - 探索任务：可以设置较大值（30-50）
+    en: |
+      **Fix Steps**:
+
+      1. Evaluate SubAgent complexity:
+         - Simple (single operation): 5-10
+         - Medium (multi-step): 10-20
+         - Complex (loop/iteration): 20-30
+         - Exploration (open-ended): 30-50
+
+      2. Add maxTurns field:
+         ```yaml
+         maxTurns: <appropriate value>
+         ```
+
+      3. Document why this value was chosen
+
+      4. Test if value is sufficient
+
+      **Tuning Advice**:
+
+      - Start with smaller value, increase gradually
+      - Monitor actual turns used
+      - Consider using haiku to reduce cost (exploration tasks)
+      - Knowledge library type doesn't need setting
+
+      **Special Cases**:
+
+      - Loop logic: Ensure maxTurns > max iterations
+      - Error retry: Reserve enough turns for failure retries
+      - Exploration tasks: Can set larger value (30-50)
+
+tags: ["subagent", "llm", "maxTurns", "limit", "control"]
+related_rules: ["SUB-008", "LLM-001"]

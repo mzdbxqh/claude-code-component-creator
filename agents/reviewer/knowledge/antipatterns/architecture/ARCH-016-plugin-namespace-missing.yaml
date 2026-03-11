@@ -1,0 +1,437 @@
+id: ARCH-016
+name: plugin-namespace-missing
+severity: warning
+component_type: plugin
+category: architecture
+
+title:
+  zh: "插件 Skill 缺少命名空间前缀"
+  en: "Plugin Skill missing namespace prefix"
+
+description:
+  zh: |
+    插件中的 Skill 应使用命名空间前缀避免命名冲突。
+
+    **命名空间格式**：`plugin-name:skill-name`
+
+    **作用**：
+    1. 避免不同插件的 Skill 名称冲突
+    2. 明确 Skill 来源
+    3. 便于管理和调用
+
+    **应用场景**：
+    - ✅ 插件内的 Skill：需要命名空间
+    - ❌ 个人 Skill（~/.claude/skills/）：不需要
+    - ❌ 项目 Skill（.claude/skills/）：不需要
+
+    **调用方式**：
+    ```markdown
+    使用 Skill(skill="my-plugin:my-skill") 调用
+    ```
+
+    **命名空间与 plugin.json**：
+    - plugin.json 中的 name 字段定义命名空间
+    - Skill name 自动添加前缀（系统自动处理）
+  en: |
+    Skills in plugins should use namespace prefix to avoid naming conflicts.
+
+    **Namespace Format**: `plugin-name:skill-name`
+
+    **Purpose**:
+    1. Avoid Skill name conflicts between plugins
+    2. Clarify Skill source
+    3. Facilitate management and invocation
+
+    **Use Cases**:
+    - ✅ Skills in plugins: Need namespace
+    - ❌ Personal Skills (~/.claude/skills/): Don't need
+    - ❌ Project Skills (.claude/skills/): Don't need
+
+    **Invocation**:
+    ```markdown
+    Use Skill(skill="my-plugin:my-skill") to call
+    ```
+
+    **Namespace & plugin.json**:
+    - name field in plugin.json defines namespace
+    - Skill name automatically gets prefix (system handles)
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-INT-010, OFF-ARC-018, skills.md OFF-ENV-005)，插件使用命名空间隔离 Skill 名称"
+  en: "Per official specs (plugins.md OFF-INT-010, OFF-ARC-018, skills.md OFF-ENV-005), plugins use namespaces to isolate Skill names"
+
+detection:
+  method: context-check
+  indicators:
+    - check: "plugin.json 存在"
+      meaning: "这是一个插件"
+    - check: "Skill 在插件的 skills/ 目录"
+      meaning: "需要命名空间"
+  validation: |
+    1. 检查 plugin.json 的 name 字段
+    2. 验证 Skill 调用是否使用命名空间格式
+    3. 检查文档中的调用示例
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "插件命名空间"
+  lines: "125-148"
+  quote: "插件 skill 使用命名空间 plugin-name:skill-name。plugin name 是唯一标识符和 skill 命名空间。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：插件 Skill 未使用命名空间
+      ```markdown
+      # 在插件 my-plugin 中的 SKILL.md
+
+      ---
+      name: analyze-code
+      # ❌ 应该使用 my-plugin:analyze-code
+      ---
+
+      # Code Analyzer
+
+      调用：使用 /analyze-code
+      # ❌ 应该说明使用 /my-plugin:analyze-code
+      ```
+
+      ❌ 错误2：plugin.json name 与 Skill 前缀不一致
+      ```json
+      // plugin.json
+      {
+        "name": "code-tools",
+        "description": "Code analysis tools"
+      }
+      ```
+      ```yaml
+      # skills/analyzer/SKILL.md
+      name: my-analyzer  # ❌ 前缀不匹配，应该是 code-tools:analyzer
+      ```
+
+      ❌ 错误3：假设无命名空间调用
+      ```markdown
+      ---
+      name: helper-skill
+      ---
+
+      # Helper Skill
+
+      可以直接使用 /helper-skill 调用
+      # ❌ 在插件中必须使用 /plugin-name:helper-skill
+      ```
+
+      ❌ 错误4：文档中未说明命名空间
+      ```markdown
+      ---
+      name: my-plugin:cool-feature
+      ---
+
+      # Cool Feature
+
+      ## Usage
+      使用 /cool-feature 调用
+      # ❌ 应该是 /my-plugin:cool-feature
+      ```
+    en: |
+      ❌ Error 1: Plugin Skill without namespace
+      ```markdown
+      # In plugin my-plugin's SKILL.md
+
+      ---
+      name: analyze-code
+      # ❌ Should be my-plugin:analyze-code
+      ---
+
+      # Code Analyzer
+
+      Usage: Use /analyze-code
+      # ❌ Should say /my-plugin:analyze-code
+      ```
+
+      ❌ Error 2: plugin.json name doesn't match Skill prefix
+      ```json
+      // plugin.json
+      {
+        "name": "code-tools",
+        "description": "Code analysis tools"
+      }
+      ```
+      ```yaml
+      # skills/analyzer/SKILL.md
+      name: my-analyzer  # ❌ Prefix doesn't match, should be code-tools:analyzer
+      ```
+
+      ❌ Error 3: Assuming no-namespace invocation
+      ```markdown
+      ---
+      name: helper-skill
+      ---
+
+      # Helper Skill
+
+      Can be called directly with /helper-skill
+      # ❌ In plugins must use /plugin-name:helper-skill
+      ```
+
+      ❌ Error 4: Namespace not documented
+      ```markdown
+      ---
+      name: my-plugin:cool-feature
+      ---
+
+      # Cool Feature
+
+      ## Usage
+      Call with /cool-feature
+      # ❌ Should be /my-plugin:cool-feature
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：完整命名空间配置
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "code-analyzer",
+        "description": "Code analysis plugin",
+        "version": "1.0.0"
+      }
+      ```
+      ```yaml
+      # skills/analyze/SKILL.md
+      name: code-analyzer:analyze
+      description: "分析代码质量"
+      ```
+
+      ✅ 正确2：文档中说明命名空间
+      ```markdown
+      ---
+      name: my-tools:formatter
+      description: "代码格式化工具"
+      ---
+
+      # Code Formatter
+
+      ## Usage
+
+      使用命名空间调用：
+      ```
+      /my-tools:formatter <file>
+      ```
+
+      或通过 Skill 工具：
+      ```
+      Skill(skill="my-tools:formatter", args="src/main.js")
+      ```
+      ```
+
+      ✅ 正确3：README 中说明命名空间
+      ```markdown
+      # My Plugin
+
+      ## Available Skills
+
+      - `my-plugin:skill-1` - 功能 1
+      - `my-plugin:skill-2` - 功能 2
+      - `my-plugin:skill-3` - 功能 3
+
+      ## Usage
+
+      所有 Skill 都需要使用命名空间前缀 `my-plugin:`：
+
+      \```
+      /my-plugin:skill-1 <args>
+      \```
+      ```
+
+      ✅ 正确4：多 Skill 插件
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       (name: "dev-tools")
+        skills/
+          linter/
+            SKILL.md        (name: dev-tools:linter)
+          formatter/
+            SKILL.md        (name: dev-tools:formatter)
+          analyzer/
+            SKILL.md        (name: dev-tools:analyzer)
+      ```
+
+      ✅ 正确5：优先级说明
+      ```markdown
+      # Skill 优先级
+
+      1. **CLI --skills** (最高优先级)
+      2. **企业级 Skill** (~/.claude/enterprise/skills/)
+      3. **个人 Skill** (~/.claude/skills/)
+      4. **插件 Skill** (需要命名空间)
+      5. **项目 Skill** (.claude/skills/)
+
+      插件 Skill 使用命名空间避免冲突。
+      ```
+    en: |
+      ✅ Good 1: Complete namespace config
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "code-analyzer",
+        "description": "Code analysis plugin",
+        "version": "1.0.0"
+      }
+      ```
+      ```yaml
+      # skills/analyze/SKILL.md
+      name: code-analyzer:analyze
+      description: "Analyze code quality"
+      ```
+
+      ✅ Good 2: Document namespace in Skill
+      ```markdown
+      ---
+      name: my-tools:formatter
+      description: "Code formatting tool"
+      ---
+
+      # Code Formatter
+
+      ## Usage
+
+      Call with namespace:
+      ```
+      /my-tools:formatter <file>
+      ```
+
+      Or via Skill tool:
+      ```
+      Skill(skill="my-tools:formatter", args="src/main.js")
+      ```
+      ```
+
+      ✅ Good 3: README explains namespace
+      ```markdown
+      # My Plugin
+
+      ## Available Skills
+
+      - `my-plugin:skill-1` - Feature 1
+      - `my-plugin:skill-2` - Feature 2
+      - `my-plugin:skill-3` - Feature 3
+
+      ## Usage
+
+      All Skills require namespace prefix `my-plugin:`:
+
+      \```
+      /my-plugin:skill-1 <args>
+      \```
+      ```
+
+      ✅ Good 4: Multi-Skill plugin
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json       (name: "dev-tools")
+        skills/
+          linter/
+            SKILL.md        (name: dev-tools:linter)
+          formatter/
+            SKILL.md        (name: dev-tools:formatter)
+          analyzer/
+            SKILL.md        (name: dev-tools:analyzer)
+      ```
+
+      ✅ Good 5: Priority documentation
+      ```markdown
+      # Skill Priority
+
+      1. **CLI --skills** (highest)
+      2. **Enterprise Skills** (~/.claude/enterprise/skills/)
+      3. **Personal Skills** (~/.claude/skills/)
+      4. **Plugin Skills** (need namespace)
+      5. **Project Skills** (.claude/skills/)
+
+      Plugin Skills use namespaces to avoid conflicts.
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. 检查 plugin.json 中的 name 字段：
+         ```bash
+         jq -r '.name' .claude-plugin/plugin.json
+         ```
+
+      2. 更新所有 Skill 的 name 字段：
+         ```yaml
+         # 从
+         name: analyze-code
+
+         # 改为
+         name: my-plugin:analyze-code
+         ```
+
+      3. 更新文档中的调用示例
+
+      4. 更新 README 说明命名空间
+
+      **测试验证**:
+
+      ```bash
+      # 列出插件 Skills
+      claude --plugin-dir . skills
+
+      # 应该看到带命名空间的 Skill 名称
+      # my-plugin:skill-1
+      # my-plugin:skill-2
+      ```
+
+      **注意事项**:
+
+      - 个人和项目 Skill 不需要命名空间
+      - 命名空间由 plugin.json 的 name 决定
+      - 确保所有文档都使用完整的命名空间名称
+    en: |
+      **Fix Steps**:
+
+      1. Check name field in plugin.json:
+         ```bash
+         jq -r '.name' .claude-plugin/plugin.json
+         ```
+
+      2. Update all Skill name fields:
+         ```yaml
+         # From
+         name: analyze-code
+
+         # To
+         name: my-plugin:analyze-code
+         ```
+
+      3. Update invocation examples in documentation
+
+      4. Update README to explain namespace
+
+      **Test Verification**:
+
+      ```bash
+      # List plugin Skills
+      claude --plugin-dir . skills
+
+      # Should see namespaced Skill names
+      # my-plugin:skill-1
+      # my-plugin:skill-2
+      ```
+
+      **Notes**:
+
+      - Personal and project Skills don't need namespaces
+      - Namespace determined by plugin.json name
+      - Ensure all docs use full namespaced names
+
+tags: ["plugin", "architecture", "namespace", "naming", "isolation"]
+related_rules: ["ARCH-014", "skill-002"]
