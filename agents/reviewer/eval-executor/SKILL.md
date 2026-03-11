@@ -18,7 +18,7 @@ skills:
 ## Purpose
 
 Eval Executor 是 Eval 执行机制的核心组件，负责：
-1. **并行执行** 测试用例（使用 Task 系统）
+1. **并行执行** 测试用例（使用 Agent 系统）
 2. **支持模式** with-skill、baseline、both
 3. **捕获** timing 数据（tokens、duration_ms）
 4. **输出** 结构化的执行结果
@@ -65,7 +65,7 @@ baseline_config:
 **错误处理**: skill-path 无效时降级为 baseline
 
 ### Step 3: 并行执行测试
-**目标**: 使用 Task 系统并行执行所有测试用例
+**目标**: 使用 Agent 系统并行执行所有测试用例
 **操作**:
 ```
 FUNCTION executeTests(testCases, mode):

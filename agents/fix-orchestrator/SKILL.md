@@ -72,7 +72,7 @@ Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解
 **错误处理**: 暂停/中止时保存进度
 
 ### Step 5: 分派 SubAgent 工厂
-**目标**: 使用 Task 工具执行并行修复
+**目标**: 使用 Agent 工具执行并行修复
 **操作**:
 1. 分派 ccc:metadata-fix-agent 修复元数据问题
 2. 分派 ccc:tool-declare-agent 修复工具权限问题

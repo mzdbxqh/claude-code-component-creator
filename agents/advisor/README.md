@@ -6,11 +6,11 @@
 
 ```
 /design-advisor
-    ├──▶ Stage 1: requirement-core
-    ├──▶ Stage 2: architect-core
-    ├──▶ Stage 3: design-core
-    ├──▶ Stage 4: validator-core
-    └──▶ Stage 5: planner-core
+    ├──▶ Stage 1: ccc:requirement-core
+    ├──▶ Stage 2: ccc:architect-core
+    ├──▶ Stage 3: ccc:design-core
+    ├──▶ Stage 4: ccc:validator-core
+    └──▶ Stage 5: ccc:planner-core
 ```
 
 ## 文件结构
@@ -44,8 +44,8 @@ advisor/
 
 | 阶段 | 名称 | Subagent | 输入 | 输出 |
 |------|------|----------|------|------|
-| 1 | 需求理解 | requirement-core | 用户描述 | 需求规格 |
-| 2 | 架构选型 | architect-core | 需求规格 | 架构决策 |
-| 3 | 详细设计 | design-core | 架构决策 | 设计规格 |
-| 4 | 规范验证 | validator-core | 设计规格 | 合规报告 |
-| 5 | 实现规划 | planner-core | 验证设计 | 实施计划 |
+| 1 | 需求理解 | ccc:requirement-core | 用户描述 | 需求规格 |
+| 2 | 架构选型 | ccc:architect-core | 需求规格 | 架构决策 |
+| 3 | 详细设计 | ccc:design-core | 架构决策 | 设计规格 |
+| 4 | 规范验证 | ccc:validator-core | 设计规格 | 合规报告 |
+| 5 | 实现规划 | ccc:planner-core | 验证设计 | 实施计划 |

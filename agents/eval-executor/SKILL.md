@@ -31,7 +31,7 @@ skills:
 ### Step 2: 并行执行
 **目标**: 同时执行 with-skill 和 baseline
 **操作**:
-1. 使用 Task 工具创建两个执行任务
+1. 使用 Agent 工具创建两个执行任务
 2. Task 1: with-skill 配置执行
 3. Task 2: baseline 配置执行
 4. 等待两个任务完成

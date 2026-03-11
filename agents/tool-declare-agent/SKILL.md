@@ -27,7 +27,7 @@ Tool Declare Agent is a tool permission analysis component that scans SKILL.md f
 1. Read the target file content
 2. Use Grep to search for tool invocation patterns:
    - Direct tool calls: `Read(...)`, `Write(...)`, `Bash(...)`
-   - Task tool patterns: `Task(subagent_type="...")`
+   - Agent tool patterns: `Task(subagent_type="...")`
    - Skill tool patterns: `Skill(skill="...")`
 3. Record tool name and usage location (line numbers)
 **Output**: List of tools used with locations
