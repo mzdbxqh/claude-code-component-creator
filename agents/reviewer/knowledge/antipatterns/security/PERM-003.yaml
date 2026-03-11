@@ -1,0 +1,249 @@
+id: PERM-003
+name: permission-syntax-error
+severity: error
+component_type: all
+category: security
+
+title:
+  zh: "权限配置语法错误"
+  en: "Permission configuration syntax error"
+
+description:
+  zh: |
+    权限字段配置语法错误，包括：
+    1. 字段名称错误（Skills: allowed-tools, SubAgents: tools）
+    2. 字段值格式错误（必须是列表）
+    3. 工具名称拼写错误或不存在
+    4. YAML 格式错误（缩进、引号等）
+
+    正确的权限配置是安全模型的基础。
+  en: |
+    Permission field configuration syntax errors, including:
+    1. Wrong field name (Skills: allowed-tools, SubAgents: tools)
+    2. Wrong field value format (must be list)
+    3. Tool name typos or non-existent tools
+    4. YAML format errors (indentation, quotes, etc.)
+
+    Correct permission configuration is foundation of security model.
+
+rationale:
+  zh: "基于官方规范 (permissions.md)，权限字段必须使用正确的名称和格式，确保权限系统正常工作"
+  en: "Per official specs (permissions.md), permission fields must use correct names and formats to ensure permission system works properly"
+
+detection:
+  method: syntax-validation
+  checks:
+    - name: field-name-validation
+      description: "验证字段名称"
+      rules:
+        - component: Skills
+          required_field: "allowed-tools"
+          error: "Skills 必须使用 allowed-tools，不是 tools"
+        - component: SubAgents
+          required_field: "tools"
+          error: "SubAgents 必须使用 tools，不是 allowed-tools"
+
+    - name: format-validation
+      description: "验证字段格式"
+      rules:
+        - format: "列表格式（- 或 []）"
+          valid: ["- Read", "[Read, Write]"]
+          invalid: ["Read", "Read, Write"]
+
+    - name: tool-name-validation
+      description: "验证工具名称"
+      valid_tools:
+        - Read
+        - Write
+        - Edit
+        - Bash
+        - Glob
+        - Grep
+        - WebFetch
+        - WebSearch
+        - Task
+        - Agent
+        - Skill
+        - AskUserQuestion
+        - EnterPlanMode
+
+    - name: yaml-syntax
+      description: "YAML 语法验证"
+      checks:
+        - "正确的缩进（2空格）"
+        - "列表项前缀 '- '"
+        - "避免 Tab 字符"
+
+official_reference:
+  document: "markdown_docs/permissions.md"
+  section: "权限规则语法"
+  lines: "80-120"
+  quote: "Skills 使用 allowed-tools 字段，SubAgents 使用 tools 字段。值为工具名称列表。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：Skills 使用了错误的字段名
+      ```yaml
+      # Skills
+      tools:  # ❌ 应该是 allowed-tools
+        - Read
+      ```
+
+      ❌ 错误2：SubAgents 使用了错误的字段名
+      ```yaml
+      # SubAgents
+      allowed-tools:  # ❌ 应该是 tools
+        - Read
+      ```
+
+      ❌ 错误3：格式错误（不是列表）
+      ```yaml
+      allowed-tools: Read  # ❌ 应该是列表格式
+      ```
+
+      ❌ 错误4：工具名称拼写错误
+      ```yaml
+      allowed-tools:
+        - Raed      # ❌ 拼写错误，应该是 Read
+        - Wriet     # ❌ 拼写错误，应该是 Write
+        - GrepAll   # ❌ 不存在的工具
+      ```
+
+      ❌ 错误5：YAML 缩进错误
+      ```yaml
+      allowed-tools:
+      - Read        # ❌ 缩进错误
+        - Write     # ❌ 缩进不一致
+      ```
+    en: |
+      ❌ Error 1: Skills using wrong field name
+      ```yaml
+      # Skills
+      tools:  # ❌ Should be allowed-tools
+        - Read
+      ```
+
+      ❌ Error 2: SubAgents using wrong field name
+      ```yaml
+      # SubAgents
+      allowed-tools:  # ❌ Should be tools
+        - Read
+      ```
+
+      ❌ Error 3: Format error (not a list)
+      ```yaml
+      allowed-tools: Read  # ❌ Should be list format
+      ```
+
+      ❌ Error 4: Tool name typos
+      ```yaml
+      allowed-tools:
+        - Raed      # ❌ Typo, should be Read
+        - Wriet     # ❌ Typo, should be Write
+        - GrepAll   # ❌ Non-existent tool
+      ```
+
+      ❌ Error 5: YAML indentation error
+      ```yaml
+      allowed-tools:
+      - Read        # ❌ Indentation error
+        - Write     # ❌ Inconsistent indentation
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：Skills 权限配置
+      ```yaml
+      ---
+      name: example-skill
+      description: "..."
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+      # 或简洁格式
+      allowed-tools: [Read, Write, Bash]
+      # 或空列表（知识库类型）
+      allowed-tools: []
+      ---
+      ```
+
+      ✅ 正确：SubAgents 权限配置
+      ```yaml
+      ---
+      name: example-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Glob
+      permissionMode: prompt
+      ---
+      ```
+    en: |
+      ✅ Good: Skills permission config
+      ```yaml
+      ---
+      name: example-skill
+      description: "..."
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+      # Or concise format
+      allowed-tools: [Read, Write, Bash]
+      # Or empty list (knowledge library)
+      allowed-tools: []
+      ---
+      ```
+
+      ✅ Good: SubAgents permission config
+      ```yaml
+      ---
+      name: example-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Glob
+      permissionMode: prompt
+      ---
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检测组件类型（Skill vs SubAgent）
+      2. Skills: 将 tools 重命名为 allowed-tools
+      3. SubAgents: 将 allowed-tools 重命名为 tools
+      4. 修正工具名称拼写错误（基于相似度匹配）
+      5. 修正 YAML 格式问题（缩进、列表格式）
+      6. 移除不存在的工具名称
+
+      **手动验证**:
+
+      1. 确认工具名称列表的正确性
+      2. 验证 YAML 格式可被正确解析
+      3. 测试权限配置是否生效
+    en: |
+      **Automatic Fix**:
+
+      1. Detect component type (Skill vs SubAgent)
+      2. Skills: Rename tools to allowed-tools
+      3. SubAgents: Rename allowed-tools to tools
+      4. Fix tool name typos (fuzzy match)
+      5. Fix YAML format issues (indentation, list format)
+      6. Remove non-existent tool names
+
+      **Manual Verification**:
+
+      1. Confirm tool name list correctness
+      2. Verify YAML format is parseable
+      3. Test permission config works
+
+tags: ["security", "permissions", "syntax", "yaml", "validation"]
+related_rules: ["PERM-001", "PERM-002"]

@@ -1,0 +1,241 @@
+id: PERM-004
+name: sensitive-tool-unprotected
+severity: warning
+component_type: subagent
+category: security
+
+title:
+  zh: "敏感工具权限缺少保护"
+  en: "Sensitive tool permissions lacking protection"
+
+description:
+  zh: |
+    SubAgent 使用敏感工具（Bash, Write, Edit, WebFetch）但未配置权限保护。
+
+    敏感操作应该：
+    1. 使用 permissionMode: prompt 要求用户确认
+    2. 提供清晰的权限说明文档
+    3. 限制敏感操作的范围（如文件路径限制）
+
+    这是深度防御策略的一部分。
+  en: |
+    SubAgent uses sensitive tools (Bash, Write, Edit, WebFetch) without permission protection.
+
+    Sensitive operations should:
+    1. Use permissionMode: prompt to require user confirmation
+    2. Provide clear permission documentation
+    3. Limit scope of sensitive operations (e.g. file path restrictions)
+
+    This is part of defense-in-depth strategy.
+
+rationale:
+  zh: "基于安全最佳实践 (permissions.md, security.md)，敏感工具需要额外保护，防止意外或恶意操作"
+  en: "Per security best practices (permissions.md, security.md), sensitive tools need extra protection to prevent accidental or malicious operations"
+
+detection:
+  method: permission-analysis
+  sensitive_tools:
+    - name: Bash
+      risk: critical
+      reason: "可执行任意系统命令"
+    - name: Write
+      risk: high
+      reason: "可覆盖或创建文件"
+    - name: Edit
+      risk: high
+      reason: "可修改现有文件"
+    - name: WebFetch
+      risk: medium
+      reason: "可访问外部网络资源"
+    - name: Task
+      risk: medium
+      reason: "可启动子任务"
+    - name: Agent
+      risk: medium
+      reason: "可启动SubAgent"
+
+  required_protection:
+    - field: permissionMode
+      value: prompt
+      when: "使用任何敏感工具"
+    - field: maxTurns
+      recommendation: "设置合理上限，防止无限循环"
+    - documentation: "解释为何需要这些权限"
+
+official_reference:
+  document: "markdown_docs/permissions.md"
+  section: "权限模式和敏感工具保护"
+  lines: "210-250"
+  quote: "SubAgents 推荐使用 permissionMode: prompt。敏感操作必须提示用户。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 违反：使用敏感工具但未设置权限保护
+      ```yaml
+      ---
+      name: risky-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write    # 敏感
+        - Bash     # 极度敏感
+      # ❌ 缺少 permissionMode: prompt
+      # ❌ 缺少 maxTurns 限制
+      ---
+      ```
+
+      ❌ 违反：permissionMode 设置为 auto（不安全）
+      ```yaml
+      tools:
+        - Bash
+      permissionMode: auto  # ❌ 敏感工具应该用 prompt
+      ```
+    en: |
+      ❌ Bad: Using sensitive tools without permission protection
+      ```yaml
+      ---
+      name: risky-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write    # Sensitive
+        - Bash     # Highly sensitive
+      # ❌ Missing permissionMode: prompt
+      # ❌ Missing maxTurns limit
+      ---
+      ```
+
+      ❌ Bad: permissionMode set to auto (unsafe)
+      ```yaml
+      tools:
+        - Bash
+      permissionMode: auto  # ❌ Sensitive tools should use prompt
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：敏感工具配置了完善的保护
+      ```yaml
+      ---
+      name: safe-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      permissionMode: prompt    # ✅ 要求用户确认
+      maxTurns: 10              # ✅ 限制执行次数
+      ---
+
+      # 敏感工具权限说明
+
+      ## 权限需求
+
+      - **Write**: 需要创建审查报告文件
+      - **Bash**: 需要运行验证脚本
+
+      ## 安全措施
+
+      - 所有敏感操作都会提示用户确认
+      - 文件写入限制在 docs/ 目录
+      - Bash 命令经过验证和过滤
+      ```
+
+      ✅ 正确：非敏感工具可以使用 auto
+      ```yaml
+      tools:
+        - Read
+        - Glob
+        - Grep
+      permissionMode: auto  # ✅ 仅只读工具，可以 auto
+      ```
+    en: |
+      ✅ Good: Sensitive tools with proper protection
+      ```yaml
+      ---
+      name: safe-agent
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      permissionMode: prompt    # ✅ Require user confirmation
+      maxTurns: 10              # ✅ Limit execution count
+      ---
+
+      # Sensitive Tool Permissions
+
+      ## Permission Requirements
+
+      - **Write**: Needed to create review report files
+      - **Bash**: Needed to run validation scripts
+
+      ## Security Measures
+
+      - All sensitive operations prompt for user confirmation
+      - File writes restricted to docs/ directory
+      - Bash commands validated and filtered
+      ```
+
+      ✅ Good: Non-sensitive tools can use auto
+      ```yaml
+      tools:
+        - Read
+        - Glob
+        - Grep
+      permissionMode: auto  # ✅ Read-only tools, safe for auto
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. 识别SubAgent中使用的敏感工具
+      2. 添加 `permissionMode: prompt` 字段
+      3. 添加 `maxTurns` 限制（建议 10-20）
+      4. 在文档中说明：
+         - 为何需要这些敏感权限
+         - 如何安全地使用这些工具
+         - 采取了哪些安全措施
+
+      **风险评估**:
+
+      - Critical (Bash): 必须 prompt + 严格输入验证
+      - High (Write/Edit): 必须 prompt + 路径限制
+      - Medium (WebFetch/Agent): 推荐 prompt + 使用说明
+      - Low (Read/Glob/Grep): 可以 auto
+
+      **特殊情况**:
+
+      - 知识库类型的 SubAgent：tools: []，不需要权限保护
+      - 纯分析类 SubAgent：仅 Read/Grep，可以 auto
+      - 执行类 SubAgent：包含 Bash/Write，必须 prompt
+    en: |
+      **Fix Steps**:
+
+      1. Identify sensitive tools used in SubAgent
+      2. Add `permissionMode: prompt` field
+      3. Add `maxTurns` limit (recommended 10-20)
+      4. Document:
+         - Why these sensitive permissions are needed
+         - How to use these tools safely
+         - What security measures are in place
+
+      **Risk Assessment**:
+
+      - Critical (Bash): Must prompt + strict input validation
+      - High (Write/Edit): Must prompt + path restrictions
+      - Medium (WebFetch/Agent): Recommend prompt + usage docs
+      - Low (Read/Glob/Grep): Can use auto
+
+      **Special Cases**:
+
+      - Knowledge library SubAgents: tools: [], no protection needed
+      - Pure analysis SubAgents: Only Read/Grep, can use auto
+      - Execution SubAgents: Include Bash/Write, must prompt
+
+tags: ["security", "permissions", "sensitive-tools", "protection", "prompt"]
+related_rules: ["PERM-001", "PERM-002", "SEC-001", "SEC-002"]

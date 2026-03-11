@@ -1,0 +1,135 @@
+id: PERM-001
+name: excessive-permissions
+severity: error
+component_type: all
+category: security
+
+title:
+  zh: "权限过度授予（违反最小权限原则）"
+  en: "Excessive permissions (violates principle of least privilege)"
+
+description:
+  zh: |
+    组件声明了超出实际需要的工具权限，违反最小权限原则。
+    Skills 使用 allowed-tools 字段，SubAgents 使用 tools 字段。
+    仅应声明组件实际使用的工具。
+  en: |
+    Component declares more tool permissions than actually needed, violating the principle of least privilege.
+    Skills use allowed-tools field, SubAgents use tools field.
+    Only declare tools that are actually used by the component.
+
+rationale:
+  zh: "基于官方安全标准 (permissions.md)，最小权限原则要求仅声明必需的工具权限，减少攻击面"
+  en: "Per official security standards (permissions.md), least privilege principle requires declaring only necessary tool permissions to reduce attack surface"
+
+detection:
+  method: code-analysis
+  checks:
+    - name: unused-tools-check
+      description: "检测声明但未使用的工具"
+      pattern: "allowed-tools:|tools:"
+      validation: "交叉引用工具使用情况"
+    - name: wildcard-permissions
+      description: "检测通配符权限（高风险）"
+      pattern: "allowed-tools:.*\\*|tools:.*\\*"
+      risk: critical
+
+official_reference:
+  document: "markdown_docs/permissions.md"
+  section: "最小权限原则"
+  lines: "156-180"
+  quote: "仅声明必需的工具权限。Skills 使用 allowed-tools，SubAgents 使用 tools。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 违反：声明了未使用的工具
+      ```yaml
+      # Skills
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+        - Edit    # 未使用
+        - Glob    # 未使用
+        - WebFetch # 未使用
+
+      # SubAgents
+      tools:
+        - "*"     # 通配符，授予所有权限（高风险）
+      ```
+    en: |
+      ❌ Bad: Declaring unused tools
+      ```yaml
+      # Skills
+      allowed-tools:
+        - Read
+        - Write
+        - Bash
+        - Edit    # Unused
+        - Glob    # Unused
+        - WebFetch # Unused
+
+      # SubAgents
+      tools:
+        - "*"     # Wildcard, grants all permissions (high risk)
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：仅声明实际使用的工具
+      ```yaml
+      # Skills - 知识库类型，不需要工具
+      allowed-tools: []
+
+      # Skills - 仅使用 Read 和 Grep
+      allowed-tools:
+        - Read
+        - Grep
+
+      # SubAgents - 仅声明必需工具
+      tools:
+        - Read
+        - Write
+      permissionMode: prompt  # 提示用户确认
+      ```
+    en: |
+      ✅ Good: Only declare actually used tools
+      ```yaml
+      # Skills - Knowledge library type, no tools needed
+      allowed-tools: []
+
+      # Skills - Only uses Read and Grep
+      allowed-tools:
+        - Read
+        - Grep
+
+      # SubAgents - Only declare necessary tools
+      tools:
+        - Read
+        - Write
+      permissionMode: prompt  # Prompt user for confirmation
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. 审查组件实际使用的工具
+      2. 删除未使用的工具权限
+      3. 禁止使用通配符 "*"（除非绝对必要）
+      4. 对于知识库类型的 Skills（lib-/std-），使用 `allowed-tools: []`
+      5. 添加权限说明文档
+    en: |
+      **Fix Steps**:
+
+      1. Review tools actually used by component
+      2. Remove unused tool permissions
+      3. Avoid wildcard "*" (unless absolutely necessary)
+      4. For knowledge library Skills (lib-/std-), use `allowed-tools: []`
+      5. Add permission documentation
+
+tags: ["security", "permissions", "least-privilege", "tools"]
+related_rules: ["PERM-002", "PERM-004", "SEC-002"]

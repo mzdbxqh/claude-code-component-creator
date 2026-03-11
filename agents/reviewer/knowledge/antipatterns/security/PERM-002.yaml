@@ -1,0 +1,174 @@
+id: PERM-002
+name: permission-inconsistency
+severity: error
+component_type: all
+category: security
+
+title:
+  zh: "权限声明与实际使用不一致"
+  en: "Permission declaration inconsistent with actual usage"
+
+description:
+  zh: |
+    组件声明的工具权限与实际使用的工具不一致，可能存在：
+    1. 声明了但未使用的工具（应移除）
+    2. 使用了但未声明的工具（严重安全问题）
+
+    必须确保 allowed-tools/tools 字段与实际工具调用完全一致。
+  en: |
+    Component's declared tool permissions don't match actual tool usage:
+    1. Declared but unused tools (should be removed)
+    2. Used but undeclared tools (serious security issue)
+
+    Must ensure allowed-tools/tools field matches actual tool calls.
+
+rationale:
+  zh: "基于官方标准 (permissions.md)，权限声明必须与实际使用一致，确保权限模型的正确性和可审计性"
+  en: "Per official standards (permissions.md), permission declarations must match actual usage to ensure correctness and auditability"
+
+detection:
+  method: cross-reference
+  checks:
+    - name: unused-permissions
+      description: "检测声明但未使用的工具"
+      action: "扫描代码中的工具调用"
+      severity: warning
+    - name: undeclared-usage
+      description: "检测使用但未声明的工具（严重）"
+      action: "对比声明列表与实际调用"
+      severity: error
+    - name: field-name-check
+      description: "检查字段名称正确性"
+      validation: |
+        - Skills: 必须使用 allowed-tools
+        - SubAgents: 必须使用 tools（不是 allowed-tools）
+
+official_reference:
+  document: "markdown_docs/permissions.md"
+  section: "权限声明与实际使用一致性"
+  lines: "180-210"
+  quote: "声明的工具必须实际使用，实际使用的工具必须已声明"
+
+examples:
+  bad:
+    zh: |
+      ❌ 违反1：使用了未声明的工具
+      ```yaml
+      # Skills
+      allowed-tools:
+        - Read
+      # 但在代码中调用了 Write 和 Bash（未声明）
+      ```
+
+      ❌ 违反2：声明了未使用的工具
+      ```yaml
+      # SubAgents
+      tools:
+        - Read
+        - Write
+        - Edit
+        - Glob
+        - Grep
+      # 但实际只使用了 Read 和 Write
+      ```
+
+      ❌ 违反3：SubAgent 使用了错误的字段名
+      ```yaml
+      # SubAgents - 错误
+      allowed-tools:  # ❌ 应该是 tools
+        - Read
+      ```
+    en: |
+      ❌ Violation 1: Using undeclared tools
+      ```yaml
+      # Skills
+      allowed-tools:
+        - Read
+      # But code calls Write and Bash (undeclared)
+      ```
+
+      ❌ Violation 2: Declaring unused tools
+      ```yaml
+      # SubAgents
+      tools:
+        - Read
+        - Write
+        - Edit
+        - Glob
+        - Grep
+      # But only Read and Write are actually used
+      ```
+
+      ❌ Violation 3: SubAgent using wrong field name
+      ```yaml
+      # SubAgents - Wrong
+      allowed-tools:  # ❌ Should be tools
+        - Read
+      ```
+
+  good:
+    zh: |
+      ✅ 正确：声明与使用完全一致
+      ```yaml
+      # Skills - 与实际使用一致
+      allowed-tools:
+        - Read
+        - Grep
+      # 代码中仅调用 Read 和 Grep
+
+      # SubAgents - 使用正确字段名
+      tools:
+        - Read
+        - Write
+      permissionMode: prompt
+      # 代码中仅调用 Read 和 Write
+      ```
+    en: |
+      ✅ Good: Declaration matches usage exactly
+      ```yaml
+      # Skills - Matches actual usage
+      allowed-tools:
+        - Read
+        - Grep
+      # Code only calls Read and Grep
+
+      # SubAgents - Using correct field name
+      tools:
+        - Read
+        - Write
+      permissionMode: prompt
+      # Code only calls Read and Write
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 扫描代码中的所有工具调用
+      2. 更新 allowed-tools/tools 列表以匹配实际使用
+      3. 移除未使用的工具权限
+      4. SubAgent 中将 allowed-tools 重命名为 tools
+
+      **手动验证**:
+
+      1. 确认工具调用是否符合组件功能需求
+      2. 检查是否遗漏了必要的权限
+      3. 更新权限文档说明
+    en: |
+      **Automatic Fix**:
+
+      1. Scan all tool calls in code
+      2. Update allowed-tools/tools list to match actual usage
+      3. Remove unused tool permissions
+      4. Rename allowed-tools to tools in SubAgents
+
+      **Manual Verification**:
+
+      1. Confirm tool calls match component functionality
+      2. Check for missing necessary permissions
+      3. Update permission documentation
+
+tags: ["security", "permissions", "consistency", "validation"]
+related_rules: ["PERM-001", "PERM-003"]
