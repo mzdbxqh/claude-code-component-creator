@@ -1,0 +1,697 @@
+id: CFG-003
+name: lsp-config-location-invalid
+severity: error
+component_type: plugin
+category: config
+
+title:
+  zh: "LSP 服务器配置位置错误"
+  en: "LSP server config location invalid"
+
+description:
+  zh: |
+    LSP（Language Server Protocol）服务器必须在 .lsp.json 文件中配置，不应在其他位置。
+
+    **正确的配置位置**：
+    - ✅ `.lsp.json` - 插件根目录
+    - ❌ `settings.json` - 不支持 lspServers 键
+    - ❌ `hooks/hooks.json` - 不是 LSP 配置文件
+    - ❌ `lsp.json` - 缺少点前缀
+
+    **LSP 配置格式**：
+    ```json
+    {
+      "lspServers": {
+        "server-name": {
+          "command": "language-server-binary",
+          "args": ["--stdio"],
+          "languages": ["javascript", "typescript"]
+        }
+      }
+    }
+    ```
+
+    **LSP 服务器的作用**：
+    - 提供代码补全、跳转、重命名等IDE功能
+    - 支持多种编程语言
+    - 需要用户安装对应的二进制文件
+  en: |
+    LSP (Language Server Protocol) servers must be configured in .lsp.json file, not elsewhere.
+
+    **Correct Config Location**:
+    - ✅ `.lsp.json` - Plugin root directory
+    - ❌ `settings.json` - Doesn't support lspServers key
+    - ❌ `hooks/hooks.json` - Not LSP config file
+    - ❌ `lsp.json` - Missing dot prefix
+
+    **LSP Config Format**:
+    ```json
+    {
+      "lspServers": {
+        "server-name": {
+          "command": "language-server-binary",
+          "args": ["--stdio"],
+          "languages": ["javascript", "typescript"]
+        }
+      }
+    }
+    ```
+
+    **LSP Server Purpose**:
+    - Provide IDE features: completion, navigation, rename, etc.
+    - Support multiple programming languages
+    - Require user to install corresponding binaries
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-CFG-021)，LSP 服务器在 .lsp.json 配置以保持清晰的配置结构"
+  en: "Per official specs (plugins.md OFF-CFG-021), LSP servers configured in .lsp.json to maintain clear config structure"
+
+detection:
+  method: file-location-check
+  checks:
+    - path: ".lsp.json"
+      expected: "LSP 配置应在这里"
+    - path: "settings.json"
+      forbidden_key: "lspServers"
+    - path: "lsp.json"
+      warning: "应该是 .lsp.json（带点前缀）"
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "LSP 服务器配置"
+  lines: "285-308"
+  quote: "LSP 服务器在 .lsp.json 配置。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：在 settings.json 中配置 LSP
+      ```json
+      // settings.json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"]
+          }
+        }
+      }
+      // ❌ lspServers 不应在 settings.json
+      ```
+
+      ❌ 错误2：文件名缺少点前缀
+      ```json
+      // lsp.json (错误的文件名)
+      {
+        "lspServers": {
+          "python": {
+            "command": "pylsp"
+          }
+        }
+      }
+      // ❌ 应该是 .lsp.json
+      ```
+
+      ❌ 错误3：在 .mcp.json 中混合配置
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {...},
+        "lspServers": {
+          "rust": {
+            "command": "rust-analyzer"
+          }
+        }
+      }
+      // ❌ LSP 配置应该独立在 .lsp.json
+      ```
+
+      ❌ 错误4：使用自定义文件名
+      ```
+      my-plugin/
+        language-servers.json    ← ❌ 自定义名称
+        config/
+          lsp-config.json        ← ❌ 错误的目录和名称
+      ```
+
+      ❌ 错误5：在 plugin.json 中配置
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "my-plugin",
+        "lspServers": {
+          "go": {
+            "command": "gopls"
+          }
+        }
+      }
+      // ❌ plugin.json 只用于插件元数据
+      ```
+    en: |
+      ❌ Error 1: Configure LSP in settings.json
+      ```json
+      // settings.json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"]
+          }
+        }
+      }
+      // ❌ lspServers shouldn't be in settings.json
+      ```
+
+      ❌ Error 2: Filename missing dot prefix
+      ```json
+      // lsp.json (wrong filename)
+      {
+        "lspServers": {
+          "python": {
+            "command": "pylsp"
+          }
+        }
+      }
+      // ❌ Should be .lsp.json
+      ```
+
+      ❌ Error 3: Mix config in .mcp.json
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {...},
+        "lspServers": {
+          "rust": {
+            "command": "rust-analyzer"
+          }
+        }
+      }
+      // ❌ LSP config should be separate in .lsp.json
+      ```
+
+      ❌ Error 4: Custom filename
+      ```
+      my-plugin/
+        language-servers.json    ← ❌ Custom name
+        config/
+          lsp-config.json        ← ❌ Wrong directory and name
+      ```
+
+      ❌ Error 5: Configure in plugin.json
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "my-plugin",
+        "lspServers": {
+          "go": {
+            "command": "gopls"
+          }
+        }
+      }
+      // ❌ plugin.json only for plugin metadata
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：标准 LSP 配置
+      ```json
+      // .lsp.json (在插件根目录)
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript", "typescriptreact"]
+          }
+        }
+      }
+      ```
+
+      ✅ 正确2：多个 LSP 服务器
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"]
+          },
+          "python": {
+            "command": "pylsp",
+            "languages": ["python"]
+          },
+          "rust": {
+            "command": "rust-analyzer",
+            "languages": ["rust"]
+          }
+        }
+      }
+      ```
+
+      ✅ 正确3：完整的插件配置结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json        ← 插件元数据
+        .lsp.json            ← ✅ LSP 服务器配置
+        .mcp.json            ← MCP 服务器配置
+        settings.json        ← Agent 默认配置
+        hooks/
+          hooks.json         ← Hooks 配置
+        skills/
+          skill-1/
+      ```
+
+      .lsp.json:
+      ```json
+      {
+        "lspServers": {
+          "go": {
+            "command": "gopls",
+            "args": ["-mode=stdio"],
+            "languages": ["go"]
+          }
+        }
+      }
+      ```
+
+      ✅ 正确4：空 LSP 配置（不使用 LSP）
+      ```json
+      // .lsp.json (可选)
+      {
+        "lspServers": {}
+      }
+      ```
+      或完全省略 .lsp.json 文件
+
+      ✅ 正确5：README 说明 LSP 配置和安装
+      ```markdown
+      # Plugin LSP Configuration
+
+      ## Prerequisites
+
+      Install required language servers:
+
+      \```bash
+      # TypeScript
+      npm install -g typescript-language-server typescript
+
+      # Python
+      pip install python-lsp-server
+
+      # Rust
+      rustup component add rust-analyzer
+      \```
+
+      ## Configuration
+
+      Edit `.lsp.json` in plugin root:
+
+      \```json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"]
+          },
+          "python": {
+            "command": "pylsp",
+            "languages": ["python"]
+          }
+        }
+      }
+      \```
+
+      ## Testing
+
+      \```bash
+      claude --plugin-dir . --version
+      # Should show LSP servers loaded
+      \```
+
+      ## Troubleshooting
+
+      If LSP server not working:
+      1. Verify binary is in PATH
+      2. Test command manually: `typescript-language-server --stdio`
+      3. Check Claude Code logs
+      ```
+
+      ✅ 正确6：文档说明 LSP vs MCP
+      ```markdown
+      # Configuration Files
+
+      ## .lsp.json - Language Server Protocol
+      - **Purpose**: IDE features (completion, navigation)
+      - **Requires**: User installs language server binaries
+      - **Languages**: JavaScript, Python, Rust, Go, etc.
+
+      ## .mcp.json - Model Context Protocol
+      - **Purpose**: External service integration
+      - **Provides**: New tools for Claude
+      - **Services**: GitHub, Slack, Filesystem, etc.
+
+      ## Key Differences
+
+      | Feature | LSP | MCP |
+      |---------|-----|-----|
+      | User Install | Required | Optional |
+      | Purpose | IDE features | Tool extension |
+      | Config File | .lsp.json | .mcp.json |
+      | Examples | TypeScript LS | GitHub MCP |
+      ```
+
+      ✅ 正确7：环境特定配置
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "node": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"],
+            "env": {
+              "NODE_ENV": "development"
+            }
+          }
+        }
+      }
+      ```
+    en: |
+      ✅ Good 1: Standard LSP config
+      ```json
+      // .lsp.json (in plugin root)
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript", "typescriptreact"]
+          }
+        }
+      }
+      ```
+
+      ✅ Good 2: Multiple LSP servers
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"]
+          },
+          "python": {
+            "command": "pylsp",
+            "languages": ["python"]
+          },
+          "rust": {
+            "command": "rust-analyzer",
+            "languages": ["rust"]
+          }
+        }
+      }
+      ```
+
+      ✅ Good 3: Complete plugin config structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json        ← Plugin metadata
+        .lsp.json            ← ✅ LSP server config
+        .mcp.json            ← MCP server config
+        settings.json        ← Agent defaults
+        hooks/
+          hooks.json         ← Hooks config
+        skills/
+          skill-1/
+      ```
+
+      .lsp.json:
+      ```json
+      {
+        "lspServers": {
+          "go": {
+            "command": "gopls",
+            "args": ["-mode=stdio"],
+            "languages": ["go"]
+          }
+        }
+      }
+      ```
+
+      ✅ Good 4: Empty LSP config (not using LSP)
+      ```json
+      // .lsp.json (optional)
+      {
+        "lspServers": {}
+      }
+      ```
+      or completely omit .lsp.json file
+
+      ✅ Good 5: README explains LSP config and installation
+      ```markdown
+      # Plugin LSP Configuration
+
+      ## Prerequisites
+
+      Install required language servers:
+
+      \```bash
+      # TypeScript
+      npm install -g typescript-language-server typescript
+
+      # Python
+      pip install python-lsp-server
+
+      # Rust
+      rustup component add rust-analyzer
+      \```
+
+      ## Configuration
+
+      Edit `.lsp.json` in plugin root:
+
+      \```json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"]
+          },
+          "python": {
+            "command": "pylsp",
+            "languages": ["python"]
+          }
+        }
+      }
+      \```
+
+      ## Testing
+
+      \```bash
+      claude --plugin-dir . --version
+      # Should show LSP servers loaded
+      \```
+
+      ## Troubleshooting
+
+      If LSP server not working:
+      1. Verify binary is in PATH
+      2. Test command manually: `typescript-language-server --stdio`
+      3. Check Claude Code logs
+      ```
+
+      ✅ Good 6: Document LSP vs MCP
+      ```markdown
+      # Configuration Files
+
+      ## .lsp.json - Language Server Protocol
+      - **Purpose**: IDE features (completion, navigation)
+      - **Requires**: User installs language server binaries
+      - **Languages**: JavaScript, Python, Rust, Go, etc.
+
+      ## .mcp.json - Model Context Protocol
+      - **Purpose**: External service integration
+      - **Provides**: New tools for Claude
+      - **Services**: GitHub, Slack, Filesystem, etc.
+
+      ## Key Differences
+
+      | Feature | LSP | MCP |
+      |---------|-----|-----|
+      | User Install | Required | Optional |
+      | Purpose | IDE features | Tool extension |
+      | Config File | .lsp.json | .mcp.json |
+      | Examples | TypeScript LS | GitHub MCP |
+      ```
+
+      ✅ Good 7: Environment-specific config
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "node": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "languages": ["javascript", "typescript"],
+            "env": {
+              "NODE_ENV": "development"
+            }
+          }
+        }
+      }
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检查 LSP 配置位置
+
+      2. 如果在 settings.json：
+         - 提取 lspServers
+         - 创建 .lsp.json
+         - 从 settings.json 移除该键
+
+      3. 如果文件名是 lsp.json：
+         - 重命名为 .lsp.json
+
+      4. 如果在 .mcp.json 中：
+         - 提取 lspServers
+         - 创建 .lsp.json
+         - 从 .mcp.json 移除该键
+
+      **迁移脚本**:
+
+      ```bash
+      # 从 settings.json 提取 LSP 配置
+      if [ -f settings.json ]; then
+        jq '{lspServers: .lspServers}' settings.json > .lsp.json
+
+        # 清理 settings.json
+        jq 'del(.lspServers)' settings.json > settings.json.tmp
+        mv settings.json.tmp settings.json
+      fi
+
+      # 从 .mcp.json 提取 LSP 配置
+      if [ -f .mcp.json ]; then
+        if jq 'has("lspServers")' .mcp.json | grep -q true; then
+          jq '{lspServers: .lspServers}' .mcp.json > .lsp.json
+
+          # 清理 .mcp.json
+          jq 'del(.lspServers)' .mcp.json > .mcp.json.tmp
+          mv .mcp.json.tmp .mcp.json
+        fi
+      fi
+
+      # 重命名 lsp.json 为 .lsp.json
+      if [ -f lsp.json ]; then
+        mv lsp.json .lsp.json
+      fi
+      ```
+
+      **验证**:
+
+      ```bash
+      # 验证 .lsp.json 存在且格式正确
+      test -f .lsp.json && jq '.lspServers' .lsp.json
+
+      # 验证其他文件不包含 lspServers
+      ! jq 'has("lspServers")' settings.json 2>/dev/null
+      ! jq 'has("lspServers")' .mcp.json 2>/dev/null
+      ```
+
+      **文档建议**:
+
+      在 README 中添加 LSP 安装说明：
+      ```markdown
+      ## LSP Setup
+
+      1. Install language servers
+      2. Configure in .lsp.json
+      3. Verify: `claude --plugin-dir . --version`
+      ```
+    en: |
+      **Automatic Fix**:
+
+      1. Check LSP config location
+
+      2. If in settings.json:
+         - Extract lspServers
+         - Create .lsp.json
+         - Remove key from settings.json
+
+      3. If filename is lsp.json:
+         - Rename to .lsp.json
+
+      4. If in .mcp.json:
+         - Extract lspServers
+         - Create .lsp.json
+         - Remove key from .mcp.json
+
+      **Migration Script**:
+
+      ```bash
+      # Extract LSP config from settings.json
+      if [ -f settings.json ]; then
+        jq '{lspServers: .lspServers}' settings.json > .lsp.json
+
+        # Clean settings.json
+        jq 'del(.lspServers)' settings.json > settings.json.tmp
+        mv settings.json.tmp settings.json
+      fi
+
+      # Extract LSP config from .mcp.json
+      if [ -f .mcp.json ]; then
+        if jq 'has("lspServers")' .mcp.json | grep -q true; then
+          jq '{lspServers: .lspServers}' .mcp.json > .lsp.json
+
+          # Clean .mcp.json
+          jq 'del(.lspServers)' .mcp.json > .mcp.json.tmp
+          mv .mcp.json.tmp .mcp.json
+        fi
+      fi
+
+      # Rename lsp.json to .lsp.json
+      if [ -f lsp.json ]; then
+        mv lsp.json .lsp.json
+      fi
+      ```
+
+      **Validation**:
+
+      ```bash
+      # Verify .lsp.json exists and is valid
+      test -f .lsp.json && jq '.lspServers' .lsp.json
+
+      # Verify other files don't contain lspServers
+      ! jq 'has("lspServers")' settings.json 2>/dev/null
+      ! jq 'has("lspServers")' .mcp.json 2>/dev/null
+      ```
+
+      **Documentation Recommendation**:
+
+      Add LSP installation instructions in README:
+      ```markdown
+      ## LSP Setup
+
+      1. Install language servers
+      2. Configure in .lsp.json
+      3. Verify: `claude --plugin-dir . --version`
+      ```
+
+tags: ["plugin", "config", "lsp", "location", "file-structure"]
+related_rules: ["CFG-001", "CFG-002"]

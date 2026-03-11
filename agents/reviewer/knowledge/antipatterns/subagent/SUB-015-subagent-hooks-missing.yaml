@@ -1,0 +1,800 @@
+id: SUB-015
+name: subagent-hooks-missing
+severity: info
+component_type: subagent
+category: architecture
+
+title:
+  zh: "SubAgent 未配置生命周期 Hooks"
+  en: "SubAgent missing lifecycle Hooks configuration"
+
+description:
+  zh: |
+    SubAgent 可以配置专属的 hooks，限定于其生命周期内触发。
+
+    **SubAgent Hooks 特性**：
+    - 在 SubAgent frontmatter 中配置 hooks
+    - Hooks 仅在该 SubAgent 运行时生效
+    - 主对话的 Stop hook 在 SubAgent 中转换为 SubagentStop
+
+    **使用场景**：
+    - ✅ SubAgent 启动时的初始化（SubagentStart）
+    - ✅ SubAgent 停止时的清理（SubagentStop）
+    - ✅ SubAgent 内的工具调用验证（PreToolUse）
+    - ✅ SubAgent 特定的审计日志
+    - ❌ 全局 hooks 应在项目级别配置
+
+    **与全局 Hooks 的区别**：
+    - SubAgent hooks: 仅该 SubAgent 生效
+    - 全局 hooks: 所有对话和 SubAgent 生效
+    - SubAgent hooks 优先级更高
+
+    **支持的事件**：
+    - SubagentStart - SubAgent 启动时
+    - SubagentStop - SubAgent 停止时
+    - PreToolUse / PostToolUse - 工具调用
+    - UserPromptSubmit - 用户输入
+  en: |
+    SubAgent can configure dedicated hooks that trigger only within its lifecycle.
+
+    **SubAgent Hooks Features**:
+    - Configure hooks in SubAgent frontmatter
+    - Hooks only active during SubAgent execution
+    - Main conversation's Stop hook converts to SubagentStop in SubAgent
+
+    **Use Cases**:
+    - ✅ Initialization on SubAgent start (SubagentStart)
+    - ✅ Cleanup on SubAgent stop (SubagentStop)
+    - ✅ Tool call validation within SubAgent (PreToolUse)
+    - ✅ SubAgent-specific audit logs
+    - ❌ Global hooks should be configured at project level
+
+    **vs Global Hooks**:
+    - SubAgent hooks: Only this SubAgent
+    - Global hooks: All conversations and SubAgents
+    - SubAgent hooks have higher priority
+
+    **Supported Events**:
+    - SubagentStart - When SubAgent starts
+    - SubagentStop - When SubAgent stops
+    - PreToolUse / PostToolUse - Tool invocations
+    - UserPromptSubmit - User input
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-ARC-013, OFF-ARC-014)，SubAgent hooks 提供了细粒度的生命周期管理"
+  en: "Per official features (sub-agents.md OFF-ARC-013, OFF-ARC-014), SubAgent hooks provide fine-grained lifecycle management"
+
+detection:
+  method: context-analysis
+  indicators:
+    - keyword: "初始化|initialization|设置|setup|准备|prepare"
+      weight: 2
+    - keyword: "清理|cleanup|释放|release|恢复|restore"
+      weight: 2
+    - keyword: "审计|audit|日志|logging|追踪|tracking"
+      weight: 1
+    - component_type: "long-running|stateful|resource-intensive"
+      weight: 2
+  threshold: 2
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "SubAgent Hooks"
+  lines: "498-525"
+  quote: "subagent hooks 限定于生命周期。Stop hook 在 subagent 转换为 SubagentStop。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：资源密集型 SubAgent 未配置清理
+      ```yaml
+      ---
+      name: database-migrator
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Write
+      maxTurns: 30
+      # ❌ 未配置 SubagentStop hook 清理数据库连接
+      ---
+
+      # Database Migrator
+
+      执行数据库迁移，建立临时连接...
+      ```
+
+      ❌ 错误2：安全敏感操作未配置审计
+      ```yaml
+      ---
+      name: secret-manager
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      permissionMode: prompt
+      # ❌ 未配置 PreToolUse hook 审计敏感操作
+      maxTurns: 10
+      ---
+
+      # Secret Manager
+
+      管理敏感凭证，需要审计所有操作...
+      ```
+
+      ❌ 错误3：使用全局 hooks 代替 SubAgent hooks
+      ```yaml
+      # ❌ 在项目 hooks.json 中配置
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate-migrator.sh"
+          // ❌ 对所有 SubAgent 生效，过于宽泛
+        }]
+      }
+
+      # 应该在 SubAgent 内配置专属 hooks
+      ```
+
+      ❌ 错误4：未处理 SubAgent 异常终止
+      ```yaml
+      ---
+      name: file-processor
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 20
+      # ❌ 如果 SubAgent 异常终止，临时文件未清理
+      ---
+      ```
+    en: |
+      ❌ Error 1: Resource-intensive SubAgent without cleanup
+      ```yaml
+      ---
+      name: database-migrator
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Write
+      maxTurns: 30
+      # ❌ No SubagentStop hook to clean up DB connections
+      ---
+
+      # Database Migrator
+
+      Execute database migration, establish temp connections...
+      ```
+
+      ❌ Error 2: Security-sensitive operation without audit
+      ```yaml
+      ---
+      name: secret-manager
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      permissionMode: prompt
+      # ❌ No PreToolUse hook to audit sensitive operations
+      maxTurns: 10
+      ---
+
+      # Secret Manager
+
+      Manage sensitive credentials, need to audit all operations...
+      ```
+
+      ❌ Error 3: Using global hooks instead of SubAgent hooks
+      ```yaml
+      # ❌ Configure in project hooks.json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate-migrator.sh"
+          // ❌ Affects all SubAgents, too broad
+        }]
+      }
+
+      # Should configure dedicated hooks in SubAgent
+      ```
+
+      ❌ Error 4: Not handling SubAgent abnormal termination
+      ```yaml
+      ---
+      name: file-processor
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 20
+      # ❌ If SubAgent terminates abnormally, temp files not cleaned
+      ---
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：配置启动和停止 hooks
+      ```yaml
+      ---
+      name: database-migrator
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Write
+      maxTurns: 30
+      permissionMode: prompt
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/migration-init.sh
+          description: "初始化迁移环境"
+        - event: SubagentStop
+          type: command
+          command: scripts/migration-cleanup.sh
+          description: "清理临时资源"
+      ---
+
+      # Database Migrator
+
+      ## Lifecycle Hooks
+
+      ### SubagentStart
+      - 建立数据库连接
+      - 验证迁移环境
+      - 创建临时表
+
+      ### SubagentStop
+      - 关闭数据库连接
+      - 删除临时表
+      - 清理锁文件
+
+      这些 hooks 确保资源正确管理，即使 SubAgent 异常终止也会执行清理。
+      ```
+
+      ✅ 正确2：敏感操作配置审计 hooks
+      ```yaml
+      ---
+      name: secret-manager
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      permissionMode: prompt
+      maxTurns: 10
+      hooks:
+        - event: PreToolUse
+          type: command
+          command: scripts/audit-tool-use.sh
+          matcher:
+            tool: Bash
+          description: "审计所有 Bash 命令"
+        - event: SubagentStop
+          type: command
+          command: scripts/audit-session-end.sh
+          description: "记录会话结束"
+      ---
+
+      # Secret Manager
+
+      ## Security Hooks
+
+      所有敏感操作都会被审计：
+
+      - **PreToolUse**: 记录每个 Bash 命令到审计日志
+      - **SubagentStop**: 生成会话摘要报告
+
+      审计日志包含：
+      - 时间戳
+      - 操作类型
+      - 用户身份
+      - 操作结果
+      ```
+
+      ✅ 正确3：工具验证 hooks
+      ```yaml
+      ---
+      name: safe-executor
+      model: sonnet
+      tools:
+        - Bash
+      permissionMode: prompt
+      maxTurns: 15
+      hooks:
+        - event: PreToolUse
+          type: command
+          command: scripts/validate-bash-command.sh
+          matcher:
+            tool: Bash
+          description: "验证 Bash 命令安全性"
+      ---
+
+      # Safe Executor
+
+      ## Tool Validation
+
+      PreToolUse hook 会验证：
+      - 禁止危险命令（rm -rf /，dd, mkfs）
+      - 禁止访问敏感路径（/etc, /root）
+      - 限制网络访问
+      - 验证命令语法
+
+      如果验证失败（exit code 2），操作被阻止。
+      ```
+
+      ✅ 正确4：组合多个 hooks
+      ```yaml
+      ---
+      name: comprehensive-processor
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 25
+      permissionMode: prompt
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/setup.sh
+          description: "环境准备"
+
+        - event: PreToolUse
+          type: command
+          command: scripts/validate.sh
+          matcher:
+            tool: Bash
+          description: "Bash 命令验证"
+
+        - event: PostToolUse
+          type: command
+          command: scripts/log.sh
+          description: "记录工具使用"
+
+        - event: SubagentStop
+          type: command
+          command: scripts/cleanup.sh
+          description: "环境清理"
+      ---
+
+      # Comprehensive Processor
+
+      ## Hook Chain
+
+      完整的生命周期管理：
+
+      1. **Start**: 准备工作目录、环境变量
+      2. **PreToolUse**: 验证操作安全性
+      3. **PostToolUse**: 记录操作结果
+      4. **Stop**: 清理临时文件、关闭连接
+
+      所有 hooks 按顺序执行，确保环境一致性。
+      ```
+
+      ✅ 正确5：HTTP hooks 用于监控
+      ```yaml
+      ---
+      name: monitored-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 20
+      hooks:
+        - event: SubagentStart
+          type: http
+          url: https://monitor.example.com/subagent/start
+          headers:
+            X-Agent-Name: monitored-analyzer
+
+        - event: SubagentStop
+          type: http
+          url: https://monitor.example.com/subagent/stop
+          headers:
+            X-Agent-Name: monitored-analyzer
+      ---
+
+      # Monitored Analyzer
+
+      ## Monitoring Hooks
+
+      发送 SubAgent 生命周期事件到监控系统：
+
+      - **Start**: 记录启动时间、用户、任务
+      - **Stop**: 记录执行时长、工具调用次数、结果
+
+      监控数据用于：
+      - 性能分析
+      - 成本统计
+      - 使用模式分析
+      ```
+
+      ✅ 正确6：文档说明 hooks 配置
+      ```yaml
+      ---
+      name: resource-manager
+      model: sonnet
+      tools:
+        - Bash
+      maxTurns: 15
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/acquire-resources.sh
+        - event: SubagentStop
+          type: command
+          command: scripts/release-resources.sh
+      ---
+
+      # Resource Manager
+
+      ## Why SubAgent Hooks?
+
+      ### vs Global Hooks
+      - **Global hooks**: 影响所有对话和 SubAgent
+      - **SubAgent hooks**: 仅此 SubAgent 生效
+
+      我们使用 SubAgent hooks 因为：
+      1. 资源管理特定于此 SubAgent
+      2. 不应影响其他 SubAgent
+      3. 提供更精确的控制
+
+      ### Hook Scope
+      - SubagentStart/Stop: 此 SubAgent 生命周期
+      - PreToolUse: 仅此 SubAgent 的工具调用
+      - 不影响主对话或其他 SubAgent
+
+      ### Hook Scripts
+      - `acquire-resources.sh`: 分配 GPU、内存、文件句柄
+      - `release-resources.sh`: 释放所有分配的资源
+
+      ### Error Handling
+      如果 SubAgent 异常终止，Stop hook 仍会执行，
+      确保资源不会泄漏。
+      ```
+    en: |
+      ✅ Good 1: Configure start and stop hooks
+      ```yaml
+      ---
+      name: database-migrator
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Write
+      maxTurns: 30
+      permissionMode: prompt
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/migration-init.sh
+          description: "Initialize migration environment"
+        - event: SubagentStop
+          type: command
+          command: scripts/migration-cleanup.sh
+          description: "Clean up temp resources"
+      ---
+
+      # Database Migrator
+
+      ## Lifecycle Hooks
+
+      ### SubagentStart
+      - Establish database connection
+      - Verify migration environment
+      - Create temp tables
+
+      ### SubagentStop
+      - Close database connections
+      - Drop temp tables
+      - Clean up lock files
+
+      These hooks ensure proper resource management, cleanup executes even if SubAgent terminates abnormally.
+      ```
+
+      ✅ Good 2: Sensitive operations with audit hooks
+      ```yaml
+      ---
+      name: secret-manager
+      model: sonnet
+      tools:
+        - Bash
+        - Write
+      permissionMode: prompt
+      maxTurns: 10
+      hooks:
+        - event: PreToolUse
+          type: command
+          command: scripts/audit-tool-use.sh
+          matcher:
+            tool: Bash
+          description: "Audit all Bash commands"
+        - event: SubagentStop
+          type: command
+          command: scripts/audit-session-end.sh
+          description: "Log session end"
+      ---
+
+      # Secret Manager
+
+      ## Security Hooks
+
+      All sensitive operations are audited:
+
+      - **PreToolUse**: Log each Bash command to audit log
+      - **SubagentStop**: Generate session summary report
+
+      Audit log includes:
+      - Timestamp
+      - Operation type
+      - User identity
+      - Operation result
+      ```
+
+      ✅ Good 3: Tool validation hooks
+      ```yaml
+      ---
+      name: safe-executor
+      model: sonnet
+      tools:
+        - Bash
+      permissionMode: prompt
+      maxTurns: 15
+      hooks:
+        - event: PreToolUse
+          type: command
+          command: scripts/validate-bash-command.sh
+          matcher:
+            tool: Bash
+          description: "Validate Bash command safety"
+      ---
+
+      # Safe Executor
+
+      ## Tool Validation
+
+      PreToolUse hook validates:
+      - Forbid dangerous commands (rm -rf /, dd, mkfs)
+      - Forbid access to sensitive paths (/etc, /root)
+      - Restrict network access
+      - Validate command syntax
+
+      If validation fails (exit code 2), operation is blocked.
+      ```
+
+      ✅ Good 4: Combine multiple hooks
+      ```yaml
+      ---
+      name: comprehensive-processor
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Bash
+      maxTurns: 25
+      permissionMode: prompt
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/setup.sh
+          description: "Environment setup"
+
+        - event: PreToolUse
+          type: command
+          command: scripts/validate.sh
+          matcher:
+            tool: Bash
+          description: "Bash command validation"
+
+        - event: PostToolUse
+          type: command
+          command: scripts/log.sh
+          description: "Log tool usage"
+
+        - event: SubagentStop
+          type: command
+          command: scripts/cleanup.sh
+          description: "Environment cleanup"
+      ---
+
+      # Comprehensive Processor
+
+      ## Hook Chain
+
+      Complete lifecycle management:
+
+      1. **Start**: Prepare working directory, env vars
+      2. **PreToolUse**: Validate operation safety
+      3. **PostToolUse**: Log operation results
+      4. **Stop**: Clean up temp files, close connections
+
+      All hooks execute in order, ensuring environment consistency.
+      ```
+
+      ✅ Good 5: HTTP hooks for monitoring
+      ```yaml
+      ---
+      name: monitored-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 20
+      hooks:
+        - event: SubagentStart
+          type: http
+          url: https://monitor.example.com/subagent/start
+          headers:
+            X-Agent-Name: monitored-analyzer
+
+        - event: SubagentStop
+          type: http
+          url: https://monitor.example.com/subagent/stop
+          headers:
+            X-Agent-Name: monitored-analyzer
+      ---
+
+      # Monitored Analyzer
+
+      ## Monitoring Hooks
+
+      Send SubAgent lifecycle events to monitoring system:
+
+      - **Start**: Record start time, user, task
+      - **Stop**: Record execution duration, tool call count, result
+
+      Monitoring data used for:
+      - Performance analysis
+      - Cost statistics
+      - Usage pattern analysis
+      ```
+
+      ✅ Good 6: Document hooks configuration
+      ```yaml
+      ---
+      name: resource-manager
+      model: sonnet
+      tools:
+        - Bash
+      maxTurns: 15
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/acquire-resources.sh
+        - event: SubagentStop
+          type: command
+          command: scripts/release-resources.sh
+      ---
+
+      # Resource Manager
+
+      ## Why SubAgent Hooks?
+
+      ### vs Global Hooks
+      - **Global hooks**: Affect all conversations and SubAgents
+      - **SubAgent hooks**: Only this SubAgent
+
+      We use SubAgent hooks because:
+      1. Resource management specific to this SubAgent
+      2. Shouldn't affect other SubAgents
+      3. Provides more precise control
+
+      ### Hook Scope
+      - SubagentStart/Stop: This SubAgent lifecycle
+      - PreToolUse: Only this SubAgent's tool calls
+      - Don't affect main conversation or other SubAgents
+
+      ### Hook Scripts
+      - `acquire-resources.sh`: Allocate GPU, memory, file handles
+      - `release-resources.sh`: Release all allocated resources
+
+      ### Error Handling
+      If SubAgent terminates abnormally, Stop hook still executes,
+      ensuring resources don't leak.
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要 SubAgent hooks**:
+
+      ✅ **应该配置**：
+      - 需要初始化资源（数据库连接、临时文件）
+      - 需要清理资源（关闭连接、删除临时数据）
+      - 需要审计敏感操作
+      - 需要验证工具调用安全性
+      - 需要监控 SubAgent 执行
+
+      ❌ **不需要配置**：
+      - 简单无状态操作
+      - 不使用外部资源
+      - 不需要特殊清理
+      - 已有全局 hooks 足够
+
+      **常用 hooks 场景**:
+
+      1. **资源管理**：
+         - SubagentStart: 初始化
+         - SubagentStop: 清理
+
+      2. **安全审计**：
+         - PreToolUse: 验证和审计
+         - PostToolUse: 记录结果
+
+      3. **监控**：
+         - SubagentStart/Stop: 发送监控数据
+
+      **添加配置**:
+
+      ```yaml
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/init.sh
+        - event: SubagentStop
+          type: command
+          command: scripts/cleanup.sh
+      ```
+
+      **文档要求**:
+
+      1. 说明为何需要 hooks
+      2. 列出每个 hook 的作用
+      3. 提供 hook 脚本示例
+      4. 说明与全局 hooks 的区别
+    en: |
+      **Evaluate if SubAgent hooks are needed**:
+
+      ✅ **Should configure**:
+      - Need to initialize resources (DB connections, temp files)
+      - Need to clean up resources (close connections, delete temp data)
+      - Need to audit sensitive operations
+      - Need to validate tool call safety
+      - Need to monitor SubAgent execution
+
+      ❌ **Don't need**:
+      - Simple stateless operations
+      - Don't use external resources
+      - Don't need special cleanup
+      - Global hooks are sufficient
+
+      **Common hooks scenarios**:
+
+      1. **Resource Management**:
+         - SubagentStart: Initialize
+         - SubagentStop: Cleanup
+
+      2. **Security Audit**:
+         - PreToolUse: Validate and audit
+         - PostToolUse: Log results
+
+      3. **Monitoring**:
+         - SubagentStart/Stop: Send monitoring data
+
+      **Add Configuration**:
+
+      ```yaml
+      hooks:
+        - event: SubagentStart
+          type: command
+          command: scripts/init.sh
+        - event: SubagentStop
+          type: command
+          command: scripts/cleanup.sh
+      ```
+
+      **Documentation Requirements**:
+
+      1. Explain why hooks are needed
+      2. List each hook's purpose
+      3. Provide hook script examples
+      4. Explain difference from global hooks
+
+tags: ["subagent", "architecture", "hooks", "lifecycle", "resource-management"]
+related_rules: ["HOOK-001", "HOOK-007", "SUB-009"]

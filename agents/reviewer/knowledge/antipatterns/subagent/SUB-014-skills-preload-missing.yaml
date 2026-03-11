@@ -1,0 +1,690 @@
+id: SUB-014
+name: skills-preload-missing
+severity: info
+component_type: subagent
+category: architecture
+
+title:
+  zh: "SubAgent 未配置 Skills 预加载"
+  en: "SubAgent missing Skills preload configuration"
+
+description:
+  zh: |
+    SubAgent 可以通过 skills 字段预加载 Skills，使 SubAgent 能够直接访问 Skill 内容作为参考。
+
+    **预加载机制**：
+    - 在 SubAgent frontmatter 中声明 skills 列表
+    - Skills 内容在 SubAgent 启动时加载到上下文
+    - SubAgent 可以引用 Skills 中的知识和模式
+
+    **使用场景**：
+    - ✅ 需要参考编码标准（lib-coding-standards）
+    - ✅ 需要遵循设计模式（lib-design-patterns）
+    - ✅ 需要应用反模式检查（lib-antipatterns）
+    - ✅ 需要参考项目规范
+    - ❌ 简单任务不需要额外知识
+
+    **与 Skill 工具的区别**：
+    - skills 字段：预加载为参考（被动）
+    - Skill() 工具：主动调用执行（主动）
+
+    **注意事项**：
+    - 预加载会占用 token 预算
+    - 仅预加载必需的 Skills
+    - 优先使用 lib- 和 std- 前缀的知识库类 Skills
+  en: |
+    SubAgent can preload Skills via skills field, allowing SubAgent to directly access Skill content as reference.
+
+    **Preload Mechanism**:
+    - Declare skills list in SubAgent frontmatter
+    - Skills content loaded into context at SubAgent startup
+    - SubAgent can reference knowledge and patterns in Skills
+
+    **Use Cases**:
+    - ✅ Need to reference coding standards (lib-coding-standards)
+    - ✅ Need to follow design patterns (lib-design-patterns)
+    - ✅ Need to apply antipattern checks (lib-antipatterns)
+    - ✅ Need to reference project conventions
+    - ❌ Simple tasks don't need extra knowledge
+
+    **vs Skill Tool**:
+    - skills field: Preload as reference (passive)
+    - Skill() tool: Active invocation and execution (active)
+
+    **Considerations**:
+    - Preloading consumes token budget
+    - Only preload necessary Skills
+    - Prefer lib- and std- prefixed knowledge library Skills
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-ARC-012)，skills 预加载是 SubAgent 访问知识库的推荐方式"
+  en: "Per official features (sub-agents.md OFF-ARC-012), skills preload is recommended way for SubAgents to access knowledge base"
+
+detection:
+  method: context-analysis
+  indicators:
+    - keyword: "标准|standard|规范|convention|模式|pattern|最佳实践|best practice"
+      weight: 2
+    - keyword: "遵循|follow|参考|reference|应用|apply"
+      weight: 1
+    - component_type: "reviewer|validator|analyzer|checker"
+      weight: 2
+  threshold: 2
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "Skills 预加载"
+  lines: "445-468"
+  quote: "skills 可预加载到 subagent。Skills 内容在启动时加载，SubAgent 可以引用。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：代码审查器未预加载标准
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      maxTurns: 20
+      # ❌ 未预加载编码标准，可能审查不一致
+      ---
+
+      # Code Reviewer
+
+      审查代码质量，检查是否符合编码标准...
+      ```
+
+      ❌ 错误2：设计验证器未加载模式库
+      ```yaml
+      ---
+      name: architecture-validator
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 15
+      # ❌ 未预加载设计模式库
+      ---
+
+      # Architecture Validator
+
+      验证架构设计是否遵循最佳实践...
+      ```
+
+      ❌ 错误3：使用 Skill() 工具代替预加载
+      ```yaml
+      ---
+      name: pattern-applier
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Skill  # ❌ 应该用 skills 字段预加载
+      maxTurns: 15
+      ---
+
+      # Pattern Applier
+
+      每次都调用 Skill(skill="lib-patterns") 查询模式
+      # ❌ 效率低，应该预加载
+      ```
+
+      ❌ 错误4：预加载过多 Skills
+      ```yaml
+      ---
+      name: simple-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      skills:
+        - lib-coding-standards
+        - lib-design-patterns
+        - lib-antipatterns
+        - lib-security-rules
+        - lib-performance-tips
+        # ❌ 格式化工具不需要这么多知识库
+      maxTurns: 5
+      ---
+      ```
+    en: |
+      ❌ Error 1: Code reviewer without preloaded standards
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      maxTurns: 20
+      # ❌ No preloaded coding standards, may have inconsistent review
+      ---
+
+      # Code Reviewer
+
+      Review code quality, check compliance with coding standards...
+      ```
+
+      ❌ Error 2: Design validator without pattern library
+      ```yaml
+      ---
+      name: architecture-validator
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      maxTurns: 15
+      # ❌ No preloaded design pattern library
+      ---
+
+      # Architecture Validator
+
+      Validate architecture design follows best practices...
+      ```
+
+      ❌ Error 3: Using Skill() tool instead of preload
+      ```yaml
+      ---
+      name: pattern-applier
+      model: sonnet
+      tools:
+        - Read
+        - Write
+        - Skill  # ❌ Should use skills field for preload
+      maxTurns: 15
+      ---
+
+      # Pattern Applier
+
+      Call Skill(skill="lib-patterns") each time to query patterns
+      # ❌ Inefficient, should preload
+      ```
+
+      ❌ Error 4: Preloading too many Skills
+      ```yaml
+      ---
+      name: simple-formatter
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      skills:
+        - lib-coding-standards
+        - lib-design-patterns
+        - lib-antipatterns
+        - lib-security-rules
+        - lib-performance-tips
+        # ❌ Formatter doesn't need so many knowledge bases
+      maxTurns: 5
+      ---
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：审查器预加载标准和反模式
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      skills:
+        - ccc:lib-coding-standards    # ✅ 编码标准
+        - ccc:lib-antipatterns         # ✅ 反模式库
+      maxTurns: 20
+      permissionMode: prompt
+      ---
+
+      # Code Reviewer
+
+      基于预加载的编码标准和反模式库审查代码
+
+      ## Preloaded Knowledge
+      - **lib-coding-standards**: JavaScript/Python/Java 编码规范
+      - **lib-antipatterns**: 76+ 常见反模式
+
+      ## Review Process
+      1. 读取代码文件
+      2. 对照编码标准检查
+      3. 识别反模式
+      4. 生成审查报告
+      ```
+
+      ✅ 正确2：架构验证器预加载设计模式
+      ```yaml
+      ---
+      name: architecture-validator
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      skills:
+        - ccc:lib-design-patterns      # ✅ 设计模式库
+        - ccc:std-component-selection  # ✅ 组件选型规则
+      maxTurns: 15
+      ---
+
+      # Architecture Validator
+
+      验证架构设计符合最佳实践
+
+      ## Preloaded Skills
+      - **lib-design-patterns**: 5阶段设计流程模式
+      - **std-component-selection**: Skill三角色决策树
+
+      ## Validation Checks
+      1. 组件类型选择是否合理
+      2. 工作流设计是否完整
+      3. 证据链是否清晰
+      ```
+
+      ✅ 正确3：迁移工具预加载命名规则
+      ```yaml
+      ---
+      name: migration-executor
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      skills:
+        - ccc:std-naming-rules         # ✅ 命名规范
+      maxTurns: 30
+      permissionMode: prompt
+      ---
+
+      # Migration Executor
+
+      执行 Agent→Skill 迁移
+
+      ## Preloaded Knowledge
+      - **std-naming-rules**: Skill命名规则（cmd-/std-/lib-前缀）
+
+      ## Migration Steps
+      1. 验证新 Skill 名称符合命名规范
+      2. 转换 frontmatter 格式
+      3. 更新调用引用
+      ```
+
+      ✅ 正确4：仅预加载必需的 Skills
+      ```yaml
+      ---
+      name: security-checker
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      skills:
+        - project:security-policies    # ✅ 仅项目安全策略
+      maxTurns: 10
+      ---
+
+      # Security Checker
+
+      检查代码安全问题
+
+      ## Preloaded Knowledge
+      - **project:security-policies**: 项目特定的安全要求
+
+      不预加载通用知识库，保持轻量
+      ```
+
+      ✅ 正确5：文档说明预加载的作用
+      ```yaml
+      ---
+      name: best-practice-enforcer
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      skills:
+        - ccc:lib-design-patterns
+        - ccc:std-evidence-chain
+      maxTurns: 20
+      ---
+
+      # Best Practice Enforcer
+
+      确保组件设计遵循 CCC 最佳实践
+
+      ## Why Preload Skills?
+
+      ### lib-design-patterns
+      - **用途**: 参考5阶段设计流程
+      - **内容**: 需求分析、架构选型、详细设计模式
+      - **好处**: 一致的设计方法论
+
+      ### std-evidence-chain
+      - **用途**: 验证证据链完整性
+      - **内容**: 能力需求表、Skill映射表、验证清单
+      - **好处**: 确保可追溯性
+
+      ## vs Skill() Tool
+      - 预加载：整个 Skill 内容作为参考（被动）
+      - Skill() 工具：执行特定 Skill 任务（主动）
+
+      我们使用预加载因为需要持续参考这些知识，
+      而不是执行它们的工作流。
+      ```
+
+      ✅ 正确6：组合使用预加载和 Skill 工具
+      ```yaml
+      ---
+      name: comprehensive-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Skill           # ✅ 主动调用其他 Skills
+      skills:
+        - ccc:lib-antipatterns  # ✅ 预加载作为参考
+      maxTurns: 25
+      ---
+
+      # Comprehensive Reviewer
+
+      全面的代码和架构审查
+
+      ## Knowledge Strategy
+
+      ### Preloaded (Passive Reference)
+      - **lib-antipatterns**: 76+ 反模式定义
+        - 在审查过程中持续参考
+        - 用于模式匹配和识别
+
+      ### Active Invocation
+      - **Skill("cmd-review")**: 调用专门的审查命令
+        - 执行深度分析
+        - 生成结构化报告
+
+      ### When to Use Each
+      - 预加载：需要持续参考的知识库
+      - Skill() 工具：需要执行的工作流任务
+      ```
+    en: |
+      ✅ Good 1: Reviewer preloads standards and antipatterns
+      ```yaml
+      ---
+      name: code-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Write
+      skills:
+        - ccc:lib-coding-standards    # ✅ Coding standards
+        - ccc:lib-antipatterns         # ✅ Antipattern library
+      maxTurns: 20
+      permissionMode: prompt
+      ---
+
+      # Code Reviewer
+
+      Review code based on preloaded coding standards and antipattern library
+
+      ## Preloaded Knowledge
+      - **lib-coding-standards**: JavaScript/Python/Java conventions
+      - **lib-antipatterns**: 76+ common antipatterns
+
+      ## Review Process
+      1. Read code files
+      2. Check against coding standards
+      3. Identify antipatterns
+      4. Generate review report
+      ```
+
+      ✅ Good 2: Architecture validator preloads design patterns
+      ```yaml
+      ---
+      name: architecture-validator
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      skills:
+        - ccc:lib-design-patterns      # ✅ Design pattern library
+        - ccc:std-component-selection  # ✅ Component selection rules
+      maxTurns: 15
+      ---
+
+      # Architecture Validator
+
+      Validate architecture design follows best practices
+
+      ## Preloaded Skills
+      - **lib-design-patterns**: 5-phase design process patterns
+      - **std-component-selection**: Skill three-role decision tree
+
+      ## Validation Checks
+      1. Component type selection reasonable?
+      2. Workflow design complete?
+      3. Evidence chain clear?
+      ```
+
+      ✅ Good 3: Migration tool preloads naming rules
+      ```yaml
+      ---
+      name: migration-executor
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      skills:
+        - ccc:std-naming-rules         # ✅ Naming conventions
+      maxTurns: 30
+      permissionMode: prompt
+      ---
+
+      # Migration Executor
+
+      Execute Agent→Skill migration
+
+      ## Preloaded Knowledge
+      - **std-naming-rules**: Skill naming rules (cmd-/std-/lib- prefixes)
+
+      ## Migration Steps
+      1. Verify new Skill name follows naming conventions
+      2. Convert frontmatter format
+      3. Update invocation references
+      ```
+
+      ✅ Good 4: Only preload necessary Skills
+      ```yaml
+      ---
+      name: security-checker
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      skills:
+        - project:security-policies    # ✅ Only project security policies
+      maxTurns: 10
+      ---
+
+      # Security Checker
+
+      Check code security issues
+
+      ## Preloaded Knowledge
+      - **project:security-policies**: Project-specific security requirements
+
+      Don't preload generic knowledge bases, keep lightweight
+      ```
+
+      ✅ Good 5: Document preload purpose
+      ```yaml
+      ---
+      name: best-practice-enforcer
+      model: sonnet
+      tools:
+        - Read
+        - Write
+      skills:
+        - ccc:lib-design-patterns
+        - ccc:std-evidence-chain
+      maxTurns: 20
+      ---
+
+      # Best Practice Enforcer
+
+      Ensure component design follows CCC best practices
+
+      ## Why Preload Skills?
+
+      ### lib-design-patterns
+      - **Purpose**: Reference 5-phase design process
+      - **Content**: Requirement analysis, architecture selection, detailed design
+      - **Benefit**: Consistent design methodology
+
+      ### std-evidence-chain
+      - **Purpose**: Verify evidence chain integrity
+      - **Content**: Capability requirements table, Skill mapping, validation checklist
+      - **Benefit**: Ensure traceability
+
+      ## vs Skill() Tool
+      - Preload: Entire Skill content as reference (passive)
+      - Skill() tool: Execute specific Skill task (active)
+
+      We use preload because we need continuous reference to this knowledge,
+      not to execute their workflows.
+      ```
+
+      ✅ Good 6: Combine preload and Skill tool
+      ```yaml
+      ---
+      name: comprehensive-reviewer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+        - Skill           # ✅ Actively invoke other Skills
+      skills:
+        - ccc:lib-antipatterns  # ✅ Preload as reference
+      maxTurns: 25
+      ---
+
+      # Comprehensive Reviewer
+
+      Comprehensive code and architecture review
+
+      ## Knowledge Strategy
+
+      ### Preloaded (Passive Reference)
+      - **lib-antipatterns**: 76+ antipattern definitions
+        - Continuously reference during review
+        - Use for pattern matching and identification
+
+      ### Active Invocation
+      - **Skill("cmd-review")**: Call specialized review command
+        - Execute deep analysis
+        - Generate structured report
+
+      ### When to Use Each
+      - Preload: Knowledge bases needing continuous reference
+      - Skill() tool: Workflow tasks needing execution
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要预加载 Skills**:
+
+      ✅ **应该预加载**：
+      - SubAgent 需要参考编码标准
+      - SubAgent 需要应用设计模式
+      - SubAgent 需要检查反模式
+      - SubAgent 需要遵循项目规范
+      - 知识需要在整个执行过程中使用
+
+      ❌ **不需要预加载**：
+      - 简单的文件操作
+      - 不需要参考外部知识
+      - 只需一次性查询（用 Skill() 工具）
+
+      **选择合适的 Skills**:
+
+      1. **知识库类型**（lib-前缀）：
+         - lib-coding-standards
+         - lib-design-patterns
+         - lib-antipatterns
+
+      2. **标准规则**（std-前缀）：
+         - std-naming-rules
+         - std-component-selection
+         - std-evidence-chain
+
+      3. **项目特定**：
+         - project:conventions
+         - project:security-policies
+
+      **添加配置**:
+
+      ```yaml
+      skills:
+        - ccc:lib-antipatterns
+        - ccc:std-naming-rules
+      ```
+
+      **文档要求**:
+
+      1. 在 "## Preloaded Knowledge" 章节说明
+      2. 解释为何预加载这些 Skills
+      3. 说明如何使用预加载的知识
+      4. 区分预加载和 Skill() 工具的用途
+    en: |
+      **Evaluate if Skills preload is needed**:
+
+      ✅ **Should preload**:
+      - SubAgent needs to reference coding standards
+      - SubAgent needs to apply design patterns
+      - SubAgent needs to check antipatterns
+      - SubAgent needs to follow project conventions
+      - Knowledge needed throughout execution
+
+      ❌ **Don't need preload**:
+      - Simple file operations
+      - Don't need external knowledge reference
+      - Only one-time query (use Skill() tool)
+
+      **Choose appropriate Skills**:
+
+      1. **Knowledge Library** (lib- prefix):
+         - lib-coding-standards
+         - lib-design-patterns
+         - lib-antipatterns
+
+      2. **Standard Rules** (std- prefix):
+         - std-naming-rules
+         - std-component-selection
+         - std-evidence-chain
+
+      3. **Project-Specific**:
+         - project:conventions
+         - project:security-policies
+
+      **Add Configuration**:
+
+      ```yaml
+      skills:
+        - ccc:lib-antipatterns
+        - ccc:std-naming-rules
+      ```
+
+      **Documentation Requirements**:
+
+      1. Add "## Preloaded Knowledge" section
+      2. Explain why preload these Skills
+      3. Describe how to use preloaded knowledge
+      4. Distinguish preload vs Skill() tool usage
+
+tags: ["subagent", "architecture", "skills", "preload", "knowledge"]
+related_rules: ["ARCH-006", "skill-005"]

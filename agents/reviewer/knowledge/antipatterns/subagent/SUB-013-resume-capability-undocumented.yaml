@@ -1,0 +1,728 @@
+id: SUB-013
+name: resume-capability-undocumented
+severity: info
+component_type: subagent
+category: scalability
+
+title:
+  zh: "SubAgent 恢复功能未说明"
+  en: "SubAgent resume capability not documented"
+
+description:
+  zh: |
+    SubAgent 支持恢复（resume）功能，允许继续之前中断的工作。
+
+    **恢复机制**：
+    - 使用 resume 参数传递 agent ID
+    - SubAgent 继续之前的执行上下文
+    - 保留完整的历史对话
+
+    **使用场景**：
+    - ✅ 长时间运行的任务（数据处理、代码重构）
+    - ✅ 可能中断的工作流（需要用户输入）
+    - ✅ 迭代优化任务（多轮改进）
+    - ❌ 一次性简单任务不需要
+
+    **与 memory 的区别**：
+    - resume: 恢复整个对话上下文（临时）
+    - memory: 保存结构化数据（持久）
+
+    **调用方式**：
+    ```python
+    # 首次调用
+    agent_id = Task(subagent_type="analyzer", prompt="分析代码")
+
+    # 恢复继续
+    Task(subagent_type="analyzer", resume=agent_id, prompt="继续分析")
+    ```
+  en: |
+    SubAgent supports resume capability, allowing continuation of previously interrupted work.
+
+    **Resume Mechanism**:
+    - Use resume parameter to pass agent ID
+    - SubAgent continues with previous execution context
+    - Preserves complete conversation history
+
+    **Use Cases**:
+    - ✅ Long-running tasks (data processing, code refactoring)
+    - ✅ Workflows that may be interrupted (need user input)
+    - ✅ Iterative optimization (multi-round improvement)
+    - ❌ One-time simple tasks don't need
+
+    **vs memory**:
+    - resume: Restore entire conversation context (temporary)
+    - memory: Save structured data (persistent)
+
+    **Invocation**:
+    ```python
+    # First call
+    agent_id = Task(subagent_type="analyzer", prompt="Analyze code")
+
+    # Resume
+    Task(subagent_type="analyzer", resume=agent_id, prompt="Continue analysis")
+    ```
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-SCA-014)，resume 是 SubAgent 的重要可恢复性特性"
+  en: "Per official features (sub-agents.md OFF-SCA-014), resume is important recoverability feature for SubAgents"
+
+detection:
+  method: capability-check
+  indicators:
+    - keyword: "继续|continue|恢复|resume|暂停|pause"
+      weight: 2
+    - keyword: "长时间|long-running|迭代|iterative|中断|interrupt"
+      weight: 1
+    - tool_usage: "Task 工具多次调用同一 subagent"
+      weight: 2
+  threshold: 2
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "恢复 SubAgent"
+  lines: "412-435"
+  quote: "恢复 subagent 继续之前的工作。使用 resume 参数传递 agent ID。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：多轮任务未说明恢复机制
+      ```yaml
+      ---
+      name: incremental-refactorer
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      maxTurns: 30
+      # ❌ 未说明如何恢复中断的重构
+      ---
+
+      # Incremental Refactorer
+
+      逐步重构代码，可能需要多次迭代...
+      ```
+
+      ❌ 错误2：长任务未提供恢复选项
+      ```yaml
+      ---
+      name: large-codebase-analyzer
+      model: sonnet
+      tools:
+        - Glob
+        - Read
+        - Grep
+      maxTurns: 50
+      ---
+
+      # Large Codebase Analyzer
+
+      分析大型代码库（可能需要1小时+）
+
+      # ❌ 如果中途中断，需要从头开始
+      ```
+
+      ❌ 错误3：假设每次都是新任务
+      ```markdown
+      ## Usage
+
+      调用此 SubAgent 进行代码审查：
+      ```
+      Task(subagent_type="code-reviewer", prompt="审查 src/")
+      ```
+
+      # ❌ 未说明如何继续之前未完成的审查
+      ```
+
+      ❌ 错误4：未利用 resume 优化工作流
+      ```python
+      # 糟糕的做法：每次都创建新 SubAgent
+      Task(subagent_type="optimizer", prompt="优化性能")
+      # 用户查看结果，要求继续优化
+      Task(subagent_type="optimizer", prompt="进一步优化")
+      # ❌ 丢失了之前的上下文
+      ```
+    en: |
+      ❌ Error 1: Multi-round task without resume mechanism
+      ```yaml
+      ---
+      name: incremental-refactorer
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+      maxTurns: 30
+      # ❌ Doesn't explain how to resume interrupted refactoring
+      ---
+
+      # Incremental Refactorer
+
+      Gradually refactor code, may need multiple iterations...
+      ```
+
+      ❌ Error 2: Long task without resume option
+      ```yaml
+      ---
+      name: large-codebase-analyzer
+      model: sonnet
+      tools:
+        - Glob
+        - Read
+        - Grep
+      maxTurns: 50
+      ---
+
+      # Large Codebase Analyzer
+
+      Analyze large codebase (may take 1+ hour)
+
+      # ❌ If interrupted, must start from scratch
+      ```
+
+      ❌ Error 3: Assuming always new task
+      ```markdown
+      ## Usage
+
+      Call this SubAgent for code review:
+      ```
+      Task(subagent_type="code-reviewer", prompt="Review src/")
+      ```
+
+      # ❌ Doesn't explain how to continue unfinished review
+      ```
+
+      ❌ Error 4: Not utilizing resume for workflow optimization
+      ```python
+      # Bad practice: Create new SubAgent each time
+      Task(subagent_type="optimizer", prompt="Optimize performance")
+      # User reviews, asks for more optimization
+      Task(subagent_type="optimizer", prompt="Further optimize")
+      # ❌ Lost previous context
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：文档中说明恢复机制
+      ```yaml
+      ---
+      name: incremental-migrator
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      maxTurns: 40
+      permissionMode: prompt
+      ---
+
+      # Incremental Migration Tool
+
+      ## Resume Support
+
+      此 SubAgent 支持恢复功能，适用于长时间迁移：
+
+      **首次运行**:
+      ```python
+      agent_id = Task(
+          subagent_type="incremental-migrator",
+          prompt="迁移 API v1 到 v2"
+      )
+      # 保存 agent_id: abc-123
+      ```
+
+      **恢复继续**:
+      ```python
+      Task(
+          subagent_type="incremental-migrator",
+          resume="abc-123",
+          prompt="继续迁移剩余文件"
+      )
+      ```
+
+      ## When to Resume
+      - 需要查看中间结果
+      - 需要用户确认下一步
+      - 任务被中断（网络、超时等）
+      ```
+
+      ✅ 正确2：工作流中利用 resume
+      ```yaml
+      ---
+      name: iterative-optimizer
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+        - Write
+      maxTurns: 30
+      ---
+
+      # Iterative Performance Optimizer
+
+      ## Multi-Round Workflow
+
+      此工具支持迭代优化流程：
+
+      **Round 1: 初始分析**
+      ```python
+      agent_id = Task(
+          subagent_type="iterative-optimizer",
+          prompt="分析性能瓶颈"
+      )
+      # SubAgent 识别3个优化点
+      ```
+
+      **Round 2: 应用优化**
+      ```python
+      Task(
+          resume=agent_id,
+          prompt="应用优化建议1和2"
+      )
+      # SubAgent 继续之前的分析上下文
+      ```
+
+      **Round 3: 验证和调优**
+      ```python
+      Task(
+          resume=agent_id,
+          prompt="验证优化效果，必要时调整"
+      )
+      ```
+
+      ## Benefits
+      - 保留完整优化历史
+      - 避免重复分析
+      - 支持渐进式改进
+      ```
+
+      ✅ 正确3：README 中说明 resume 用法
+      ```markdown
+      # Code Refactoring Agent
+
+      ## Features
+      - Incremental refactoring
+      - **Resume support** for interrupted work
+      - Context preservation across calls
+
+      ## Usage Examples
+
+      ### Simple One-Shot
+      ```python
+      Task(subagent_type="refactorer", prompt="Refactor UserService")
+      ```
+
+      ### Multi-Round with Resume
+      ```python
+      # Start
+      id1 = Task(subagent_type="refactorer",
+                 prompt="Refactor UserService - step 1")
+
+      # User reviews changes, then continues
+      id2 = Task(resume=id1,
+                 prompt="Continue with AuthService")
+
+      # Final polish
+      Task(resume=id2,
+           prompt="Final cleanup and tests")
+      ```
+
+      ## When to Use Resume
+      - Large refactoring spanning multiple files
+      - Need user approval between steps
+      - Want to preserve decision history
+      ```
+
+      ✅ 正确4：与 memory 功能对比说明
+      ```yaml
+      ---
+      name: project-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: project
+      maxTurns: 30
+      ---
+
+      # Project Analyzer
+
+      ## Persistence Features
+
+      ### Resume (临时恢复)
+      - 用途：继续当前分析会话
+      - 范围：单个任务链
+      - 数据：完整对话历史
+      - 生命周期：会话结束后清除
+
+      ```python
+      id = Task(subagent_type="project-analyzer",
+                prompt="分析架构")
+      Task(resume=id, prompt="深入分析模块A")
+      ```
+
+      ### Memory (持久存储)
+      - 用途：缓存分析结果
+      - 范围：整个项目
+      - 数据：结构化结果
+      - 生命周期：跨会话保留
+
+      两者可以组合使用：
+      - resume 保持短期上下文
+      - memory 存储长期知识
+      ```
+
+      ✅ 正确5：错误处理中的 resume
+      ```yaml
+      ---
+      name: build-fixer
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Edit
+      maxTurns: 25
+      ---
+
+      # Build Error Fixer
+
+      ## Error Recovery with Resume
+
+      如果修复过程中出错：
+
+      1. SubAgent 返回当前 agent_id
+      2. 用户检查问题
+      3. 使用 resume 继续修复：
+
+      ```python
+      try:
+          agent_id = Task(
+              subagent_type="build-fixer",
+              prompt="修复构建错误"
+          )
+      except TimeoutError:
+          # 恢复继续
+          Task(
+              resume=agent_id,
+              prompt="继续之前的修复工作"
+          )
+      ```
+
+      ## Benefits
+      - 不会丢失已完成的修复
+      - 保留错误诊断历史
+      - 支持增量调试
+      ```
+    en: |
+      ✅ Good 1: Document resume mechanism
+      ```yaml
+      ---
+      name: incremental-migrator
+      model: sonnet
+      tools:
+        - Read
+        - Edit
+        - Bash
+      maxTurns: 40
+      permissionMode: prompt
+      ---
+
+      # Incremental Migration Tool
+
+      ## Resume Support
+
+      This SubAgent supports resume for long migrations:
+
+      **Initial Run**:
+      ```python
+      agent_id = Task(
+          subagent_type="incremental-migrator",
+          prompt="Migrate API v1 to v2"
+      )
+      # Save agent_id: abc-123
+      ```
+
+      **Resume**:
+      ```python
+      Task(
+          subagent_type="incremental-migrator",
+          resume="abc-123",
+          prompt="Continue migrating remaining files"
+      )
+      ```
+
+      ## When to Resume
+      - Need to review intermediate results
+      - Need user confirmation for next step
+      - Task interrupted (network, timeout, etc.)
+      ```
+
+      ✅ Good 2: Utilize resume in workflow
+      ```yaml
+      ---
+      name: iterative-optimizer
+      model: sonnet
+      tools:
+        - Read
+        - Bash
+        - Write
+      maxTurns: 30
+      ---
+
+      # Iterative Performance Optimizer
+
+      ## Multi-Round Workflow
+
+      Supports iterative optimization:
+
+      **Round 1: Initial Analysis**
+      ```python
+      agent_id = Task(
+          subagent_type="iterative-optimizer",
+          prompt="Analyze performance bottlenecks"
+      )
+      # SubAgent identifies 3 optimization points
+      ```
+
+      **Round 2: Apply Optimizations**
+      ```python
+      Task(
+          resume=agent_id,
+          prompt="Apply suggestions 1 and 2"
+      )
+      # SubAgent continues with previous analysis context
+      ```
+
+      **Round 3: Verify and Tune**
+      ```python
+      Task(
+          resume=agent_id,
+          prompt="Verify optimization effects, adjust if needed"
+      )
+      ```
+
+      ## Benefits
+      - Preserve complete optimization history
+      - Avoid duplicate analysis
+      - Support progressive improvement
+      ```
+
+      ✅ Good 3: README explains resume usage
+      ```markdown
+      # Code Refactoring Agent
+
+      ## Features
+      - Incremental refactoring
+      - **Resume support** for interrupted work
+      - Context preservation across calls
+
+      ## Usage Examples
+
+      ### Simple One-Shot
+      ```python
+      Task(subagent_type="refactorer", prompt="Refactor UserService")
+      ```
+
+      ### Multi-Round with Resume
+      ```python
+      # Start
+      id1 = Task(subagent_type="refactorer",
+                 prompt="Refactor UserService - step 1")
+
+      # User reviews changes, then continues
+      id2 = Task(resume=id1,
+                 prompt="Continue with AuthService")
+
+      # Final polish
+      Task(resume=id2,
+           prompt="Final cleanup and tests")
+      ```
+
+      ## When to Use Resume
+      - Large refactoring spanning multiple files
+      - Need user approval between steps
+      - Want to preserve decision history
+      ```
+
+      ✅ Good 4: Compare with memory feature
+      ```yaml
+      ---
+      name: project-analyzer
+      model: sonnet
+      tools:
+        - Read
+        - Grep
+      memory:
+        scope: project
+      maxTurns: 30
+      ---
+
+      # Project Analyzer
+
+      ## Persistence Features
+
+      ### Resume (Temporary Recovery)
+      - Purpose: Continue current analysis session
+      - Scope: Single task chain
+      - Data: Complete conversation history
+      - Lifecycle: Cleared after session ends
+
+      ```python
+      id = Task(subagent_type="project-analyzer",
+                prompt="Analyze architecture")
+      Task(resume=id, prompt="Deep dive into module A")
+      ```
+
+      ### Memory (Persistent Storage)
+      - Purpose: Cache analysis results
+      - Scope: Entire project
+      - Data: Structured results
+      - Lifecycle: Persist across sessions
+
+      Can be combined:
+      - resume for short-term context
+      - memory for long-term knowledge
+      ```
+
+      ✅ Good 5: Resume in error handling
+      ```yaml
+      ---
+      name: build-fixer
+      model: sonnet
+      tools:
+        - Bash
+        - Read
+        - Edit
+      maxTurns: 25
+      ---
+
+      # Build Error Fixer
+
+      ## Error Recovery with Resume
+
+      If fix process encounters error:
+
+      1. SubAgent returns current agent_id
+      2. User investigates issue
+      3. Use resume to continue:
+
+      ```python
+      try:
+          agent_id = Task(
+              subagent_type="build-fixer",
+              prompt="Fix build errors"
+          )
+      except TimeoutError:
+          # Resume
+          Task(
+              resume=agent_id,
+              prompt="Continue previous fix work"
+          )
+      ```
+
+      ## Benefits
+      - Don't lose completed fixes
+      - Preserve error diagnosis history
+      - Support incremental debugging
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要说明 resume**:
+
+      ✅ **应该说明**：
+      - 任务可能需要多轮执行
+      - 工作流可能被中断
+      - 需要保留决策历史
+      - 支持渐进式处理
+
+      ❌ **不需要说明**：
+      - 简单的一次性任务
+      - 快速完成的操作（<5分钟）
+      - 无中间状态的转换
+
+      **文档要求**:
+
+      1. 在 "## Usage" 章节添加 resume 示例
+      2. 说明何时应该使用 resume
+      3. 提供完整的调用代码示例
+      4. 如果有 memory，说明两者的区别
+
+      **代码模板**:
+
+      ```markdown
+      ## Resume Support
+
+      This SubAgent supports resuming interrupted work:
+
+      ```python
+      # First call
+      agent_id = Task(
+          subagent_type="my-agent",
+          prompt="Start task"
+      )
+
+      # Resume
+      Task(
+          resume=agent_id,
+          prompt="Continue task"
+      )
+      ```
+
+      Use resume when:
+      - Task is interrupted
+      - Need to review intermediate results
+      - Want to preserve context
+      ```
+    en: |
+      **Evaluate if resume needs documentation**:
+
+      ✅ **Should document**:
+      - Task may need multiple rounds
+      - Workflow may be interrupted
+      - Need to preserve decision history
+      - Support progressive processing
+
+      ❌ **Don't need**:
+      - Simple one-time tasks
+      - Quick operations (<5 min)
+      - Stateless transformations
+
+      **Documentation Requirements**:
+
+      1. Add resume example in "## Usage" section
+      2. Explain when to use resume
+      3. Provide complete invocation code examples
+      4. If has memory, explain the difference
+
+      **Code Template**:
+
+      ```markdown
+      ## Resume Support
+
+      This SubAgent supports resuming interrupted work:
+
+      ```python
+      # First call
+      agent_id = Task(
+          subagent_type="my-agent",
+          prompt="Start task"
+      )
+
+      # Resume
+      Task(
+          resume=agent_id,
+          prompt="Continue task"
+      )
+      ```
+
+      Use resume when:
+      - Task is interrupted
+      - Need to review intermediate results
+      - Want to preserve context
+      ```
+
+tags: ["subagent", "scalability", "resume", "recovery", "context"]
+related_rules: ["SUB-011", "SCA-002"]

@@ -1,0 +1,538 @@
+id: CFG-001
+name: settings-json-invalid-keys
+severity: error
+component_type: plugin
+category: config
+
+title:
+  zh: "settings.json 包含不支持的配置键"
+  en: "settings.json contains unsupported config keys"
+
+description:
+  zh: |
+    插件的 settings.json 仅支持 `agent` 键，用于配置默认代理行为。
+
+    **支持的配置**：
+    ```json
+    {
+      "agent": {
+        "model": "sonnet",
+        "permissionMode": "prompt"
+      }
+    }
+    ```
+
+    **不支持的配置**（应使用其他文件）：
+    - ❌ `hooks` - 应在 hooks/hooks.json
+    - ❌ `mcpServers` - 应在 .mcp.json
+    - ❌ `lspServers` - 应在 .lsp.json
+    - ❌ `skills` - Skill 应在 skills/ 目录
+    - ❌ 其他任意自定义键
+
+    **settings.json 的作用**：
+    - 配置默认代理模型
+    - 配置默认权限模式
+    - 仅影响代理行为，不配置其他功能
+  en: |
+    Plugin's settings.json only supports `agent` key for configuring default agent behavior.
+
+    **Supported Config**:
+    ```json
+    {
+      "agent": {
+        "model": "sonnet",
+        "permissionMode": "prompt"
+      }
+    }
+    ```
+
+    **Unsupported Config** (should use other files):
+    - ❌ `hooks` - Should be in hooks/hooks.json
+    - ❌ `mcpServers` - Should be in .mcp.json
+    - ❌ `lspServers` - Should be in .lsp.json
+    - ❌ `skills` - Skills should be in skills/ directory
+    - ❌ Any other custom keys
+
+    **settings.json Purpose**:
+    - Configure default agent model
+    - Configure default permission mode
+    - Only affects agent behavior, doesn't configure other features
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-CFG-019)，settings.json 有明确的键限制以避免配置混乱"
+  en: "Per official specs (plugins.md OFF-CFG-019), settings.json has clear key restrictions to avoid config confusion"
+
+detection:
+  method: schema-validation
+  allowed_keys:
+    - agent
+  common_mistakes:
+    - hooks
+    - mcpServers
+    - lspServers
+    - skills
+    - plugins
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "settings.json 配置"
+  lines: "195-218"
+  quote: "settings.json 仅支持 agent 键。Hooks 在 hooks.json，MCP 在 .mcp.json，LSP 在 .lsp.json。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：在 settings.json 中配置 hooks
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate.sh"
+          }
+        ]
+      }
+      // ❌ hooks 应该在 hooks/hooks.json
+      ```
+
+      ❌ 错误2：在 settings.json 中配置 MCP 服务器
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ mcpServers 应该在 .mcp.json
+      ```
+
+      ❌ 错误3：在 settings.json 中列出 skills
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "skills": [
+          "my-skill-1",
+          "my-skill-2"
+        ]
+      }
+      // ❌ skills 不在 settings.json 配置
+      // 应通过 skills/ 目录结构管理
+      ```
+
+      ❌ 错误4：添加自定义配置键
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "customConfig": {
+          "timeout": 30000,
+          "retries": 3
+        }
+      }
+      // ❌ customConfig 不是支持的键
+      ```
+
+      ❌ 错误5：混合多种配置
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        },
+        "hooks": [...],
+        "mcpServers": {...},
+        "lspServers": {...}
+      }
+      // ❌ 配置混乱，应该分离到不同文件
+      ```
+    en: |
+      ❌ Error 1: Configure hooks in settings.json
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate.sh"
+          }
+        ]
+      }
+      // ❌ hooks should be in hooks/hooks.json
+      ```
+
+      ❌ Error 2: Configure MCP servers in settings.json
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ mcpServers should be in .mcp.json
+      ```
+
+      ❌ Error 3: List skills in settings.json
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "skills": [
+          "my-skill-1",
+          "my-skill-2"
+        ]
+      }
+      // ❌ skills not configured in settings.json
+      // Should be managed via skills/ directory structure
+      ```
+
+      ❌ Error 4: Add custom config keys
+      ```json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "customConfig": {
+          "timeout": 30000,
+          "retries": 3
+        }
+      }
+      // ❌ customConfig is not a supported key
+      ```
+
+      ❌ Error 5: Mix multiple configs
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        },
+        "hooks": [...],
+        "mcpServers": {...},
+        "lspServers": {...}
+      }
+      // ❌ Config confusion, should separate into different files
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：仅配置 agent 行为
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        }
+      }
+      ```
+
+      ✅ 正确2：空配置（使用默认值）
+      ```json
+      {}
+      ```
+      或省略 settings.json 文件
+
+      ✅ 正确3：完整的正确配置结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+        hooks/
+          hooks.json           ← Hooks 配置
+        .mcp.json              ← MCP 服务器配置
+        .lsp.json              ← LSP 服务器配置
+        skills/                ← Skills 通过目录管理
+          skill-1/
+            SKILL.md
+        settings.json          ← 仅 agent 配置
+      ```
+
+      settings.json:
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        }
+      }
+      ```
+
+      hooks/hooks.json:
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate.sh"
+          }
+        ]
+      }
+      ```
+
+      .mcp.json:
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      ```
+
+      ✅ 正确4：仅配置模型
+      ```json
+      {
+        "agent": {
+          "model": "haiku"
+        }
+      }
+      ```
+
+      ✅ 正确5：仅配置权限模式
+      ```json
+      {
+        "agent": {
+          "permissionMode": "auto"
+        }
+      }
+      ```
+
+      ✅ 正确6：README 说明配置结构
+      ```markdown
+      # My Plugin Configuration
+
+      ## File Structure
+
+      - **settings.json** - Agent defaults only
+        ```json
+        {
+          "agent": {
+            "model": "sonnet",
+            "permissionMode": "prompt"
+          }
+        }
+        ```
+
+      - **hooks/hooks.json** - Hook configurations
+      - **.mcp.json** - MCP server configurations
+      - **.lsp.json** - LSP server configurations
+      - **skills/** - Skill definitions
+
+      ## Why Separate Files?
+
+      - Clear separation of concerns
+      - Easier to manage and version control
+      - Follows official Claude Code structure
+      - Prevents configuration conflicts
+      ```
+    en: |
+      ✅ Good 1: Only configure agent behavior
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        }
+      }
+      ```
+
+      ✅ Good 2: Empty config (use defaults)
+      ```json
+      {}
+      ```
+      or omit settings.json file
+
+      ✅ Good 3: Complete correct config structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json
+        hooks/
+          hooks.json           ← Hooks config
+        .mcp.json              ← MCP server config
+        .lsp.json              ← LSP server config
+        skills/                ← Skills via directory
+          skill-1/
+            SKILL.md
+        settings.json          ← Only agent config
+      ```
+
+      settings.json:
+      ```json
+      {
+        "agent": {
+          "model": "sonnet",
+          "permissionMode": "prompt"
+        }
+      }
+      ```
+
+      hooks/hooks.json:
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "validate.sh"
+          }
+        ]
+      }
+      ```
+
+      .mcp.json:
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      ```
+
+      ✅ Good 4: Only configure model
+      ```json
+      {
+        "agent": {
+          "model": "haiku"
+        }
+      }
+      ```
+
+      ✅ Good 5: Only configure permission mode
+      ```json
+      {
+        "agent": {
+          "permissionMode": "auto"
+        }
+      }
+      ```
+
+      ✅ Good 6: README explains config structure
+      ```markdown
+      # My Plugin Configuration
+
+      ## File Structure
+
+      - **settings.json** - Agent defaults only
+        ```json
+        {
+          "agent": {
+            "model": "sonnet",
+            "permissionMode": "prompt"
+          }
+        }
+        ```
+
+      - **hooks/hooks.json** - Hook configurations
+      - **.mcp.json** - MCP server configurations
+      - **.lsp.json** - LSP server configurations
+      - **skills/** - Skill definitions
+
+      ## Why Separate Files?
+
+      - Clear separation of concerns
+      - Easier to manage and version control
+      - Follows official Claude Code structure
+      - Prevents configuration conflicts
+      ```
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检测 settings.json 中的非 agent 键
+
+      2. 移动配置到正确位置：
+         - `hooks` → hooks/hooks.json
+         - `mcpServers` → .mcp.json
+         - `lspServers` → .lsp.json
+
+      3. 移除所有非 agent 键
+
+      4. 验证 agent 键的内容仅包含：
+         - model
+         - permissionMode
+
+      **迁移脚本示例**:
+
+      ```bash
+      # 提取 hooks 配置
+      jq '.hooks' settings.json > hooks/hooks.json
+
+      # 提取 MCP 配置
+      jq '{mcpServers: .mcpServers}' settings.json > .mcp.json
+
+      # 清理 settings.json
+      jq '{agent: .agent}' settings.json > settings.json.tmp
+      mv settings.json.tmp settings.json
+      ```
+
+      **验证**:
+
+      ```bash
+      # 验证 settings.json 只有 agent 键
+      jq 'keys | length == 1 and .[0] == "agent"' settings.json
+      ```
+    en: |
+      **Automatic Fix**:
+
+      1. Detect non-agent keys in settings.json
+
+      2. Move config to correct location:
+         - `hooks` → hooks/hooks.json
+         - `mcpServers` → .mcp.json
+         - `lspServers` → .lsp.json
+
+      3. Remove all non-agent keys
+
+      4. Verify agent key content only includes:
+         - model
+         - permissionMode
+
+      **Migration Script Example**:
+
+      ```bash
+      # Extract hooks config
+      jq '.hooks' settings.json > hooks/hooks.json
+
+      # Extract MCP config
+      jq '{mcpServers: .mcpServers}' settings.json > .mcp.json
+
+      # Clean settings.json
+      jq '{agent: .agent}' settings.json > settings.json.tmp
+      mv settings.json.tmp settings.json
+      ```
+
+      **Validation**:
+
+      ```bash
+      # Verify settings.json only has agent key
+      jq 'keys | length == 1 and .[0] == "agent"' settings.json
+      ```
+
+tags: ["plugin", "config", "settings", "validation", "schema"]
+related_rules: ["CFG-002", "CFG-003", "HOOK-001"]

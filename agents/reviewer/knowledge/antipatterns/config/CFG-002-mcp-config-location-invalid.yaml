@@ -1,0 +1,565 @@
+id: CFG-002
+name: mcp-config-location-invalid
+severity: error
+component_type: plugin
+category: config
+
+title:
+  zh: "MCP 服务器配置位置错误"
+  en: "MCP server config location invalid"
+
+description:
+  zh: |
+    MCP（Model Context Protocol）服务器必须在 .mcp.json 文件中配置，不应在其他位置。
+
+    **正确的配置位置**：
+    - ✅ `.mcp.json` - 插件根目录
+    - ❌ `settings.json` - 不支持 mcpServers 键
+    - ❌ `hooks/hooks.json` - 不是 MCP 配置文件
+    - ❌ `mcp.json` - 缺少点前缀
+
+    **MCP 配置格式**：
+    ```json
+    {
+      "mcpServers": {
+        "server-name": {
+          "command": "command-to-run",
+          "args": ["arg1", "arg2"],
+          "env": {
+            "VAR_NAME": "${ENV_VAR}"
+          }
+        }
+      },
+      "allowedEnvVars": ["ENV_VAR"]
+    }
+    ```
+
+    **MCP 服务器的作用**：
+    - 扩展 Claude Code 的工具集
+    - 提供外部服务集成（GitHub、Slack等）
+    - 通过标准化协议通信
+  en: |
+    MCP (Model Context Protocol) servers must be configured in .mcp.json file, not elsewhere.
+
+    **Correct Config Location**:
+    - ✅ `.mcp.json` - Plugin root directory
+    - ❌ `settings.json` - Doesn't support mcpServers key
+    - ❌ `hooks/hooks.json` - Not MCP config file
+    - ❌ `mcp.json` - Missing dot prefix
+
+    **MCP Config Format**:
+    ```json
+    {
+      "mcpServers": {
+        "server-name": {
+          "command": "command-to-run",
+          "args": ["arg1", "arg2"],
+          "env": {
+            "VAR_NAME": "${ENV_VAR}"
+          }
+        }
+      },
+      "allowedEnvVars": ["ENV_VAR"]
+    }
+    ```
+
+    **MCP Server Purpose**:
+    - Extend Claude Code toolset
+    - Provide external service integration (GitHub, Slack, etc.)
+    - Communicate via standardized protocol
+
+rationale:
+  zh: "基于官方规范 (plugins.md OFF-CFG-020)，MCP 服务器在 .mcp.json 配置以保持清晰的配置结构"
+  en: "Per official specs (plugins.md OFF-CFG-020), MCP servers configured in .mcp.json to maintain clear config structure"
+
+detection:
+  method: file-location-check
+  checks:
+    - path: ".mcp.json"
+      expected: "MCP 配置应在这里"
+    - path: "settings.json"
+      forbidden_key: "mcpServers"
+    - path: "mcp.json"
+      warning: "应该是 .mcp.json（带点前缀）"
+
+official_reference:
+  document: "markdown_docs/plugins.md"
+  section: "MCP 服务器配置"
+  lines: "245-272"
+  quote: "MCP 服务器在 .mcp.json 配置。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：在 settings.json 中配置 MCP
+      ```json
+      // settings.json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ mcpServers 不应在 settings.json
+      ```
+
+      ❌ 错误2：文件名缺少点前缀
+      ```json
+      // mcp.json (错误的文件名)
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ 应该是 .mcp.json
+      ```
+
+      ❌ 错误3：在 hooks.json 中配置
+      ```json
+      // hooks/hooks.json
+      {
+        "hooks": [...],
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+      // ❌ MCP 配置不应在 hooks.json
+      ```
+
+      ❌ 错误4：在 plugin.json 中配置
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "my-plugin",
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+      // ❌ plugin.json 只用于插件元数据
+      ```
+
+      ❌ 错误5：MCP 配置分散在多个文件
+      ```
+      my-plugin/
+        mcp-servers.json    ← ❌ 自定义名称
+        config/
+          mcp.json          ← ❌ 错误的目录
+        .mcp.json           ← ✅ 正确，但与上面冲突
+      ```
+    en: |
+      ❌ Error 1: Configure MCP in settings.json
+      ```json
+      // settings.json
+      {
+        "agent": {
+          "model": "sonnet"
+        },
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ mcpServers shouldn't be in settings.json
+      ```
+
+      ❌ Error 2: Filename missing dot prefix
+      ```json
+      // mcp.json (wrong filename)
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github"
+          }
+        }
+      }
+      // ❌ Should be .mcp.json
+      ```
+
+      ❌ Error 3: Configure in hooks.json
+      ```json
+      // hooks/hooks.json
+      {
+        "hooks": [...],
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+      // ❌ MCP config shouldn't be in hooks.json
+      ```
+
+      ❌ Error 4: Configure in plugin.json
+      ```json
+      // .claude-plugin/plugin.json
+      {
+        "name": "my-plugin",
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+      // ❌ plugin.json only for plugin metadata
+      ```
+
+      ❌ Error 5: MCP config scattered across files
+      ```
+      my-plugin/
+        mcp-servers.json    ← ❌ Custom name
+        config/
+          mcp.json          ← ❌ Wrong directory
+        .mcp.json           ← ✅ Correct, but conflicts with above
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：标准 MCP 配置
+      ```json
+      // .mcp.json (在插件根目录)
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT"]
+      }
+      ```
+
+      ✅ 正确2：多个 MCP 服务器
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"
+            }
+          },
+          "slack": {
+            "command": "mcp-server-slack",
+            "args": ["--workspace", "my-workspace"],
+            "env": {
+              "SLACK_TOKEN": "${SLACK_BOT_TOKEN}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT", "SLACK_BOT_TOKEN"]
+      }
+      ```
+
+      ✅ 正确3：完整的插件配置结构
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json        ← 插件元数据
+        .mcp.json            ← ✅ MCP 服务器配置
+        .lsp.json            ← LSP 服务器配置
+        settings.json        ← Agent 默认配置
+        hooks/
+          hooks.json         ← Hooks 配置
+        skills/
+          skill-1/
+      ```
+
+      .mcp.json:
+      ```json
+      {
+        "mcpServers": {
+          "filesystem": {
+            "command": "mcp-server-filesystem",
+            "args": ["--root", "${PROJECT_DIR}"]
+          }
+        },
+        "allowedEnvVars": ["PROJECT_DIR"]
+      }
+      ```
+
+      ✅ 正确4：空 MCP 配置（不使用 MCP）
+      ```json
+      // .mcp.json (可选)
+      {
+        "mcpServers": {}
+      }
+      ```
+      或完全省略 .mcp.json 文件
+
+      ✅ 正确5：README 说明 MCP 配置
+      ```markdown
+      # Plugin MCP Configuration
+
+      ## Setup MCP Servers
+
+      Edit `.mcp.json` in plugin root:
+
+      \```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT"]
+      }
+      \```
+
+      ## Environment Variables
+
+      Set required environment variables:
+
+      \```bash
+      export GITHUB_PAT="your-token-here"
+      \```
+
+      ## Testing
+
+      \```bash
+      claude --plugin-dir . --version
+      # Should show MCP servers loaded
+      \```
+      ```
+
+      ✅ 正确6：分离关注点
+      ```
+      my-plugin/
+        .mcp.json            ← ✅ 仅 MCP 配置
+        .lsp.json            ← ✅ 仅 LSP 配置
+        settings.json        ← ✅ 仅 agent 配置
+        hooks/hooks.json     ← ✅ 仅 hooks 配置
+      ```
+
+      每个配置文件职责单一，易于维护
+    en: |
+      ✅ Good 1: Standard MCP config
+      ```json
+      // .mcp.json (in plugin root)
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT"]
+      }
+      ```
+
+      ✅ Good 2: Multiple MCP servers
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "mcp-server-github",
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_PAT}"
+            }
+          },
+          "slack": {
+            "command": "mcp-server-slack",
+            "args": ["--workspace", "my-workspace"],
+            "env": {
+              "SLACK_TOKEN": "${SLACK_BOT_TOKEN}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT", "SLACK_BOT_TOKEN"]
+      }
+      ```
+
+      ✅ Good 3: Complete plugin config structure
+      ```
+      my-plugin/
+        .claude-plugin/
+          plugin.json        ← Plugin metadata
+        .mcp.json            ← ✅ MCP server config
+        .lsp.json            ← LSP server config
+        settings.json        ← Agent defaults
+        hooks/
+          hooks.json         ← Hooks config
+        skills/
+          skill-1/
+      ```
+
+      .mcp.json:
+      ```json
+      {
+        "mcpServers": {
+          "filesystem": {
+            "command": "mcp-server-filesystem",
+            "args": ["--root", "${PROJECT_DIR}"]
+          }
+        },
+        "allowedEnvVars": ["PROJECT_DIR"]
+      }
+      ```
+
+      ✅ Good 4: Empty MCP config (not using MCP)
+      ```json
+      // .mcp.json (optional)
+      {
+        "mcpServers": {}
+      }
+      ```
+      or completely omit .mcp.json file
+
+      ✅ Good 5: README explains MCP config
+      ```markdown
+      # Plugin MCP Configuration
+
+      ## Setup MCP Servers
+
+      Edit `.mcp.json` in plugin root:
+
+      \```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"
+            }
+          }
+        },
+        "allowedEnvVars": ["GITHUB_PAT"]
+      }
+      \```
+
+      ## Environment Variables
+
+      Set required environment variables:
+
+      \```bash
+      export GITHUB_PAT="your-token-here"
+      \```
+
+      ## Testing
+
+      \```bash
+      claude --plugin-dir . --version
+      # Should show MCP servers loaded
+      \```
+      ```
+
+      ✅ Good 6: Separate concerns
+      ```
+      my-plugin/
+        .mcp.json            ← ✅ MCP config only
+        .lsp.json            ← ✅ LSP config only
+        settings.json        ← ✅ Agent config only
+        hooks/hooks.json     ← ✅ Hooks config only
+      ```
+
+      Each config file has single responsibility, easy to maintain
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复**:
+
+      1. 检查 MCP 配置位置
+
+      2. 如果在 settings.json：
+         - 提取 mcpServers 和 allowedEnvVars
+         - 创建 .mcp.json
+         - 从 settings.json 移除这些键
+
+      3. 如果文件名是 mcp.json：
+         - 重命名为 .mcp.json
+
+      4. 如果在其他位置：
+         - 移动到插件根目录的 .mcp.json
+
+      **迁移脚本**:
+
+      ```bash
+      # 从 settings.json 提取 MCP 配置
+      if [ -f settings.json ]; then
+        jq '{mcpServers: .mcpServers, allowedEnvVars: .allowedEnvVars}' \
+           settings.json > .mcp.json
+
+        # 清理 settings.json
+        jq 'del(.mcpServers, .allowedEnvVars)' \
+           settings.json > settings.json.tmp
+        mv settings.json.tmp settings.json
+      fi
+
+      # 重命名 mcp.json 为 .mcp.json
+      if [ -f mcp.json ]; then
+        mv mcp.json .mcp.json
+      fi
+      ```
+
+      **验证**:
+
+      ```bash
+      # 验证 .mcp.json 存在且格式正确
+      test -f .mcp.json && jq '.mcpServers' .mcp.json
+
+      # 验证 settings.json 不包含 mcpServers
+      ! jq 'has("mcpServers")' settings.json
+      ```
+    en: |
+      **Automatic Fix**:
+
+      1. Check MCP config location
+
+      2. If in settings.json:
+         - Extract mcpServers and allowedEnvVars
+         - Create .mcp.json
+         - Remove these keys from settings.json
+
+      3. If filename is mcp.json:
+         - Rename to .mcp.json
+
+      4. If in other location:
+         - Move to .mcp.json in plugin root
+
+      **Migration Script**:
+
+      ```bash
+      # Extract MCP config from settings.json
+      if [ -f settings.json ]; then
+        jq '{mcpServers: .mcpServers, allowedEnvVars: .allowedEnvVars}' \
+           settings.json > .mcp.json
+
+        # Clean settings.json
+        jq 'del(.mcpServers, .allowedEnvVars)' \
+           settings.json > settings.json.tmp
+        mv settings.json.tmp settings.json
+      fi
+
+      # Rename mcp.json to .mcp.json
+      if [ -f mcp.json ]; then
+        mv mcp.json .mcp.json
+      fi
+      ```
+
+      **Validation**:
+
+      ```bash
+      # Verify .mcp.json exists and is valid
+      test -f .mcp.json && jq '.mcpServers' .mcp.json
+
+      # Verify settings.json doesn't contain mcpServers
+      ! jq 'has("mcpServers")' settings.json
+      ```
+
+tags: ["plugin", "config", "mcp", "location", "file-structure"]
+related_rules: ["CFG-001", "CFG-003", "MCP-001"]
