@@ -1,0 +1,383 @@
+id: ENV-002
+name: subagent-location-priority-unclear
+severity: info
+component_type: subagent
+category: environment
+
+title:
+  zh: "SubAgent 位置优先级未说明"
+  en: "SubAgent location priority not documented"
+
+description:
+  zh: |
+    SubAgent 的位置决定其优先级和发现顺序。
+
+    **SubAgent 位置优先级**（从高到低）：
+    1. **CLI --agents** - 命令行参数（最高）
+    2. **项目 agents/** - 项目根目录
+    3. **插件 agents/** - 插件目录
+    4. **个人 ~/.claude/agents/** - 用户目录
+
+    **与 Skills 的区别**：
+    - Skills: 个人优先级高于项目
+    - SubAgents: 项目优先级高于个人
+
+    **使用建议**：
+    - 项目特定逻辑 → 项目 agents/
+    - 可分发功能 → 插件 agents/
+    - 通用工具 → 个人 ~/.claude/agents/
+  en: |
+    SubAgent location determines its priority and discovery order.
+
+    **SubAgent Location Priority** (high to low):
+    1. **CLI --agents** - Command line args (highest)
+    2. **Project agents/** - Project root directory
+    3. **Plugin agents/** - Plugin directory
+    4. **Personal ~/.claude/agents/** - User directory
+
+    **vs Skills**:
+    - Skills: Personal priority > Project
+    - SubAgents: Project priority > Personal
+
+    **Usage Recommendations**:
+    - Project-specific logic → Project agents/
+    - Distributable features → Plugin agents/
+    - General tools → Personal ~/.claude/agents/
+
+rationale:
+  zh: "基于官方规范 (sub-agents.md OFF-ENV-006~007, OFF-ARC-020)，SubAgent 位置优先级与 Skills 相反"
+  en: "Per official specs (sub-agents.md OFF-ENV-006~007, OFF-ARC-020), SubAgent location priority is opposite to Skills"
+
+detection:
+  method: documentation-check
+  indicators:
+    - missing_documentation: "README 未说明 SubAgent 适用范围"
+    - unclear_priority: "未说明优先级规则"
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "SubAgent 位置优先级"
+  lines: "125-158"
+  quote: "subagent 位置决定优先级。CLI --agents 最高优先级。项目 agents/ 优先于个人。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：README 未说明位置
+      ```markdown
+      # My SubAgent
+
+      ## Installation
+      Put SKILL.md somewhere...
+
+      # ❌ 没有说明应该放在哪里
+      ```
+
+      ❌ 错误2：项目特定功能放在个人目录
+      ```
+      ~/.claude/agents/
+        project-builder/    ← ❌ 项目构建应在项目目录
+          SKILL.md
+      ```
+
+      ❌ 错误3：通用工具放在项目目录
+      ```
+      my-project/
+        agents/
+          json-validator/   ← ❌ 通用验证器应在个人目录
+            SKILL.md
+      ```
+    en: |
+      ❌ Error 1: README doesn't explain location
+      ```markdown
+      # My SubAgent
+
+      ## Installation
+      Put SKILL.md somewhere...
+
+      # ❌ Doesn't specify where
+      ```
+
+      ❌ Error 2: Project-specific in personal directory
+      ```
+      ~/.claude/agents/
+        project-builder/    ← ❌ Project build should be in project dir
+          SKILL.md
+      ```
+
+      ❌ Error 3: General tool in project directory
+      ```
+      my-project/
+        agents/
+          json-validator/   ← ❌ General validator should be in personal dir
+            SKILL.md
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：项目 SubAgent README
+      ```markdown
+      # Project Builder
+
+      项目特定的构建工具
+
+      ## Installation
+
+      ### 项目内安装（推荐）
+      ```bash
+      mkdir -p agents/project-builder
+      cp SKILL.md agents/project-builder/
+      ```
+
+      **Location**: `agents/` (project root)
+      **Priority**: Higher than personal/plugin SubAgents
+      **Scope**: This project only
+
+      ## Why Project-Level?
+      - Uses project-specific build config
+      - Depends on project structure
+      - Should not run on other projects
+      ```
+
+      ✅ 正确2：个人 SubAgent README
+      ```markdown
+      # Code Analyzer
+
+      通用代码分析工具
+
+      ## Installation
+
+      ### 个人使用
+      ```bash
+      mkdir -p ~/.claude/agents/code-analyzer
+      cp SKILL.md ~/.claude/agents/code-analyzer/
+      ```
+
+      **Location**: `~/.claude/agents/`
+      **Priority**: Lower than project SubAgents
+      **Scope**: All projects
+
+      ## Note on Priority
+      If a project has its own `code-analyzer` SubAgent,
+      that will be used instead of this personal one.
+      ```
+
+      ✅ 正确3：完整的优先级说明
+      ```markdown
+      # SubAgent Installation Guide
+
+      ## Priority Rules
+
+      When multiple SubAgents have the same name:
+
+      1. **CLI --agents** (highest)
+         ```bash
+         claude --agents=./custom-agents/my-agent
+         ```
+
+      2. **Project agents/**
+         ```
+         project/agents/my-agent/SKILL.md
+         ```
+
+      3. **Plugin agents/**
+         ```
+         ~/.claude/plugins/my-plugin/agents/my-agent/
+         ```
+
+      4. **Personal ~/.claude/agents/**
+         ```
+         ~/.claude/agents/my-agent/SKILL.md
+         ```
+
+      ## Examples
+
+      ### Scenario: "builder" SubAgent exists in all locations
+
+      ```bash
+      # Project directory
+      Task(subagent_type="builder")
+      → Uses project/agents/builder/ (priority 2)
+      ```
+
+      ```bash
+      # Override with CLI
+      claude --agents=~/.claude/agents/builder
+      Task(subagent_type="builder")
+      → Uses personal builder (priority 1 via CLI)
+      ```
+
+      ### Scenario: No project SubAgent
+
+      ```bash
+      # Project directory, no local builder
+      Task(subagent_type="builder")
+      → Uses ~/.claude/agents/builder/ (fallback to personal)
+      ```
+      ```
+    en: |
+      ✅ Good 1: Project SubAgent README
+      ```markdown
+      # Project Builder
+
+      Project-specific build tool
+
+      ## Installation
+
+      ### Install in Project (Recommended)
+      ```bash
+      mkdir -p agents/project-builder
+      cp SKILL.md agents/project-builder/
+      ```
+
+      **Location**: `agents/` (project root)
+      **Priority**: Higher than personal/plugin SubAgents
+      **Scope**: This project only
+
+      ## Why Project-Level?
+      - Uses project-specific build config
+      - Depends on project structure
+      - Should not run on other projects
+      ```
+
+      ✅ Good 2: Personal SubAgent README
+      ```markdown
+      # Code Analyzer
+
+      General code analysis tool
+
+      ## Installation
+
+      ### Personal Use
+      ```bash
+      mkdir -p ~/.claude/agents/code-analyzer
+      cp SKILL.md ~/.claude/agents/code-analyzer/
+      ```
+
+      **Location**: `~/.claude/agents/`
+      **Priority**: Lower than project SubAgents
+      **Scope**: All projects
+
+      ## Note on Priority
+      If a project has its own `code-analyzer` SubAgent,
+      that will be used instead of this personal one.
+      ```
+
+      ✅ Good 3: Complete priority documentation
+      ```markdown
+      # SubAgent Installation Guide
+
+      ## Priority Rules
+
+      When multiple SubAgents have the same name:
+
+      1. **CLI --agents** (highest)
+         ```bash
+         claude --agents=./custom-agents/my-agent
+         ```
+
+      2. **Project agents/**
+         ```
+         project/agents/my-agent/SKILL.md
+         ```
+
+      3. **Plugin agents/**
+         ```
+         ~/.claude/plugins/my-plugin/agents/my-agent/
+         ```
+
+      4. **Personal ~/.claude/agents/**
+         ```
+         ~/.claude/agents/my-agent/SKILL.md
+         ```
+
+      ## Examples
+
+      ### Scenario: "builder" SubAgent exists in all locations
+
+      ```bash
+      # Project directory
+      Task(subagent_type="builder")
+      → Uses project/agents/builder/ (priority 2)
+      ```
+
+      ```bash
+      # Override with CLI
+      claude --agents=~/.claude/agents/builder
+      Task(subagent_type="builder")
+      → Uses personal builder (priority 1 via CLI)
+      ```
+
+      ### Scenario: No project SubAgent
+
+      ```bash
+      # Project directory, no local builder
+      Task(subagent_type="builder")
+      → Uses ~/.claude/agents/builder/ (fallback to personal)
+      ```
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **为 SubAgent 添加位置文档**:
+
+      1. **在 README 中说明**：
+         - SubAgent 类型（项目特定/通用/插件）
+         - 推荐安装位置
+         - 优先级说明
+
+      2. **安装说明模板**：
+         ```markdown
+         ## Installation
+
+         ### Project Installation (Recommended/Optional)
+         ```bash
+         mkdir -p agents/my-agent
+         cp SKILL.md agents/my-agent/
+         ```
+
+         **Priority**: [High/Medium/Low]
+         **When used**: [Explain when this SubAgent is invoked]
+         ```
+
+      **决策指南**:
+
+      | SubAgent 用途 | 推荐位置 | 优先级 |
+      |--------------|---------|--------|
+      | 项目构建 | Project | High |
+      | 通用分析 | Personal | Low |
+      | 插件功能 | Plugin | Medium |
+    en: |
+      **Add location documentation for SubAgent**:
+
+      1. **Document in README**:
+         - SubAgent type (project-specific/general/plugin)
+         - Recommended installation location
+         - Priority explanation
+
+      2. **Installation template**:
+         ```markdown
+         ## Installation
+
+         ### Project Installation (Recommended/Optional)
+         ```bash
+         mkdir -p agents/my-agent
+         cp SKILL.md agents/my-agent/
+         ```
+
+         **Priority**: [High/Medium/Low]
+         **When used**: [Explain when this SubAgent is invoked]
+         ```
+
+      **Decision Guide**:
+
+      | SubAgent Purpose | Recommended Location | Priority |
+      |------------------|---------------------|----------|
+      | Project build | Project | High |
+      | General analysis | Personal | Low |
+      | Plugin feature | Plugin | Medium |
+
+tags: ["subagent", "environment", "location", "priority"]
+related_rules: ["ENV-001", "SUB-001"]

@@ -1,0 +1,585 @@
+id: HOOK-011
+name: prompt-agent-hooks-misuse
+severity: warning
+component_type: hook
+category: architecture
+
+title:
+  zh: "prompt/agent hooks 使用不当"
+  en: "prompt/agent hooks misuse"
+
+description:
+  zh: |
+    prompt hooks 和 agent hooks 是基于 LLM 的 hooks，仅支持特定事件类型。
+
+    **prompt hooks**：
+    - 使用 LLM 快速评估（简单提示）
+    - 支持事件：PreToolUse, PostToolUse, UserPromptSubmit
+    - 不支持：SessionStart, SubagentStart 等其他事件
+
+    **agent hooks**：
+    - 使用完整 SubAgent 执行复杂验证
+    - 支持事件：PreToolUse, PostToolUse, UserPromptSubmit
+    - 不支持：SessionStart, SubagentStart 等其他事件
+
+    **与 command hooks 的区别**：
+    - command hooks：支持所有事件，执行 shell 命令
+    - prompt/agent hooks：仅支持 3 种事件，使用 LLM 评估
+
+    **使用场景**：
+    - ✅ 复杂的安全策略判断（prompt/agent）
+    - ✅ 基于上下文的动态验证（prompt/agent）
+    - ❌ 简单的命令检查（用 command hook）
+    - ❌ 非支持的事件（用 command hook）
+  en: |
+    prompt hooks and agent hooks are LLM-based hooks that only support specific event types.
+
+    **prompt hooks**:
+    - Use LLM for quick evaluation (simple prompts)
+    - Supported events: PreToolUse, PostToolUse, UserPromptSubmit
+    - Not supported: SessionStart, SubagentStart, etc.
+
+    **agent hooks**:
+    - Use full SubAgent for complex validation
+    - Supported events: PreToolUse, PostToolUse, UserPromptSubmit
+    - Not supported: SessionStart, SubagentStart, etc.
+
+    **vs command hooks**:
+    - command hooks: Support all events, execute shell commands
+    - prompt/agent hooks: Only 3 events, use LLM evaluation
+
+    **Use Cases**:
+    - ✅ Complex security policy decisions (prompt/agent)
+    - ✅ Context-based dynamic validation (prompt/agent)
+    - ❌ Simple command checks (use command hook)
+    - ❌ Unsupported events (use command hook)
+
+rationale:
+  zh: "基于官方规范 (hooks.md OFF-ARC-034~036)，prompt/agent hooks 有明确的事件限制和使用场景"
+  en: "Per official specs (hooks.md OFF-ARC-034~036), prompt/agent hooks have clear event restrictions and use cases"
+
+detection:
+  method: schema-validation
+  checks:
+    - hook_type: prompt
+      allowed_events: [PreToolUse, PostToolUse, UserPromptSubmit]
+    - hook_type: agent
+      allowed_events: [PreToolUse, PostToolUse, UserPromptSubmit]
+    - hook_type: command
+      allowed_events: [all]
+
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "基于 LLM 的 Hooks"
+  lines: "415-458"
+  quote: "prompt/agent hooks 仅支持 PreToolUse, PostToolUse, UserPromptSubmit。command hooks 支持所有事件。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：prompt hook 使用不支持的事件
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "prompt",
+          "prompt": "验证会话环境"
+        }]
+      }
+      // ❌ prompt hook 不支持 SessionStart
+      // 应该使用 command hook
+      ```
+
+      ❌ 错误2：agent hook 用于 SubagentStop
+      ```json
+      {
+        "hooks": [{
+          "event": "SubagentStop",
+          "type": "agent",
+          "agent": "cleanup-validator"
+        }]
+      }
+      // ❌ agent hook 不支持 SubagentStop
+      ```
+
+      ❌ 错误3：简单验证使用 agent hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "bash-validator",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ❌ 简单的 Bash 命令验证应该用 command hook
+      // agent hook 开销太大
+      ```
+
+      ❌ 错误4：复杂逻辑使用 prompt hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "分析这个工具调用是否符合以下50条安全规则...[长篇提示]",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ❌ 复杂验证应该用 agent hook，不是 prompt hook
+      ```
+
+      ❌ 错误5：混淆 prompt 和 command
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "command": "validate.sh"
+        }]
+      }
+      // ❌ prompt hook 应该用 prompt 字段，不是 command
+      ```
+    en: |
+      ❌ Error 1: prompt hook with unsupported event
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "prompt",
+          "prompt": "Validate session environment"
+        }]
+      }
+      // ❌ prompt hook doesn't support SessionStart
+      // Should use command hook
+      ```
+
+      ❌ Error 2: agent hook for SubagentStop
+      ```json
+      {
+        "hooks": [{
+          "event": "SubagentStop",
+          "type": "agent",
+          "agent": "cleanup-validator"
+        }]
+      }
+      // ❌ agent hook doesn't support SubagentStop
+      ```
+
+      ❌ Error 3: Simple validation with agent hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "bash-validator",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ❌ Simple Bash validation should use command hook
+      // agent hook is too expensive
+      ```
+
+      ❌ Error 4: Complex logic with prompt hook
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "Analyze if this tool call follows these 50 security rules...[long prompt]",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ❌ Complex validation should use agent hook, not prompt
+      ```
+
+      ❌ Error 5: Confusing prompt and command
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "command": "validate.sh"
+        }]
+      }
+      // ❌ prompt hook should use prompt field, not command
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：prompt hook 用于快速安全检查
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "这个 Bash 命令是否安全？检查是否包含危险操作（rm -rf, dd, 等）。如果不安全，返回 {\"ok\": false, \"reason\": \"原因\"}",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ✅ 简单的安全策略判断
+      ```
+
+      ✅ 正确2：agent hook 用于复杂验证
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "security-policy-validator",
+          "matcher": {"tool": "Bash"},
+          "description": "根据公司安全策略验证命令"
+        }]
+      }
+      // ✅ 需要参考复杂规则库的验证
+      ```
+
+      ✅ 正确3：command hook 用于 SessionStart
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "scripts/session-init.sh",
+          "description": "初始化会话环境"
+        }]
+      }
+      // ✅ SessionStart 必须用 command hook
+      ```
+
+      ✅ 正确4：根据复杂度选择 hook 类型
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/quick-check.sh",
+            "matcher": {"tool": "Read"},
+            "description": "简单检查：命令 hook"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "prompt",
+            "prompt": "验证这个写入操作是否安全",
+            "matcher": {"tool": "Write"},
+            "description": "中等复杂度：prompt hook"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "agent",
+            "agent": "complex-validator",
+            "matcher": {"tool": "Bash"},
+            "description": "高复杂度：agent hook"
+          }
+        ]
+      }
+      ```
+
+      ✅ 正确5：prompt hook 返回格式
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "检查这个 API 调用是否符合速率限制。返回 JSON: {\"ok\": true/false, \"reason\": \"说明\"}",
+          "matcher": {"tool": "WebFetch"}
+        }]
+      }
+      // ✅ 明确返回格式要求
+      ```
+
+      ✅ 正确6：agent hook 配置 SubAgent
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "agent",
+          "agent": "audit-logger",
+          "agentConfig": {
+            "model": "haiku",
+            "maxTurns": 3
+          },
+          "description": "审计日志记录"
+        }]
+      }
+      // ✅ 可以配置 SubAgent 参数
+      ```
+
+      ✅ 正确7：UserPromptSubmit 事件
+      ```json
+      {
+        "hooks": [{
+          "event": "UserPromptSubmit",
+          "type": "prompt",
+          "prompt": "用户输入是否包含敏感信息（密码、API key 等）？"
+        }]
+      }
+      // ✅ 验证用户输入
+      ```
+
+      ✅ 正确8：文档说明 hook 类型选择
+      ```markdown
+      # Hook Configuration Guide
+
+      ## Hook Type Selection
+
+      ### command hooks
+      - **When**: Simple checks, all events
+      - **Cost**: Low (shell script execution)
+      - **Examples**: File existence, regex matching
+      - **Events**: All (SessionStart, PreToolUse, etc.)
+
+      ### prompt hooks
+      - **When**: Medium complexity, LLM judgment
+      - **Cost**: Medium (LLM prompt evaluation)
+      - **Examples**: Safety checks, policy decisions
+      - **Events**: PreToolUse, PostToolUse, UserPromptSubmit only
+
+      ### agent hooks
+      - **When**: Complex validation, need reasoning
+      - **Cost**: High (full SubAgent execution)
+      - **Examples**: Multi-step validation, rule engines
+      - **Events**: PreToolUse, PostToolUse, UserPromptSubmit only
+
+      ## Decision Tree
+
+      ```
+      Need hook? → Yes
+        ↓
+      Which event?
+        ├─ SessionStart/Stop → command hook
+        ├─ SubagentStart/Stop → command hook
+        └─ PreToolUse/PostToolUse/UserPromptSubmit
+            ↓
+          How complex?
+            ├─ Simple (regex, exists) → command hook
+            ├─ Medium (safety check) → prompt hook
+            └─ Complex (multi-rule) → agent hook
+      ```
+      ```
+    en: |
+      ✅ Good 1: prompt hook for quick security check
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "Is this Bash command safe? Check for dangerous ops (rm -rf, dd, etc). If unsafe, return {\"ok\": false, \"reason\": \"explanation\"}",
+          "matcher": {"tool": "Bash"}
+        }]
+      }
+      // ✅ Simple security policy decision
+      ```
+
+      ✅ Good 2: agent hook for complex validation
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "security-policy-validator",
+          "matcher": {"tool": "Bash"},
+          "description": "Validate command against company security policy"
+        }]
+      }
+      // ✅ Validation needing complex rule library reference
+      ```
+
+      ✅ Good 3: command hook for SessionStart
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "scripts/session-init.sh",
+          "description": "Initialize session environment"
+        }]
+      }
+      // ✅ SessionStart must use command hook
+      ```
+
+      ✅ Good 4: Choose hook type by complexity
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/quick-check.sh",
+            "matcher": {"tool": "Read"},
+            "description": "Simple check: command hook"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "prompt",
+            "prompt": "Validate this write operation is safe",
+            "matcher": {"tool": "Write"},
+            "description": "Medium complexity: prompt hook"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "agent",
+            "agent": "complex-validator",
+            "matcher": {"tool": "Bash"},
+            "description": "High complexity: agent hook"
+          }
+        ]
+      }
+      ```
+
+      ✅ Good 5: prompt hook return format
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "prompt",
+          "prompt": "Check if this API call follows rate limits. Return JSON: {\"ok\": true/false, \"reason\": \"explanation\"}",
+          "matcher": {"tool": "WebFetch"}
+        }]
+      }
+      // ✅ Clear return format requirement
+      ```
+
+      ✅ Good 6: agent hook with SubAgent config
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "agent",
+          "agent": "audit-logger",
+          "agentConfig": {
+            "model": "haiku",
+            "maxTurns": 3
+          },
+          "description": "Audit logging"
+        }]
+      }
+      // ✅ Can configure SubAgent parameters
+      ```
+
+      ✅ Good 7: UserPromptSubmit event
+      ```json
+      {
+        "hooks": [{
+          "event": "UserPromptSubmit",
+          "type": "prompt",
+          "prompt": "Does user input contain sensitive info (passwords, API keys, etc.)?"
+        }]
+      }
+      // ✅ Validate user input
+      ```
+
+      ✅ Good 8: Document hook type selection
+      ```markdown
+      # Hook Configuration Guide
+
+      ## Hook Type Selection
+
+      ### command hooks
+      - **When**: Simple checks, all events
+      - **Cost**: Low (shell script execution)
+      - **Examples**: File existence, regex matching
+      - **Events**: All (SessionStart, PreToolUse, etc.)
+
+      ### prompt hooks
+      - **When**: Medium complexity, LLM judgment
+      - **Cost**: Medium (LLM prompt evaluation)
+      - **Examples**: Safety checks, policy decisions
+      - **Events**: PreToolUse, PostToolUse, UserPromptSubmit only
+
+      ### agent hooks
+      - **When**: Complex validation, need reasoning
+      - **Cost**: High (full SubAgent execution)
+      - **Examples**: Multi-step validation, rule engines
+      - **Events**: PreToolUse, PostToolUse, UserPromptSubmit only
+
+      ## Decision Tree
+
+      ```
+      Need hook? → Yes
+        ↓
+      Which event?
+        ├─ SessionStart/Stop → command hook
+        ├─ SubagentStart/Stop → command hook
+        └─ PreToolUse/PostToolUse/UserPromptSubmit
+            ↓
+          How complex?
+            ├─ Simple (regex, exists) → command hook
+            ├─ Medium (safety check) → prompt hook
+            └─ Complex (multi-rule) → agent hook
+      ```
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复步骤**:
+
+      1. **检测事件类型错误**：
+         - prompt/agent hook 使用了不支持的事件
+         - 改为 command hook 或更改事件类型
+
+      2. **根据复杂度选择 hook 类型**：
+         - 简单 → command hook
+         - 中等 → prompt hook
+         - 复杂 → agent hook
+
+      3. **修正配置字段**：
+         - prompt hook: type="prompt", prompt="..."
+         - agent hook: type="agent", agent="..."
+         - command hook: type="command", command="..."
+
+      **决策指南**:
+
+      | 场景 | 推荐类型 | 原因 |
+      |------|----------|------|
+      | 检查文件是否存在 | command | 简单，shell 快 |
+      | 验证命令安全性 | prompt | 需要判断，LLM 合适 |
+      | 多规则复杂验证 | agent | 需要推理，SubAgent |
+      | SessionStart 初始化 | command | 事件限制 |
+      | PreToolUse 安全检查 | 任意 | 看复杂度 |
+
+      **成本考虑**:
+      - command: 毫秒级
+      - prompt: 1-2秒
+      - agent: 5-10秒+
+
+      仅在必要时使用 prompt/agent hooks。
+    en: |
+      **Fix Steps**:
+
+      1. **Detect event type errors**:
+         - prompt/agent hook using unsupported events
+         - Change to command hook or change event type
+
+      2. **Choose hook type by complexity**:
+         - Simple → command hook
+         - Medium → prompt hook
+         - Complex → agent hook
+
+      3. **Fix config fields**:
+         - prompt hook: type="prompt", prompt="..."
+         - agent hook: type="agent", agent="..."
+         - command hook: type="command", command="..."
+
+      **Decision Guide**:
+
+      | Scenario | Recommended | Reason |
+      |----------|-------------|--------|
+      | Check file exists | command | Simple, shell fast |
+      | Validate command safety | prompt | Need judgment, LLM appropriate |
+      | Multi-rule complex validation | agent | Need reasoning, SubAgent |
+      | SessionStart init | command | Event restriction |
+      | PreToolUse security | Any | Depends on complexity |
+
+      **Cost Consideration**:
+      - command: milliseconds
+      - prompt: 1-2 seconds
+      - agent: 5-10+ seconds
+
+      Only use prompt/agent hooks when necessary.
+
+tags: ["hook", "architecture", "prompt", "agent", "llm", "validation"]
+related_rules: ["HOOK-001", "HOOK-002", "SUB-001"]

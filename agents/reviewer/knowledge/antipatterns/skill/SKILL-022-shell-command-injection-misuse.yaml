@@ -1,0 +1,656 @@
+id: SKILL-022
+name: shell-command-injection-misuse
+severity: warning
+component_type: skill
+category: config
+
+title:
+  zh: "Shell 命令注入语法使用不当"
+  en: "Shell command injection syntax misuse"
+
+description:
+  zh: |
+    Skills 支持 !`command` 语法在文档中执行 shell 命令并注入结果。
+
+    **语法格式**：
+    ```markdown
+    当前时间：!`date`
+    项目文件：!`ls -1`
+    Git 分支：!`git branch --show-current`
+    ```
+
+    **执行时机**：
+    - Skill 被加载到上下文时执行
+    - 结果替换 !`command` 占位符
+
+    **安全考虑**：
+    - ⚠️ 命令在主机上执行，具有完整权限
+    - ⚠️ 不要执行危险命令（rm, dd, mkfs）
+    - ⚠️ 不要在命令中包含用户输入
+    - ⚠️ 结果会被加载到上下文，注意敏感信息
+
+    **使用场景**：
+    - ✅ 获取环境信息（时间、路径、版本）
+    - ✅ 读取配置文件内容
+    - ✅ 生成动态文档
+    - ❌ 修改文件或系统状态
+    - ❌ 包含敏感数据的命令
+  en: |
+    Skills support !`command` syntax to execute shell commands in documentation and inject results.
+
+    **Syntax Format**:
+    ```markdown
+    Current time: !`date`
+    Project files: !`ls -1`
+    Git branch: !`git branch --show-current`
+    ```
+
+    **Execution Timing**:
+    - Executed when Skill is loaded into context
+    - Result replaces !`command` placeholder
+
+    **Security Considerations**:
+    - ⚠️ Commands execute on host with full permissions
+    - ⚠️ Don't execute dangerous commands (rm, dd, mkfs)
+    - ⚠️ Don't include user input in commands
+    - ⚠️ Results loaded into context, watch for sensitive info
+
+    **Use Cases**:
+    - ✅ Get environment info (time, paths, versions)
+    - ✅ Read config file contents
+    - ✅ Generate dynamic documentation
+    - ❌ Modify files or system state
+    - ❌ Commands with sensitive data
+
+rationale:
+  zh: "基于官方功能 (skills.md OFF-DEP-012)，!`command` 是 Skills 的动态内容生成机制"
+  en: "Per official features (skills.md OFF-DEP-012), !`command` is Skills' dynamic content generation mechanism"
+
+detection:
+  method: pattern-matching
+  patterns:
+    - pattern: "!`[^`]+`"
+      description: "检测命令注入语法"
+    - dangerous_commands:
+        - rm
+        - dd
+        - mkfs
+        - format
+        - ">"
+        - ">>"
+  security_check: |
+    1. 检测危险命令模式
+    2. 检查是否包含变量/参数替换
+    3. 验证命令输出是否可能包含敏感信息
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Shell 命令注入"
+  lines: "198-225"
+  quote: "!`command` 语法运行 shell 命令注入结果。命令在加载时执行。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：执行危险命令
+      ```markdown
+      ---
+      name: dangerous-skill
+      ---
+
+      # Dangerous Skill
+
+      清理临时文件：!`rm -rf /tmp/*`
+      # ❌ 危险命令，可能删除重要文件
+      ```
+
+      ❌ 错误2：包含用户输入
+      ```markdown
+      ---
+      name: user-input-skill
+      argument-hint: "<filename>"
+      ---
+
+      # File Reader
+
+      文件内容：!`cat $ARGUMENTS`
+      # ❌ $ARGUMENTS 可能包含路径遍历攻击
+      # 例如：../../etc/passwd
+      ```
+
+      ❌ 错误3：修改系统状态
+      ```markdown
+      ---
+      name: config-writer
+      ---
+
+      # Config Writer
+
+      写入配置：!`echo "config=value" >> ~/.config/app.conf`
+      # ❌ 不应该在加载时修改文件
+      ```
+
+      ❌ 错误4：暴露敏感信息
+      ```markdown
+      ---
+      name: env-display
+      ---
+
+      # Environment
+
+      环境变量：!`env`
+      # ❌ 可能包含密码、token 等敏感信息
+      ```
+
+      ❌ 错误5：长时间运行的命令
+      ```markdown
+      ---
+      name: slow-skill
+      ---
+
+      # Slow Skill
+
+      构建项目：!`npm run build`
+      # ❌ 每次加载 Skill 都会重新构建
+      # 应该提前构建，而不是在加载时
+      ```
+
+      ❌ 错误6：网络请求
+      ```markdown
+      ---
+      name: api-fetcher
+      ---
+
+      # API Fetcher
+
+      API 数据：!`curl https://api.example.com/data`
+      # ❌ 每次加载都会发起请求
+      # 可能泄漏信息或触发速率限制
+      ```
+    en: |
+      ❌ Error 1: Execute dangerous command
+      ```markdown
+      ---
+      name: dangerous-skill
+      ---
+
+      # Dangerous Skill
+
+      Clean temp files: !`rm -rf /tmp/*`
+      # ❌ Dangerous command, may delete important files
+      ```
+
+      ❌ Error 2: Include user input
+      ```markdown
+      ---
+      name: user-input-skill
+      argument-hint: "<filename>"
+      ---
+
+      # File Reader
+
+      File content: !`cat $ARGUMENTS`
+      # ❌ $ARGUMENTS may contain path traversal attack
+      # E.g.: ../../etc/passwd
+      ```
+
+      ❌ Error 3: Modify system state
+      ```markdown
+      ---
+      name: config-writer
+      ---
+
+      # Config Writer
+
+      Write config: !`echo "config=value" >> ~/.config/app.conf`
+      # ❌ Shouldn't modify files during load
+      ```
+
+      ❌ Error 4: Expose sensitive info
+      ```markdown
+      ---
+      name: env-display
+      ---
+
+      # Environment
+
+      Env vars: !`env`
+      # ❌ May contain passwords, tokens, etc.
+      ```
+
+      ❌ Error 5: Long-running command
+      ```markdown
+      ---
+      name: slow-skill
+      ---
+
+      # Slow Skill
+
+      Build project: !`npm run build`
+      # ❌ Rebuilds every time Skill loads
+      # Should build ahead, not during load
+      ```
+
+      ❌ Error 6: Network requests
+      ```markdown
+      ---
+      name: api-fetcher
+      ---
+
+      # API Fetcher
+
+      API data: !`curl https://api.example.com/data`
+      # ❌ Requests every load
+      # May leak info or hit rate limits
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：读取环境信息
+      ```markdown
+      ---
+      name: project-info
+      ---
+
+      # Project Information
+
+      ## Environment
+      - 当前目录：!`pwd`
+      - 当前用户：!`whoami`
+      - 操作系统：!`uname -s`
+      - Git 分支：!`git branch --show-current 2>/dev/null || echo "not a git repo"`
+
+      ## Project Files
+      !`find . -name "*.md" -maxdepth 2`
+      ```
+
+      ✅ 正确2：读取配置文件
+      ```markdown
+      ---
+      name: config-reference
+      ---
+
+      # Configuration Reference
+
+      ## Current Config
+      ```
+      !`cat .claude/settings.json 2>/dev/null || echo "{}"`
+      ```
+
+      注意：仅读取，不修改
+      ```
+
+      ✅ 正确3：动态生成文档
+      ```markdown
+      ---
+      name: api-docs
+      ---
+
+      # API Documentation
+
+      ## Available Endpoints
+
+      根据 OpenAPI spec 生成：
+      !`jq -r '.paths | keys[]' api-spec.json`
+
+      ## Version
+      API 版本：!`jq -r '.info.version' api-spec.json`
+      ```
+
+      ✅ 正确4：安全的参数验证
+      ```markdown
+      ---
+      name: file-validator
+      argument-hint: "<filename>"
+      ---
+
+      # File Validator
+
+      **不要直接使用 $ARGUMENTS**
+
+      使用步骤：
+      1. 使用 Skill 工具验证 $ARGUMENTS
+      2. 然后使用 Read 工具读取文件
+
+      当前允许的文件：
+      !`ls -1 *.md`
+      ```
+
+      ✅ 正确5：版本信息
+      ```markdown
+      ---
+      name: dependencies-info
+      ---
+
+      # Dependencies
+
+      ## Node.js
+      - Version: !`node --version`
+      - NPM: !`npm --version`
+
+      ## Python
+      - Version: !`python --version 2>&1`
+      - Pip: !`pip --version`
+
+      ## Installed Packages
+      !`npm list --depth=0 2>/dev/null | head -20`
+      ```
+
+      ✅ 正确6：错误处理
+      ```markdown
+      ---
+      name: robust-skill
+      ---
+
+      # Robust Information
+
+      ## Git Info
+      分支：!`git branch --show-current 2>/dev/null || echo "N/A"`
+      提交：!`git rev-parse --short HEAD 2>/dev/null || echo "N/A"`
+
+      ## Directory Info
+      文件数：!`find . -type f | wc -l`
+      目录数：!`find . -type d | wc -l`
+
+      所有命令都有错误处理（2>/dev/null || echo "N/A"）
+      ```
+
+      ✅ 正确7：性能考虑
+      ```markdown
+      ---
+      name: quick-info
+      ---
+
+      # Quick Information
+
+      ## Fast Commands Only
+      - Date: !`date +%Y-%m-%d`
+      - User: !`whoami`
+      - Shell: !`echo $SHELL`
+
+      ❌ 不要使用：
+      - !`find / -name "*.txt"` (太慢)
+      - !`npm install` (修改状态)
+      - !`docker build .` (长时间运行)
+      ```
+
+      ✅ 正确8：文档说明命令注入
+      ```markdown
+      ---
+      name: documented-skill
+      ---
+
+      # Documented Skill
+
+      ## Dynamic Content
+
+      本 Skill 使用 shell 命令注入生成动态内容：
+
+      当前时间：!`date`
+
+      ### 安全说明
+      - 仅执行只读命令
+      - 不包含用户输入
+      - 不暴露敏感信息
+      - 命令快速完成（<1秒）
+
+      ### 命令执行时机
+      - Skill 加载到上下文时执行
+      - 非每次调用 Skill 时执行
+      - 结果缓存在当前会话
+      ```
+    en: |
+      ✅ Good 1: Read environment info
+      ```markdown
+      ---
+      name: project-info
+      ---
+
+      # Project Information
+
+      ## Environment
+      - Current dir: !`pwd`
+      - Current user: !`whoami`
+      - OS: !`uname -s`
+      - Git branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
+
+      ## Project Files
+      !`find . -name "*.md" -maxdepth 2`
+      ```
+
+      ✅ Good 2: Read config files
+      ```markdown
+      ---
+      name: config-reference
+      ---
+
+      # Configuration Reference
+
+      ## Current Config
+      ```
+      !`cat .claude/settings.json 2>/dev/null || echo "{}"`
+      ```
+
+      Note: Read only, don't modify
+      ```
+
+      ✅ Good 3: Dynamically generate docs
+      ```markdown
+      ---
+      name: api-docs
+      ---
+
+      # API Documentation
+
+      ## Available Endpoints
+
+      Generated from OpenAPI spec:
+      !`jq -r '.paths | keys[]' api-spec.json`
+
+      ## Version
+      API version: !`jq -r '.info.version' api-spec.json`
+      ```
+
+      ✅ Good 4: Safe parameter validation
+      ```markdown
+      ---
+      name: file-validator
+      argument-hint: "<filename>"
+      ---
+
+      # File Validator
+
+      **Don't use $ARGUMENTS directly**
+
+      Steps:
+      1. Validate $ARGUMENTS using Skill tool
+      2. Then use Read tool to read file
+
+      Currently allowed files:
+      !`ls -1 *.md`
+      ```
+
+      ✅ Good 5: Version information
+      ```markdown
+      ---
+      name: dependencies-info
+      ---
+
+      # Dependencies
+
+      ## Node.js
+      - Version: !`node --version`
+      - NPM: !`npm --version`
+
+      ## Python
+      - Version: !`python --version 2>&1`
+      - Pip: !`pip --version`
+
+      ## Installed Packages
+      !`npm list --depth=0 2>/dev/null | head -20`
+      ```
+
+      ✅ Good 6: Error handling
+      ```markdown
+      ---
+      name: robust-skill
+      ---
+
+      # Robust Information
+
+      ## Git Info
+      Branch: !`git branch --show-current 2>/dev/null || echo "N/A"`
+      Commit: !`git rev-parse --short HEAD 2>/dev/null || echo "N/A"`
+
+      ## Directory Info
+      Files: !`find . -type f | wc -l`
+      Dirs: !`find . -type d | wc -l`
+
+      All commands have error handling (2>/dev/null || echo "N/A")
+      ```
+
+      ✅ Good 7: Performance considerations
+      ```markdown
+      ---
+      name: quick-info
+      ---
+
+      # Quick Information
+
+      ## Fast Commands Only
+      - Date: !`date +%Y-%m-%d`
+      - User: !`whoami`
+      - Shell: !`echo $SHELL`
+
+      ❌ Don't use:
+      - !`find / -name "*.txt"` (too slow)
+      - !`npm install` (modifies state)
+      - !`docker build .` (long running)
+      ```
+
+      ✅ Good 8: Document command injection
+      ```markdown
+      ---
+      name: documented-skill
+      ---
+
+      # Documented Skill
+
+      ## Dynamic Content
+
+      This Skill uses shell command injection for dynamic content:
+
+      Current time: !`date`
+
+      ### Security Notes
+      - Only execute read-only commands
+      - No user input included
+      - No sensitive info exposed
+      - Commands complete quickly (<1s)
+
+      ### Command Execution Timing
+      - Executed when Skill loads into context
+      - Not executed every Skill invocation
+      - Results cached in current session
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **安全审查清单**:
+
+      ✅ **允许的命令**：
+      - 只读命令（cat, ls, pwd, git status）
+      - 快速执行（<1秒）
+      - 无副作用
+      - 不包含敏感信息
+
+      ❌ **禁止的命令**：
+      - 修改命令（rm, mv, cp, write）
+      - 危险命令（dd, mkfs, format）
+      - 长时间运行（build, install, download）
+      - 网络请求（curl, wget, ssh）
+      - 包含用户输入
+
+      **修复建议**:
+
+      1. 移除危险命令，改用其他方法：
+         ```markdown
+         # 错误
+         !`rm temp.txt`
+
+         # 正确
+         使用 Bash 工具删除文件（有权限提示）
+         ```
+
+      2. 添加错误处理：
+         ```bash
+         !`command 2>/dev/null || echo "N/A"`
+         ```
+
+      3. 限制命令范围：
+         ```bash
+         !`find . -maxdepth 2 -name "*.md"`
+         # 而不是
+         !`find / -name "*.md"`
+         ```
+
+      4. 文档中说明命令用途
+
+      **替代方案**:
+
+      如果需要修改文件或执行复杂操作：
+      - 使用 Bash 工具（带权限控制）
+      - 使用 SubAgent（受监控）
+      - 不要用 !`command` 语法
+    en: |
+      **Security Review Checklist**:
+
+      ✅ **Allowed Commands**:
+      - Read-only commands (cat, ls, pwd, git status)
+      - Fast execution (<1s)
+      - No side effects
+      - No sensitive info
+
+      ❌ **Forbidden Commands**:
+      - Modify commands (rm, mv, cp, write)
+      - Dangerous commands (dd, mkfs, format)
+      - Long-running (build, install, download)
+      - Network requests (curl, wget, ssh)
+      - Include user input
+
+      **Fix Recommendations**:
+
+      1. Remove dangerous commands, use alternative:
+         ```markdown
+         # Wrong
+         !`rm temp.txt`
+
+         # Right
+         Use Bash tool to delete file (with permission prompt)
+         ```
+
+      2. Add error handling:
+         ```bash
+         !`command 2>/dev/null || echo "N/A"`
+         ```
+
+      3. Limit command scope:
+         ```bash
+         !`find . -maxdepth 2 -name "*.md"`
+         # instead of
+         !`find / -name "*.md"`
+         ```
+
+      4. Document command purpose
+
+      **Alternatives**:
+
+      If need to modify files or execute complex operations:
+      - Use Bash tool (with permission control)
+      - Use SubAgent (monitored)
+      - Don't use !`command` syntax
+
+tags: ["skill", "security", "command-injection", "shell", "dynamic-content"]
+related_rules: ["SEC-001", "SEC-005", "skill-001"]

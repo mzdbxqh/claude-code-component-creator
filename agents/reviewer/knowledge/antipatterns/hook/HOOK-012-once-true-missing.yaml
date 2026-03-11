@@ -1,0 +1,583 @@
+id: HOOK-012
+name: once-true-missing
+severity: info
+component_type: hook
+category: scalability
+
+title:
+  zh: "重复执行的 Hook 缺少 once: true"
+  en: "Repeatedly executing Hook missing once: true"
+
+description:
+  zh: |
+    某些 hooks 应该在每个会话中只执行一次，使用 once: true 防止重复执行。
+
+    **once: true 的作用**：
+    - Hook 在会话中首次触发时执行
+    - 后续相同事件不再触发该 hook
+    - 会话结束后重置
+
+    **适用场景**：
+    - ✅ 会话初始化（SessionStart）
+    - ✅ 一次性设置（环境配置、日志初始化）
+    - ✅ 欢迎消息或提示
+    - ✅ 费用较高的检查
+    - ❌ 需要每次执行的验证（PreToolUse 安全检查）
+    - ❌ 审计日志（每次都要记录）
+
+    **与事件类型的关系**：
+    - SessionStart: 通常不需要 once，本身只触发一次
+    - PreToolUse: 看情况，初始化用 once，验证不用
+    - PostToolUse: 看情况，日志不用，一次性通知用 once
+  en: |
+    Some hooks should execute only once per session, use once: true to prevent repeated execution.
+
+    **once: true Purpose**:
+    - Hook executes on first trigger in session
+    - Subsequent same events don't trigger this hook
+    - Resets after session ends
+
+    **Use Cases**:
+    - ✅ Session initialization (SessionStart)
+    - ✅ One-time setup (env config, log init)
+    - ✅ Welcome messages or prompts
+    - ✅ Expensive checks
+    - ❌ Validation needed every time (PreToolUse security)
+    - ❌ Audit logs (must record every time)
+
+    **Relationship with Event Types**:
+    - SessionStart: Usually don't need once, triggers once inherently
+    - PreToolUse: Depends, init uses once, validation doesn't
+    - PostToolUse: Depends, logs don't, one-time notifications do
+
+rationale:
+  zh: "基于官方功能 (hooks.md OFF-ARC-015)，once: true 用于优化性能和避免重复操作"
+  en: "Per official features (hooks.md OFF-ARC-015), once: true used for performance optimization and avoiding duplicate operations"
+
+detection:
+  method: pattern-analysis
+  indicators:
+    - keyword: "初始化|initialization|设置|setup|一次|once"
+      weight: 2
+    - keyword: "欢迎|welcome|提示|prompt|通知|notify"
+      weight: 1
+    - event: "PreToolUse 且描述包含 '首次'"
+      weight: 2
+
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "once 字段"
+  lines: "342-368"
+  quote: "once: true 每会话仅运行一次 hook。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：初始化 hook 未设置 once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init-workspace.sh",
+          "description": "初始化工作空间"
+        }]
+      }
+      // ❌ 每次 PreToolUse 都会初始化
+      // 应该添加 once: true
+      ```
+
+      ❌ 错误2：欢迎消息每次都显示
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "echo '欢迎使用本插件！'",
+          "description": "显示欢迎消息"
+        }]
+      }
+      // ❌ SessionStart 已经只触发一次
+      // 但如果改为 UserPromptSubmit，就需要 once: true
+      ```
+
+      ❌ 错误3：费用高的检查重复执行
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "expensive-validator",
+          "matcher": {"tool": "Bash"},
+          "description": "深度安全分析（首次）"
+        }]
+      }
+      // ❌ 描述说"首次"，但没有 once: true
+      // 会每次都执行昂贵的 agent hook
+      ```
+
+      ❌ 错误4：审计日志使用了 once
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "command",
+          "command": "scripts/audit-log.sh",
+          "once": true,  // ❌ 错误！审计应该每次都记录
+          "description": "记录审计日志"
+        }]
+      }
+      // ❌ once: true 导致只记录第一次工具使用
+      ```
+    en: |
+      ❌ Error 1: Init hook without once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init-workspace.sh",
+          "description": "Initialize workspace"
+        }]
+      }
+      // ❌ Initializes on every PreToolUse
+      // Should add once: true
+      ```
+
+      ❌ Error 2: Welcome message shows every time
+      ```json
+      {
+        "hooks": [{
+          "event": "SessionStart",
+          "type": "command",
+          "command": "echo 'Welcome to this plugin!'",
+          "description": "Show welcome message"
+        }]
+      }
+      // ❌ SessionStart already triggers once
+      // But if changed to UserPromptSubmit, would need once: true
+      ```
+
+      ❌ Error 3: Expensive check executes repeatedly
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "expensive-validator",
+          "matcher": {"tool": "Bash"},
+          "description": "Deep security analysis (first time)"
+        }]
+      }
+      // ❌ Description says "first time" but no once: true
+      // Will execute expensive agent hook every time
+      ```
+
+      ❌ Error 4: Audit log uses once
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "command",
+          "command": "scripts/audit-log.sh",
+          "once": true,  // ❌ Wrong! Audit should record every time
+          "description": "Record audit log"
+        }]
+      }
+      // ❌ once: true causes only first tool use to be logged
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：初始化使用 once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init-workspace.sh",
+          "once": true,  // ✅ 只初始化一次
+          "description": "初始化工作空间（仅首次）"
+        }]
+      }
+      ```
+
+      ✅ 正确2：用户输入提示使用 once
+      ```json
+      {
+        "hooks": [{
+          "event": "UserPromptSubmit",
+          "type": "prompt",
+          "prompt": "提醒用户：本会话启用了代码审查功能",
+          "once": true,  // ✅ 只提示一次
+          "description": "首次输入时的功能提示"
+        }]
+      }
+      ```
+
+      ✅ 正确3：费用高的验证使用 once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "security-policy-loader",
+          "once": true,  // ✅ 只加载一次安全策略
+          "description": "加载公司安全策略（首次）"
+        }]
+      }
+      ```
+
+      ✅ 正确4：审计日志不使用 once
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "command",
+          "command": "scripts/audit-log.sh",
+          // ✅ 没有 once，每次都记录
+          "description": "记录所有工具使用"
+        }]
+      }
+      ```
+
+      ✅ 正确5：组合使用 once 和非 once
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/load-config.sh",
+            "once": true,
+            "description": "加载配置（首次）"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/validate.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "验证每个 Bash 命令"
+          }
+        ]
+      }
+      // ✅ 第一个 hook 只运行一次，第二个每次都运行
+      ```
+
+      ✅ 正确6：文档说明 once 行为
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/check-dependencies.sh",
+          "once": true,
+          "description": "检查依赖安装情况"
+        }]
+      }
+      ```
+
+      对应的 README:
+      ```markdown
+      ## Hooks
+
+      ### Dependency Check (once per session)
+      - **When**: Before first tool use
+      - **What**: Validates all required dependencies are installed
+      - **Frequency**: Once per session (using `once: true`)
+      - **Why**: Dependencies don't change during session
+
+      If dependencies are missing, the hook will fail and block operations.
+      ```
+
+      ✅ 正确7：条件使用 once
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "prompt",
+            "prompt": "检查用户是否有使用此工具的权限",
+            "matcher": {"tool": "Bash"},
+            "once": true,
+            "description": "首次 Bash 使用时验证权限"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/validate-command.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "验证每个 Bash 命令安全性"
+          }
+        ]
+      }
+      // ✅ 权限检查一次，命令验证每次
+      ```
+
+      ✅ 正确8：理解会话范围
+      ```markdown
+      # Hook once: true Behavior
+
+      ## What is a "session"?
+      - One conversation in Claude Code CLI
+      - From start to exit
+      - Separate sessions = separate once states
+
+      ## Example
+      ```json
+      {
+        "event": "PreToolUse",
+        "once": true,
+        "command": "echo 'First time!'"
+      }
+      ```
+
+      ### Session 1:
+      1. First PreToolUse → Hook runs ✅
+      2. Second PreToolUse → Hook skipped ⏭️
+      3. Third PreToolUse → Hook skipped ⏭️
+
+      ### Session 2 (new conversation):
+      1. First PreToolUse → Hook runs ✅ (reset!)
+      2. Second PreToolUse → Hook skipped ⏭️
+      ```
+    en: |
+      ✅ Good 1: Initialization with once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init-workspace.sh",
+          "once": true,  // ✅ Initialize only once
+          "description": "Initialize workspace (first time only)"
+        }]
+      }
+      ```
+
+      ✅ Good 2: User input prompt with once
+      ```json
+      {
+        "hooks": [{
+          "event": "UserPromptSubmit",
+          "type": "prompt",
+          "prompt": "Remind user: Code review feature enabled this session",
+          "once": true,  // ✅ Prompt only once
+          "description": "Feature reminder on first input"
+        }]
+      }
+      ```
+
+      ✅ Good 3: Expensive validation with once
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "agent",
+          "agent": "security-policy-loader",
+          "once": true,  // ✅ Load security policy once
+          "description": "Load company security policy (first time)"
+        }]
+      }
+      ```
+
+      ✅ Good 4: Audit log without once
+      ```json
+      {
+        "hooks": [{
+          "event": "PostToolUse",
+          "type": "command",
+          "command": "scripts/audit-log.sh",
+          // ✅ No once, records every time
+          "description": "Log all tool usage"
+        }]
+      }
+      ```
+
+      ✅ Good 5: Combine once and non-once
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/load-config.sh",
+            "once": true,
+            "description": "Load config (first time)"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/validate.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "Validate every Bash command"
+          }
+        ]
+      }
+      // ✅ First hook runs once, second runs every time
+      ```
+
+      ✅ Good 6: Document once behavior
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/check-dependencies.sh",
+          "once": true,
+          "description": "Check dependency installation"
+        }]
+      }
+      ```
+
+      Corresponding README:
+      ```markdown
+      ## Hooks
+
+      ### Dependency Check (once per session)
+      - **When**: Before first tool use
+      - **What**: Validates all required dependencies are installed
+      - **Frequency**: Once per session (using `once: true`)
+      - **Why**: Dependencies don't change during session
+
+      If dependencies are missing, the hook will fail and block operations.
+      ```
+
+      ✅ Good 7: Conditional use of once
+      ```json
+      {
+        "hooks": [
+          {
+            "event": "PreToolUse",
+            "type": "prompt",
+            "prompt": "Check if user has permission to use this tool",
+            "matcher": {"tool": "Bash"},
+            "once": true,
+            "description": "Verify permission on first Bash use"
+          },
+          {
+            "event": "PreToolUse",
+            "type": "command",
+            "command": "scripts/validate-command.sh",
+            "matcher": {"tool": "Bash"},
+            "description": "Validate every Bash command safety"
+          }
+        ]
+      }
+      // ✅ Permission check once, command validation every time
+      ```
+
+      ✅ Good 8: Understand session scope
+      ```markdown
+      # Hook once: true Behavior
+
+      ## What is a "session"?
+      - One conversation in Claude Code CLI
+      - From start to exit
+      - Separate sessions = separate once states
+
+      ## Example
+      ```json
+      {
+        "event": "PreToolUse",
+        "once": true,
+        "command": "echo 'First time!'"
+      }
+      ```
+
+      ### Session 1:
+      1. First PreToolUse → Hook runs ✅
+      2. Second PreToolUse → Hook skipped ⏭️
+      3. Third PreToolUse → Hook skipped ⏭️
+
+      ### Session 2 (new conversation):
+      1. First PreToolUse → Hook runs ✅ (reset!)
+      2. Second PreToolUse → Hook skipped ⏭️
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要 once: true**:
+
+      ✅ **应该使用 once**：
+      - 初始化操作（环境设置、配置加载）
+      - 一次性提示或通知
+      - 费用高的验证（首次检查权限）
+      - 不会变化的检查（依赖安装）
+
+      ❌ **不应使用 once**：
+      - 每次都需要的验证（命令安全检查）
+      - 审计日志
+      - 动态检查（每次可能不同的结果）
+      - 状态追踪
+
+      **添加配置**:
+
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init.sh",
+          "once": true,  // 添加这一行
+          "description": "初始化（仅首次）"
+        }]
+      }
+      ```
+
+      **决策表**:
+
+      | Hook 用途 | 使用 once? | 原因 |
+      |-----------|-----------|------|
+      | 环境初始化 | ✅ Yes | 只需一次 |
+      | 配置加载 | ✅ Yes | 配置不变 |
+      | 权限检查 | ✅ Yes | 权限不变 |
+      | 欢迎消息 | ✅ Yes | 只显示一次 |
+      | 命令验证 | ❌ No | 每次都验证 |
+      | 审计日志 | ❌ No | 记录所有 |
+      | 速率限制 | ❌ No | 动态检查 |
+    en: |
+      **Evaluate if once: true needed**:
+
+      ✅ **Should use once**:
+      - Initialization operations (env setup, config load)
+      - One-time prompts or notifications
+      - Expensive validation (first-time permission check)
+      - Unchanging checks (dependency installation)
+
+      ❌ **Shouldn't use once**:
+      - Validation needed every time (command safety check)
+      - Audit logs
+      - Dynamic checks (results may differ each time)
+      - State tracking
+
+      **Add Configuration**:
+
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "scripts/init.sh",
+          "once": true,  // Add this line
+          "description": "Initialize (first time only)"
+        }]
+      }
+      ```
+
+      **Decision Table**:
+
+      | Hook Purpose | Use once? | Reason |
+      |--------------|-----------|--------|
+      | Env initialization | ✅ Yes | Only needed once |
+      | Config loading | ✅ Yes | Config doesn't change |
+      | Permission check | ✅ Yes | Permission doesn't change |
+      | Welcome message | ✅ Yes | Show once only |
+      | Command validation | ❌ No | Validate every time |
+      | Audit logs | ❌ No | Record all |
+      | Rate limiting | ❌ No | Dynamic check |
+
+tags: ["hook", "scalability", "once", "optimization", "performance"]
+related_rules: ["HOOK-001", "HOOK-005"]

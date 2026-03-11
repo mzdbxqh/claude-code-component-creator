@@ -1,0 +1,573 @@
+id: ENV-001
+name: skill-location-priority-unclear
+severity: info
+component_type: skill
+category: environment
+
+title:
+  zh: "Skill 位置优先级未说明"
+  en: "Skill location priority not documented"
+
+description:
+  zh: |
+    Skill 的位置决定其作用范围和优先级。
+
+    **Skill 位置优先级**（从高到低）：
+    1. **CLI --skills** - 命令行参数（最高）
+    2. **企业级** - ~/.claude/enterprise/skills/
+    3. **个人** - ~/.claude/skills/
+    4. **插件** - plugin/skills/ (需要命名空间)
+    5. **项目** - .claude/skills/
+
+    **位置说明**：
+    - **个人 Skills** (~/.claude/skills/): 用户所有项目通用
+    - **项目 Skills** (.claude/skills/): 仅当前项目
+    - **插件 Skills** (plugin/skills/): 可分发，使用命名空间
+
+    **命名空间规则**：
+    - 个人/项目 Skills: 直接使用名称 (/skill-name)
+    - 插件 Skills: 需要命名空间 (/plugin-name:skill-name)
+
+    **使用建议**：
+    - 通用工具 → 个人 Skills
+    - 项目特定 → 项目 Skills
+    - 可分发功能 → 插件 Skills
+  en: |
+    Skill location determines its scope and priority.
+
+    **Skill Location Priority** (high to low):
+    1. **CLI --skills** - Command line args (highest)
+    2. **Enterprise** - ~/.claude/enterprise/skills/
+    3. **Personal** - ~/.claude/skills/
+    4. **Plugin** - plugin/skills/ (needs namespace)
+    5. **Project** - .claude/skills/
+
+    **Location Descriptions**:
+    - **Personal Skills** (~/.claude/skills/): Common across all user projects
+    - **Project Skills** (.claude/skills/): Current project only
+    - **Plugin Skills** (plugin/skills/): Distributable, use namespace
+
+    **Namespace Rules**:
+    - Personal/Project Skills: Use name directly (/skill-name)
+    - Plugin Skills: Need namespace (/plugin-name:skill-name)
+
+    **Usage Recommendations**:
+    - General tools → Personal Skills
+    - Project-specific → Project Skills
+    - Distributable features → Plugin Skills
+
+rationale:
+  zh: "基于官方规范 (skills.md OFF-ENV-002~004, OFF-ARC-019)，Skill 位置决定作用范围和调用方式"
+  en: "Per official specs (skills.md OFF-ENV-002~004, OFF-ARC-019), Skill location determines scope and invocation"
+
+detection:
+  method: context-check
+  indicators:
+    - missing_documentation: "README 未说明 Skill 适用范围"
+    - unclear_placement: "Skill 位置不清晰"
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Skill 位置和范围"
+  lines: "88-125"
+  quote: "skill 存储位置决定范围。~/.claude/skills/ 为个人，.claude/skills/ 为项目，插件 skills 使用命名空间。"
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误1：README 未说明 Skill 位置
+      ```markdown
+      # My Skill
+
+      ## Installation
+      Copy SKILL.md to somewhere...
+
+      # ❌ 没有说明应该放在哪里
+      ```
+
+      ❌ 错误2：通用工具放在项目目录
+      ```
+      my-project/
+        .claude/
+          skills/
+            json-formatter/    ← ❌ 通用工具应在个人目录
+              SKILL.md
+      ```
+
+      ❌ 错误3：项目特定功能放在个人目录
+      ```
+      ~/.claude/skills/
+        deploy-to-prod/    ← ❌ 部署是项目特定的
+          SKILL.md         应该在项目 .claude/skills/
+      ```
+
+      ❌ 错误4：未说明命名空间
+      ```markdown
+      # Plugin Skill
+
+      调用方式：/my-skill
+
+      # ❌ 插件 Skill 需要命名空间
+      # 应该是：/plugin-name:my-skill
+      ```
+    en: |
+      ❌ Error 1: README doesn't explain Skill location
+      ```markdown
+      # My Skill
+
+      ## Installation
+      Copy SKILL.md to somewhere...
+
+      # ❌ Doesn't specify where to put it
+      ```
+
+      ❌ Error 2: General tool in project directory
+      ```
+      my-project/
+        .claude/
+          skills/
+            json-formatter/    ← ❌ General tool should be in personal dir
+              SKILL.md
+      ```
+
+      ❌ Error 3: Project-specific feature in personal directory
+      ```
+      ~/.claude/skills/
+        deploy-to-prod/    ← ❌ Deployment is project-specific
+          SKILL.md         Should be in project .claude/skills/
+      ```
+
+      ❌ Error 4: Namespace not documented
+      ```markdown
+      # Plugin Skill
+
+      Usage: /my-skill
+
+      # ❌ Plugin Skill needs namespace
+      # Should be: /plugin-name:my-skill
+      ```
+
+  good:
+    zh: |
+      ✅ 正确1：个人 Skill README
+      ```markdown
+      # JSON Formatter
+
+      通用 JSON 格式化工具
+
+      ## Installation
+
+      ### 个人使用（推荐）
+      ```bash
+      mkdir -p ~/.claude/skills/json-formatter
+      cp SKILL.md ~/.claude/skills/json-formatter/
+      ```
+
+      **作用范围**: 所有项目
+
+      ## Usage
+      ```
+      /json-formatter <file>
+      ```
+
+      无需命名空间，直接使用 Skill 名称。
+      ```
+
+      ✅ 正确2：项目 Skill README
+      ```markdown
+      # Deploy to Production
+
+      项目特定的部署工具
+
+      ## Installation
+
+      ### 项目内安装
+      ```bash
+      mkdir -p .claude/skills/deploy-to-prod
+      cp SKILL.md .claude/skills/deploy-to-prod/
+      ```
+
+      **作用范围**: 仅当前项目
+
+      ## Why Project-Specific?
+      - 包含项目特定的配置
+      - 依赖项目目录结构
+      - 不应用于其他项目
+
+      ## Usage
+      ```
+      /deploy-to-prod
+      ```
+      ```
+
+      ✅ 正确3：插件 Skill README
+      ```markdown
+      # Code Review Plugin
+
+      可分发的代码审查工具
+
+      ## Installation
+
+      ### 作为插件安装
+      ```bash
+      claude install my-code-review-plugin
+      ```
+
+      或手动：
+      ```bash
+      cp -r my-code-review-plugin ~/.claude/plugins/
+      ```
+
+      **作用范围**: 所有安装了插件的项目
+
+      ## Usage
+
+      **必须使用命名空间**:
+      ```
+      /code-review:analyze <file>
+      /code-review:fix <file>
+      ```
+
+      **不能**直接使用 `/analyze`（会与其他插件冲突）
+
+      ## Namespace
+      - Plugin name: `code-review`
+      - Skills: `analyze`, `fix`, `report`
+      - Full names: `code-review:analyze`, etc.
+      ```
+
+      ✅ 正确4：完整的位置指南
+      ```markdown
+      # Skill Installation Guide
+
+      ## Location Decision Tree
+
+      ```
+      What type of Skill?
+        ├─ General tool (JSON formatter, linter)
+        │   → Personal: ~/.claude/skills/
+        │
+        ├─ Project-specific (deploy, project config)
+        │   → Project: .claude/skills/
+        │
+        └─ Distributable feature (plugin)
+            → Plugin: plugin-dir/skills/
+      ```
+
+      ## Priority (when same name)
+
+      1. CLI --skills (highest)
+      2. Enterprise (~/.claude/enterprise/skills/)
+      3. Personal (~/.claude/skills/)
+      4. Plugin (plugin/skills/)
+      5. Project (.claude/skills/)
+
+      ## Examples
+
+      ### Scenario 1: JSON formatter
+      - **Type**: General tool
+      - **Location**: ~/.claude/skills/json-formatter/
+      - **Usage**: `/json-formatter`
+      - **Scope**: All projects
+
+      ### Scenario 2: Project deployment
+      - **Type**: Project-specific
+      - **Location**: project/.claude/skills/deploy/
+      - **Usage**: `/deploy`
+      - **Scope**: This project only
+
+      ### Scenario 3: Plugin feature
+      - **Type**: Distributable
+      - **Location**: plugin/skills/feature/
+      - **Usage**: `/plugin-name:feature`
+      - **Scope**: Where plugin installed
+      ```
+
+      ✅ 正确5：说明优先级行为
+      ```markdown
+      # Skill Priority Example
+
+      ## Setup
+
+      Three Skills with same name "test":
+
+      1. Personal: ~/.claude/skills/test/
+      2. Plugin: my-plugin/skills/test/ (as `my-plugin:test`)
+      3. Project: .claude/skills/test/
+
+      ## Invocation
+
+      ```bash
+      /test
+      ```
+      → Calls personal Skill (higher priority)
+
+      ```bash
+      /my-plugin:test
+      ```
+      → Calls plugin Skill (explicit namespace)
+
+      ## Override
+
+      To use project Skill instead:
+      ```bash
+      cd project-dir
+      # Temporarily rename personal Skill
+      mv ~/.claude/skills/test ~/.claude/skills/test.backup
+      /test  # Now calls project Skill
+      ```
+
+      Or use CLI override:
+      ```bash
+      claude --skills=.claude/skills/test
+      # CLI has highest priority
+      ```
+      ```
+    en: |
+      ✅ Good 1: Personal Skill README
+      ```markdown
+      # JSON Formatter
+
+      General JSON formatting tool
+
+      ## Installation
+
+      ### Personal Use (Recommended)
+      ```bash
+      mkdir -p ~/.claude/skills/json-formatter
+      cp SKILL.md ~/.claude/skills/json-formatter/
+      ```
+
+      **Scope**: All projects
+
+      ## Usage
+      ```
+      /json-formatter <file>
+      ```
+
+      No namespace needed, use Skill name directly.
+      ```
+
+      ✅ Good 2: Project Skill README
+      ```markdown
+      # Deploy to Production
+
+      Project-specific deployment tool
+
+      ## Installation
+
+      ### Install in Project
+      ```bash
+      mkdir -p .claude/skills/deploy-to-prod
+      cp SKILL.md .claude/skills/deploy-to-prod/
+      ```
+
+      **Scope**: This project only
+
+      ## Why Project-Specific?
+      - Contains project-specific config
+      - Depends on project directory structure
+      - Shouldn't be used for other projects
+
+      ## Usage
+      ```
+      /deploy-to-prod
+      ```
+      ```
+
+      ✅ Good 3: Plugin Skill README
+      ```markdown
+      # Code Review Plugin
+
+      Distributable code review tool
+
+      ## Installation
+
+      ### Install as Plugin
+      ```bash
+      claude install my-code-review-plugin
+      ```
+
+      Or manually:
+      ```bash
+      cp -r my-code-review-plugin ~/.claude/plugins/
+      ```
+
+      **Scope**: All projects with plugin installed
+
+      ## Usage
+
+      **Must use namespace**:
+      ```
+      /code-review:analyze <file>
+      /code-review:fix <file>
+      ```
+
+      **Cannot** use `/analyze` directly (would conflict with other plugins)
+
+      ## Namespace
+      - Plugin name: `code-review`
+      - Skills: `analyze`, `fix`, `report`
+      - Full names: `code-review:analyze`, etc.
+      ```
+
+      ✅ Good 4: Complete location guide
+      ```markdown
+      # Skill Installation Guide
+
+      ## Location Decision Tree
+
+      ```
+      What type of Skill?
+        ├─ General tool (JSON formatter, linter)
+        │   → Personal: ~/.claude/skills/
+        │
+        ├─ Project-specific (deploy, project config)
+        │   → Project: .claude/skills/
+        │
+        └─ Distributable feature (plugin)
+            → Plugin: plugin-dir/skills/
+      ```
+
+      ## Priority (when same name)
+
+      1. CLI --skills (highest)
+      2. Enterprise (~/.claude/enterprise/skills/)
+      3. Personal (~/.claude/skills/)
+      4. Plugin (plugin/skills/)
+      5. Project (.claude/skills/)
+
+      ## Examples
+
+      ### Scenario 1: JSON formatter
+      - **Type**: General tool
+      - **Location**: ~/.claude/skills/json-formatter/
+      - **Usage**: `/json-formatter`
+      - **Scope**: All projects
+
+      ### Scenario 2: Project deployment
+      - **Type**: Project-specific
+      - **Location**: project/.claude/skills/deploy/
+      - **Usage**: `/deploy`
+      - **Scope**: This project only
+
+      ### Scenario 3: Plugin feature
+      - **Type**: Distributable
+      - **Location**: plugin/skills/feature/
+      - **Usage**: `/plugin-name:feature`
+      - **Scope**: Where plugin installed
+      ```
+
+      ✅ Good 5: Document priority behavior
+      ```markdown
+      # Skill Priority Example
+
+      ## Setup
+
+      Three Skills with same name "test":
+
+      1. Personal: ~/.claude/skills/test/
+      2. Plugin: my-plugin/skills/test/ (as `my-plugin:test`)
+      3. Project: .claude/skills/test/
+
+      ## Invocation
+
+      ```bash
+      /test
+      ```
+      → Calls personal Skill (higher priority)
+
+      ```bash
+      /my-plugin:test
+      ```
+      → Calls plugin Skill (explicit namespace)
+
+      ## Override
+
+      To use project Skill instead:
+      ```bash
+      cd project-dir
+      # Temporarily rename personal Skill
+      mv ~/.claude/skills/test ~/.claude/skills/test.backup
+      /test  # Now calls project Skill
+      ```
+
+      Or use CLI override:
+      ```bash
+      claude --skills=.claude/skills/test
+      # CLI has highest priority
+      ```
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **为 Skill 添加位置文档**:
+
+      1. **在 README 中说明**：
+         - Skill 类型（通用/项目特定/插件）
+         - 推荐安装位置
+         - 作用范围
+
+      2. **安装说明模板**：
+         ```markdown
+         ## Installation
+
+         ### [Personal/Project/Plugin] Installation
+         ```bash
+         # 安装命令
+         ```
+
+         **Scope**: [描述作用范围]
+         **Priority**: [描述优先级]
+         ```
+
+      3. **使用说明**：
+         - 个人/项目：`/skill-name`
+         - 插件：`/plugin-name:skill-name`
+
+      **决策指南**:
+
+      | Skill 特性 | 推荐位置 |
+      |-----------|---------|
+      | 通用工具 | Personal |
+      | 项目特定配置 | Project |
+      | 可分发功能 | Plugin |
+      | 公司标准 | Enterprise |
+    en: |
+      **Add location documentation for Skill**:
+
+      1. **Document in README**:
+         - Skill type (general/project-specific/plugin)
+         - Recommended installation location
+         - Scope
+
+      2. **Installation template**:
+         ```markdown
+         ## Installation
+
+         ### [Personal/Project/Plugin] Installation
+         ```bash
+         # Installation command
+         ```
+
+         **Scope**: [Describe scope]
+         **Priority**: [Describe priority]
+         ```
+
+      3. **Usage instructions**:
+         - Personal/Project: `/skill-name`
+         - Plugin: `/plugin-name:skill-name`
+
+      **Decision Guide**:
+
+      | Skill Characteristic | Recommended Location |
+      |---------------------|---------------------|
+      | General tool | Personal |
+      | Project-specific config | Project |
+      | Distributable feature | Plugin |
+      | Company standard | Enterprise |
+
+tags: ["skill", "environment", "location", "priority", "namespace"]
+related_rules: ["ARCH-016", "skill-002"]
