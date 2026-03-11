@@ -1,41 +1,67 @@
 id: ARCH-010
 name: model-task-mismatch
-severity: warning
+severity: info
 component_type: all
-category: architecture
+category: configuration
 
 title:
-  zh: "模型选择与任务复杂度不匹配"
-  en: "Model-Task Complexity Mismatch"
+  zh: "模型选择建议"
+  en: "Model selection recommendation"
 
 description:
   zh: |
-    任务复杂度与选择的模型能力不匹配。
-    复杂任务使用轻量级模型(haiku)可能导致质量下降，
-    简单任务使用重量级模型(opus)造成资源浪费。
+    模型选择建议根据任务复杂度，但 inherit 是推荐默认值。
+
+    **官方模型选项**（OFF-LLM-001~002）：
+    - **inherit**: 继承主对话模型（推荐默认）
+    - **haiku**: 快速、简单任务
+    - **sonnet**: 中等复杂度任务
+    - **opus**: 复杂推理、设计任务
+
+    **推荐策略**：
+    1. 默认使用 inherit（自动适配）
+    2. 有特定性能需求时选择具体模型
+    3. 在文档中说明选择原因
+
+    注意：这是建议而非强制要求，inherit 是有效且推荐的选项。
   en: |
-    Task complexity doesn't match selected model capability.
+    Model selection suggestions based on task complexity, but inherit is recommended default.
+
+    **Official Model Options** (OFF-LLM-001~002):
+    - **inherit**: Inherit main conversation model (recommended default)
+    - **haiku**: Fast, simple tasks
+    - **sonnet**: Medium complexity tasks
+    - **opus**: Complex reasoning, design tasks
+
+    **Recommended Strategy**:
+    1. Default to inherit (auto-adapts)
+    2. Choose specific model for specific performance needs
+    3. Document reasoning in docs
+
+    Note: This is a suggestion, not a requirement; inherit is valid and recommended.
 
 rationale:
-  zh: "合理选择模型可平衡质量和成本"
-  en: "Proper model selection balances quality and cost"
+  zh: "基于官方标准 (sub-agents.md OFF-LLM-001~002)，inherit是推荐默认值，具体模型选择取决于特定需求"
+  en: "Per official standards (sub-agents.md OFF-LLM-001~002), inherit is recommended default; specific model choice depends on specific needs"
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "Model Configuration"
+  checkpoints: ["OFF-LLM-001", "OFF-LLM-002"]
+  quote: "model 字段支持 sonnet/opus/haiku/inherit。inherit 使用主对话模型。"
 
 detection:
-  method: custom
-  custom_function: check_model_task_match
-  rules:
-    complex_tasks:
-      keywords: ["architecture", "design", "orchestration", "planning", "review", "analyze"]
-      required_model: ["sonnet", "opus"]
-    simple_tasks:
-      keywords: ["format", "convert", "extract", "count", "list"]
-      suitable_model: ["haiku", "sonnet"]
-    model_tiers:
-      haiku: 1
-      sonnet: 2
-      opus: 3
-  threshold:
-    min_tier_gap: 2  # 差距2级以上触发
+  method: recommendation-check
+  recommendations:
+    - task_type: "complex-reasoning"
+      suggested_models: ["inherit", "opus", "sonnet"]
+      keywords: ["architecture", "design", "review", "refactor"]
+    - task_type: "simple-operations"
+      suggested_models: ["inherit", "haiku", "sonnet"]
+      keywords: ["format", "convert", "list", "count"]
+    - task_type: "default"
+      suggested_models: ["inherit"]
+      note: "inherit 适用于大多数场景"
 
 fix:
   automatic: false

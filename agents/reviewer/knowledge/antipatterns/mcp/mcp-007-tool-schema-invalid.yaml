@@ -2,30 +2,57 @@ id: MCP-007
 name: tool-schema-invalid
 severity: error
 component_type: mcp
-category: config
+category: configuration
 
 title:
-  zh: "工具 Schema 无效"
-  en: "Invalid tool schema"
+  zh: "MCP 工具 Schema 无效"
+  en: "Invalid MCP tool schema"
 
 description:
   zh: |
-    MCP 工具的参数 schema 必须是有效的 JSON Schema，
-    包含类型定义和必要的字段描述。
+    MCP 工具参数 schema 必须遵循 MCP 协议规范和 JSON Schema 标准。
+
+    **MCP 协议要求**（OFF-DEP-001）：
+    - 工具名称格式: mcp__<server>__<tool>
+    - 参数 schema 必须是有效的 JSON Schema
+    - 必须包含 type、properties 等标准字段
+    - description 字段帮助 Claude 理解工具用途
+
+    **常见问题**：
+    - schema 格式错误
+    - 缺少必需的 type 字段
+    - 参数定义不完整
   en: |
-    MCP tool parameter schema must be valid JSON Schema,
-    containing type definitions and necessary field descriptions.
+    MCP tool parameter schema must follow MCP protocol specification and JSON Schema standard.
+
+    **MCP Protocol Requirements** (OFF-DEP-001):
+    - Tool naming format: mcp__<server>__<tool>
+    - Parameter schema must be valid JSON Schema
+    - Must include standard fields like type, properties
+    - description field helps Claude understand tool purpose
+
+    **Common Issues**:
+    - Invalid schema format
+    - Missing required type field
+    - Incomplete parameter definitions
 
 rationale:
-  zh: "有效的 schema 确保参数验证正常工作。"
-  en: "Valid schema ensures parameter validation works correctly."
+  zh: "基于官方规范 (hooks.md OFF-DEP-001~002, mcp.md)，MCP工具必须遵循协议规范以确保正确集成"
+  en: "Per official specification (hooks.md OFF-DEP-001~002, mcp.md), MCP tools must follow protocol spec for proper integration"
 
-handbook_reference: "Chapter 8.2"
+official_reference:
+  document: "markdown_docs/hooks.md, markdown_docs/mcp.md"
+  section: "MCP Server Integration"
+  checkpoints: ["OFF-DEP-001", "OFF-DEP-002"]
+  quote: "MCP 服务器命名模式 mcp__<server>__<tool>。工具schema遵循JSON Schema规范。"
 
 detection:
-  method: custom
-  custom_function: "validate_tool_schema"
-  file_pattern: '*.yaml'
+  method: schema-validation
+  check_for:
+    - invalid_json_schema: "不符合JSON Schema规范"
+    - missing_type: "缺少type字段"
+    - invalid_tool_name: "工具名称格式不正确"
+  mcp_naming_pattern: "^mcp__[a-z0-9-]+__[a-z0-9-]+$"
 
 fix:
   automatic: false

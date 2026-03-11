@@ -1,32 +1,59 @@
 id: HOOK-003
 name: condition-too-complex
-severity: warning
+severity: info
 component_type: hook
-category: workflow
+category: configuration
 
 title:
-  zh: "触发条件过于复杂"
-  en: "Trigger condition too complex"
+  zh: "条件复杂度建议"
+  en: "Condition complexity suggestion"
 
 description:
   zh: |
-    Hook 的触发条件应该简单明了，过于复杂的条件难以理解和维护。
-    条件判断应限制在 3 个以内。
+    Hook 触发条件建议保持简洁，使用匹配器精确过滤。
+
+    **官方推荐**（OFF-ARC-009）：
+    - 使用 matcher 字段过滤工具
+    - 将复杂逻辑移到 Hook 脚本内部
+    - 避免在配置中编写复杂条件
+
+    **建议**：
+    - 使用简单的matcher模式
+    - 复杂判断在command/script中处理
+    - 多个简单Hook优于一个复杂Hook
+
+    注意：这是可维护性建议，不是强制要求。
   en: |
-    Hook trigger conditions should be simple and clear; overly complex conditions are hard to understand and maintain.
-    Condition checks should be limited to 3 or fewer.
+    Hook trigger conditions should remain concise, using matchers for precise filtering.
+
+    **Official Recommendation** (OFF-ARC-009):
+    - Use matcher field to filter tools
+    - Move complex logic inside hook scripts
+    - Avoid complex conditions in configuration
+
+    **Suggestions**:
+    - Use simple matcher patterns
+    - Handle complex logic in command/script
+    - Multiple simple hooks better than one complex hook
+
+    Note: This is a maintainability suggestion, not a requirement.
 
 rationale:
-  zh: "简单的条件更容易测试和调试，降低出错概率。"
-  en: "Simple conditions are easier to test and debug, reducing error probability."
+  zh: "基于官方建议 (hooks.md OFF-ARC-009)，使用matcher过滤而非复杂条件，提升可维护性"
+  en: "Per official recommendation (hooks.md OFF-ARC-009), use matcher filtering instead of complex conditions for better maintainability"
 
-handbook_reference: "Chapter 6.3"
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "Hook Matchers"
+  checkpoints: ["OFF-ARC-009"]
+  quote: "hook 匹配器过滤工具名称。推荐使用简单的matcher而非复杂条件。"
 
 detection:
-  method: custom
-  custom_function: "check_condition_complexity"
-  file_pattern: "hooks/*.md"
-  threshold: 3
+  method: complexity-suggestion
+  check_for:
+    - complex_matcher_regex: "matcher使用复杂正则表达式"
+    - nested_conditions: "嵌套条件判断"
+  recommendation: "建议简化matcher或将逻辑移到脚本中"
 
 fix:
   automatic: false
