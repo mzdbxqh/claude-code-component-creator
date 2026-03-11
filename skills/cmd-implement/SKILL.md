@@ -2,6 +2,7 @@
 name: ccc:cmd-implement
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 description: "执行迭代计划，应用增量变更。触发：执行/应用/实施。支持整体/分阶段/预览模式。代码迭代第2步。"
 argument-hint: "--plan=<iteration-plan-path> [--phase=<phase-number>] [--dry-run]"

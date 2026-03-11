@@ -3,6 +3,7 @@ name: ccc:cmd-init
 description: "4问框架分析需求，创建Intent。触发：启动/初始化/需求。输出Intent制品。主工作流起点。"
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
 ---

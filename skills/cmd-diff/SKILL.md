@@ -2,6 +2,7 @@
 name: ccc:cmd-diff
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Glob, Grep]
 description: "对比两个制品版本的差异。触发：对比/差异/变更。输出增删改的差异报告。"
 argument-hint: "[--from=id] [--to=id] [--lang=zh-cn|en-us|ja-jp]"

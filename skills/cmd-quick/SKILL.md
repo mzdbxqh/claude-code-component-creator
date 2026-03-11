@@ -2,6 +2,7 @@
 name: ccc:cmd-quick
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "一键执行完整流程(init→design→build)。触发：快速/原型/一键。输出完整制品包。"
 argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"

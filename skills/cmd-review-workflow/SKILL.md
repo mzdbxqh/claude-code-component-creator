@@ -2,6 +2,7 @@
 name: ccc:cmd-review-workflow
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "按工作流顺序审查组件。触发：工作流审查/完整性检查。输出健康度报告和并行化建议。"
 argument-hint: "[--artifact-id=<id>] [--depth=shallow|full]"

@@ -2,6 +2,7 @@
 name: ccc:cmd-trace
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Glob, Grep]
 description: "生成需求到实现的追溯链路。触发：追溯/审计/验证。输出映射表和覆盖率统计。"
 argument-hint: "<project-id> [--lang=zh-cn|en-us|ja-jp]"

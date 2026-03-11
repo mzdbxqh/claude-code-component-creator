@@ -2,6 +2,7 @@
 name: ccc:cmd-test-sandbox
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 description: "沙箱测试验证CCC插件功能。触发：测试/验证/质量检查。输出测试报告和评分。"
 argument-hint: "[--test-case=<id>] [--dry-run] [--verbose]"

@@ -2,6 +2,7 @@
 name: ccc:cmd-fix
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "交互式修复审查问题。触发：修复/整改/改进。支持自动/交互/手动三种模式。"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"

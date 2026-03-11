@@ -2,6 +2,7 @@
 name: ccc:cmd-status-trace
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Glob, Grep]
 description: "显示需求覆盖的追溯矩阵。触发：追踪/覆盖率/缺口。输出映射表和覆盖率百分比。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"

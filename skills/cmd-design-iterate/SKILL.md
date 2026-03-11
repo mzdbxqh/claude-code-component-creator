@@ -2,6 +2,7 @@
 name: ccc:cmd-design-iterate
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "分析组件差异，生成增量改进方案。触发：重构/升级/优化。输出差异分析和迭代设计文档。"
 argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"

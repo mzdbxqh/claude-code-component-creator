@@ -2,6 +2,7 @@
 name: ccc:cmd-validate
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "验证制品语法、Schema和Token预算。触发：验证/检查/确认。输出验证报告。主工作流第5步。"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"

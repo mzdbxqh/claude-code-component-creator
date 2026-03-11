@@ -2,6 +2,7 @@
 name: ccc:cmd-status-graph
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Glob, Grep]
 description: "生成制品依赖的ASCII图。触发：可视化/依赖图/关系图。输出关系树和状态指示器。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"

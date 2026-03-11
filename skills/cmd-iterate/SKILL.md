@@ -2,6 +2,7 @@
 name: ccc:cmd-iterate
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "迭代优化Blueprint，生成改进版本。触发：优化/简化/重构。自动检测改进机会，递增ID。"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"

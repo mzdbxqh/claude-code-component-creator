@@ -2,6 +2,7 @@
 name: ccc:cmd-review-migration-plan
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "审查Agent→Skill迁移计划质量。触发：迁移审查/方案评估。输出21个检测点的审查报告。"
 argument-hint: "<file-path> [--format=json|markdown] [--lang=zh-cn|en-us|ja-jp]"

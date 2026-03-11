@@ -2,6 +2,7 @@
 name: ccc:cmd-design
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "5阶段设计流程生成Blueprint。触发：设计/创建方案。从Intent创建详细设计。主工作流第2步。"
 argument-hint: "--name=<name> [--intent-id=current] [--lang=zh-cn|en-us|ja-jp]"

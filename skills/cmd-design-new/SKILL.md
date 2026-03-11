@@ -2,6 +2,7 @@
 name: ccc:cmd-design-new
 model: sonnet
 context: fork
+disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "5阶段交互式设计新组件。触发：新建/创建组件，复杂设计。输出Blueprint。等同design的交互版。"
 argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
