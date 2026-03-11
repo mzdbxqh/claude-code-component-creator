@@ -237,11 +237,42 @@ _首次审查，无历史数据_
 | **分类** | {{category}} |
 | **描述** | {{description}} |
 
-**修复建议**:
-{{fix_suggestion}}
+**问题分析**:
+{{problem_analysis}}
 
-**参考**:
+**修复建议**:
+
+**修复步骤**:
+{{#each fix_steps}}
+{{@index}}. {{this}}
+{{/each}}
+
+{{#if fix_example}}
+**示例代码**:
+```yaml
+{{fix_example}}
+```
+{{/if}}
+
+{{#if verification_method}}
+**验证方法**:
+{{verification_method}}
+{{/if}}
+
+**官方文档引用**:
+{{#if official_document}}
+- 文档：`{{official_document}}`
+- 章节：{{official_section}}
+{{#if official_lines}}
+- 行号：{{official_lines}}
+{{/if}}
+{{#if official_quote}}
+- 引用：
+  > {{official_quote}}
+{{/if}}
+{{else}}
 - 手册章节：{{handbook_ref}}
+{{/if}}
 - 相关规则：{{related_rules}}
 
 ---
@@ -286,25 +317,43 @@ _首次审查，无历史数据_
 ### 高优先级 (P0 - 阻塞性)
 
 {{#each p0_actions}}
-1. [ ] **{{title}}** ({{id}})
+{{@index}}. [ ] **{{title}}** ({{id}})
    - 文件：{{file}}
    - 操作：{{action}}
+   {{#if estimated_time}}
+   - 预计时间：{{estimated_time}}
+   {{/if}}
+   {{#if complexity}}
+   - 复杂度：{{complexity}}
+   {{/if}}
+   {{#if impact_scope}}
+   - 影响范围：{{impact_scope}}
+   {{/if}}
 {{/each}}
 
 ### 中优先级 (P1 - 建议修复)
 
 {{#each p1_actions}}
-1. [ ] **{{title}}** ({{id}})
+{{@index}}. [ ] **{{title}}** ({{id}})
    - 文件：{{file}}
    - 操作：{{action}}
+   {{#if estimated_time}}
+   - 预计时间：{{estimated_time}}
+   {{/if}}
+   {{#if complexity}}
+   - 复杂度：{{complexity}}
+   {{/if}}
 {{/each}}
 
 ### 低优先级 (P2 - 可选优化)
 
 {{#each p2_actions}}
-1. [ ] **{{title}}** ({{id}})
+{{@index}}. [ ] **{{title}}** ({{id}})
    - 文件：{{file}}
    - 操作：{{action}}
+   {{#if estimated_time}}
+   - 预计时间：{{estimated_time}}
+   {{/if}}
 {{/each}}
 
 {{#if next_steps}}
