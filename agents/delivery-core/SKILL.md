@@ -32,14 +32,31 @@ Delivery Core 是 CCC 工作流的 Stage 3 交付生成核心组件，负责从 
 **错误处理**: 文件不存在时提示检查路径
 
 ### Step 2: 生成 SKILL.md
-**目标**: 创建组件定义文件
+**目标**: 创建包含完整frontmatter的组件定义文件
 **操作**:
-1. 提取 Stage 3 详细设计的 YAML 配置
-2. 生成完整的 SKILL.md 结构
-3. 包含 header、workflow、examples、error handling
-4. 写入 `docs/ccc/delivery/{date}-{id}/SKILL.md`
-**输出**: SKILL.md 文件
-**错误处理**: 设计缺失时使用默认模板
+1. 从 Stage 3 详细设计提取 YAML 配置
+2. **确保frontmatter包含所有必需和推荐字段**:
+
+   **对于 SubAgent（13个字段完整性检查）**:
+   - ✅ 必需: `name`, `description`
+   - ✅ 推荐: `tools`, `model`, `permissionMode`, `maxTurns`, `skills`
+   - ✅ 可选: `disallowedTools`, `mcpServers`, `hooks`, `memory`, `background`, `isolation`
+
+   **对于 Skill（9个字段完整性检查）**:
+   - ✅ 必需: `name`, `description`
+   - ✅ 推荐: `allowed-tools`, `model`, `context`
+   - ✅ 可选: `argument-hint`, `disable-model-invocation`, `user-invocable`, `skills`
+
+3. **补充缺失的推荐字段**（如果Blueprint中未提供）:
+   - SubAgent缺失 `permissionMode` → 添加默认值 `prompt`
+   - SubAgent缺失 `maxTurns` → 基于工作流步骤数设置（建议10-20）
+   - Skill有副作用但缺失 `disable-model-invocation` → 自动添加 `true`
+   - Skill接受参数但缺失 `argument-hint` → 根据输入格式生成提示
+
+4. 生成完整的 SKILL.md 结构（frontmatter + workflow + examples + error handling）
+5. 写入 `docs/ccc/delivery/{date}-{id}/SKILL.md`
+**输出**: 包含完整13/9字段的 SKILL.md 文件
+**错误处理**: 设计缺失时使用默认模板，并在报告中列出使用的默认值
 
 ### Step 3: 生成实现代码
 **目标**: 创建实现文件 (如适用)
@@ -300,6 +317,15 @@ docs/ccc/blueprint/2026-03-03-BLP-005.yaml --output-dir=/custom/output/
 3. **测试覆盖**: 至少生成基本测试框架
 4. **文档同步**: 文档与设计保持同步
 5. **验证完整**: 交付后验证所有文件存在
+6. **字段完整性**: 确保生成的SKILL.md包含所有13/9个字段
+   - SubAgent必须包含13个字段（2必需+5推荐+6可选）
+   - Skill必须包含9个字段（2必需+3推荐+4可选）
+   - 推荐字段如果Blueprint中缺失，应使用合理默认值
+7. **默认值策略**:
+   - permissionMode默认为prompt
+   - maxTurns根据工作流步骤数设置（建议10-20）
+   - disable-model-invocation根据副作用检测自动设置
+   - argument-hint根据输入格式自动生成
 
 ### Common Pitfalls
 
@@ -308,6 +334,12 @@ docs/ccc/blueprint/2026-03-03-BLP-005.yaml --output-dir=/custom/output/
 3. ❌ **测试遗漏**: 忘记生成测试用例
 4. ❌ **文档脱节**: 文档与设计不一致
 5. ❌ **验证缺失**: 不验证交付包完整性
+6. ❌ **字段不完整**: 生成的SKILL.md缺少推荐字段
+   - SubAgent缺少permissionMode导致权限混乱
+   - SubAgent缺少maxTurns可能导致无限循环
+   - Skill有副作用但未设置disable-model-invocation导致意外触发
+   - Skill接受参数但缺少argument-hint导致用户困惑
+7. ❌ **忽略默认值**: Blueprint缺失字段时不补充默认值
 
 ### Deliverable Types
 

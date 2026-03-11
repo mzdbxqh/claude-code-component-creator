@@ -30,7 +30,7 @@ Design Core 是 CCC 工作流的阶段 3 组件，负责基于阶段 2 架构决
 **错误处理**: 如果阶段 2 输出缺失，请求先完成架构阶段
 
 ### Step 2: 设计 YAML 配置
-**目标**: 创建组件的 YAML frontmatter
+**目标**: 创建组件的完整 YAML frontmatter
 **操作**:
 1. 从组件用途生成 kebab-case 名称
 2. 编写 50-200 字符描述，包含触发词
@@ -38,12 +38,31 @@ Design Core 是 CCC 工作流的阶段 3 组件，负责基于阶段 2 架构决
 4. 基于决策矩阵选择模型 (参考 Model Selection Guide)
 5. 定义最小必要工具集
 6. 验证 skill 加载策略 (command 避免显式加载 3+ skill)
-7. **验证 frontmatter 完整性** (参考 Frontmatter Validation Guide):
+7. **添加组件类型特定字段**:
+
+   **对于 SubAgent（13个字段）**:
+   - 必需: `name`, `description`
+   - 推荐: `tools`, `model`, `permissionMode`, `maxTurns`, `skills`
+   - 可选: `disallowedTools`, `mcpServers`, `hooks`, `memory`, `background`, `isolation`
+
+   **对于 Skill（9个字段）**:
+   - 必需: `name`, `description`
+   - 推荐: `allowed-tools`, `model`, `context`
+   - 可选: `argument-hint`, `disable-model-invocation`, `user-invocable`, `skills`
+
+8. **生成推荐字段的默认值**:
+   - `permissionMode`: 根据工具权限选择（默认 `prompt`）
+   - `maxTurns`: 根据工作流步骤数估算（建议 10-20）
+   - `argument-hint`: 如果接受参数则必须提供（如 `<file-path>`）
+   - `disable-model-invocation`: 副作用操作必须设为 `true`
+   - `skills`: 根据证据链中的Skill映射表添加预加载Skills
+
+9. **验证 frontmatter 完整性** (参考 Frontmatter Validation Guide):
    - 检查所有必需字段是否存在
    - 验证字段值的有效性
-   - 确认组件类型特定要求（SubAgent需要maxTurns、context等）
+   - 确认组件类型特定要求（SubAgent需要maxTurns、permissionMode等）
    - 检查条件必需字段（如参数型Skill需要argument-hint）
-**输出**: 完整且经过验证的 YAML frontmatter
+**输出**: 包含完整字段的 YAML frontmatter
 **错误处理**: 如果配置无效或缺少必需字段，提供正确语法的模板并列出缺失项
 
 ### Step 3: 设计工作流步骤
@@ -500,46 +519,85 @@ Design Core (本组件) → 设计规格
 **验证清单**:
 
 ```markdown
-## Frontmatter 验证清单
+## Frontmatter 验证清单（完整13/9字段）
 
-### 通用字段
+### 通用字段（所有组件）
 - [ ] name: 存在且格式正确（kebab-case）
 - [ ] description: 存在且长度50-200字符
 - [ ] model: 已选择或说明继承
-- [ ] permissionMode: SubAgent必需，Skill根据需求
 
-### SubAgent 特定
-- [ ] tools: 定义了必要工具
-- [ ] maxTurns: 设置了合理值（如果tools非空）
-- [ ] context: 明确指定（建议fork）
-- [ ] skills: 预加载了必要知识库
+### SubAgent 特定字段（13个字段）
+**必需字段（2个）**:
+- [ ] name: 已验证
+- [ ] description: 已验证
 
-### Skill 特定
+**推荐字段（5个）**:
+- [ ] tools: 定义了必要工具列表
+- [ ] model: 选择haiku/sonnet/opus或inherit
+- [ ] permissionMode: 设置为prompt/acceptEdits/dontAsk/bypassPermissions/plan
+- [ ] maxTurns: 设置了合理值（建议10-20，如果tools非空则必需）
+- [ ] skills: 预加载了必要知识库（如ccc:lib-antipatterns）
+
+**可选字段（6个）**:
+- [ ] disallowedTools: 明确拒绝的工具（如果需要）
+- [ ] mcpServers: MCP服务器配置（如果使用MCP）
+- [ ] hooks: 生命周期钩子（如PreToolUse/PostToolUse）
+- [ ] memory: 持久内存配置（user/project/local）
+- [ ] background: 是否后台运行（true/false）
+- [ ] isolation: 隔离模式（如worktree）
+
+### Skill 特定字段（9个字段）
+**必需字段（2个）**:
+- [ ] name: 已验证
+- [ ] description: 已验证
+
+**推荐字段（3个）**:
 - [ ] allowed-tools: 定义了最小必要工具集
+- [ ] model: 选择haiku/sonnet/opus或继承
+- [ ] context: 说明使用场景或设置main/fork
+
+**可选字段（4个）**:
+- [ ] argument-hint: 接受参数的Skill必须提供（如"<file-path>"）
 - [ ] disable-model-invocation: 副作用操作必须设为true
-- [ ] argument-hint: 接受参数的Skill必须提供
-- [ ] context: 复杂Skill建议说明使用场景
+- [ ] user-invocable: 是否允许用户手动调用（true/false）
+- [ ] skills: 预加载的技能列表（如果需要）
 
 ### 字段值验证
 - [ ] name 符合命名规范（cmd-/std-/lib- 前缀）
-- [ ] description 包含触发词
-- [ ] model 值有效（haiku/sonnet/opus）
-- [ ] context 值有效（main/fork）
-- [ ] maxTurns 值合理（5-50范围）
-- [ ] tools 列表格式正确
+- [ ] description 包含触发词和使用场景
+- [ ] model 值有效（haiku/sonnet/opus/inherit）
+- [ ] permissionMode 值有效（prompt/acceptEdits/dontAsk/bypassPermissions/plan）
+- [ ] maxTurns 值合理（10-20范围，最大不超过50）
+- [ ] tools/allowed-tools 列表格式正确，工具名称有效
 ```
 
-**常见缺失字段**:
+**完整字段数量统计**:
+- SubAgent: 2必需 + 5推荐 + 6可选 = **13个字段**
+- Skill: 2必需 + 3推荐 + 4可选 = **9个字段**
 
-| 组件类型 | 常缺字段 | 严重性 | 修复 |
-|---------|---------|--------|------|
-| SubAgent | maxTurns | 警告 | 根据复杂度设置5-50 |
-| SubAgent | context | 信息 | 建议设为fork |
-| SubAgent | skills | 信息 | 预加载lib-antipatterns等 |
-| Skill | argument-hint | 信息 | 如使用$ARGUMENTS则必需 |
-| Skill | disable-model-invocation | 警告 | 副作用操作必需 |
-| Skill | context | 信息 | 复杂Skill建议添加 |
-| 所有 | permissionMode | 错误 | SubAgent必需 |
+**常见缺失字段及修复建议**:
+
+| 组件类型 | 常缺字段 | 字段类型 | 严重性 | 修复建议 |
+|---------|---------|---------|--------|---------|
+| SubAgent | permissionMode | 推荐 | 高 | 添加 `permissionMode: prompt` |
+| SubAgent | maxTurns | 推荐 | 高 | 根据工作流步骤数设置（建议10-20） |
+| SubAgent | skills | 推荐 | 中 | 预加载 `ccc:lib-antipatterns` 等知识库 |
+| SubAgent | hooks | 可选 | 低 | 根据需要添加PreToolUse/PostToolUse |
+| SubAgent | memory | 可选 | 低 | 如需持久化添加 `memory: project` |
+| SubAgent | background | 可选 | 低 | 后台任务设为 `background: true` |
+| SubAgent | isolation | 可选 | 低 | 需要隔离时添加 `isolation: worktree` |
+| SubAgent | disallowedTools | 可选 | 低 | 明确拒绝危险工具 |
+| SubAgent | mcpServers | 可选 | 低 | 使用MCP时配置服务器 |
+| Skill | disable-model-invocation | 可选 | 高 | 副作用操作必须设为 `true` |
+| Skill | argument-hint | 可选 | 高 | 接受参数必须提供提示（如 `"<file-path>"`） |
+| Skill | user-invocable | 可选 | 中 | 允许手动调用设为 `true` |
+| Skill | skills | 可选 | 低 | 需要预加载技能时添加列表 |
+| Skill | context | 推荐 | 中 | 说明使用场景或设置 `main`/`fork` |
+
+**字段优先级**:
+- **高优先级**（必须添加）: permissionMode, maxTurns, disable-model-invocation, argument-hint
+- **中优先级**（强烈推荐）: skills, context, user-invocable
+- **低优先级**（按需添加）: hooks, memory, background, isolation, disallowedTools, mcpServers
 
 **验证失败处理**:
 
