@@ -1,33 +1,164 @@
 id: HOOK-008
 name: trigger-too-broad
-severity: warning
+severity: info
 component_type: hook
-category: metadata
+category: configuration
 
 title:
-  zh: "触发范围过于宽泛"
-  en: "Trigger scope too broad"
+  zh: "触发范围建议优化"
+  en: "Trigger scope optimization suggested"
 
 description:
   zh: |
-    Hook 的触发范围应该精确，避免过于宽泛的条件
-    （如监听所有文件类型的事件）。
+    Hook 的触发范围建议使用匹配器精确过滤，提升性能。
+
+    **官方推荐**（OFF-ARC-009）：
+    - 使用 matcher 过滤工具名称
+    - 使用正则表达式匹配特定模式
+    - 避免无条件触发所有工具调用
+
+    **示例**：
+    ```json
+    {
+      "event": "PreToolUse",
+      "matcher": {"tool": "Bash"}  // 仅匹配 Bash 工具
+    }
+    ```
+
+    注意：这是性能优化建议，不是强制要求。
   en: |
-    Hook trigger scope should be precise, avoiding overly broad conditions
-    (e.g., listening to events for all file types).
+    Hook trigger scope should use matchers for precise filtering to improve performance.
+
+    **Official Recommendation** (OFF-ARC-009):
+    - Use matcher to filter tool names
+    - Use regex to match specific patterns
+    - Avoid unconditional triggering for all tool calls
+
+    **Example**:
+    ```json
+    {
+      "event": "PreToolUse",
+      "matcher": {"tool": "Bash"}  // Only match Bash tool
+    }
+    ```
+
+    Note: This is a performance recommendation, not a requirement.
 
 rationale:
-  zh: "过于宽泛的触发会导致 Hook 频繁执行，影响性能。"
-  en: "Overly broad triggers cause hooks to execute frequently, affecting performance."
+  zh: "基于官方建议 (hooks.md OFF-ARC-009)，使用匹配器过滤可以减少不必要的hook执行，提升性能"
+  en: "Per official recommendation (hooks.md OFF-ARC-009), using matchers reduces unnecessary hook executions, improving performance"
 
-handbook_reference: "Chapter 6.2"
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "Hook Matchers"
+  checkpoints: ["OFF-ARC-009"]
+  quote: "hook 匹配器过滤工具名称。使用正则表达式匹配特定模式。"
 
 detection:
-  method: custom
-  custom_function: "check_trigger_scope"
-  file_pattern: "hooks/*.md"
+  method: matcher-check
+  check_for:
+    - no_matcher_on_PreToolUse: "PreToolUse事件无matcher（将匹配所有工具）"
+    - overly_generic_matcher: "matcher过于宽泛"
+  recommendation: "建议添加具体的 matcher 过滤条件"
 
 fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加 matcher 精确过滤**：
+
+      ```json
+      {
+        "event": "PreToolUse",
+        "matcher": {
+          "tool": "Bash"  // 仅匹配 Bash 工具
+        },
+        "type": "command",
+        "command": "security-check.sh"
+      }
+      ```
+
+      **使用正则表达式**：
+
+      ```json
+      {
+        "matcher": {
+          "tool": "(Bash|Write|Edit)"  // 匹配多个工具
+        }
+      }
+      ```
+    en: |
+      **Add matcher for precise filtering**:
+
+      ```json
+      {
+        "event": "PreToolUse",
+        "matcher": {
+          "tool": "Bash"  // Only match Bash tool
+        },
+        "type": "command",
+        "command": "security-check.sh"
+      }
+      ```
+
+      **Use regex**:
+
+      ```json
+      {
+        "matcher": {
+          "tool": "(Bash|Write|Edit)"  // Match multiple tools
+        }
+      }
+      ```
+
+examples:
+  bad:
+    zh: |
+      ⚠️ 性能建议：无matcher的PreToolUse
+      ```json
+      {
+        "event": "PreToolUse",
+        "type": "command",
+        "command": "check.sh"
+      }
+      ```
+      ⚠️ 将在所有工具调用时执行
+    en: |
+      ⚠️ Performance tip: PreToolUse without matcher
+      ```json
+      {
+        "event": "PreToolUse",
+        "type": "command",
+        "command": "check.sh"
+      }
+      ```
+      ⚠️ Will execute on all tool calls
+  good:
+    zh: |
+      ✅ 使用matcher过滤
+      ```json
+      {
+        "event": "PreToolUse",
+        "matcher": {"tool": "Bash"},
+        "type": "command",
+        "command": "security-check.sh"
+      }
+      ```
+      ✅ 仅在Bash工具调用时执行
+    en: |
+      ✅ Using matcher for filtering
+      ```json
+      {
+        "event": "PreToolUse",
+        "matcher": {"tool": "Bash"},
+        "type": "command",
+        "command": "security-check.sh"
+      }
+      ```
+      ✅ Only executes on Bash tool calls
+
+tags: ["hook", "matcher", "performance", "configuration"]
+related_rules: ["HOOK-003", "HOOK-009"]
   automatic: false
   suggestion:
     zh: "缩小触发范围，使用更具体的条件。"
