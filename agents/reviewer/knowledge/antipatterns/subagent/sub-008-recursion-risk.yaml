@@ -1,61 +1,239 @@
 id: SUB-008
 name: recursion-risk
-severity: error
+severity: warning
 component_type: subagent
-category: workflow
+category: architecture
 
 title:
-  zh: "递归调用风险"
-  en: "Recursion risk"
+  zh: "SubAgent 生成限制违规"
+  en: "SubAgent generation restriction violation"
 
 description:
   zh: |
-    Subagent 不应该直接或间接调用自身，
-    这可能导致无限递归和栈溢出。
+    SubAgent 本身**无法生成其他 SubAgent**（官方限制）。
+
+    **官方规范**：
+    - SubAgent 不能直接使用 Agent() 权限生成其他 SubAgent
+    - 如需委托，应该在 skills 字段预加载 Skills，而非动态生成 SubAgent
+    - 可以使用 Agent(agent_type) 限制可生成的代理类型
+
+    **风险**：
+    - 违规使用会导致运行时错误
+    - 可能造成意外的递归调用链
+    - 增加系统复杂度和不稳定性
   en: |
-    Subagent should not call itself directly or indirectly,
-    which could lead to infinite recursion and stack overflow.
+    SubAgent **cannot generate other SubAgents** (official restriction).
+
+    **Official Specification**:
+    - SubAgent cannot directly use Agent() permission to generate other SubAgents
+    - To delegate, should preload Skills in skills field, not dynamically generate SubAgents
+    - Can use Agent(agent_type) to restrict allowable agent types
+
+    **Risks**:
+    - Violation causes runtime errors
+    - May create unexpected recursive call chains
+    - Increases system complexity and instability
 
 rationale:
-  zh: "递归调用会导致资源耗尽和系统不稳定。"
-  en: "Recursive calls cause resource exhaustion and system instability."
+  zh: "基于官方规范 (sub-agents.md OFF-ARC-010, OFF-SEC-020)，SubAgent 架构设计限制了其生成其他 SubAgent 的能力，防止无限递归和资源耗尽"
+  en: "Per official specification (sub-agents.md OFF-ARC-010, OFF-SEC-020), SubAgent architecture restricts its ability to generate other SubAgents, preventing infinite recursion and resource exhaustion"
 
-handbook_reference: "Chapter 7.3"
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "SubAgent Restrictions"
+  checkpoints: ["OFF-ARC-010", "OFF-SEC-020"]
+  quote: "subagent 无法生成其他 subagents。使用 Agent(agent_type) 限制可生成类型。"
 
 detection:
-  method: custom
-  custom_function: "check_recursion_risk"
-  file_pattern: 'subagents/*.md'
+  method: permission-check
+  check_for:
+    - agent_permission_without_restriction: "tools 包含 Agent 但无 Agent(type) 限制"
+    - self_reference_in_workflow: "工作流中引用自身名称"
+  file_pattern: '*/SKILL.md'
 
 fix:
   automatic: false
   suggestion:
-    zh: "移除递归调用，使用迭代或拆分任务给其他 Subagent。"
-  en: "Remove recursive calls, use iteration or delegate to other subagents."
+    zh: |
+      **推荐方案**：
+
+      1. **使用 skills 字段预加载**：
+         ```yaml
+         ---
+         name: orchestrator
+         tools: [Read, Write]  # 不包含 Agent
+         skills: [subtask-handler]  # 预加载需要的 Skills
+         ---
+         ```
+
+      2. **使用 Agent(type) 限制**（如必须使用Agent工具）：
+         ```yaml
+         ---
+         name: task-manager
+         tools: [Read, Agent(Explore), Agent(Plan)]  # 仅允许特定类型
+         ---
+         ```
+
+      3. **重构为 Skill 委托模式**：
+         将 SubAgent 拆分为多个协作的 Skills，避免 SubAgent 间调用
+    en: |
+      **Recommended Solutions**:
+
+      1. **Use skills field for preloading**:
+         ```yaml
+         ---
+         name: orchestrator
+         tools: [Read, Write]  # No Agent
+         skills: [subtask-handler]  # Preload required Skills
+         ---
+         ```
+
+      2. **Use Agent(type) restriction** (if Agent tool必须使用)：
+         ```yaml
+         ---
+         name: task-manager
+         tools: [Read, Agent(Explore), Agent(Plan)]  # Only specific types allowed
+         ---
+         ```
+
+      3. **Refactor to Skill delegation pattern**:
+         Split SubAgent into collaborating Skills, avoiding SubAgent-to-SubAgent calls
 
 examples:
   bad:
     zh: |
-      ## 处理流程
-      1. 处理当前任务
-      2. 如有子任务，调用自身处理
-         （风险：可能导致无限递归）
-  en: |
-      ## Processing Flow
-      1. Process current task
-      2. If subtasks exist, call self to process
-          (Risk: May cause infinite recursion)
+      错误1：直接使用 Agent 权限
+      ```yaml
+      ---
+      name: task-processor
+      tools: [Read, Write, Agent]  # ❌ 无限制的 Agent 权限
+      ---
+      ❌ SubAgent 不应该能生成任意 SubAgent
+      ❌ 可能造成递归调用
+      ```
+
+      错误2：工作流中引用自身
+      ```yaml
+      ---
+      name: recursive-analyzer
+      tools: [Read, Agent(recursive-analyzer)]  # ❌ 引用自身
+      ---
+      ## 工作流
+      1. 分析当前文件
+      2. 如有依赖，生成 recursive-analyzer 处理
+      ❌ 直接递归，违反官方规范
+      ```
+
+      错误3：间接递归链
+      ```yaml
+      # SubAgent A
+      ---
+      name: agent-a
+      tools: [Agent(agent-b)]
+      ---
+
+      # SubAgent B
+      ---
+      name: agent-b
+      tools: [Agent(agent-a)]  # ❌ 形成循环
+      ---
+      ❌ A → B → A 递归链
+      ```
+    en: |
+      Error 1: Direct Agent permission
+      ```yaml
+      ---
+      name: task-processor
+      tools: [Read, Write, Agent]  # ❌ Unrestricted Agent permission
+      ---
+      ❌ SubAgent shouldn't generate arbitrary SubAgents
+      ❌ May cause recursive calls
+      ```
+
+      Error 2: Self-reference in workflow
+      ```yaml
+      ---
+      name: recursive-analyzer
+      tools: [Read, Agent(recursive-analyzer)]  # ❌ Self-reference
+      ---
+      ## Workflow
+      1. Analyze current file
+      2. If dependencies, generate recursive-analyzer to process
+      ❌ Direct recursion, violates official spec
+      ```
+
+      Error 3: Indirect recursion chain
+      ```yaml
+      # SubAgent A
+      ---
+      name: agent-a
+      tools: [Agent(agent-b)]
+      ---
+
+      # SubAgent B
+      ---
+      name: agent-b
+      tools: [Agent(agent-a)]  # ❌ Forms cycle
+      ---
+      ❌ A → B → A recursion chain
+      ```
   good:
     zh: |
-      ## 处理流程
-      1. 收集所有任务到队列
-      2. 使用循环逐个处理
-      3. 如有嵌套，使用栈结构而非递归
-  en: |
-      ## Processing Flow
-      1. Collect all tasks to queue
-      2. Process iteratively using loop
-      3. For nesting, use stack structure instead of recursion
+      正确1：使用 skills 预加载
+      ```yaml
+      ---
+      name: task-orchestrator
+      tools: [Read, Write]  # ✅ 无 Agent 权限
+      skills: [file-processor, data-validator]  # ✅ 预加载 Skills
+      ---
+      ## 工作流
+      1. 使用 file-processor Skill 处理文件
+      2. 使用 data-validator Skill 验证数据
+      ✅ 委托给 Skills 而非生成 SubAgents
+      ```
 
-tags: ["workflow", "recursion", "risk", "subagent"]
-related_rules: []
+      正确2：Agent(type) 限制
+      ```yaml
+      ---
+      name: research-manager
+      tools: [Read, Agent(Explore), Agent(Plan)]  # ✅ 限制类型
+      ---
+      ## 工作流
+      1. 使用 Explore agent 搜索信息
+      2. 使用 Plan agent 规划方案
+      ✅ 仅使用内置 agent 类型
+      ✅ 不生成自定义 SubAgents
+      ```
+
+      正确3：迭代而非递归
+      ```yaml
+      ---
+      name: dependency-analyzer
+      tools: [Read, Grep]
+      ---
+      ## 工作流
+      1. 收集所有依赖文件到队列
+      2. 使用循环逐个分析（while queue not empty）
+      3. 将新发现的依赖添加到队列末尾
+      ✅ 使用迭代算法
+      ✅ 避免递归调用
+      ```
+
+      正确4：Skill 链式委托
+      ```yaml
+      # Skill (非 SubAgent)
+      ---
+      name: multi-step-processor
+      context: fork
+      agent: general-purpose
+      ---
+      ## 工作流
+      1. Step 1: 调用 /preprocess Skill
+      2. Step 2: 调用 /validate Skill
+      3. Step 3: 调用 /finalize Skill
+      ✅ Skills 可以委托给其他 Skills
+      ✅ 避免 SubAgent 间调用
+      ```
+
+tags: ["architecture", "recursion", "subagent", "permissions"]
+related_rules: ["ARCH-012", "SEC-004"]
