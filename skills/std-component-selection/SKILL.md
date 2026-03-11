@@ -32,11 +32,15 @@ context: main
 
 ## Skill 三种角色定义
 
-| 角色 | 命名前缀 | 触发方式 | 用途 | 示例 |
-|------|---------|---------|------|------|
-| **入口型 Skill** | `cmd-` | `/plugin:cmd-xxx` 用户手动触发 | 工作流入口，可调度 Subagent | `cmd-design`, `cmd-review` |
-| **自动发现型 Skill** | `std-` | Claude 自动匹配 description | 通用规范、知识，Claude 自动加载 | `std-api-conventions`, `std-naming-rules` |
-| **参考型 Skill** | `lib-` | Subagent `skills: []` 显式加载 | 专业知识库，给特定 Subagent 用 | `lib-security-rules`, `lib-antipatterns` |
+| 组件类型 | 命名/配置 | 触发方式 | 用途 | 示例 |
+|---------|----------|---------|------|------|
+| **入口型 Skill** | `cmd-` 前缀 | `/plugin:cmd-xxx` 用户手动触发 | 工作流入口，可调度 Subagent | `cmd-design`, `cmd-review` |
+| **自动发现型 Skill** | `std-` 前缀 | Claude 自动匹配 description | 通用规范、知识，Claude 自动加载 | `std-api-conventions`, `std-naming-rules` |
+| **参考型 Skill** | `lib-` 前缀 | Subagent `skills: []` 显式加载 | 专业知识库，给特定 Subagent 用 | `lib-security-rules`, `lib-antipatterns` |
+| **Subagent** | 无前缀 | 通过 Skill 调度或直接调用 | 独立执行复杂任务，隔离上下文 | `review-core`, `advisor-core` |
+| **Hook** | `.sh` 脚本 | 事件自动触发 | 确定性逻辑，权限检查、参数验证 | `pre-deploy-check.sh` |
+| **MCP Server** | `.mcp.json` | 自动加载 | 扩展工具集，外部服务集成 | GitHub、Slack、Filesystem |
+| **LSP Server** | `.lsp.json` | 自动加载 | IDE功能：补全、跳转、重命名 | TypeScript LS、Python LS |
 
 ---
 
@@ -77,12 +81,30 @@ context: main
 │   - 典型场景：审阅、设计、测试执行、报告生成
 │   - 示例：review-core, advisor-core, blueprint-core
 │
-└─ ⚡ 需要在事件发生时自动执行确定性逻辑？
-    → **Hook**
-    - PreToolUse / PostToolUse / Notification / Stop
-    - 不经过 LLM，100% 确定性
-    - 典型场景：权限检查、环境验证、参数校验
-    - 示例：pre-deploy-check.sh, validate-config.sh
+├─ ⚡ 需要在事件发生时自动执行确定性逻辑？
+│   → **Hook**
+│   - PreToolUse / PostToolUse / Notification / Stop
+│   - 不经过 LLM，100% 确定性
+│   - 典型场景：权限检查、环境验证、参数校验
+│   - 示例：pre-deploy-check.sh, validate-config.sh
+│
+├─ 🔌 需要扩展 Claude Code 的工具集？
+│   - 集成外部服务（GitHub、Slack、数据库等）
+│   → **MCP Server** (.mcp.json 配置)
+│   - 配置文件：.mcp.json（插件根目录）
+│   - 传输方式：http（推荐）、stdio
+│   - 典型场景：GitHub 集成、Slack 通知、文件系统访问
+│   - 示例：github MCP、slack MCP、filesystem MCP
+│   - 注意：需要用户配置环境变量和权限
+│
+└─ 🔧 需要提供 IDE 级别的代码支持？
+    - 代码补全、跳转定义、重命名、诊断
+    → **LSP Server** (.lsp.json 配置)
+    - 配置文件：.lsp.json（插件根目录）
+    - 语言支持：JavaScript、Python、Rust、Go 等
+    - 典型场景：TypeScript 补全、Python 类型检查、Rust 分析
+    - 示例：typescript-language-server、pylsp、rust-analyzer
+    - 注意：需要用户安装对应的语言服务器二进制文件
 ```
 
 ---
@@ -147,6 +169,18 @@ model: sonnet
 2. **是纯知识/规范吗？** → 是，且通用 → 自动发现型 Skill (std-) / 是，且专业 → 参考型 Skill (lib-)
 3. **需要独立执行复杂任务吗？** → 是 → Subagent（配置 skills: 字段）
 4. **需要事件驱动的确定性逻辑吗？** → 是 → Hook
+5. **需要集成外部服务吗？** → 是 → MCP Server（配置 .mcp.json）
+6. **需要提供 IDE 级别的代码支持吗？** → 是 → LSP Server（配置 .lsp.json）
+
+### MCP vs LSP 选择指南
+
+| 需求 | 选择 | 配置文件 | 示例 |
+|------|------|----------|------|
+| 需要调用外部 API（GitHub、Slack） | MCP | .mcp.json | github MCP, slack MCP |
+| 需要访问文件系统、数据库 | MCP | .mcp.json | filesystem MCP, postgres MCP |
+| 需要代码补全、跳转定义 | LSP | .lsp.json | typescript-language-server |
+| 需要类型检查、诊断 | LSP | .lsp.json | pylsp, rust-analyzer |
+| 需要重命名、查找引用 | LSP | .lsp.json | gopls, clangd |
 
 ---
 
@@ -173,8 +207,25 @@ model: sonnet
 - [ ] skills: 字段使用完整命名空间（plugin:skill-name）
 - [ ] 引用的 Skill 确实存在
 
+### MCP Server 配置检查
+
+- [ ] MCP 配置文件位于插件根目录的 `.mcp.json`
+- [ ] mcpServers 字段格式正确（name、command、args、env）
+- [ ] 使用 http 传输（推荐），避免使用已弃用的 sse
+- [ ] allowedEnvVars 声明了所有需要的环境变量
+- [ ] README 文档说明了 MCP 配置和环境变量设置
+
+### LSP Server 配置检查
+
+- [ ] LSP 配置文件位于插件根目录的 `.lsp.json`
+- [ ] lspServers 字段格式正确（command、args、languages）
+- [ ] 指定了支持的编程语言（languages 字段）
+- [ ] README 文档说明了 LSP 依赖的二进制文件安装
+- [ ] 没有与 .mcp.json 混淆（分离关注点）
+
 ---
 
 ## 更新日志
 
+- 2026-03-12: **Task 2.3** - 补充 MCP Servers 和 LSP Servers 组件类型到选型决策树
 - 2026-03-11: 创建 std-component-selection Skill，定义 Skill 三种角色和选型决策树
