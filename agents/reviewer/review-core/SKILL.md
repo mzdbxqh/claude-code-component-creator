@@ -110,9 +110,19 @@ END CASE
 1. 汇总所有维度得分
 2. 计算加权综合分数
 3. 按严重程度排序问题
-4. 生成 JSON 和 Markdown 双格式输出
-**输出**: 综合审阅报告
-**错误处理**: 报告生成失败时返回原始数据
+4. **增强问题详情**（参考 Enhanced Issue Details Guide）:
+   - 从反模式YAML提取官方文档引用（official_reference字段）
+   - 生成问题根因分析（problem_analysis）
+   - 生成结构化修复步骤（fix_steps数组）
+   - 提供YAML示例代码（fix_example）
+   - 说明验证方法（verification_method）
+5. **增强行动建议**:
+   - 估算修复时间（estimated_time: 5分钟~2小时）
+   - 评估修复复杂度（complexity: 低/中/高）
+   - 分析影响范围（impact_scope: 单文件/多文件/全局）
+6. 生成 JSON 和 Markdown 双格式输出
+**输出**: 增强的综合审阅报告
+**错误处理**: 字段缺失时使用默认值，报告生成失败时返回原始数据
 
 ## Input Format
 
@@ -258,6 +268,97 @@ review:
 > 详细示例：references/examples.txt（如果存在）
 
 ## Notes
+
+### Enhanced Issue Details Guide
+
+**目标**: 生成详细、可操作的问题报告
+
+**步骤1: 提取官方文档引用**
+
+从反模式YAML的`official_reference`字段提取：
+```yaml
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "disable-model-invocation"
+  lines: "78-95"
+  quote: "有副作用工作流使用 disable-model-invocation: true"
+```
+
+生成JSON字段：
+```json
+{
+  "official_document": "markdown_docs/skills.md",
+  "official_section": "disable-model-invocation",
+  "official_lines": "78-95",
+  "official_quote": "有副作用工作流使用 disable-model-invocation: true"
+}
+```
+
+**步骤2: 生成问题根因分析**
+
+基于反模式的`description`字段和实际代码情况：
+```json
+{
+  "problem_analysis": "该Skill执行git commit操作但未设置disable-model-invocation: true，可能被Claude自动触发导致意外提交。根本原因是缺少副作用操作保护。"
+}
+```
+
+**步骤3: 生成结构化修复步骤**
+
+从反模式的`fix.suggestion`字段提取并结构化：
+```json
+{
+  "fix_steps": [
+    "识别Skill中的副作用操作（git commit, push等）",
+    "在frontmatter添加 disable-model-invocation: true",
+    "在description中说明需要手动触发",
+    "测试确认不会被自动调用"
+  ]
+}
+```
+
+**步骤4: 提供YAML示例代码**
+
+基于反模式的`examples.good`字段生成修复后的代码：
+```json
+{
+  "fix_example": "---\nname: git-commit\ndescription: \"提交代码变更（仅手动触发）\"\ndisable-model-invocation: true\nallowed-tools:\n  - Bash\n---"
+}
+```
+
+**步骤5: 说明验证方法**
+
+根据问题类型生成验证步骤：
+```json
+{
+  "verification_method": "1. 运行 /ccc:review <file> 确认问题消失\n2. 测试Claude不会自动调用此Skill\n3. 手动触发 /<skill-name> 确认功能正常"
+}
+```
+
+**步骤6: 估算修复成本**
+
+| 问题类型 | 修复时间 | 复杂度 | 影响范围 |
+|---------|---------|--------|----------|
+| Frontmatter缺失字段 | 5分钟 | 低 | 单文件 |
+| 命名规范问题 | 10分钟 | 低 | 单文件 |
+| 工作流缺失步骤 | 30分钟 | 中 | 单文件 |
+| 架构设计问题 | 1-2小时 | 高 | 多文件 |
+| 依赖关系错误 | 1-2小时 | 高 | 全局 |
+
+生成字段：
+```json
+{
+  "estimated_time": "5分钟",
+  "complexity": "低",
+  "impact_scope": "单文件"
+}
+```
+
+**字段缺失处理**:
+
+- 如果反模式YAML缺少`official_reference`，使用通用引用
+- 如果无法生成`fix_example`，省略该字段
+- `estimated_time`/`complexity`/`impact_scope`根据问题ID自动推断
 
 ### Best Practices
 
