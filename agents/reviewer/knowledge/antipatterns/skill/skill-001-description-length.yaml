@@ -1,61 +1,185 @@
 id: SKILL-001
-name: description-length
-severity: error
+name: description-incomplete
+severity: warning
 component_type: skill
 category: metadata
 
 title:
-  zh: "描述长度过短或缺失"
-  en: "Description too short or missing"
+  zh: "描述信息不完整"
+  en: "Description incomplete"
 
 description:
   zh: |
-    Skill 的 description 字段是用户理解组件用途的第一信息源。
-    长度小于 30 字符或大于 300 字符都属于不规范。
+    Skill 的 description 字段必须包含两个关键要素：
+    1. **功能说明**: 描述 skill 的作用
+    2. **触发场景**: 说明何时应该使用此 skill
+
+    官方参考：Include both **what the skill does** AND **specific contexts for when to use it**.
   en: |
-    Skill description is the primary source for users to understand component purpose.
-    Length less than 30 or greater than 300 characters is non-compliant.
+    Skill description must include two key elements:
+    1. **Functionality**: What the skill does
+    2. **Trigger scenarios**: When to use this skill
+
+    Official reference: Include both **what the skill does** AND **specific contexts for when to use it**.
 
 rationale:
-  zh: "基于 HANDBOOK 第 4 章 Skill 规范，description 必须清晰简洁。"
-  en: "Per HANDBOOK Chapter 4 Skill specification, description must be clear and concise."
+  zh: "基于官方文档 skills.md (OFF-INT-001, OFF-INT-002)，description 必须包含功能和触发场景以帮助 Claude 决定何时使用"
+  en: "Per official docs skills.md (OFF-INT-001, OFF-INT-002), description must include functionality and trigger scenarios to help Claude decide when to use"
 
-handbook_reference: "Chapter 4.2"
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Frontmatter Reference"
+  checkpoints: ["OFF-INT-001", "OFF-INT-002"]
+  quote: "description 字段必须描述 skill 功能和触发场景，应包含 Claude 决定何时使用的关键字"
 
 detection:
-  method: regex
-  pattern: '^description:\s*(.{0,29}|.{301,})$'
-  file_pattern: '*.md'
+  method: content-check
+  indicators:
+    - missing_functionality: "缺少功能说明"
+    - missing_trigger_scenario: "缺少触发场景说明"
+    - missing_keywords: "缺少关键触发词"
+  check_for:
+    - functionality_description: true
+    - trigger_keywords: ["when", "whenever", "use when", "当", "在", "时候", "场景"]
+    - minimum_substance: true  # 检查是否有实质内容而非仅仅几个字
 
 fix:
   automatic: false
   suggestion:
-    zh: "将 description 长度控制在 30-300 字符之间，清晰描述组件用途。"
-    en: "Keep description length between 30-300 characters, clearly describing the component purpose."
+    zh: "在 description 中同时包含功能说明和触发场景。例如：'代码分析工具，检查代码质量和潜在问题。当用户请求代码审查、提交 PR 或询问代码质量时使用。'"
+    en: "Include both functionality and trigger scenarios in description. Example: 'Code analysis tool checking code quality and potential issues. Use when user requests code review, submits PR, or asks about code quality.'"
 
 examples:
   bad:
     zh: |
+      错误1：只有功能，无触发场景
+      ```yaml
       ---
-      description: 部署工具
+      description: 代码分析工具，检查代码质量和编码规范
       ---
+      ❌ 没有说明何时使用
+      ❌ Claude 不知道什么时候触发
+      ```
+
+      错误2：过于简短，缺少实质信息
+      ```yaml
+      ---
+      description: 部署
+      ---
+      ❌ 没有功能说明
+      ❌ 没有触发场景
+      ```
+
+      错误3：只有触发场景，无功能说明
+      ```yaml
+      ---
+      description: 在需要部署时使用
+      ---
+      ❌ 不知道具体做什么
+      ```
     en: |
+      Error 1: Only functionality, no trigger scenarios
+      ```yaml
       ---
-      description: Deploy tool
+      description: Code analysis tool checking code quality and coding standards
       ---
+      ❌ Doesn't explain when to use
+      ❌ Claude doesn't know when to trigger
+      ```
+
+      Error 2: Too brief, lacks substance
+      ```yaml
+      ---
+      description: Deploy
+      ---
+      ❌ No functionality description
+      ❌ No trigger scenarios
+      ```
+
+      Error 3: Only trigger scenario, no functionality
+      ```yaml
+      ---
+      description: Use when deployment is needed
+      ---
+      ❌ Doesn't explain what it does
+      ```
   good:
     zh: |
+      正确1：完整的功能和触发场景
+      ```yaml
       ---
       description: |
-        自动化部署工具，支持 Docker 容器和 Kubernetes 集群的部署。
-        适用于 CI/CD 流程集成，支持滚动更新和回滚操作。
+        代码分析工具，检查代码质量、编码规范和潜在问题。
+        当用户请求代码审查、提交 PR 或询问代码质量时使用。
       ---
-    en: |
-      ---
-      description: |
-        Automated deployment tool supporting Docker containers and Kubernetes clusters.
-        Suitable for CI/CD pipeline integration with rolling updates and rollback.
-      ---
+      ✅ 包含功能说明
+      ✅ 包含触发场景
+      ✅ 有明确的关键词（代码审查、PR、代码质量）
+      ```
 
-tags: ["metadata", "description", "skill"]
-related_rules: ["SKILL-014"]
+      正确2：使用 pushy 语言增强触发
+      ```yaml
+      ---
+      description: |
+        自动化部署工具，支持 Docker 和 Kubernetes 部署。
+        无论何时用户提到部署、发布、上线或 deploy，都应使用此工具。
+        即使是小的更新或配置变更，也建议使用以确保流程标准化。
+      ---
+      ✅ 功能清晰
+      ✅ 多个触发关键词
+      ✅ "pushy" 描述增强触发
+      ```
+
+      正确3：明确的使用时机
+      ```yaml
+      ---
+      description: |
+        Git 工作流辅助工具，协助创建分支、提交和 PR。
+        当用户需要 git 操作、版本控制或代码提交时，主动使用此工具。
+        触发词：git, commit, branch, pr, pull request, 提交, 分支
+      ---
+      ✅ 功能+时机都很明确
+      ✅ 列出具体触发词
+      ✅ 主动性描述
+      ```
+    en: |
+      Good 1: Complete functionality and trigger scenarios
+      ```yaml
+      ---
+      description: |
+        Code analysis tool checking code quality, coding standards, and potential issues.
+        Use when user requests code review, submits PR, or asks about code quality.
+      ---
+      ✅ Includes functionality
+      ✅ Includes trigger scenarios
+      ✅ Clear keywords (code review, PR, code quality)
+      ```
+
+      Good 2: Using pushy language for better triggering
+      ```yaml
+      ---
+      description: |
+        Automated deployment tool supporting Docker and Kubernetes deployments.
+        Use whenever user mentions deploy, release, go-live, or deployment.
+        Even for small updates or config changes, recommend using for process standardization.
+      ---
+      ✅ Clear functionality
+      ✅ Multiple trigger keywords
+      ✅ Pushy description enhances triggering
+      ```
+
+      Good 3: Clear usage timing
+      ```yaml
+      ---
+      description: |
+        Git workflow assistant helping with branches, commits, and PRs.
+        Proactively use when user needs git operations, version control, or code commits.
+        Triggers: git, commit, branch, pr, pull request
+      ---
+      ✅ Clear functionality+timing
+      ✅ Lists specific trigger words
+      ✅ Proactive description
+      ```
+
+tags: ["metadata", "description", "skill", "triggering"]
+related_rules: ["SKILL-014", "DESC-001", "DESC-002"]
