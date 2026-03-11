@@ -3,13 +3,13 @@ name: ccc:cmd-status-trace
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Displays traceability matrix showing requirement coverage from intent through blueprint to delivery with gap analysis and action items"
+description: "追溯矩阵 | 场景: 独立工具"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status-trace
 
-Shows traceability matrix linking requirements to implementation.
+Displays traceability matrix showing requirement coverage from intent through blueprint to delivery with gap analysis and action items.
 
 ## Usage
 

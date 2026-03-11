@@ -3,13 +3,15 @@ name: ccc:cmd-design
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Creates comprehensive blueprint artifacts from intent specifications using structured 5-stage design workflow analysis"
+description: "生成Blueprint | 场景: 主工作流的第2步"
 argument-hint: "--name=<name> [--intent-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:design
 
-Creates a blueprint from intent through a 5-stage workflow.
+**完整流程**: `init` → **design** → `review` → `fix` → `validate` → `build`
+
+Creates comprehensive blueprint artifacts from intent specifications using structured 5-stage design workflow analysis.
 
 ## Usage
 

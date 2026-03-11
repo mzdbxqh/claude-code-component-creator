@@ -1,14 +1,14 @@
 ---
 name: ccc:cmd-design-new
-description: |
-  从零开始设计新组件 - 通过 5 阶段流程（需求→架构→设计→验证→规划）
-  创建完整的组件设计方案。
-  Design new component from scratch - 5-stage workflow (requirements→architecture→
-  design→validation→planning) to create complete component design.
+description: "从零设计 | 场景: 主工作流的变体（等同design）"
 argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /design-new 命令
+# /ccc:design-new
+
+**完整流程**: **design-new** → `review` → `fix` → `validate` → `build`
+
+Design new component from scratch - 5-stage workflow (requirements→architecture→design→validation→planning) to create complete component design.
 
 ## 用法 (Usage)
 

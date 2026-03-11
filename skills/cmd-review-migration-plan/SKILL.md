@@ -1,12 +1,12 @@
 ---
 name: ccc:cmd-review-migration-plan
-description: 改造方案审阅模式 - 检查 Agent → Skill 改造方案质量
+description: "改造方案审阅 | 场景: 独立工具"
 argument-hint: "<file-path> [--format=json|markdown] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /review-migration-plan
+# /ccc:review-migration-plan
 
-对 Agent → Skill 改造方案进行质量审阅，检测方案完整性、风险评估、最佳实践符合度等问题。
+Reviews Agent→Skill migration plan quality - checks completeness, risk assessment, and best practice compliance.
 
 ## 用法
 

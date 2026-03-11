@@ -3,13 +3,13 @@ name: ccc:cmd-status-graph
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Generates visual ASCII dependency graph of all artifacts in project showing relationships between intents, blueprints, and deliveries with status indicators"
+description: "依赖关系图 | 场景: 独立工具"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status-graph
 
-Shows ASCII/text graph of artifact dependencies.
+Generates visual ASCII dependency graph of all artifacts in project showing relationships between intents, blueprints, and deliveries with status indicators.
 
 ## Usage
 

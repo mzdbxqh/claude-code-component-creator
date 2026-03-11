@@ -1,0 +1,94 @@
+id: SKILL-018
+name: workflow-diagram-missing
+severity: warning
+component_type: skill
+category: documentation
+
+title:
+  zh: "集成场景 Skill 缺少工作流图"
+  en: "Integrated scenario Skill missing workflow diagram"
+
+description:
+  zh: |
+    属于集成工作流的 cmd- Skill（非独立工具）必须在 SKILL.md 第一行添加完整流程图，
+    展示该 Skill 在工作流中的位置和上下游关系。
+  en: |
+    cmd- Skills belonging to integrated workflows (not independent tools) must add a complete workflow diagram
+    in the first line of SKILL.md, showing the Skill's position and upstream/downstream relationships in the workflow.
+
+rationale:
+  zh: "完整流程图帮助用户理解 Skill 的前置和后续步骤，避免孤立使用导致流程断裂。"
+  en: "Complete workflow diagram helps users understand Skill's prerequisite and subsequent steps, avoiding workflow breaks from isolated usage."
+
+handbook_reference: "ccc:std-workflow-attribution"
+
+detection:
+  method: regex
+  pattern: '^# /ccc:cmd-[^\n]+\n\n(?!\\*\\*完整流程\\*\\*:|\\*\\*适用流程\\*\\*:|\\*\\*等价流程\\*\\*:)'
+  file_pattern: 'skills/cmd-*/SKILL.md'
+  exclude_patterns:
+    - 'skills/cmd-status/SKILL.md'
+    - 'skills/cmd-diff/SKILL.md'
+    - 'skills/cmd-trace/SKILL.md'
+    - 'skills/cmd-test-sandbox/SKILL.md'
+    - 'skills/cmd-review-migration-plan/SKILL.md'
+    - 'skills/cmd-review-workflow/SKILL.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 SKILL.md 第一行（标题下）添加流程图：
+
+      单一流程:
+      **完整流程**: `上游` → **当前** → `下游` → `后续`
+
+      多流程交汇:
+      **适用流程**:
+      - **流程A**: `步骤1` → **当前** → `步骤3`
+      - **流程B**: `步骤1` → **当前** → `步骤3`
+    en: |
+      Add workflow diagram in the first line of SKILL.md (below title):
+
+      Single workflow:
+      **完整流程**: `upstream` → **current** → `downstream` → `next`
+
+      Multi-workflow junction:
+      **适用流程**:
+      - **Workflow A**: `step1` → **current** → `step3`
+      - **Workflow B**: `step1` → **current** → `step3`
+
+examples:
+  bad:
+    zh: |
+      # /ccc:implement
+
+      Implements iteration plans from design-iterate.
+
+      ## Usage
+    en: |
+      # /ccc:implement
+
+      Implements iteration plans from design-iterate.
+
+      ## Usage
+  good:
+    zh: |
+      # /ccc:implement
+
+      **完整流程**: `design-iterate` → **implement** → `review` → `fix`
+
+      Implements iteration plans from design-iterate.
+
+      ## Usage
+    en: |
+      # /ccc:implement
+
+      **完整流程**: `design-iterate` → **implement** → `review` → `fix`
+
+      Implements iteration plans from design-iterate.
+
+      ## Usage
+
+tags: ["workflow", "diagram", "documentation", "cmd"]
+related_rules: ["SKILL-017", "SKILL-019"]

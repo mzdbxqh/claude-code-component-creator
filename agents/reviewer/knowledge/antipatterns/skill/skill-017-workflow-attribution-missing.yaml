@@ -1,0 +1,71 @@
+id: SKILL-017
+name: workflow-attribution-missing
+severity: warning
+component_type: skill
+category: metadata
+
+title:
+  zh: "cmd- Skill 缺少工作流归属标注"
+  en: "cmd- Skill missing workflow attribution annotation"
+
+description:
+  zh: |
+    所有 cmd- 前缀的入口型 Skill 必须在 description 中包含 "| 场景: [归属类型]" 标注，
+    帮助用户理解该 Skill 是独立工具还是某工作流的一部分。
+  en: |
+    All cmd- prefix entry-point Skills must include "| 场景: [attribution-type]" annotation in description,
+    helping users understand whether the Skill is an independent tool or part of a workflow.
+
+rationale:
+  zh: "工作流归属标注帮助用户快速理解 Skill 的定位和使用场景，提升文档自解释性。"
+  en: "Workflow attribution helps users quickly understand Skill positioning and usage scenarios, improving documentation self-explanatory nature."
+
+handbook_reference: "ccc:std-workflow-attribution"
+
+detection:
+  method: regex
+  pattern: '^name:\s+ccc:cmd-[^\s]+\s*\n(?:.*\n)*?description:.*(?!.*\|\s*场景:)'
+  file_pattern: 'skills/cmd-*/SKILL.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 description 末尾添加归属标注：
+      - 独立工具: "| 场景: 独立工具"
+      - 主工作流: "| 场景: 主工作流的第X步"
+      - 代码迭代: "| 场景: 代码迭代流程的第X步"
+      - 多流程交汇: "| 场景: 多流程的检查点/修复点"
+    en: |
+      Add attribution annotation at the end of description:
+      - Independent tool: "| 场景: 独立工具"
+      - Main workflow: "| 场景: 主工作流的第X步"
+      - Code iteration: "| 场景: 代码迭代流程的第X步"
+      - Multi-workflow junction: "| 场景: 多流程的检查点/修复点"
+
+examples:
+  bad:
+    zh: |
+      ---
+      name: ccc:cmd-design
+      description: "Creates comprehensive blueprint artifacts"
+      ---
+    en: |
+      ---
+      name: ccc:cmd-design
+      description: "Creates comprehensive blueprint artifacts"
+      ---
+  good:
+    zh: |
+      ---
+      name: ccc:cmd-design
+      description: "生成Blueprint | 场景: 主工作流的第2步"
+      ---
+    en: |
+      ---
+      name: ccc:cmd-design
+      description: "生成Blueprint | 场景: 主工作流的第2步"
+      ---
+
+tags: ["workflow", "attribution", "cmd", "metadata"]
+related_rules: ["SKILL-018", "SKILL-019"]

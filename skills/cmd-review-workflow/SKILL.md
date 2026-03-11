@@ -3,13 +3,13 @@ name: ccc:cmd-review-workflow
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Reviews multiple components in workflow order, generating workflow health report"
+description: "工作流审阅 | 场景: 独立工具"
 argument-hint: "[--artifact-id=<id>] [--depth=shallow|full]"
 ---
 
 # /ccc:review-workflow
 
-工作流串联审查命令。
+Reviews multiple components in workflow order, generating workflow health report with dependency analysis and parallelization opportunities.
 
 ## 参数
 

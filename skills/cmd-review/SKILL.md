@@ -3,13 +3,18 @@ name: ccc:cmd-review
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Performs comprehensive component quality review using 76+ antipatterns across 8 dimensions (intent, config, dependency, security, environment, llm, scalability, testability) (intent, config, dependency, security, environment, llm, scalability) with architecture checks and linkage validation"
+description: "质量审查 | 场景: 多流程的检查点"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:review
 
-使用 76+ 反模式进行审查，默认开启所有 8 个评估维度 + L1+L2 架构分析。
+**适用流程**:
+- **主工作流**: `design` → **review** → `fix` → `validate` → `build`
+- **代码迭代**: `implement` → **review** → `fix`
+- **制品迭代**: `iterate` → **review** → `fix` → `build`
+
+Performs comprehensive component quality review using 76+ antipatterns across 8 dimensions.
 
 ## Usage
 

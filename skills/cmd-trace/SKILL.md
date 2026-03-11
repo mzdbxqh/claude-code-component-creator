@@ -3,13 +3,13 @@ name: ccc:cmd-trace
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Generates comprehensive traceability matrix linking intent requirements to blueprint elements and delivery implementations with coverage analysis"
+description: "完整追溯 | 场景: 独立工具"
 argument-hint: "<project-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:trace
 
-Generates full traceability matrix for the project.
+Generates comprehensive traceability matrix linking intent requirements to blueprint elements and delivery implementations with coverage analysis.
 
 ## Global Parameter
 

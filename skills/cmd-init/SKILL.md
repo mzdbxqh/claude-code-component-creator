@@ -1,17 +1,17 @@
 ---
 name: ccc:cmd-init
-description: |
-  Create Intent artifact using 4-question framework.
-  Analyzes user requirement and generates structured Intent with cognitive load management.
-  使用 4 问题框架创建 Intent 制品。
-  分析用户需求并生成包含认知卸载的结构化 Intent。
+description: "创建Intent制品 | 场景: 主工作流的起点"
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /ccc:init Command
+# /ccc:init
+
+**完整流程**: **init** → `design` → `review` → `fix` → `validate` → `build`
+
+Create Intent artifact using 4-question framework. Analyzes user requirement and generates structured Intent with cognitive load management.
 
 ## Usage
 

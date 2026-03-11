@@ -3,13 +3,15 @@ name: ccc:cmd-quick
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Executes complete workflow from intent to delivery in a single command with auto-approval options"
+description: "快速完整流程 | 场景: 快捷工具（集成多个流程）"
 argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:quick
 
-Runs full workflow: init → design → build in sequence.
+**等价流程**: **quick** ≈ `init` → `design` → `build`（自动化执行）
+
+Executes complete workflow from intent to delivery in a single command with auto-approval options.
 
 ## Usage
 

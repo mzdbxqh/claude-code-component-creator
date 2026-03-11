@@ -3,13 +3,13 @@ name: ccc:cmd-status
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Displays current project workflow state and artifact status including intent, blueprint, and delivery progress with stage indicators"
+description: "查询项目状态 | 场景: 独立工具"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status
 
-Shows current workflow state and artifact status.
+Displays current project workflow state and artifact status including intent, blueprint, and delivery progress with stage indicators.
 
 ## Usage
 

@@ -3,13 +3,13 @@ name: ccc:cmd-test-sandbox
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Runs automated sandbox tests to verify CCC plugin functionality including intent→blueprint→delivery workflow and review features. Use this whenever you need to validate the plugin is working correctly after changes or before releases."
+description: "沙箱测试 | 场景: 独立工具"
 argument-hint: "[--test-case=<id>] [--dry-run] [--verbose]"
 ---
 
 # /ccc:test-sandbox
 
-自动化沙箱测试，验证 CCC 插件的核心功能。
+Runs automated sandbox tests to verify CCC plugin functionality including intent→blueprint→delivery workflow and review features.
 
 ## Usage
 

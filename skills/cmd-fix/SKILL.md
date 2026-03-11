@@ -3,13 +3,18 @@ name: ccc:cmd-fix
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Interactive repair workflow with AskUserQuestion strategy selection and SubAgent factory execution"
+description: "修复问题 | 场景: 多流程的修复点"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 ---
 
 # /ccc:fix
 
-交互式修复命令，基于审查报告执行批量修复。
+**适用流程**:
+- **主工作流**: `design` → `review` → **fix** → `validate` → `build`
+- **代码迭代**: `implement` → `review` → **fix**
+- **制品迭代**: `iterate` → `review` → **fix** → `build`
+
+Interactive repair workflow with AskUserQuestion strategy selection and SubAgent factory execution.
 
 ## 参数
 

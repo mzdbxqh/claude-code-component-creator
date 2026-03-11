@@ -3,13 +3,15 @@ name: ccc:cmd-validate
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Validates artifacts using external tools including YAML lint, schema validation, and token count analysis"
+description: "验证制品 | 场景: 主工作流的第5步"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:validate
 
-Runs external validation (YAML lint, schema, token count).
+**完整流程**: `init` → `design` → `review` → `fix` → **validate** → `build`
+
+Validates artifacts using external tools including YAML lint, schema validation, and token count analysis.
 
 ## Usage
 

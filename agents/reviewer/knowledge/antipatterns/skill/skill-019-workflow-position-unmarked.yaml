@@ -1,0 +1,58 @@
+id: SKILL-019
+name: workflow-position-unmarked
+severity: info
+component_type: skill
+category: documentation
+
+title:
+  zh: "工作流图未标注当前位置"
+  en: "Workflow diagram does not mark current position"
+
+description:
+  zh: |
+    工作流图中必须用加粗（**当前**）标注该 Skill 的位置，用反引号（`其他`）标注其他 Skill，
+    便于用户快速识别当前位置。
+  en: |
+    Workflow diagram must use bold (**current**) to mark this Skill's position, and backticks (`other`) for other Skills,
+    allowing users to quickly identify the current position.
+
+rationale:
+  zh: "清晰标注当前位置提升用户体验，避免在复杂工作流中迷失方向。"
+  en: "Clear current position marking improves user experience, avoiding disorientation in complex workflows."
+
+handbook_reference: "ccc:std-workflow-attribution"
+
+detection:
+  method: regex
+  pattern: '\\*\\*完整流程\\*\\*:|\\*\\*适用流程\\*\\*:'
+  negative_pattern: '\\*\\*[a-z-]+\\*\\*'
+  file_pattern: 'skills/cmd-*/SKILL.md'
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      使用以下格式标注工作流图：
+      - 当前 Skill: **skill-name** (加粗)
+      - 其他 Skill: `skill-name` (反引号)
+      - 非 Skill 节点: 普通文本（如：现有代码、Blueprint-v1）
+    en: |
+      Use the following format to mark workflow diagram:
+      - Current Skill: **skill-name** (bold)
+      - Other Skills: `skill-name` (backticks)
+      - Non-Skill nodes: plain text (e.g., existing code, Blueprint-v1)
+
+examples:
+  bad:
+    zh: |
+      **完整流程**: design-iterate → implement → review → fix
+    en: |
+      **完整流程**: design-iterate → implement → review → fix
+  good:
+    zh: |
+      **完整流程**: `design-iterate` → **implement** → `review` → `fix`
+    en: |
+      **完整流程**: `design-iterate` → **implement** → `review` → `fix`
+
+tags: ["workflow", "position", "formatting", "cmd"]
+related_rules: ["SKILL-017", "SKILL-018"]

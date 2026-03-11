@@ -3,13 +3,13 @@ name: ccc:cmd-diff
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Compares differences between two artifact versions including intents, blueprints, and deliveries with detailed change summaries and export capabilities"
+description: "对比制品差异 | 场景: 独立工具"
 argument-hint: "[--from=id] [--to=id] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:diff
 
-Shows differences between artifact versions.
+Compares differences between two artifact versions including intents, blueprints, and deliveries with detailed change summaries and export capabilities.
 
 ## Usage
 

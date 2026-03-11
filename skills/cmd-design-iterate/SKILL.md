@@ -1,13 +1,14 @@
 ---
 name: ccc:cmd-design-iterate
-description: |
-  基于现有组件迭代优化 - 分析现状与目标差异，生成增量变更方案。
-  Iterate on existing components - analyze current vs target state,
-  generate incremental change proposals.
+description: "生成迭代方案 | 场景: 代码迭代流程的起点"
 argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /design-iterate 命令
+# /ccc:design-iterate
+
+**完整流程**: 现有代码 → **design-iterate** → `implement` → `review` → `fix`
+
+Iterate on existing components - analyze current vs target state, generate incremental change proposals.
 
 ## 用法 (Usage)
 

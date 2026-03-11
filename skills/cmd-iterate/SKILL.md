@@ -3,13 +3,15 @@ name: ccc:cmd-iterate
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Iterates on existing blueprint artifacts to create improved versions with refinement tracking and change documentation"
+description: "迭代Blueprint | 场景: 制品迭代流程的核心"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:iterate
 
-Iterates on an existing blueprint artifact, creating a new version with improvements.
+**完整流程**: Blueprint-v1 → **iterate** → Blueprint-v2 → `review` → `fix` → `build`
+
+Iterates on existing blueprint artifacts to create improved versions with refinement tracking and change documentation.
 
 ## Usage
 

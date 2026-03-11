@@ -3,13 +3,15 @@ name: ccc:cmd-build
 model: sonnet
 context: fork
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "Generates complete production-ready deliverable packages from validated blueprints including SKILL.md, implementation code, tests, and documentation"
+description: "构建交付 | 场景: 主工作流的终点"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:build
 
-Generates deliverable files from a blueprint artifact.
+**完整流程**: `init` → `design` → `review` → `fix` → `validate` → **build**
+
+Generates complete production-ready deliverable packages from validated blueprints including SKILL.md, implementation code, tests, and documentation.
 
 ## Usage
 
