@@ -1,0 +1,701 @@
+id: ARCH-018
+name: poor-component-organization
+severity: info
+component_type: all
+category: architecture
+
+title:
+  zh: "组件组织结构不佳"
+  en: "Poor component organization"
+
+description:
+  zh: |
+    组件应该遵循清晰的组织结构，提升可维护性和可理解性。
+
+    **推荐结构**：
+    ```
+    plugin/
+      .claude-plugin/
+        plugin.json
+      skills/
+        <skill-name>/
+          SKILL.md
+          support/           # 支持文件（可选）
+      agents/
+        <agent-name>/
+          SKILL.md
+          support/
+      hooks/
+        hooks.json
+        scripts/             # Hook 脚本
+      tests/                 # 测试文件
+      docs/                  # 额外文档
+      README.md
+    ```
+
+    **组织原则**：
+    - 每个组件独立目录
+    - 相关文件就近放置
+    - 避免深层嵌套（≤3层）
+    - 清晰的文件职责划分
+
+  en: |
+    Components should follow clear organizational structure for maintainability and understandability.
+
+    **Recommended Structure**:
+    ```
+    plugin/
+      .claude-plugin/
+        plugin.json
+      skills/
+        <skill-name>/
+          SKILL.md
+          support/           # Support files (optional)
+      agents/
+        <agent-name>/
+          SKILL.md
+          support/
+      hooks/
+        hooks.json
+        scripts/             # Hook scripts
+      tests/                 # Test files
+      docs/                  # Additional docs
+      README.md
+    ```
+
+    **Organization Principles**:
+    - Each component in separate directory
+    - Related files placed nearby
+    - Avoid deep nesting (≤3 levels)
+    - Clear file responsibility separation
+
+rationale:
+  zh: "基于官方建议 (architecture.md OFF-ARC-040~042)，良好组织提升代码库可维护性和可扩展性"
+  en: "Per official recommendations (architecture.md OFF-ARC-040~042), good organization improves codebase maintainability and scalability"
+
+detection:
+  method: structure-check
+  indicators:
+    - flat_structure: "所有文件在同一目录"
+    - deep_nesting: "目录嵌套超过 3 层"
+    - mixed_concerns: "不同类型组件混在一起"
+
+official_reference:
+  document: "markdown_docs/architecture-best-practices.md"
+  section: "组织结构"
+  lines: "126-189"
+  quote: "每个组件独立目录。相关文件就近。避免深层嵌套。清晰职责划分。"
+
+examples:
+  bad:
+    zh: |
+      错误1：扁平结构
+      ```
+      plugin/
+        skill1.md
+        skill2.md
+        skill3.md
+        agent1.md
+        agent2.md
+        hook.json
+        README.md
+
+      ❌ 所有文件混在一起
+      ❌ 难以区分组件类型
+      ❌ 扩展性差
+      ```
+
+      错误2：深层嵌套
+      ```
+      plugin/
+        src/
+          components/
+            skills/
+              analyzers/
+                code/
+                  javascript/
+                    SKILL.md    ← 6 层嵌套
+
+      ❌ 路径太长
+      ❌ 难以导航
+      ```
+
+      错误3：混合职责
+      ```
+      plugin/
+        skills/
+          analyze/
+            SKILL.md
+            utils.js           ← 工具代码
+            config.json        ← 配置
+            test.js            ← 测试
+            docs.md            ← 文档
+            temp.txt           ← 临时文件
+
+      ❌ 文件职责不清
+      ❌ 支持文件应该在 support/ 中
+      ❌ 测试应该在 tests/ 中
+      ```
+    en: |
+      Error 1: Flat structure
+      ```
+      plugin/
+        skill1.md
+        skill2.md
+        skill3.md
+        agent1.md
+        agent2.md
+        hook.json
+        README.md
+
+      ❌ All files mixed together
+      ❌ Hard to distinguish component types
+      ❌ Poor scalability
+      ```
+
+      Error 2: Deep nesting
+      ```
+      plugin/
+        src/
+          components/
+            skills/
+              analyzers/
+                code/
+                  javascript/
+                    SKILL.md    ← 6 levels deep
+
+      ❌ Path too long
+      ❌ Hard to navigate
+      ```
+
+      Error 3: Mixed responsibilities
+      ```
+      plugin/
+        skills/
+          analyze/
+            SKILL.md
+            utils.js           ← Utility code
+            config.json        ← Config
+            test.js            ← Tests
+            docs.md            ← Docs
+            temp.txt           ← Temp file
+
+      ❌ File responsibilities unclear
+      ❌ Support files should be in support/
+      ❌ Tests should be in tests/
+      ```
+
+  good:
+    zh: |
+      正确1：清晰的组织结构
+      ```
+      code-analyzer/
+        .claude-plugin/
+          plugin.json
+
+        skills/
+          analyze/
+            SKILL.md
+            support/
+              parsers.js
+              rules.json
+
+          format/
+            SKILL.md
+
+        agents/
+          deep-analyzer/
+            SKILL.md
+            support/
+              analysis-engine.js
+
+        hooks/
+          hooks.json
+          scripts/
+            pre-commit-check.sh
+
+        tests/
+          analyze.test.js
+          format.test.js
+
+        docs/
+          architecture.md
+          api.md
+
+        README.md
+        LICENSE
+
+      ✅ 清晰的目录结构
+      ✅ 每个组件独立
+      ✅ 支持文件有序组织
+      ```
+
+      正确2：support/ 目录规范
+      ```
+      skills/
+        data-processor/
+          SKILL.md
+          support/
+            parsers/          # 解析器
+              json.js
+              yaml.js
+            validators/       # 验证器
+              schema.js
+            config/           # 配置
+              defaults.json
+            lib/              # 共享库
+              utils.js
+
+      README (in support/):
+      ```markdown
+      # Support Files
+
+      - parsers/: Data format parsers
+      - validators/: Data validation logic
+      - config/: Default configurations
+      - lib/: Shared utilities
+      ```
+
+      ✅ support/ 内部再分类
+      ✅ 每个子目录有明确职责
+      ```
+
+      正确3：tests/ 目录组织
+      ```
+      tests/
+        unit/                 # 单元测试
+          skills/
+            analyze.test.js
+            format.test.js
+          agents/
+            analyzer.test.js
+
+        integration/          # 集成测试
+          workflow.test.js
+          hooks.test.js
+
+        e2e/                  # 端到端测试
+          full-workflow.test.js
+
+        fixtures/             # 测试数据
+          sample.js
+          expected.json
+
+        README.md
+
+      ✅ 测试类型分离
+      ✅ 镜像源代码结构
+      ✅ 测试数据独立存放
+      ```
+
+      正确4：docs/ 目录结构
+      ```
+      docs/
+        user-guide/           # 用户指南
+          installation.md
+          usage.md
+          troubleshooting.md
+
+        developer/            # 开发文档
+          architecture.md
+          contributing.md
+          api-reference.md
+
+        examples/             # 示例
+          basic-usage.md
+          advanced-workflows.md
+
+        images/               # 图片资源
+          architecture-diagram.png
+          demo.gif
+
+        README.md
+
+      ✅ 文档类型分离
+      ✅ 用户/开发者文档区分
+      ✅ 示例和资源独立
+      ```
+
+      正确5：中型插件完整结构
+      ```
+      git-integration/
+        .claude-plugin/
+          plugin.json           # 插件元数据
+
+        skills/
+          commit/
+            SKILL.md
+            support/
+              message-template.txt
+          push/
+            SKILL.md
+          status/
+            SKILL.md
+
+        agents/
+          commit-helper/
+            SKILL.md
+            support/
+              conventions.json
+
+        hooks/
+          hooks.json
+          scripts/
+            pre-commit-check.sh
+            post-push-notify.sh
+
+        tests/
+          unit/
+            commit.test.js
+          integration/
+            workflow.test.js
+          fixtures/
+            sample-repo/
+
+        docs/
+          user-guide.md
+          api.md
+
+        lib/                    # 共享代码库
+          git-utils.js
+          config-loader.js
+
+        README.md
+        LICENSE
+        CHANGELOG.md
+
+      ✅ 完整的插件结构
+      ✅ 每个部分职责清晰
+      ✅ 易于扩展和维护
+      ```
+
+      正确6：组织原则应用
+      ```markdown
+      # Organization Checklist
+
+      ## Directory Structure
+      - [ ] skills/ for Skills
+      - [ ] agents/ for SubAgents
+      - [ ] hooks/ for Hooks
+      - [ ] tests/ for tests
+      - [ ] docs/ for documentation
+      - [ ] lib/ for shared code (if needed)
+
+      ## File Placement
+      - [ ] Each component in own directory
+      - [ ] Support files in support/
+      - [ ] Tests mirror source structure
+      - [ ] Documentation separated
+
+      ## Nesting Rules
+      - [ ] Max 3 levels deep
+      - [ ] Use flat structure when possible
+      - [ ] Group by type, then by feature
+
+      ## Naming
+      - [ ] Consistent naming (lowercase-hyphen)
+      - [ ] Self-explanatory directories
+      - [ ] README in complex directories
+      ```
+    en: |
+      Good 1: Clear organization
+      ```
+      code-analyzer/
+        .claude-plugin/
+          plugin.json
+
+        skills/
+          analyze/
+            SKILL.md
+            support/
+              parsers.js
+              rules.json
+
+          format/
+            SKILL.md
+
+        agents/
+          deep-analyzer/
+            SKILL.md
+            support/
+              analysis-engine.js
+
+        hooks/
+          hooks.json
+          scripts/
+            pre-commit-check.sh
+
+        tests/
+          analyze.test.js
+          format.test.js
+
+        docs/
+          architecture.md
+          api.md
+
+        README.md
+        LICENSE
+
+      ✅ Clear directory structure
+      ✅ Each component independent
+      ✅ Support files organized
+      ```
+
+      Good 2: support/ directory conventions
+      ```
+      skills/
+        data-processor/
+          SKILL.md
+          support/
+            parsers/          # Parsers
+              json.js
+              yaml.js
+            validators/       # Validators
+              schema.js
+            config/           # Configs
+              defaults.json
+            lib/              # Shared libs
+              utils.js
+
+      README (in support/):
+      ```markdown
+      # Support Files
+
+      - parsers/: Data format parsers
+      - validators/: Data validation logic
+      - config/: Default configurations
+      - lib/: Shared utilities
+      ```
+
+      ✅ Further categorize within support/
+      ✅ Each subdirectory has clear role
+      ```
+
+      Good 3: tests/ directory organization
+      ```
+      tests/
+        unit/                 # Unit tests
+          skills/
+            analyze.test.js
+            format.test.js
+          agents/
+            analyzer.test.js
+
+        integration/          # Integration tests
+          workflow.test.js
+          hooks.test.js
+
+        e2e/                  # End-to-end tests
+          full-workflow.test.js
+
+        fixtures/             # Test data
+          sample.js
+          expected.json
+
+        README.md
+
+      ✅ Test types separated
+      ✅ Mirrors source structure
+      ✅ Test data stored separately
+      ```
+
+      Good 4: docs/ directory structure
+      ```
+      docs/
+        user-guide/           # User guide
+          installation.md
+          usage.md
+          troubleshooting.md
+
+        developer/            # Developer docs
+          architecture.md
+          contributing.md
+          api-reference.md
+
+        examples/             # Examples
+          basic-usage.md
+          advanced-workflows.md
+
+        images/               # Image assets
+          architecture-diagram.png
+          demo.gif
+
+        README.md
+
+      ✅ Doc types separated
+      ✅ User/developer docs distinguished
+      ✅ Examples and assets separate
+      ```
+
+      Good 5: Complete medium plugin structure
+      ```
+      git-integration/
+        .claude-plugin/
+          plugin.json           # Plugin metadata
+
+        skills/
+          commit/
+            SKILL.md
+            support/
+              message-template.txt
+          push/
+            SKILL.md
+          status/
+            SKILL.md
+
+        agents/
+          commit-helper/
+            SKILL.md
+            support/
+              conventions.json
+
+        hooks/
+          hooks.json
+          scripts/
+            pre-commit-check.sh
+            post-push-notify.sh
+
+        tests/
+          unit/
+            commit.test.js
+          integration/
+            workflow.test.js
+          fixtures/
+            sample-repo/
+
+        docs/
+          user-guide.md
+          api.md
+
+        lib/                    # Shared codebase
+          git-utils.js
+          config-loader.js
+
+        README.md
+        LICENSE
+        CHANGELOG.md
+
+      ✅ Complete plugin structure
+      ✅ Each part has clear responsibility
+      ✅ Easy to extend and maintain
+      ```
+
+      Good 6: Organization principles applied
+      ```markdown
+      # Organization Checklist
+
+      ## Directory Structure
+      - [ ] skills/ for Skills
+      - [ ] agents/ for SubAgents
+      - [ ] hooks/ for Hooks
+      - [ ] tests/ for tests
+      - [ ] docs/ for documentation
+      - [ ] lib/ for shared code (if needed)
+
+      ## File Placement
+      - [ ] Each component in own directory
+      - [ ] Support files in support/
+      - [ ] Tests mirror source structure
+      - [ ] Documentation separated
+
+      ## Nesting Rules
+      - [ ] Max 3 levels deep
+      - [ ] Use flat structure when possible
+      - [ ] Group by type, then by feature
+
+      ## Naming
+      - [ ] Consistent naming (lowercase-hyphen)
+      - [ ] Self-explanatory directories
+      - [ ] README in complex directories
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **重组组件结构**:
+
+      1. **创建标准目录**：
+         ```bash
+         mkdir -p skills agents hooks tests docs
+         ```
+
+      2. **移动组件到对应目录**：
+         ```bash
+         # Skills
+         mkdir -p skills/analyze
+         mv analyze.md skills/analyze/SKILL.md
+
+         # SubAgents
+         mkdir -p agents/analyzer
+         mv analyzer.md agents/analyzer/SKILL.md
+         ```
+
+      3. **组织支持文件**：
+         ```bash
+         mkdir -p skills/analyze/support
+         mv utils.js skills/analyze/support/
+         mv config.json skills/analyze/support/
+         ```
+
+      4. **分离测试和文档**：
+         ```bash
+         mkdir -p tests/unit tests/integration
+         mv *.test.js tests/unit/
+
+         mkdir -p docs
+         mv architecture.md docs/
+         ```
+
+      **组织检查清单**:
+      - [ ] 每个组件有独立目录
+      - [ ] 支持文件在 support/ 中
+      - [ ] 测试在 tests/ 中
+      - [ ] 文档在 docs/ 中
+      - [ ] 目录嵌套 ≤3 层
+      - [ ] README 说明结构
+    en: |
+      **Reorganize component structure**:
+
+      1. **Create standard directories**:
+         ```bash
+         mkdir -p skills agents hooks tests docs
+         ```
+
+      2. **Move components to directories**:
+         ```bash
+         # Skills
+         mkdir -p skills/analyze
+         mv analyze.md skills/analyze/SKILL.md
+
+         # SubAgents
+         mkdir -p agents/analyzer
+         mv analyzer.md agents/analyzer/SKILL.md
+         ```
+
+      3. **Organize support files**:
+         ```bash
+         mkdir -p skills/analyze/support
+         mv utils.js skills/analyze/support/
+         mv config.json skills/analyze/support/
+         ```
+
+      4. **Separate tests and docs**:
+         ```bash
+         mkdir -p tests/unit tests/integration
+         mv *.test.js tests/unit/
+
+         mkdir -p docs
+         mv architecture.md docs/
+         ```
+
+      **Organization Checklist**:
+      - [ ] Each component has own directory
+      - [ ] Support files in support/
+      - [ ] Tests in tests/
+      - [ ] Docs in docs/
+      - [ ] Directory nesting ≤3 levels
+      - [ ] README explains structure
+
+tags: ["architecture", "organization", "structure", "maintainability", "scalability"]
+related_rules: ["ARCH-017", "ARCH-014", "ARCH-015"]

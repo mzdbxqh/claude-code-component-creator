@@ -1,0 +1,567 @@
+id: ARCH-017
+name: component-naming-inconsistent
+severity: info
+component_type: all
+category: architecture
+
+title:
+  zh: "组件命名不一致"
+  en: "Component naming inconsistent"
+
+description:
+  zh: |
+    组件命名应该遵循一致的规范，提高可维护性和可发现性。
+
+    **命名规范**：
+    - **Skills**: 使用动词或动作名称 (analyze, format, deploy)
+    - **SubAgents**: 使用名词或角色名称 (analyzer, formatter, deployer)
+    - **Hooks**: 使用事件相关名称 (pre-commit-check, security-validator)
+    - **插件**: 使用项目或功能名称 (code-review, git-helper)
+
+    **文件命名**：
+    - Skill 目录名与 name 字段一致
+    - 小写字母，连字符分隔
+    - 避免缩写和简写
+    - 名称应该自解释
+
+    **命名空间**：
+    - 插件 Skills: `plugin-name:skill-name`
+    - 避免冲突: 使用描述性前缀
+
+  en: |
+    Component naming should follow consistent conventions for maintainability and discoverability.
+
+    **Naming Conventions**:
+    - **Skills**: Use verbs or action names (analyze, format, deploy)
+    - **SubAgents**: Use nouns or role names (analyzer, formatter, deployer)
+    - **Hooks**: Use event-related names (pre-commit-check, security-validator)
+    - **Plugins**: Use project or feature names (code-review, git-helper)
+
+    **File Naming**:
+    - Skill directory name matches name field
+    - Lowercase letters, hyphen-separated
+    - Avoid abbreviations and shortcuts
+    - Names should be self-explanatory
+
+    **Namespacing**:
+    - Plugin Skills: `plugin-name:skill-name`
+    - Avoid conflicts: Use descriptive prefixes
+
+rationale:
+  zh: "基于官方建议 (architecture.md OFF-ARC-038~039)，一致的命名提升代码库可维护性"
+  en: "Per official recommendations (architecture.md OFF-ARC-038~039), consistent naming improves codebase maintainability"
+
+detection:
+  method: pattern-check
+  indicators:
+    - name_mismatch: "目录名与 name 字段不一致"
+    - wrong_case: "使用大写字母或下划线"
+    - vague_name: "名称过于简短或模糊"
+
+official_reference:
+  document: "markdown_docs/architecture-best-practices.md"
+  section: "命名规范"
+  lines: "67-125"
+  quote: "Skills 用动词，SubAgents 用名词。小写连字符分隔。名称自解释。"
+
+examples:
+  bad:
+    zh: |
+      错误1：目录名与 name 不一致
+      ```
+      skills/
+        codeAnalyzer/        ← 目录名使用驼峰
+          SKILL.md
+            name: code-analyzer   ← name 使用连字符
+
+      应该统一为: code-analyzer/
+      ```
+
+      错误2：Skill 使用名词
+      ```yaml
+      ---
+      name: analyzer
+      ---
+
+      ❌ Skill 应该用动词
+      应该是: analyze 或 analyze-code
+      ```
+
+      错误3：SubAgent 使用动词
+      ```yaml
+      ---
+      name: review
+      ---
+      # SubAgent
+
+      ❌ SubAgent 应该用名词
+      应该是: reviewer 或 code-reviewer
+      ```
+
+      错误4：名称太简短
+      ```
+      skills/
+        fmt/      ← 太简短
+        chk/      ← 缩写
+        proc/     ← 不清晰
+
+      应该是:
+        format-code/
+        check-syntax/
+        process-data/
+      ```
+
+      错误5：使用下划线
+      ```
+      skills/
+        code_analyzer/    ← 使用下划线
+
+      应该是: code-analyzer/
+      ```
+    en: |
+      Error 1: Directory name != name field
+      ```
+      skills/
+        codeAnalyzer/        ← Directory uses camelCase
+          SKILL.md
+            name: code-analyzer   ← name uses hyphen
+
+      Should be unified: code-analyzer/
+      ```
+
+      Error 2: Skill uses noun
+      ```yaml
+      ---
+      name: analyzer
+      ---
+
+      ❌ Skill should use verb
+      Should be: analyze or analyze-code
+      ```
+
+      Error 3: SubAgent uses verb
+      ```yaml
+      ---
+      name: review
+      ---
+      # SubAgent
+
+      ❌ SubAgent should use noun
+      Should be: reviewer or code-reviewer
+      ```
+
+      Error 4: Name too short
+      ```
+      skills/
+        fmt/      ← Too short
+        chk/      ← Abbreviation
+        proc/     ← Unclear
+
+      Should be:
+        format-code/
+        check-syntax/
+        process-data/
+      ```
+
+      Error 5: Uses underscore
+      ```
+      skills/
+        code_analyzer/    ← Uses underscore
+
+      Should be: code-analyzer/
+      ```
+
+  good:
+    zh: |
+      正确1：Skills 命名
+      ```
+      skills/
+        analyze-code/          ← 动词，清晰
+          SKILL.md (name: analyze-code)
+
+        format-json/           ← 动词 + 对象
+          SKILL.md (name: format-json)
+
+        deploy-to-production/  ← 完整动作
+          SKILL.md (name: deploy-to-production)
+
+      ✅ 动词开头
+      ✅ 描述性名称
+      ✅ 目录名与 name 一致
+      ```
+
+      正确2：SubAgents 命名
+      ```
+      agents/
+        code-analyzer/         ← 名词，角色
+          SKILL.md (name: code-analyzer)
+
+        test-runner/           ← 名词，功能
+          SKILL.md (name: test-runner)
+
+        deployment-manager/    ← 名词，职责
+          SKILL.md (name: deployment-manager)
+
+      ✅ 名词形式
+      ✅ 表示角色或功能
+      ✅ 清晰描述职责
+      ```
+
+      正确3：Hooks 命名
+      ```
+      hooks/
+        pre-commit-check/      ← 事件 + 动作
+        security-validator/    ← 功能 + 角色
+        code-quality-gate/     ← 描述性名称
+
+      hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "description": "pre-commit-check"
+        }]
+      }
+
+      ✅ 关联事件类型
+      ✅ 描述验证目的
+      ```
+
+      正确4：插件命名
+      ```
+      ~/.claude/plugins/
+        code-review/           ← 功能名称
+          plugin.json (name: "code-review")
+          skills/
+            review/            ← 插件内部可简短
+            suggest/
+          README.md
+
+      使用时: /code-review:review
+
+      ✅ 插件名描述功能
+      ✅ 命名空间避免冲突
+      ```
+
+      正确5：命名决策树
+      ```markdown
+      # Naming Decision Tree
+
+      ## What are you naming?
+
+      ### Skill (User-invocable action)
+      → Use verb or verb phrase
+      - analyze
+      - format-code
+      - deploy-to-prod
+
+      ### SubAgent (Autonomous worker)
+      → Use noun or role name
+      - analyzer
+      - code-reviewer
+      - test-runner
+
+      ### Hook (Event handler)
+      → Use event + purpose
+      - pre-commit-check
+      - post-tooluse-logger
+      - security-validator
+
+      ### Plugin (Feature collection)
+      → Use project/feature name
+      - git-helper
+      - code-review
+      - deployment-tools
+
+      ## Formatting Rules
+      - ✅ lowercase-with-hyphens
+      - ✅ descriptive-full-words
+      - ❌ camelCase
+      - ❌ snake_case
+      - ❌ abbr or shrt
+      ```
+
+      正确6：一致性检查
+      ```markdown
+      # Plugin Structure with Consistent Naming
+
+      git-helper/
+        .claude-plugin/
+          plugin.json
+            name: "git-helper"
+
+        skills/
+          commit/              ← Verb (Skill)
+            SKILL.md
+              name: commit
+
+          push/                ← Verb (Skill)
+            SKILL.md
+              name: push
+
+        agents/
+          commit-helper/       ← Noun (SubAgent)
+            SKILL.md
+              name: commit-helper
+
+        hooks/
+          pre-commit-check/    ← Event-purpose (Hook)
+            hooks.json
+
+        README.md
+
+      ✅ 所有命名遵循规范
+      ✅ 目录名与配置一致
+      ✅ 命名空间清晰 (git-helper:commit)
+      ```
+
+      正确7：重构命名示例
+      ```markdown
+      # Before (Bad Naming)
+      my-plugin/
+        skills/
+          proc/              ← 缩写
+          chk/               ← 缩写
+        agents/
+          analyze/           ← 动词（应该用名词）
+
+      # After (Good Naming)
+      data-processor/        ← 描述性插件名
+        skills/
+          process-data/      ← 动词短语
+          check-format/      ← 动词短语
+        agents/
+          data-analyzer/     ← 名词
+
+      ✅ 清晰、一致、自解释
+      ```
+    en: |
+      Good 1: Skills naming
+      ```
+      skills/
+        analyze-code/          ← Verb, clear
+          SKILL.md (name: analyze-code)
+
+        format-json/           ← Verb + object
+          SKILL.md (name: format-json)
+
+        deploy-to-production/  ← Complete action
+          SKILL.md (name: deploy-to-production)
+
+      ✅ Verb prefix
+      ✅ Descriptive names
+      ✅ Directory matches name
+      ```
+
+      Good 2: SubAgents naming
+      ```
+      agents/
+        code-analyzer/         ← Noun, role
+          SKILL.md (name: code-analyzer)
+
+        test-runner/           ← Noun, function
+          SKILL.md (name: test-runner)
+
+        deployment-manager/    ← Noun, responsibility
+          SKILL.md (name: deployment-manager)
+
+      ✅ Noun form
+      ✅ Indicates role or function
+      ✅ Clearly describes responsibility
+      ```
+
+      Good 3: Hooks naming
+      ```
+      hooks/
+        pre-commit-check/      ← Event + action
+        security-validator/    ← Function + role
+        code-quality-gate/     ← Descriptive name
+
+      hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "description": "pre-commit-check"
+        }]
+      }
+
+      ✅ Related to event type
+      ✅ Describes validation purpose
+      ```
+
+      Good 4: Plugin naming
+      ```
+      ~/.claude/plugins/
+        code-review/           ← Feature name
+          plugin.json (name: "code-review")
+          skills/
+            review/            ← Can be shorter internally
+            suggest/
+          README.md
+
+      Usage: /code-review:review
+
+      ✅ Plugin name describes function
+      ✅ Namespace avoids conflicts
+      ```
+
+      Good 5: Naming decision tree
+      ```markdown
+      # Naming Decision Tree
+
+      ## What are you naming?
+
+      ### Skill (User-invocable action)
+      → Use verb or verb phrase
+      - analyze
+      - format-code
+      - deploy-to-prod
+
+      ### SubAgent (Autonomous worker)
+      → Use noun or role name
+      - analyzer
+      - code-reviewer
+      - test-runner
+
+      ### Hook (Event handler)
+      → Use event + purpose
+      - pre-commit-check
+      - post-tooluse-logger
+      - security-validator
+
+      ### Plugin (Feature collection)
+      → Use project/feature name
+      - git-helper
+      - code-review
+      - deployment-tools
+
+      ## Formatting Rules
+      - ✅ lowercase-with-hyphens
+      - ✅ descriptive-full-words
+      - ❌ camelCase
+      - ❌ snake_case
+      - ❌ abbr or shrt
+      ```
+
+      Good 6: Consistency check
+      ```markdown
+      # Plugin Structure with Consistent Naming
+
+      git-helper/
+        .claude-plugin/
+          plugin.json
+            name: "git-helper"
+
+        skills/
+          commit/              ← Verb (Skill)
+            SKILL.md
+              name: commit
+
+          push/                ← Verb (Skill)
+            SKILL.md
+              name: push
+
+        agents/
+          commit-helper/       ← Noun (SubAgent)
+            SKILL.md
+              name: commit-helper
+
+        hooks/
+          pre-commit-check/    ← Event-purpose (Hook)
+            hooks.json
+
+        README.md
+
+      ✅ All naming follows conventions
+      ✅ Directory names match config
+      ✅ Clear namespace (git-helper:commit)
+      ```
+
+      Good 7: Refactoring naming example
+      ```markdown
+      # Before (Bad Naming)
+      my-plugin/
+        skills/
+          proc/              ← Abbreviation
+          chk/               ← Abbreviation
+        agents/
+          analyze/           ← Verb (should be noun)
+
+      # After (Good Naming)
+      data-processor/        ← Descriptive plugin name
+        skills/
+          process-data/      ← Verb phrase
+          check-format/      ← Verb phrase
+        agents/
+          data-analyzer/     ← Noun
+
+      ✅ Clear, consistent, self-explanatory
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **统一组件命名**:
+
+      1. **检查当前命名**：
+         - 目录名是否与 name 字段一致？
+         - 是否使用正确的词性？
+         - 是否使用连字符分隔？
+
+      2. **应用命名规范**：
+         - Skills → 动词 (analyze, format)
+         - SubAgents → 名词 (analyzer, formatter)
+         - Hooks → 事件关联 (pre-commit-check)
+         - 全部小写，连字符分隔
+
+      3. **重命名步骤**：
+         ```bash
+         # 重命名目录
+         mv skills/codeAnalyzer skills/analyze-code
+
+         # 更新 SKILL.md name 字段
+         ---
+         name: analyze-code
+         ---
+         ```
+
+      **命名检查清单**:
+      - [ ] 目录名 = name 字段
+      - [ ] 小写 + 连字符
+      - [ ] 词性正确（Skill=动词，SubAgent=名词）
+      - [ ] 名称自解释（不用缩写）
+      - [ ] 插件使用命名空间
+    en: |
+      **Unify component naming**:
+
+      1. **Check current naming**:
+         - Does directory name match name field?
+         - Using correct part of speech?
+         - Using hyphen separation?
+
+      2. **Apply naming conventions**:
+         - Skills → verbs (analyze, format)
+         - SubAgents → nouns (analyzer, formatter)
+         - Hooks → event-related (pre-commit-check)
+         - All lowercase, hyphen-separated
+
+      3. **Rename steps**:
+         ```bash
+         # Rename directory
+         mv skills/codeAnalyzer skills/analyze-code
+
+         # Update SKILL.md name field
+         ---
+         name: analyze-code
+         ---
+         ```
+
+      **Naming Checklist**:
+      - [ ] Directory name = name field
+      - [ ] Lowercase + hyphens
+      - [ ] Correct part of speech (Skill=verb, SubAgent=noun)
+      - [ ] Self-explanatory (no abbreviations)
+      - [ ] Plugin uses namespace
+
+tags: ["architecture", "naming", "conventions", "maintainability", "consistency"]
+related_rules: ["ARCH-014", "ARCH-015", "ARCH-016"]
