@@ -1,0 +1,858 @@
+id: DEP-001
+name: mcp-server-misconfiguration
+severity: warning
+component_type: plugin
+category: dependency
+
+title:
+  zh: "MCP Server 配置不当"
+  en: "MCP Server misconfiguration"
+
+description:
+  zh: |
+    MCP (Model Context Protocol) servers 为 Claude 提供外部工具和数据访问。
+
+    **配置位置**：
+    - 必须在 `.mcp.json` 文件中配置
+    - 不能在 `settings.json` 中配置
+    - 不能在 `hooks.json` 中配置
+
+    **配置格式**：
+    ```json
+    {
+      "mcpServers": {
+        "server-name": {
+          "command": "node",
+          "args": ["path/to/server.js"],
+          "env": {
+            "API_KEY": "..."
+          }
+        }
+      }
+    }
+    ```
+
+    **常见用途**：
+    - ✅ 数据库访问 (PostgreSQL, MongoDB)
+    - ✅ API 集成 (GitHub, Slack, Jira)
+    - ✅ 文件系统扩展
+    - ✅ 自定义工具集
+    - ❌ 简单的 shell 命令（用 Bash 工具）
+    - ❌ 一次性脚本（用 Hook）
+
+    **安全注意**：
+    - API keys 应使用环境变量
+    - 验证 server 来源和权限
+    - 限制 server 访问范围
+
+  en: |
+    MCP (Model Context Protocol) servers provide external tool and data access to Claude.
+
+    **Config Location**:
+    - Must be configured in `.mcp.json` file
+    - Cannot be in `settings.json`
+    - Cannot be in `hooks.json`
+
+    **Config Format**:
+    ```json
+    {
+      "mcpServers": {
+        "server-name": {
+          "command": "node",
+          "args": ["path/to/server.js"],
+          "env": {
+            "API_KEY": "..."
+          }
+        }
+      }
+    }
+    ```
+
+    **Common Uses**:
+    - ✅ Database access (PostgreSQL, MongoDB)
+    - ✅ API integration (GitHub, Slack, Jira)
+    - ✅ File system extensions
+    - ✅ Custom tool sets
+    - ❌ Simple shell commands (use Bash tool)
+    - ❌ One-time scripts (use Hook)
+
+    **Security Notes**:
+    - API keys should use environment variables
+    - Verify server source and permissions
+    - Limit server access scope
+
+rationale:
+  zh: "基于官方规范 (mcp-servers.md OFF-DEP-013~015, OFF-CFG-020)，MCP servers 必须在 .mcp.json 中配置"
+  en: "Per official specs (mcp-servers.md OFF-DEP-013~015, OFF-CFG-020), MCP servers must be configured in .mcp.json"
+
+detection:
+  method: config-validation
+  checks:
+    - file: ".mcp.json"
+      required: true
+      schema: "mcpServers object"
+    - file: "settings.json"
+      forbidden_keys: ["mcpServers"]
+    - security_check: "检查硬编码的 API keys"
+
+official_reference:
+  document: "markdown_docs/mcp-servers.md"
+  section: "MCP Server 配置"
+  lines: "45-89"
+  quote: "MCP servers 在 .mcp.json 中配置。不支持 settings.json 中的 mcpServers 字段。"
+
+examples:
+  bad:
+    zh: |
+      错误1：在 settings.json 中配置 MCP
+      ```json
+      // settings.json (错误！)
+      {
+        "agent": {...},
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+
+      应该在 .mcp.json 中配置
+      ```
+
+      错误2：硬编码 API key
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "ghp_abc123..."
+            }
+          }
+        }
+      }
+
+      硬编码 token，可能泄漏到版本控制
+      应该使用环境变量引用
+      ```
+
+      错误3：缺少必要字段
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "my-server": {
+            "command": "node"
+          }
+        }
+      }
+
+      缺少 args 字段
+      server 无法启动
+      ```
+
+      错误4：README 未说明 MCP 依赖
+      ```markdown
+      # My Plugin
+
+      ## Installation
+      Copy files to plugin directory
+
+      未说明需要安装 MCP server
+      用户不知道如何配置
+      ```
+
+      错误5：MCP server 文件不存在
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "custom": {
+            "command": "node",
+            "args": ["./mcp-server/server.js"]
+          }
+        }
+      }
+
+      但 ./mcp-server/server.js 不存在
+      server 启动失败
+      ```
+    en: |
+      Error 1: Configure MCP in settings.json
+      ```json
+      // settings.json (wrong!)
+      {
+        "agent": {...},
+        "mcpServers": {
+          "github": {...}
+        }
+      }
+
+      Should be configured in .mcp.json
+      ```
+
+      Error 2: Hardcoded API key
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "ghp_abc123..."
+            }
+          }
+        }
+      }
+
+      Hardcoded token, may leak to version control
+      Should use environment variable reference
+      ```
+
+      Error 3: Missing required fields
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "my-server": {
+            "command": "node"
+          }
+        }
+      }
+
+      Missing args field
+      Server cannot start
+      ```
+
+      Error 4: README doesn't mention MCP dependency
+      ```markdown
+      # My Plugin
+
+      ## Installation
+      Copy files to plugin directory
+
+      Doesn't mention need to install MCP server
+      User doesn't know how to configure
+      ```
+
+      Error 5: MCP server file doesn't exist
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "custom": {
+            "command": "node",
+            "args": ["./mcp-server/server.js"]
+          }
+        }
+      }
+
+      But ./mcp-server/server.js doesn't exist
+      Server startup fails
+      ```
+
+  good:
+    zh: |
+      正确1：标准 MCP 配置
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          }
+        }
+      }
+
+      使用环境变量引用
+      不硬编码敏感信息
+      ```
+
+      正确2：完整的 README 说明
+      ```markdown
+      # GitHub Integration Plugin
+
+      ## Prerequisites
+
+      1. Install Node.js 18+
+      2. Get GitHub personal access token
+
+      ## Installation
+
+      ### 1. Install Plugin
+      ```bash
+      cp -r github-plugin ~/.claude/plugins/
+      ```
+
+      ### 2. Configure MCP Server
+      Create or edit `~/.mcp.json`:
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          }
+        }
+      }
+      ```
+
+      ### 3. Set Environment Variable
+      ```bash
+      export GITHUB_TOKEN="ghp_your_token_here"
+      ```
+
+      Or add to `~/.bashrc`/`~/.zshrc`:
+      ```bash
+      echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.zshrc
+      ```
+
+      ## Verification
+
+      Start Claude Code and check:
+      ```bash
+      claude
+      # 在 Claude 中:
+      # 应该看到 GitHub 工具可用
+      ```
+
+      ## Troubleshooting
+
+      ### Server not starting
+      - Check Node.js version: `node --version` (need 18+)
+      - Verify token: `echo $GITHUB_TOKEN`
+      - Check logs: `~/.claude/logs/mcp-github.log`
+      ```
+
+      正确3：本地自定义 MCP server
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "custom-db": {
+            "command": "node",
+            "args": ["~/.claude/plugins/my-plugin/mcp-server/server.js"],
+            "env": {
+              "DB_HOST": "${DB_HOST}",
+              "DB_PORT": "${DB_PORT}",
+              "DB_NAME": "${DB_NAME}"
+            }
+          }
+        }
+      }
+      ```
+
+      插件目录结构：
+      ```
+      ~/.claude/plugins/my-plugin/
+        mcp-server/
+          server.js
+          package.json
+        skills/
+        hooks/
+        README.md
+      ```
+
+      README 说明：
+      ```markdown
+      ## MCP Server
+
+      This plugin includes a custom MCP server for database access.
+
+      Location: `mcp-server/server.js`
+      Protocol: Model Context Protocol v1.0
+
+      ### Configuration
+      See .mcp.json example above.
+
+      ### Environment Variables
+      - DB_HOST: Database host (default: localhost)
+      - DB_PORT: Database port (default: 5432)
+      - DB_NAME: Database name (required)
+      ```
+
+      正确4：多个 MCP servers
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          },
+          "slack": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-slack"],
+            "env": {
+              "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+              "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+            }
+          },
+          "database": {
+            "command": "node",
+            "args": ["~/.claude/plugins/db-plugin/mcp-server/server.js"],
+            "env": {
+              "DB_CONNECTION_STRING": "${DB_CONNECTION_STRING}"
+            }
+          }
+        }
+      }
+
+      多个 servers 可以同时运行
+      每个提供不同的工具集
+      ```
+
+      正确5：项目级 MCP 配置
+      ```json
+      // project/.mcp.json
+      {
+        "mcpServers": {
+          "project-db": {
+            "command": "node",
+            "args": ["./scripts/mcp-server.js"],
+            "env": {
+              "PROJECT_ROOT": "${PWD}"
+            }
+          }
+        }
+      }
+
+      项目特定的 MCP server
+      仅在该项目目录下生效
+      ```
+
+      正确6：安全的 token 管理
+      ```markdown
+      # Security Best Practices
+
+      ## Environment Variables (Recommended)
+
+      1. **Never commit tokens to git**
+         Add to `.gitignore`:
+         ```
+         .env
+         .mcp.json
+         ```
+
+      2. **Use environment variables**
+         ```json
+         {
+           "env": {
+             "API_KEY": "${API_KEY}"
+           }
+         }
+         ```
+
+      3. **Document required variables**
+         ```markdown
+         ## Required Environment Variables
+
+         - GITHUB_TOKEN: GitHub personal access token
+           - Scopes: repo, read:user
+           - Get from: https://github.com/settings/tokens
+
+         - SLACK_BOT_TOKEN: Slack bot token
+           - Get from: https://api.slack.com/apps
+         ```
+
+      4. **Provide .env.example**
+         ```bash
+         # .env.example
+         GITHUB_TOKEN=ghp_your_token_here
+         SLACK_BOT_TOKEN=xoxb-your-token-here
+         ```
+      ```
+
+      正确7：验证 MCP server 可用性
+      ```markdown
+      # Post-Installation Verification
+
+      ## Check MCP Server Status
+
+      1. **Start Claude Code**:
+         ```bash
+         claude
+         ```
+
+      2. **List available tools**:
+         Ask Claude: "What tools do you have access to?"
+
+      3. **Test MCP server**:
+         Ask Claude: "Can you search GitHub for repositories about Claude?"
+
+      ## Expected Behavior
+
+      If configured correctly, Claude should:
+      - ✅ See GitHub tools (search_repositories, get_file_contents, etc.)
+      - ✅ Be able to execute GitHub operations
+      - ✅ Show MCP server in tool descriptions
+
+      ## Troubleshooting
+
+      If not working:
+      1. Check MCP server logs: `~/.claude/logs/`
+      2. Verify environment variables: `env | grep GITHUB`
+      3. Test server manually: `node path/to/server.js`
+      ```
+    en: |
+      Good 1: Standard MCP configuration
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          }
+        }
+      }
+
+      Uses environment variable reference
+      No hardcoded sensitive info
+      ```
+
+      Good 2: Complete README instructions
+      ```markdown
+      # GitHub Integration Plugin
+
+      ## Prerequisites
+
+      1. Install Node.js 18+
+      2. Get GitHub personal access token
+
+      ## Installation
+
+      ### 1. Install Plugin
+      ```bash
+      cp -r github-plugin ~/.claude/plugins/
+      ```
+
+      ### 2. Configure MCP Server
+      Create or edit `~/.mcp.json`:
+      ```json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          }
+        }
+      }
+      ```
+
+      ### 3. Set Environment Variable
+      ```bash
+      export GITHUB_TOKEN="ghp_your_token_here"
+      ```
+
+      Or add to `~/.bashrc`/`~/.zshrc`:
+      ```bash
+      echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.zshrc
+      ```
+
+      ## Verification
+
+      Start Claude Code and check:
+      ```bash
+      claude
+      # In Claude:
+      # Should see GitHub tools available
+      ```
+
+      ## Troubleshooting
+
+      ### Server not starting
+      - Check Node.js version: `node --version` (need 18+)
+      - Verify token: `echo $GITHUB_TOKEN`
+      - Check logs: `~/.claude/logs/mcp-github.log`
+      ```
+
+      Good 3: Local custom MCP server
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "custom-db": {
+            "command": "node",
+            "args": ["~/.claude/plugins/my-plugin/mcp-server/server.js"],
+            "env": {
+              "DB_HOST": "${DB_HOST}",
+              "DB_PORT": "${DB_PORT}",
+              "DB_NAME": "${DB_NAME}"
+            }
+          }
+        }
+      }
+      ```
+
+      Plugin directory structure:
+      ```
+      ~/.claude/plugins/my-plugin/
+        mcp-server/
+          server.js
+          package.json
+        skills/
+        hooks/
+        README.md
+      ```
+
+      README explains:
+      ```markdown
+      ## MCP Server
+
+      This plugin includes a custom MCP server for database access.
+
+      Location: `mcp-server/server.js`
+      Protocol: Model Context Protocol v1.0
+
+      ### Configuration
+      See .mcp.json example above.
+
+      ### Environment Variables
+      - DB_HOST: Database host (default: localhost)
+      - DB_PORT: Database port (default: 5432)
+      - DB_NAME: Database name (required)
+      ```
+
+      Good 4: Multiple MCP servers
+      ```json
+      // .mcp.json
+      {
+        "mcpServers": {
+          "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+            }
+          },
+          "slack": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-slack"],
+            "env": {
+              "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+              "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+            }
+          },
+          "database": {
+            "command": "node",
+            "args": ["~/.claude/plugins/db-plugin/mcp-server/server.js"],
+            "env": {
+              "DB_CONNECTION_STRING": "${DB_CONNECTION_STRING}"
+            }
+          }
+        }
+      }
+
+      Multiple servers can run simultaneously
+      Each provides different tool sets
+      ```
+
+      Good 5: Project-level MCP configuration
+      ```json
+      // project/.mcp.json
+      {
+        "mcpServers": {
+          "project-db": {
+            "command": "node",
+            "args": ["./scripts/mcp-server.js"],
+            "env": {
+              "PROJECT_ROOT": "${PWD}"
+            }
+          }
+        }
+      }
+
+      Project-specific MCP server
+      Only active in this project directory
+      ```
+
+      Good 6: Secure token management
+      ```markdown
+      # Security Best Practices
+
+      ## Environment Variables (Recommended)
+
+      1. **Never commit tokens to git**
+         Add to `.gitignore`:
+         ```
+         .env
+         .mcp.json
+         ```
+
+      2. **Use environment variables**
+         ```json
+         {
+           "env": {
+             "API_KEY": "${API_KEY}"
+           }
+         }
+         ```
+
+      3. **Document required variables**
+         ```markdown
+         ## Required Environment Variables
+
+         - GITHUB_TOKEN: GitHub personal access token
+           - Scopes: repo, read:user
+           - Get from: https://github.com/settings/tokens
+
+         - SLACK_BOT_TOKEN: Slack bot token
+           - Get from: https://api.slack.com/apps
+         ```
+
+      4. **Provide .env.example**
+         ```bash
+         # .env.example
+         GITHUB_TOKEN=ghp_your_token_here
+         SLACK_BOT_TOKEN=xoxb-your-token-here
+         ```
+      ```
+
+      Good 7: Verify MCP server availability
+      ```markdown
+      # Post-Installation Verification
+
+      ## Check MCP Server Status
+
+      1. **Start Claude Code**:
+         ```bash
+         claude
+         ```
+
+      2. **List available tools**:
+         Ask Claude: "What tools do you have access to?"
+
+      3. **Test MCP server**:
+         Ask Claude: "Can you search GitHub for repositories about Claude?"
+
+      ## Expected Behavior
+
+      If configured correctly, Claude should:
+      - ✅ See GitHub tools (search_repositories, get_file_contents, etc.)
+      - ✅ Be able to execute GitHub operations
+      - ✅ Show MCP server in tool descriptions
+
+      ## Troubleshooting
+
+      If not working:
+      1. Check MCP server logs: `~/.claude/logs/`
+      2. Verify environment variables: `env | grep GITHUB`
+      3. Test server manually: `node path/to/server.js`
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复 MCP Server 配置**:
+
+      1. **移动配置到正确位置**：
+         - 从 settings.json 移到 .mcp.json
+         - 从 hooks.json 移到 .mcp.json
+
+      2. **修复配置格式**：
+         ```json
+         // .mcp.json
+         {
+           "mcpServers": {
+             "server-name": {
+               "command": "node",
+               "args": ["path/to/server.js"],
+               "env": {
+                 "KEY": "${ENV_VAR}"
+               }
+             }
+           }
+         }
+         ```
+
+      3. **安全修复**：
+         - 硬编码 token → 环境变量
+         - 添加到 .gitignore
+         - 提供 .env.example
+
+      4. **文档完善**：
+         ```markdown
+         ## MCP Server Configuration
+
+         1. Create .mcp.json
+         2. Set environment variables
+         3. Verify server starts
+
+         Required env vars:
+         - API_KEY: Get from...
+         ```
+
+      **检查清单**:
+      - [ ] .mcp.json 文件存在
+      - [ ] 配置格式正确
+      - [ ] 使用环境变量（不硬编码）
+      - [ ] README 说明配置步骤
+      - [ ] 提供验证方法
+    en: |
+      **Fix MCP Server Configuration**:
+
+      1. **Move config to correct location**:
+         - From settings.json to .mcp.json
+         - From hooks.json to .mcp.json
+
+      2. **Fix config format**:
+         ```json
+         // .mcp.json
+         {
+           "mcpServers": {
+             "server-name": {
+               "command": "node",
+               "args": ["path/to/server.js"],
+               "env": {
+                 "KEY": "${ENV_VAR}"
+               }
+             }
+           }
+         }
+         ```
+
+      3. **Security fixes**:
+         - Hardcoded token → environment variable
+         - Add to .gitignore
+         - Provide .env.example
+
+      4. **Documentation improvements**:
+         ```markdown
+         ## MCP Server Configuration
+
+         1. Create .mcp.json
+         2. Set environment variables
+         3. Verify server starts
+
+         Required env vars:
+         - API_KEY: Get from...
+         ```
+
+      **Checklist**:
+      - [ ] .mcp.json file exists
+      - [ ] Config format correct
+      - [ ] Uses env vars (no hardcoding)
+      - [ ] README explains config steps
+      - [ ] Provides verification method
+
+tags: ["mcp", "dependency", "configuration", "security", "integration"]
+related_rules: ["CFG-002", "DEP-002", "SEC-001"]

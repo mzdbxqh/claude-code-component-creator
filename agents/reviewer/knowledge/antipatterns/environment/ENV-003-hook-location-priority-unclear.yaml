@@ -1,0 +1,719 @@
+id: ENV-003
+name: hook-location-priority-unclear
+severity: info
+component_type: hook
+category: environment
+
+title:
+  zh: "Hook 位置优先级未说明"
+  en: "Hook location priority not documented"
+
+description:
+  zh: |
+    Hooks 的位置决定其优先级和加载顺序。
+
+    **Hook 位置优先级**（从高到低）：
+    1. **CLI --hooks** - 命令行参数（最高）
+    2. **项目 hooks/** - 项目根目录
+    3. **个人 ~/.claude/hooks/** - 用户目录
+    4. **插件 hooks/** - 插件目录（最低）
+
+    **与 Skills/SubAgents 的区别**：
+    - Skills: CLI > Enterprise > Personal > Plugin > Project
+    - SubAgents: CLI > Project > Plugin > Personal
+    - **Hooks: CLI > Project > Personal > Plugin**
+
+    **配置文件位置**：
+    - 项目: `hooks/hooks.json` 或 `.claude/hooks.json`
+    - 个人: `~/.claude/hooks/hooks.json`
+    - 插件: `plugin-dir/hooks/hooks.json`
+
+    **使用建议**：
+    - 项目特定验证 → 项目 hooks/
+    - 个人通用规则 → 个人 ~/.claude/hooks/
+    - 可分发功能 → 插件 hooks/
+
+  en: |
+    Hook location determines its priority and loading order.
+
+    **Hook Location Priority** (high to low):
+    1. **CLI --hooks** - Command line args (highest)
+    2. **Project hooks/** - Project root directory
+    3. **Personal ~/.claude/hooks/** - User directory
+    4. **Plugin hooks/** - Plugin directory (lowest)
+
+    **vs Skills/SubAgents**:
+    - Skills: CLI > Enterprise > Personal > Plugin > Project
+    - SubAgents: CLI > Project > Plugin > Personal
+    - **Hooks: CLI > Project > Personal > Plugin**
+
+    **Config File Locations**:
+    - Project: `hooks/hooks.json` or `.claude/hooks.json`
+    - Personal: `~/.claude/hooks/hooks.json`
+    - Plugin: `plugin-dir/hooks/hooks.json`
+
+    **Usage Recommendations**:
+    - Project-specific validation → Project hooks/
+    - Personal general rules → Personal ~/.claude/hooks/
+    - Distributable features → Plugin hooks/
+
+rationale:
+  zh: "基于官方规范 (hooks.md OFF-ENV-008~011)，Hooks 位置优先级与 Skills/SubAgents 不同"
+  en: "Per official specs (hooks.md OFF-ENV-008~011), Hooks location priority differs from Skills/SubAgents"
+
+detection:
+  method: documentation-check
+  indicators:
+    - missing_documentation: "README 未说明 Hook 适用范围"
+    - unclear_priority: "未说明优先级规则"
+    - wrong_location: "Hook 放在错误位置"
+
+official_reference:
+  document: "markdown_docs/hooks.md"
+  section: "Hook 位置优先级"
+  lines: "89-125"
+  quote: "hooks 位置决定优先级。项目 hooks/ 优先于个人。插件 hooks/ 优先级最低。"
+
+examples:
+  bad:
+    zh: |
+      错误1：README 未说明位置
+      ```markdown
+      # My Security Hook
+
+      ## Installation
+      Put hooks.json somewhere...
+
+      未说明应该放在哪里
+      用户不知道优先级
+      ```
+
+      错误2：项目特定 hook 放在个人目录
+      ```
+      ~/.claude/hooks/
+        hooks.json:
+          {
+            "hooks": [{
+              "event": "PreToolUse",
+              "command": "scripts/validate-project-rules.sh"
+            }]
+          }
+
+      项目特定验证应该在项目 hooks/
+      这样其他项目不会受影响
+      ```
+
+      错误3：通用 hook 放在项目目录
+      ```
+      my-project/
+        hooks/
+          hooks.json:
+            {
+              "hooks": [{
+                "event": "PreToolUse",
+                "command": "check-dangerous-commands.sh"
+              }]
+            }
+
+      通用安全检查应该在个人目录
+      这样所有项目都能受益
+      ```
+
+      错误4：多处定义同名 hook
+      ```
+      项目 hooks/hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate.sh"
+        }]
+      }
+
+      个人 ~/.claude/hooks/hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "different-validate.sh"
+        }]
+      }
+
+      哪个会执行？
+      用户困惑：项目 hook 优先级更高
+      ```
+    en: |
+      Error 1: README doesn't explain location
+      ```markdown
+      # My Security Hook
+
+      ## Installation
+      Put hooks.json somewhere...
+
+      Doesn't specify where
+      User doesn't know priority
+      ```
+
+      Error 2: Project-specific hook in personal directory
+      ```
+      ~/.claude/hooks/
+        hooks.json:
+          {
+            "hooks": [{
+              "event": "PreToolUse",
+              "command": "scripts/validate-project-rules.sh"
+            }]
+          }
+
+      Project-specific validation should be in project hooks/
+      So other projects aren't affected
+      ```
+
+      Error 3: General hook in project directory
+      ```
+      my-project/
+        hooks/
+          hooks.json:
+            {
+              "hooks": [{
+                "event": "PreToolUse",
+                "command": "check-dangerous-commands.sh"
+              }]
+            }
+
+      General security check should be in personal directory
+      So all projects benefit
+      ```
+
+      Error 4: Same hook defined in multiple locations
+      ```
+      Project hooks/hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "validate.sh"
+        }]
+      }
+
+      Personal ~/.claude/hooks/hooks.json:
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "type": "command",
+          "command": "different-validate.sh"
+        }]
+      }
+
+      Which executes?
+      User confused: project hook has higher priority
+      ```
+
+  good:
+    zh: |
+      正确1：项目 Hook README
+      ```markdown
+      # Project Security Hook
+
+      项目特定的安全验证规则
+
+      ## Installation
+
+      ### 项目内安装（推荐）
+      ```bash
+      mkdir -p hooks
+      cp hooks.json hooks/
+      ```
+
+      **Location**: `hooks/` (project root)
+      **Priority**: Higher than personal/plugin hooks
+      **Scope**: This project only
+
+      ## Why Project-Level?
+      - Enforces project-specific security rules
+      - Validates project conventions
+      - Should not apply to other projects
+
+      ## Priority Behavior
+      If you also have personal hooks, this project hook runs first.
+      ```
+
+      正确2：个人 Hook README
+      ```markdown
+      # Personal Security Rules
+
+      通用安全检查，适用于所有项目
+
+      ## Installation
+
+      ### 个人使用
+      ```bash
+      mkdir -p ~/.claude/hooks
+      cp hooks.json ~/.claude/hooks/
+      ```
+
+      **Location**: `~/.claude/hooks/`
+      **Priority**: Lower than project hooks
+      **Scope**: All projects
+
+      ## Note on Priority
+      If a project has its own hooks, those run first.
+      Your personal hooks run after project hooks.
+      ```
+
+      正确3：插件 Hook README
+      ```markdown
+      # Code Review Plugin Hooks
+
+      可分发的代码审查 hooks
+
+      ## Installation
+
+      ### 作为插件安装
+      ```bash
+      claude install code-review-plugin
+      ```
+
+      或手动：
+      ```bash
+      cp -r code-review-plugin ~/.claude/plugins/
+      ```
+
+      **Location**: `plugin-dir/hooks/`
+      **Priority**: Lowest (after project and personal hooks)
+      **Scope**: All projects with plugin installed
+
+      ## Priority Note
+      Plugin hooks have lowest priority:
+      1. Project hooks run first
+      2. Personal hooks run second
+      3. Plugin hooks run last
+
+      This ensures project-specific rules can override plugin rules.
+      ```
+
+      正确4：完整的优先级说明
+      ```markdown
+      # Hook Installation Guide
+
+      ## Priority Rules
+
+      When multiple hooks match the same event:
+
+      1. **CLI --hooks** (highest)
+         ```bash
+         claude --hooks=./custom-hooks/hooks.json
+         ```
+
+      2. **Project hooks/**
+         ```
+         project/hooks/hooks.json
+         project/.claude/hooks.json
+         ```
+
+      3. **Personal ~/.claude/hooks/**
+         ```
+         ~/.claude/hooks/hooks.json
+         ```
+
+      4. **Plugin hooks/**
+         ```
+         ~/.claude/plugins/my-plugin/hooks/hooks.json
+         ```
+
+      ## Examples
+
+      ### Scenario: "security-check" hook exists in all locations
+
+      ```bash
+      # In project directory
+      # Which security-check runs?
+      # → Project hooks/hooks.json (priority 2)
+      ```
+
+      ```bash
+      # Override with CLI
+      claude --hooks=~/.claude/hooks/hooks.json
+      # → Personal hooks (priority 1 via CLI)
+      ```
+
+      ### Scenario: No project hooks
+
+      ```bash
+      # In project directory, no local hooks
+      # Which runs?
+      # → Personal ~/.claude/hooks/ (fallback)
+      # → Plugin hooks/ (if no personal)
+      ```
+
+      ## Decision Guide
+
+      | Hook Purpose | Recommended Location | Priority |
+      |--------------|---------------------|----------|
+      | Project-specific rules | Project | High |
+      | Personal preferences | Personal | Medium |
+      | Distributable features | Plugin | Low |
+      | One-time override | CLI --hooks | Highest |
+      ```
+
+      正确5：说明 hook 合并行为
+      ```markdown
+      # Hook Merging Behavior
+
+      ## Multiple Hooks for Same Event
+
+      All hooks for an event execute in priority order:
+
+      1. Project hooks run first
+      2. Personal hooks run second
+      3. Plugin hooks run last
+
+      ## Example
+
+      Project hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "command": "project-validate.sh"
+        }]
+      }
+      ```
+
+      Personal ~/.claude/hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "command": "personal-check.sh"
+        }]
+      }
+      ```
+
+      Execution order:
+      1. project-validate.sh (project hook)
+      2. personal-check.sh (personal hook)
+
+      ## Blocking Behavior
+
+      If any hook returns non-zero exit code, execution stops.
+      ```
+
+      正确6：条件覆盖
+      ```markdown
+      # Advanced: Override Personal Hooks in Project
+
+      ## Scenario
+      You have personal hooks that are too strict for this project.
+
+      ## Solution
+
+      Create project hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "matcher": {"tool": "Bash"},
+          "command": "echo 'Project allows all Bash commands'"
+        }]
+      }
+      ```
+
+      Project hook runs first and allows all commands.
+      Personal hook never runs (blocked by project hook success).
+
+      Note: This is an anti-pattern. Better to configure personal hook properly.
+      ```
+    en: |
+      Good 1: Project Hook README
+      ```markdown
+      # Project Security Hook
+
+      Project-specific security validation rules
+
+      ## Installation
+
+      ### Install in Project (Recommended)
+      ```bash
+      mkdir -p hooks
+      cp hooks.json hooks/
+      ```
+
+      **Location**: `hooks/` (project root)
+      **Priority**: Higher than personal/plugin hooks
+      **Scope**: This project only
+
+      ## Why Project-Level?
+      - Enforces project-specific security rules
+      - Validates project conventions
+      - Should not apply to other projects
+
+      ## Priority Behavior
+      If you also have personal hooks, this project hook runs first.
+      ```
+
+      Good 2: Personal Hook README
+      ```markdown
+      # Personal Security Rules
+
+      General security checks for all projects
+
+      ## Installation
+
+      ### Personal Use
+      ```bash
+      mkdir -p ~/.claude/hooks
+      cp hooks.json ~/.claude/hooks/
+      ```
+
+      **Location**: `~/.claude/hooks/`
+      **Priority**: Lower than project hooks
+      **Scope**: All projects
+
+      ## Note on Priority
+      If a project has its own hooks, those run first.
+      Your personal hooks run after project hooks.
+      ```
+
+      Good 3: Plugin Hook README
+      ```markdown
+      # Code Review Plugin Hooks
+
+      Distributable code review hooks
+
+      ## Installation
+
+      ### Install as Plugin
+      ```bash
+      claude install code-review-plugin
+      ```
+
+      Or manually:
+      ```bash
+      cp -r code-review-plugin ~/.claude/plugins/
+      ```
+
+      **Location**: `plugin-dir/hooks/`
+      **Priority**: Lowest (after project and personal hooks)
+      **Scope**: All projects with plugin installed
+
+      ## Priority Note
+      Plugin hooks have lowest priority:
+      1. Project hooks run first
+      2. Personal hooks run second
+      3. Plugin hooks run last
+
+      This ensures project-specific rules can override plugin rules.
+      ```
+
+      Good 4: Complete priority documentation
+      ```markdown
+      # Hook Installation Guide
+
+      ## Priority Rules
+
+      When multiple hooks match the same event:
+
+      1. **CLI --hooks** (highest)
+         ```bash
+         claude --hooks=./custom-hooks/hooks.json
+         ```
+
+      2. **Project hooks/**
+         ```
+         project/hooks/hooks.json
+         project/.claude/hooks.json
+         ```
+
+      3. **Personal ~/.claude/hooks/**
+         ```
+         ~/.claude/hooks/hooks.json
+         ```
+
+      4. **Plugin hooks/**
+         ```
+         ~/.claude/plugins/my-plugin/hooks/hooks.json
+         ```
+
+      ## Examples
+
+      ### Scenario: "security-check" hook exists in all locations
+
+      ```bash
+      # In project directory
+      # Which security-check runs?
+      # → Project hooks/hooks.json (priority 2)
+      ```
+
+      ```bash
+      # Override with CLI
+      claude --hooks=~/.claude/hooks/hooks.json
+      # → Personal hooks (priority 1 via CLI)
+      ```
+
+      ### Scenario: No project hooks
+
+      ```bash
+      # In project directory, no local hooks
+      # Which runs?
+      # → Personal ~/.claude/hooks/ (fallback)
+      # → Plugin hooks/ (if no personal)
+      ```
+
+      ## Decision Guide
+
+      | Hook Purpose | Recommended Location | Priority |
+      |--------------|---------------------|----------|
+      | Project-specific rules | Project | High |
+      | Personal preferences | Personal | Medium |
+      | Distributable features | Plugin | Low |
+      | One-time override | CLI --hooks | Highest |
+      ```
+
+      Good 5: Explain hook merging behavior
+      ```markdown
+      # Hook Merging Behavior
+
+      ## Multiple Hooks for Same Event
+
+      All hooks for an event execute in priority order:
+
+      1. Project hooks run first
+      2. Personal hooks run second
+      3. Plugin hooks run last
+
+      ## Example
+
+      Project hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "command": "project-validate.sh"
+        }]
+      }
+      ```
+
+      Personal ~/.claude/hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "command": "personal-check.sh"
+        }]
+      }
+      ```
+
+      Execution order:
+      1. project-validate.sh (project hook)
+      2. personal-check.sh (personal hook)
+
+      ## Blocking Behavior
+
+      If any hook returns non-zero exit code, execution stops.
+      ```
+
+      Good 6: Conditional override
+      ```markdown
+      # Advanced: Override Personal Hooks in Project
+
+      ## Scenario
+      You have personal hooks that are too strict for this project.
+
+      ## Solution
+
+      Create project hooks/hooks.json:
+      ```json
+      {
+        "hooks": [{
+          "event": "PreToolUse",
+          "matcher": {"tool": "Bash"},
+          "command": "echo 'Project allows all Bash commands'"
+        }]
+      }
+      ```
+
+      Project hook runs first and allows all commands.
+      Personal hook never runs (blocked by project hook success).
+
+      Note: This is an anti-pattern. Better to configure personal hook properly.
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **为 Hook 添加位置文档**:
+
+      1. **在 README 中说明**：
+         - Hook 类型（项目特定/通用/插件）
+         - 推荐安装位置
+         - 优先级说明
+
+      2. **安装说明模板**：
+         ```markdown
+         ## Installation
+
+         ### [Project/Personal/Plugin] Installation
+         ```bash
+         # 安装命令
+         ```
+
+         **Priority**: [High/Medium/Low]
+         **Scope**: [描述作用范围]
+         ```
+
+      **决策指南**:
+
+      | Hook 用途 | 推荐位置 | 优先级 |
+      |----------|---------|--------|
+      | 项目规则 | Project | High |
+      | 个人偏好 | Personal | Medium |
+      | 插件功能 | Plugin | Low |
+
+      **优先级对比**:
+
+      | 组件类型 | 优先级顺序 |
+      |---------|-----------|
+      | Skills | CLI > Enterprise > Personal > Plugin > Project |
+      | SubAgents | CLI > Project > Plugin > Personal |
+      | **Hooks** | **CLI > Project > Personal > Plugin** |
+    en: |
+      **Add location documentation for Hook**:
+
+      1. **Document in README**:
+         - Hook type (project-specific/general/plugin)
+         - Recommended installation location
+         - Priority explanation
+
+      2. **Installation template**:
+         ```markdown
+         ## Installation
+
+         ### [Project/Personal/Plugin] Installation
+         ```bash
+         # Installation command
+         ```
+
+         **Priority**: [High/Medium/Low]
+         **Scope**: [Describe scope]
+         ```
+
+      **Decision Guide**:
+
+      | Hook Purpose | Recommended Location | Priority |
+      |--------------|---------------------|----------|
+      | Project rules | Project | High |
+      | Personal prefs | Personal | Medium |
+      | Plugin features | Plugin | Low |
+
+      **Priority Comparison**:
+
+      | Component Type | Priority Order |
+      |---------------|---------------|
+      | Skills | CLI > Enterprise > Personal > Plugin > Project |
+      | SubAgents | CLI > Project > Plugin > Personal |
+      | **Hooks** | **CLI > Project > Personal > Plugin** |
+
+tags: ["hook", "environment", "location", "priority", "configuration"]
+related_rules: ["ENV-001", "ENV-002", "HOOK-001"]
