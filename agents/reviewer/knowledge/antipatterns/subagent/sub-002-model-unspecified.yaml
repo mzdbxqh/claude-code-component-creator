@@ -1,43 +1,175 @@
 id: SUB-002
 name: model-unspecified
-severity: warning
+severity: info
 component_type: subagent
-category: metadata
+category: configuration
 
 title:
-  zh: "未指定模型"
-  en: "Model not specified"
+  zh: "未明确指定模型"
+  en: "Model not explicitly specified"
 
 description:
   zh: |
-    Subagent 应该明确指定使用的模型（haiku/sonnet/opus），
-    以便控制性能和成本。
+    SubAgent 省略 model 字段时，默认使用 **inherit**（继承主对话模型）。
+
+    **官方行为**：
+    - 省略 model 字段 = model: inherit（默认）
+    - inherit 是有效且推荐的选项
+    - 自动适配用户的模型选择
+
+    **建议**：
+    - 大多数情况：保持默认（inherit）
+    - 特定需求：明确指定 haiku/sonnet/opus
+    - 如明确指定，在文档中说明原因
+
+    注意：这是信息提示，不是错误。inherit 是完全有效的默认值。
   en: |
-    Subagent should explicitly specify the model to use (haiku/sonnet/opus),
-    to control performance and cost.
+    When SubAgent omits model field, defaults to **inherit** (inherit main conversation model).
+
+    **Official Behavior**:
+    - Omitting model field = model: inherit (default)
+    - inherit is valid and recommended option
+    - Auto-adapts to user's model choice
+
+    **Recommendation**:
+    - Most cases: Keep default (inherit)
+    - Specific needs: Explicitly specify haiku/sonnet/opus
+    - If specifying, document reasoning
+
+    Note: This is informational, not an error. inherit is fully valid default.
 
 rationale:
-  zh: "不同任务需要不同模型能力，明确指定可避免资源浪费。"
-  en: "Different tasks require different model capabilities; explicit specification prevents resource waste."
+  zh: "基于官方标准 (sub-agents.md OFF-LLM-002~003)，省略 model 字段默认为 inherit，这是有效且推荐的默认值"
+  en: "Per official standards (sub-agents.md OFF-LLM-002~003), omitting model field defaults to inherit, which is valid and recommended"
 
-handbook_reference: "Chapter 7.2"
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "Model Configuration"
+  checkpoints: ["OFF-LLM-002", "OFF-LLM-003"]
+  quote: "inherit 使用主对话模型。省略 model 默认为 inherit。"
 
 detection:
-  method: regex
-  pattern: '^---\n(?!.*model:)'
-  file_pattern: 'subagents/*.md'
+  method: info-check
+  check_for:
+    - model_field_missing: "model 字段缺失（将使用 inherit 默认值）"
+  note: "这不是错误，仅作为信息提示"
 
 fix:
   automatic: false
   suggestion:
-    zh: "添加 model 字段，选择合适的模型。"
-    en: "Add model field with appropriate model selection."
+    zh: |
+      **推荐做法**：
+
+      1. **保持默认（大多数情况）**：
+         ```yaml
+         ---
+         name: my-subagent
+         # model字段省略，使用inherit默认值
+         ---
+         ```
+
+      2. **明确使用inherit**：
+         ```yaml
+         ---
+         name: my-subagent
+         model: inherit  # 明确声明
+         ---
+         ```
+
+      3. **特定模型需求**：
+         ```yaml
+         ---
+         name: quick-processor
+         model: haiku  # 快速简单任务
+         ---
+         ## Model Note
+         使用haiku以提高响应速度
+         ```
+    en: |
+      **Recommended Approach**:
+
+      1. **Keep default (most cases)**:
+         ```yaml
+         ---
+         name: my-subagent
+         # model field omitted, uses inherit default
+         ---
+         ```
+
+      2. **Explicitly use inherit**:
+         ```yaml
+         ---
+         name: my-subagent
+         model: inherit  # Explicit declaration
+         ---
+         ```
+
+      3. **Specific model needs**:
+         ```yaml
+         ---
+         name: quick-processor
+         model: haiku  # Fast simple tasks
+         ---
+         ## Model Note
+         Using haiku for faster response
+         ```
 
 examples:
   bad:
     zh: |
+      ⚠️ 误解：认为必须指定模型
+      ```yaml
+      ---
+      name: processor
+      model: sonnet  # 可能不必要
+      ---
+      ```
+      ⚠️ 如无特殊需求，inherit默认值更灵活
+    en: |
+      ⚠️ Misunderstanding: Thinking model must be specified
+      ```yaml
+      ---
+      name: processor
+      model: sonnet  # May be unnecessary
+      ---
+      ```
+      ⚠️ Without special needs, inherit default is more flexible
+  good:
+    zh: |
+      ✅ 推荐1：使用默认（inherit）
+      ```yaml
       ---
       name: data-processor
+      tools: [Read, Write]
+      # model字段省略 = inherit
+      ---
+      ✅ 自动适配用户模型
+      ```
+
+      ✅ 推荐2：明确inherit
+      ```yaml
+      ---
+      name: analyzer
+      model: inherit
+      tools: [Read, Grep]
+      ---
+      ✅ 明确且灵活
+      ```
+
+      ✅ 推荐3：有特定需求
+      ```yaml
+      ---
+      name: complex-reasoner
+      model: opus
+      tools: [Read, Write]
+      ---
+      ## Why opus?
+      需要复杂推理和代码生成能力
+      ✅ 有明确原因
+      ```
+
+tags: ["configuration", "model", "subagent", "metadata"]
+related_rules: ["SKILL-006", "ARCH-010"]
       allowed-tools:
         - Read
       ---

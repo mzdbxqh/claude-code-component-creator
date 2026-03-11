@@ -24,8 +24,15 @@ handbook_reference: "Chapter 4.2"
 
 detection:
   method: regex
-  pattern: '^name:\s*([A-Z][^\s]*|[^a-z0-9-].*|.*[-_]$|^[^a-z].*)$'
+  patterns:
+    format: '^name:\s*([A-Z][^\s]*|[^a-z0-9-].*|.*[-_]$|^[^a-z].*)$'  # 格式检查
+    length: '^name:\s*.{65,}$'  # 长度检查：>64字符
+  rules:
+    - "仅小写字母、数字和连字符"
+    - "最多64个字符"
+    - "不能以连字符开头或结尾"
   file_pattern: '*.md'
+  official_reference: "OFF-INT-005, OFF-INT-006"
 
 fix:
   automatic: true
@@ -36,29 +43,50 @@ fix:
 examples:
   bad:
     zh: |
+      ❌ 错误1：使用大写字母
       ---
       name: MySkill
       ---
-      或
+
+      ❌ 错误2：使用下划线
       ---
       name: my_skill
       ---
+
+      ❌ 错误3：超过64字符
+      ---
+      name: this-is-a-very-long-skill-name-that-exceeds-the-maximum-allowed-length-limit
+      ---
+      （67字符，超过64字符限制）
     en: |
+      ❌ Error 1: Using uppercase
       ---
       name: MySkill
       ---
-      or
+
+      ❌ Error 2: Using underscore
       ---
       name: my_skill
       ---
+
+      ❌ Error 3: Exceeds 64 characters
+      ---
+      name: this-is-a-very-long-skill-name-that-exceeds-the-maximum-allowed-length-limit
+      ---
+      (67 chars, exceeds 64-char limit)
   good:
     zh: |
+      ✅ 正确：符合格式和长度要求
       ---
       name: my-skill
       ---
+      ✅ 小写+连字符，未超过64字符
     en: |
+      ✅ Correct: Meets format and length requirements
       ---
       name: my-skill
+      ---
+      ✅ Lowercase+hyphens, within 64 chars
       ---
 
 tags: ["metadata", "name", "format", "skill"]
