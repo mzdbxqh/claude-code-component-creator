@@ -1,0 +1,433 @@
+id: QUA-002
+name: quality-metrics-missing
+severity: info
+component_type: all
+category: quality
+
+title:
+  zh: "组件缺少质量指标"
+  en: "Component missing quality metrics"
+
+description:
+  zh: |
+    组件应该包含质量指标，便于评估和改进。
+
+    **推荐指标**：
+    - **覆盖率**: 测试覆盖的功能百分比
+    - **复杂度**: 组件复杂程度（简单/中等/复杂）
+    - **成熟度**: 开发阶段（alpha/beta/stable）
+    - **维护性**: 代码质量评分
+
+    **在哪里声明**：
+    - README 的徽章部分
+    - plugin.json 的 metadata
+    - CHANGELOG 的版本信息
+
+    **最佳实践**：
+    - 使用标准化指标
+    - 定期更新
+    - 提供趋势数据
+    - 与 CI/CD 集成
+
+  en: |
+    Components should include quality metrics for evaluation and improvement.
+
+    **Recommended Metrics**:
+    - **Coverage**: Percentage of functionality tested
+    - **Complexity**: Component complexity level (simple/medium/complex)
+    - **Maturity**: Development stage (alpha/beta/stable)
+    - **Maintainability**: Code quality score
+
+    **Where to Declare**:
+    - Badge section in README
+    - Metadata in plugin.json
+    - Version info in CHANGELOG
+
+    **Best Practices**:
+    - Use standardized metrics
+    - Update regularly
+    - Provide trend data
+    - Integrate with CI/CD
+
+rationale:
+  zh: "基于官方建议 (quality.md OFF-QUA-004~006)，质量指标提升透明度和可信度"
+  en: "Per official recommendations (quality.md OFF-QUA-004~006), quality metrics improve transparency and credibility"
+
+detection:
+  method: content-check
+  indicators:
+    - no_badges: "README 无徽章或指标"
+    - no_version: "未标注版本和成熟度"
+    - no_changelog: "无 CHANGELOG"
+
+official_reference:
+  document: "markdown_docs/quality-assurance.md"
+  section: "质量指标"
+  lines: "145-198"
+  quote: "组件应包含质量指标。覆盖率、复杂度、成熟度。徽章或 metadata。"
+
+examples:
+  bad:
+    zh: |
+      错误1：README 无质量信息
+      ```markdown
+      # My Plugin
+
+      ## Installation
+      Copy files...
+
+      ## Usage
+      /command
+
+      ❌ 无版本信息
+      ❌ 无成熟度标识
+      ❌ 无质量指标
+      ```
+
+      错误2：版本混乱
+      ```markdown
+      # My Plugin
+
+      Latest version available.
+
+      ❌ 未明确版本号
+      ❌ 用户不知道使用哪个版本
+      ```
+
+      错误3：无 CHANGELOG
+      ```
+      plugin/
+        skills/
+        README.md
+
+      ❌ 无 CHANGELOG.md
+      用户不知道版本变化
+      ```
+    en: |
+      Error 1: README without quality info
+      ```markdown
+      # My Plugin
+
+      ## Installation
+      Copy files...
+
+      ## Usage
+      /command
+
+      ❌ No version info
+      ❌ No maturity indicator
+      ❌ No quality metrics
+      ```
+
+      Error 2: Version confusion
+      ```markdown
+      # My Plugin
+
+      Latest version available.
+
+      ❌ No explicit version number
+      ❌ User doesn't know which version
+      ```
+
+      Error 3: No CHANGELOG
+      ```
+      plugin/
+        skills/
+        README.md
+
+      ❌ No CHANGELOG.md
+      User doesn't know version changes
+      ```
+
+  good:
+    zh: |
+      正确1：完整的质量指标
+      ```markdown
+      # Code Analyzer Plugin
+
+      ![Version](https://img.shields.io/badge/version-v1.2.0-blue)
+      ![Status](https://img.shields.io/badge/status-stable-green)
+      ![Tests](https://img.shields.io/badge/tests-passing-success)
+      ![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen)
+
+      Static code analysis tool for Claude Code.
+
+      ## Quality Metrics
+
+      - **Version**: 1.2.0 (stable)
+      - **Test Coverage**: 87%
+      - **Complexity**: Medium
+      - **Maintenance**: Active
+      - **Last Updated**: 2026-03-11
+
+      ## Installation
+      ...
+      ```
+
+      正确2：plugin.json 元数据
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "1.2.0",
+        "metadata": {
+          "maturity": "stable",
+          "complexity": "medium",
+          "testCoverage": 87,
+          "lastUpdated": "2026-03-11",
+          "maintenance": "active"
+        }
+      }
+      ```
+
+      正确3：详细的 CHANGELOG
+      ```markdown
+      # Changelog
+
+      ## [1.2.0] - 2026-03-11
+
+      ### Added
+      - Python analysis support
+      - Custom rule configuration
+
+      ### Fixed
+      - Memory leak in large files
+      - False positives in async code
+
+      ### Metrics
+      - Test coverage: 82% → 87%
+      - Performance: 2x faster
+
+      ## [1.1.0] - 2026-02-15
+
+      ### Added
+      - TypeScript support
+
+      ### Metrics
+      - Test coverage: 75% → 82%
+      ```
+
+      正确4：CI/CD 集成
+      ```yaml
+      # .github/workflows/quality.yml
+      name: Quality Check
+
+      on: [push, pull_request]
+
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v2
+            - name: Run tests
+              run: npm test
+            - name: Coverage report
+              run: npm run coverage
+            - name: Update badge
+              run: npm run update-badge
+
+      # 自动更新 README 徽章
+      ```
+
+      正确5：趋势可视化
+      ```markdown
+      # Quality Trends
+
+      ## Test Coverage
+      ```
+      v1.0.0: ████████░░ 75%
+      v1.1.0: █████████░ 82%
+      v1.2.0: █████████▌ 87%
+      ```
+
+      ## Performance (ops/sec)
+      ```
+      v1.0.0: 1000
+      v1.1.0: 1500 (+50%)
+      v1.2.0: 2000 (+33%)
+      ```
+
+      ✅ 可视化改进趋势
+      ```
+    en: |
+      Good 1: Complete quality metrics
+      ```markdown
+      # Code Analyzer Plugin
+
+      ![Version](https://img.shields.io/badge/version-v1.2.0-blue)
+      ![Status](https://img.shields.io/badge/status-stable-green)
+      ![Tests](https://img.shields.io/badge/tests-passing-success)
+      ![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen)
+
+      Static code analysis tool for Claude Code.
+
+      ## Quality Metrics
+
+      - **Version**: 1.2.0 (stable)
+      - **Test Coverage**: 87%
+      - **Complexity**: Medium
+      - **Maintenance**: Active
+      - **Last Updated**: 2026-03-11
+
+      ## Installation
+      ...
+      ```
+
+      Good 2: plugin.json metadata
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "1.2.0",
+        "metadata": {
+          "maturity": "stable",
+          "complexity": "medium",
+          "testCoverage": 87,
+          "lastUpdated": "2026-03-11",
+          "maintenance": "active"
+        }
+      }
+      ```
+
+      Good 3: Detailed CHANGELOG
+      ```markdown
+      # Changelog
+
+      ## [1.2.0] - 2026-03-11
+
+      ### Added
+      - Python analysis support
+      - Custom rule configuration
+
+      ### Fixed
+      - Memory leak in large files
+      - False positives in async code
+
+      ### Metrics
+      - Test coverage: 82% → 87%
+      - Performance: 2x faster
+
+      ## [1.1.0] - 2026-02-15
+
+      ### Added
+      - TypeScript support
+
+      ### Metrics
+      - Test coverage: 75% → 82%
+      ```
+
+      Good 4: CI/CD integration
+      ```yaml
+      # .github/workflows/quality.yml
+      name: Quality Check
+
+      on: [push, pull_request]
+
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v2
+            - name: Run tests
+              run: npm test
+            - name: Coverage report
+              run: npm run coverage
+            - name: Update badge
+              run: npm run update-badge
+
+      # Auto-update README badges
+      ```
+
+      Good 5: Trend visualization
+      ```markdown
+      # Quality Trends
+
+      ## Test Coverage
+      ```
+      v1.0.0: ████████░░ 75%
+      v1.1.0: █████████░ 82%
+      v1.2.0: █████████▌ 87%
+      ```
+
+      ## Performance (ops/sec)
+      ```
+      v1.0.0: 1000
+      v1.1.0: 1500 (+50%)
+      v1.2.0: 2000 (+33%)
+      ```
+
+      ✅ Visualize improvement trends
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加质量指标**:
+
+      1. **README 徽章**：
+         ```markdown
+         ![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+         ![Status](https://img.shields.io/badge/status-beta-yellow)
+         ![Tests](https://img.shields.io/badge/tests-passing-success)
+         ```
+
+      2. **plugin.json 元数据**：
+         ```json
+         {
+           "version": "1.0.0",
+           "metadata": {
+             "maturity": "beta",
+             "testCoverage": 75
+           }
+         }
+         ```
+
+      3. **创建 CHANGELOG**：
+         ```markdown
+         # Changelog
+
+         ## [1.0.0] - 2026-03-11
+         - Initial release
+         ```
+
+      **最小指标集**:
+      - [ ] 版本号
+      - [ ] 成熟度（alpha/beta/stable）
+      - [ ] 测试状态
+      - [ ] CHANGELOG
+    en: |
+      **Add quality metrics**:
+
+      1. **README badges**:
+         ```markdown
+         ![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+         ![Status](https://img.shields.io/badge/status-beta-yellow)
+         ![Tests](https://img.shields.io/badge/tests-passing-success)
+         ```
+
+      2. **plugin.json metadata**:
+         ```json
+         {
+           "version": "1.0.0",
+           "metadata": {
+             "maturity": "beta",
+             "testCoverage": 75
+           }
+         }
+         ```
+
+      3. **Create CHANGELOG**:
+         ```markdown
+         # Changelog
+
+         ## [1.0.0] - 2026-03-11
+         - Initial release
+         ```
+
+      **Minimum metrics set**:
+      - [ ] Version number
+      - [ ] Maturity (alpha/beta/stable)
+      - [ ] Test status
+      - [ ] CHANGELOG
+
+tags: ["quality", "metrics", "versioning", "maturity", "transparency"]
+related_rules: ["TEST-001", "DOC-001", "QUA-001"]

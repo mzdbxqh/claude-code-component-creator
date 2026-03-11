@@ -1,0 +1,513 @@
+id: SCA-005
+name: resource-management-missing
+severity: info
+component_type: subagent
+category: scalability
+
+title:
+  zh: "SubAgent 缺少资源管理配置"
+  en: "SubAgent missing resource management config"
+
+description:
+  zh: |
+    SubAgents 应该配置资源管理，优化性能和防止资源耗尽。
+
+    **资源管理字段**：
+    - **maxTurns**: 限制执行轮数（防止无限循环）
+    - **timeout**: 执行超时时间
+    - **memory**: 内存作用域（控制数据持久化）
+
+    **适用场景**：
+    - ✅ 长时间运行的 SubAgent
+    - ✅ 复杂推理任务
+    - ✅ 可能递归的操作
+    - ❌ 简单的单次操作
+
+    **最佳实践**：
+    - 根据任务复杂度设置 maxTurns
+    - 设置合理的超时时间
+    - 明确 memory 作用域
+    - 在文档中说明资源限制
+
+  en: |
+    SubAgents should configure resource management to optimize performance and prevent resource exhaustion.
+
+    **Resource Management Fields**:
+    - **maxTurns**: Limit execution rounds (prevent infinite loops)
+    - **timeout**: Execution timeout
+    - **memory**: Memory scope (control data persistence)
+
+    **Use Cases**:
+    - ✅ Long-running SubAgents
+    - ✅ Complex reasoning tasks
+    - ✅ Potentially recursive operations
+    - ❌ Simple one-time operations
+
+    **Best Practices**:
+    - Set maxTurns based on task complexity
+    - Set reasonable timeout
+    - Specify memory scope clearly
+    - Document resource limits
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-SCA-019~020)，资源管理防止性能问题和资源耗尽"
+  en: "Per official features (sub-agents.md OFF-SCA-019~020), resource management prevents performance issues and resource exhaustion"
+
+detection:
+  method: config-check
+  indicators:
+    - complex_without_limits: "复杂 SubAgent 无 maxTurns"
+    - no_timeout: "长任务无超时配置"
+    - memory_unclear: "未指定 memory 作用域"
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "资源管理"
+  lines: "458-512"
+  quote: "maxTurns 限制轮数。timeout 防止超时。memory 控制作用域。"
+
+examples:
+  bad:
+    zh: |
+      错误1：复杂任务无限制
+      ```yaml
+      ---
+      name: deep-analyzer
+      description: "深度代码分析"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Deep Analyzer
+
+      递归分析所有依赖...
+
+      ❌ 无 maxTurns
+      可能无限递归
+      消耗大量资源
+      ```
+
+      错误2：长任务无超时
+      ```yaml
+      ---
+      name: full-scan
+      description: "扫描整个项目"
+      ---
+
+      ❌ 无 timeout
+      可能运行几小时
+      阻塞其他任务
+      ```
+
+      错误3：memory 作用域不明
+      ```yaml
+      ---
+      name: data-processor
+      description: "处理大量数据"
+      ---
+
+      ❌ 未指定 memory
+      不清楚数据是否持久化
+      ```
+    en: |
+      Error 1: Complex task without limits
+      ```yaml
+      ---
+      name: deep-analyzer
+      description: "Deep code analysis"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Deep Analyzer
+
+      Recursively analyze all dependencies...
+
+      ❌ No maxTurns
+      May recurse infinitely
+      Consumes excessive resources
+      ```
+
+      Error 2: Long task without timeout
+      ```yaml
+      ---
+      name: full-scan
+      description: "Scan entire project"
+      ---
+
+      ❌ No timeout
+      May run for hours
+      Blocks other tasks
+      ```
+
+      Error 3: Unclear memory scope
+      ```yaml
+      ---
+      name: data-processor
+      description: "Process large data"
+      ---
+
+      ❌ No memory specified
+      Unclear if data persists
+      ```
+
+  good:
+    zh: |
+      正确1：复杂分析配置资源限制
+      ```yaml
+      ---
+      name: deep-analyzer
+      description: "深度分析"
+      maxTurns: 30
+      timeout: 300000  # 5 minutes
+      memory:
+        scope: user
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Deep Analyzer
+
+      ## Resource Limits
+      - Max execution rounds: 30
+      - Timeout: 5 minutes
+      - Memory scope: User (persists across sessions)
+
+      ## Why these limits?
+      - 30 turns: Enough for deep analysis
+      - 5 min: Prevents indefinite hang
+      - User scope: Remember analysis results
+      ```
+
+      正确2：简单任务无需限制
+      ```yaml
+      ---
+      name: quick-formatter
+      description: "快速格式化"
+      tools:
+        - Read
+        - Write
+      ---
+
+      # Quick Formatter
+
+      Simple formatting task.
+      No resource limits needed (completes in <1 turn).
+
+      ✅ 简单任务不过度配置
+      ```
+
+      正确3：根据复杂度设置
+      ```yaml
+      # Simple SubAgent
+      ---
+      name: file-reader
+      maxTurns: 5
+      ---
+
+      # Medium SubAgent
+      ---
+      name: code-analyzer
+      maxTurns: 15
+      timeout: 120000  # 2 min
+      ---
+
+      # Complex SubAgent
+      ---
+      name: architecture-designer
+      maxTurns: 40
+      timeout: 600000  # 10 min
+      memory:
+        scope: project
+      ---
+
+      ✅ 复杂度与资源限制匹配
+      ```
+
+      正确4：文档说明限制
+      ```markdown
+      # Architecture Designer SubAgent
+
+      ## Resource Configuration
+
+      ### Execution Limits
+      - **maxTurns**: 40 rounds
+        - Why: Complex architectural reasoning needs multiple iterations
+        - Typical usage: 20-30 turns
+        - Maximum: 40 turns (safety limit)
+
+      ### Timeout
+      - **timeout**: 10 minutes
+        - Why: Architecture design is CPU-intensive
+        - If timeout occurs: Partial results returned
+        - Recommendation: Run in background for large projects
+
+      ### Memory
+      - **scope**: project
+        - Why: Architecture decisions persist per project
+        - Data stored: Design decisions, patterns used
+        - Clear with: New project or explicit reset
+
+      ## Performance Tips
+      - Use `run_in_background=True` for large projects
+      - Consider splitting into smaller SubAgents for >1000 files
+      ```
+
+      正确5：动态调整建议
+      ```markdown
+      # SubAgent Resource Tuning
+
+      ## Start Conservative
+      ```yaml
+      maxTurns: 10  # Start with low limit
+      ```
+
+      ## Monitor and Adjust
+
+      If SubAgent frequently hits limit:
+      - Check logs for actual turn usage
+      - Increase by 50%: maxTurns: 15
+      - Re-evaluate after testing
+
+      If SubAgent rarely uses limit:
+      - Decrease to reduce waste
+      - Example: 5 turns used → set maxTurns: 10
+
+      ## Warning Signs
+
+      ⚠️ **Too Low**:
+      - Frequent "maxTurns exceeded" errors
+      - Incomplete results
+
+      ⚠️ **Too High**:
+      - Never reaches limit
+      - Wastes quota/resources
+
+      ✅ **Just Right**:
+      - Occasionally hits limit (rare cases)
+      - Most tasks complete within limit
+      ```
+    en: |
+      Good 1: Complex analysis with resource limits
+      ```yaml
+      ---
+      name: deep-analyzer
+      description: "Deep analysis"
+      maxTurns: 30
+      timeout: 300000  # 5 minutes
+      memory:
+        scope: user
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Deep Analyzer
+
+      ## Resource Limits
+      - Max execution rounds: 30
+      - Timeout: 5 minutes
+      - Memory scope: User (persists across sessions)
+
+      ## Why these limits?
+      - 30 turns: Enough for deep analysis
+      - 5 min: Prevents indefinite hang
+      - User scope: Remember analysis results
+      ```
+
+      Good 2: Simple task needs no limits
+      ```yaml
+      ---
+      name: quick-formatter
+      description: "Quick formatting"
+      tools:
+        - Read
+        - Write
+      ---
+
+      # Quick Formatter
+
+      Simple formatting task.
+      No resource limits needed (completes in <1 turn).
+
+      ✅ Don't over-configure simple tasks
+      ```
+
+      Good 3: Set by complexity
+      ```yaml
+      # Simple SubAgent
+      ---
+      name: file-reader
+      maxTurns: 5
+      ---
+
+      # Medium SubAgent
+      ---
+      name: code-analyzer
+      maxTurns: 15
+      timeout: 120000  # 2 min
+      ---
+
+      # Complex SubAgent
+      ---
+      name: architecture-designer
+      maxTurns: 40
+      timeout: 600000  # 10 min
+      memory:
+        scope: project
+      ---
+
+      ✅ Complexity matches resource limits
+      ```
+
+      Good 4: Document limits
+      ```markdown
+      # Architecture Designer SubAgent
+
+      ## Resource Configuration
+
+      ### Execution Limits
+      - **maxTurns**: 40 rounds
+        - Why: Complex architectural reasoning needs multiple iterations
+        - Typical usage: 20-30 turns
+        - Maximum: 40 turns (safety limit)
+
+      ### Timeout
+      - **timeout**: 10 minutes
+        - Why: Architecture design is CPU-intensive
+        - If timeout occurs: Partial results returned
+        - Recommendation: Run in background for large projects
+
+      ### Memory
+      - **scope**: project
+        - Why: Architecture decisions persist per project
+        - Data stored: Design decisions, patterns used
+        - Clear with: New project or explicit reset
+
+      ## Performance Tips
+      - Use `run_in_background=True` for large projects
+      - Consider splitting into smaller SubAgents for >1000 files
+      ```
+
+      Good 5: Dynamic adjustment advice
+      ```markdown
+      # SubAgent Resource Tuning
+
+      ## Start Conservative
+      ```yaml
+      maxTurns: 10  # Start with low limit
+      ```
+
+      ## Monitor and Adjust
+
+      If SubAgent frequently hits limit:
+      - Check logs for actual turn usage
+      - Increase by 50%: maxTurns: 15
+      - Re-evaluate after testing
+
+      If SubAgent rarely uses limit:
+      - Decrease to reduce waste
+      - Example: 5 turns used → set maxTurns: 10
+
+      ## Warning Signs
+
+      ⚠️ **Too Low**:
+      - Frequent "maxTurns exceeded" errors
+      - Incomplete results
+
+      ⚠️ **Too High**:
+      - Never reaches limit
+      - Wastes quota/resources
+
+      ✅ **Just Right**:
+      - Occasionally hits limit (rare cases)
+      - Most tasks complete within limit
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加资源管理配置**:
+
+      1. **评估任务复杂度**：
+         - 简单（单次操作）: 无需配置或 maxTurns: 5
+         - 中等（多步骤）: maxTurns: 10-20
+         - 复杂（递归/推理）: maxTurns: 30-50
+
+      2. **添加配置**：
+         ```yaml
+         ---
+         name: my-subagent
+         maxTurns: 20
+         timeout: 180000  # 3 min
+         memory:
+           scope: user
+         ---
+         ```
+
+      3. **文档说明**：
+         ```markdown
+         ## Resource Configuration
+         - maxTurns: 20 (typical: 10-15)
+         - timeout: 3 minutes
+         - memory: user scope
+         ```
+
+      **推荐值**:
+      | 任务类型 | maxTurns | timeout |
+      |---------|----------|---------|
+      | 简单 | 5-10 | 1 min |
+      | 中等 | 10-20 | 2-3 min |
+      | 复杂 | 20-50 | 5-10 min |
+
+      **检查清单**:
+      - [ ] 复杂 SubAgent 有 maxTurns
+      - [ ] 长任务有 timeout
+      - [ ] memory scope 明确
+      - [ ] 文档说明限制理由
+    en: |
+      **Add resource management config**:
+
+      1. **Assess task complexity**:
+         - Simple (one-time): No config or maxTurns: 5
+         - Medium (multi-step): maxTurns: 10-20
+         - Complex (recursive/reasoning): maxTurns: 30-50
+
+      2. **Add configuration**:
+         ```yaml
+         ---
+         name: my-subagent
+         maxTurns: 20
+         timeout: 180000  # 3 min
+         memory:
+           scope: user
+         ---
+         ```
+
+      3. **Document**:
+         ```markdown
+         ## Resource Configuration
+         - maxTurns: 20 (typical: 10-15)
+         - timeout: 3 minutes
+         - memory: user scope
+         ```
+
+      **Recommended Values**:
+      | Task Type | maxTurns | timeout |
+      |-----------|----------|---------|
+      | Simple | 5-10 | 1 min |
+      | Medium | 10-20 | 2-3 min |
+      | Complex | 20-50 | 5-10 min |
+
+      **Checklist**:
+      - [ ] Complex SubAgent has maxTurns
+      - [ ] Long task has timeout
+      - [ ] memory scope explicit
+      - [ ] Docs explain limit rationale
+
+tags: ["subagent", "scalability", "resource-management", "performance", "limits"]
+related_rules: ["SUB-011", "SCA-001", "SCA-002", "SCA-003"]
