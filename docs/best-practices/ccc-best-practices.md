@@ -104,7 +104,7 @@ description: |
 ### 1. 批量审查时使用并行
 
 ```bash
-# 使用 review-aggregator 并行审查多个组件
+# 使用 ccc:review-aggregator 并行审查多个组件
 ccc-review --target=. --parallel
 ```
 

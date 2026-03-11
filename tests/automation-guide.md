@@ -208,10 +208,10 @@ report:
 
 | 组件 | 通过 | 失败 | 跳过 |
 |------|------|------|------|
-| intent-core | 10 | 0 | 0 |
-| blueprint-core | 14 | 0 | 0 |
-| delivery-core | 14 | 0 | 0 |
-| test-sandbox-core | 14 | 0 | 0 |
+| ccc:intent-core | 10 | 0 | 0 |
+| ccc:blueprint-core | 14 | 0 | 0 |
+| ccc:delivery-core | 14 | 0 | 0 |
+| ccc:test-sandbox-core | 14 | 0 | 0 |
 | integration | 21 | 0 | 0 |
 | commands | 2 | 0 | 0 |
 

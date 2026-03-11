@@ -1,0 +1,178 @@
+{
+  "name": "cmd-quick-evals",
+  "version": "1.0.0",
+  "description": "测试用例：一键执行从需求到交付的完整流程（init→design→build）",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：快速创建简单工具",
+      "description": "验证完整自动化流程",
+      "input": {
+        "arguments": "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
+      },
+      "expected_behavior": {
+        "creates_intent": true,
+        "creates_blueprint": true,
+        "creates_delivery": true,
+        "auto_approves_high_quality": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Stage 1: Intent Creation"
+        },
+        {
+          "type": "contains",
+          "value": "Stage 2: Blueprint Design"
+        },
+        {
+          "type": "contains",
+          "value": "Stage 3: Delivery"
+        },
+        {
+          "type": "contains",
+          "value": "Quick Workflow Complete"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：复杂工具需要人工审查",
+      "description": "验证质量阈值检查和交互式确认",
+      "input": {
+        "arguments": "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要回滚功能"
+      },
+      "expected_behavior": {
+        "detects_quality_below_threshold": true,
+        "requests_manual_review": true,
+        "continues_after_confirmation": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Manual review required"
+        },
+        {
+          "type": "contains",
+          "value": "质量"
+        },
+        {
+          "type": "contains",
+          "value": "Suggestions"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：多语言支持（英文）",
+      "description": "验证英文输出",
+      "input": {
+        "arguments": "I want to create a log analyzer --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Quick Workflow Complete"
+        },
+        {
+          "type": "contains",
+          "value": "All stages passed"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：部分阶段失败并保留中间制品",
+      "description": "验证错误恢复和制品保留",
+      "input": {
+        "arguments": "创建一个数据迁移工具",
+        "simulate_error": "build_failure_at_stage_3"
+      },
+      "expected_behavior": {
+        "preserves_intent": true,
+        "preserves_blueprint": true,
+        "reports_partial_completion": true,
+        "provides_recovery_options": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Delivery"
+        },
+        {
+          "type": "contains",
+          "value": "FAILED"
+        },
+        {
+          "type": "contains",
+          "value": "Partial completion"
+        },
+        {
+          "type": "contains",
+          "value": "Recovery options"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：Intent 质量过低",
+      "description": "验证模糊需求的拒绝",
+      "input": {
+        "arguments": "做个工具"
+      },
+      "expected_behavior": {
+        "detects_low_quality": true,
+        "stops_workflow": true,
+        "provides_guidance": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Intent quality too low"
+        },
+        {
+          "type": "contains",
+          "value": "Workflow stopped"
+        },
+        {
+          "type": "contains",
+          "value": "Try again"
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：空描述",
+      "description": "验证必填参数检查",
+      "input": {
+        "arguments": ""
+      },
+      "expected_behavior": {
+        "prompts_for_description": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["请提供", "description", "requirement"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": [
+      "docs/ccc/intent/",
+      "docs/ccc/blueprint/",
+      "docs/ccc/delivery/"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 1,
+    "error_scenarios": 2,
+    "total": 6
+  }
+}

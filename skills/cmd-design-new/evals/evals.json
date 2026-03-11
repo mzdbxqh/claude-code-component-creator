@@ -1,0 +1,120 @@
+{
+  "name": "cmd-design-new-evals",
+  "version": "1.0.0",
+  "description": "测试用例：从零设计组件，使用 5 阶段交互式流程",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：简单命令设计",
+      "description": "验证5阶段交互式设计流程",
+      "input": {
+        "arguments": "",
+        "interactive_responses": [
+          "代码格式化命令",
+          "Python/JavaScript",
+          "Command组件"
+        ]
+      },
+      "expected_behavior": {
+        "executes_5_stages": true,
+        "generates_evidence_chain": true,
+        "creates_blueprint": "docs/ccc/blueprint/*.yaml"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "阶段"
+        },
+        {
+          "type": "contains",
+          "value": "证据链"
+        },
+        {
+          "type": "contains",
+          "value": "Blueprint artifact"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：复杂 Subagent 设计",
+      "description": "验证多组件系统设计",
+      "input": {
+        "arguments": "--lang=en-us",
+        "interactive_responses": ["API testing automation"]
+      },
+      "expected_behavior": {
+        "output_language": "en-us",
+        "designs_subagent": true,
+        "includes_tool_permissions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Requirements"
+        },
+        {
+          "type": "contains",
+          "value": "Architecture"
+        },
+        {
+          "type": "contains",
+          "value": "evidence chain"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：端到端工作流设计",
+      "description": "验证复杂多组件架构设计",
+      "input": {
+        "arguments": "",
+        "interactive_responses": ["数据迁移工作流", "多个Skill和Subagent"]
+      },
+      "expected_behavior": {
+        "handles_complex_workflow": true,
+        "identifies_multiple_components": true,
+        "generates_complete_design": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "多组件架构"
+        },
+        {
+          "type": "contains",
+          "value": "能力需求"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：用户取消设计流程",
+      "description": "验证用户中途退出的处理",
+      "input": {
+        "arguments": "",
+        "interactive_responses": ["cancel"]
+      },
+      "expected_behavior": {
+        "handles_cancellation": true,
+        "no_artifacts_created": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["已取消", "cancelled", "退出"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/blueprint/", "docs/designs/"],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 2,
+    "boundary_scenarios": 1,
+    "error_scenarios": 1,
+    "total": 4
+  }
+}

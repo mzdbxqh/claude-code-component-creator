@@ -3,7 +3,7 @@ name: migration-review-aggregator
 description: "改造方案审阅聚合器：并行调用多个 reviewer→收集结果→整合去重→生成最终报告。触发：改造/迁移/聚合/migration-aggregator"
 model: haiku
 tools:
-  - Task
+  - Agent
 permissionMode: prompt
 skills:
   - ccc:std-component-selection

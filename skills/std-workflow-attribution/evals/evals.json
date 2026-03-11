@@ -1,0 +1,44 @@
+{
+  "name": "std-workflow-attribution-evals",
+  "version": "1.0.0",
+  "description": "测试用例：工作流归因规范",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：提供归因规范",
+      "description": "验证归因规范提供",
+      "input": {
+        "context": "auto_discovered"
+      },
+      "expected_behavior": {
+        "provides_attribution_spec": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "归因"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：工作流标注验证",
+      "description": "验证归因检查功能",
+      "input": {
+        "validate": "test-workflow-attribution"
+      },
+      "expected_behavior": {
+        "validates_attribution": true
+      },
+      "assertions": [
+        {
+          "type": "execution_success": true
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "total": 2
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "std-naming-rules-evals",
+  "version": "1.0.0",
+  "description": "测试用例：命名规范",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：提供命名规则",
+      "description": "验证命名规范提供",
+      "input": {
+        "context": "auto_discovered"
+      },
+      "expected_behavior": {
+        "provides_naming_rules": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "命名"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：验证名称合规性",
+      "description": "验证名称检查功能",
+      "input": {
+        "validate_name": "cmd-design"
+      },
+      "expected_behavior": {
+        "validates_name": true
+      },
+      "assertions": [
+        {
+          "type": "execution_success": true
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "total": 2
+  }
+}

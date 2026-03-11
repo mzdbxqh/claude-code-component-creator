@@ -3,7 +3,7 @@ name: eval-executor
 description: "Eval 执行器：并行执行测试用例 (with-skill vs baseline)，捕获 timing 数据"
 model: sonnet
 tools:
-  - Task
+  - Agent
   - Read
   - Write
   - Bash

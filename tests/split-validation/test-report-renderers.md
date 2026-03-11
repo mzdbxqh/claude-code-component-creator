@@ -5,10 +5,10 @@
 - 拆分后: 4 个专用 renderers
 
 ## 行数对比
-- review-report-renderer: 49 行
-- architecture-report-renderer: 31 行
-- dependency-report-renderer: 31 行
-- migration-report-renderer: 31 行
+- ccc:review-report-renderer: 49 行
+- ccc:architecture-report-renderer: 31 行
+- ccc:dependency-report-renderer: 31 行
+- ccc:migration-report-renderer: 31 行
 - 共享逻辑: 27 行
 
 ## Token 消耗估算

@@ -5,7 +5,7 @@ model: sonnet
 tools:
   - Read
   - Write
-  - Task
+  - Agent
 permissionMode: prompt
 skills:
   - ccc:std-naming-rules

@@ -1,0 +1,237 @@
+{
+  "name": "cmd-iterate-evals",
+  "version": "1.0.0",
+  "description": "测试用例：迭代 Blueprint 制品，生成改进版本",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：改进工具选择",
+      "description": "验证工具冗余检测和简化",
+      "input": {
+        "arguments": "--artifact-id=BLP-REDUNDANT-TOOLS"
+      },
+      "expected_behavior": {
+        "detects_tool_redundancy": true,
+        "simplifies_tools": true,
+        "generates_new_artifact": true,
+        "creates_iteration_report": "docs/iterations/*-iteration.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Iteration Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Simplified tool selection"
+        },
+        {
+          "type": "contains",
+          "value": "New Artifact:"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/iterations/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：增强错误处理",
+      "description": "验证错误处理改进检测",
+      "input": {
+        "arguments": "--artifact-id=BLP-NO-ERROR-HANDLING"
+      },
+      "expected_behavior": {
+        "detects_missing_error_handling": true,
+        "adds_fallback_strategies": true,
+        "improves_quality_score": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Iteration Complete"
+        },
+        {
+          "type": "contains",
+          "value": "error handling"
+        },
+        {
+          "type": "contains",
+          "value": "Quality improvement"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：优化工作流顺序",
+      "description": "验证工作流步骤优化",
+      "input": {
+        "arguments": "--artifact-id=BLP-INEFFICIENT-WORKFLOW"
+      },
+      "expected_behavior": {
+        "detects_redundant_steps": true,
+        "reorders_workflow": true,
+        "shows_performance_improvement": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Iteration Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Reordered workflow"
+        },
+        {
+          "type": "contains_any",
+          "values": ["Performance improvement", "faster"]
+        }
+      ]
+    },
+    {
+      "id": "normal-004",
+      "name": "正常场景：多语言支持（英文）",
+      "description": "验证英文输出",
+      "input": {
+        "arguments": "--artifact-id=BLP-001 --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Iteration Complete"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：无需改进的 Blueprint",
+      "description": "验证最优设计的识别",
+      "input": {
+        "arguments": "--artifact-id=BLP-OPTIMAL"
+      },
+      "expected_behavior": {
+        "detects_no_improvements": true,
+        "exits_gracefully": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "No improvements detected"
+        },
+        {
+          "type": "contains",
+          "value": "well-designed"
+        },
+        {
+          "type": "contains",
+          "value": "No changes needed"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：最小化 Blueprint",
+      "description": "验证对最小 Blueprint 的处理",
+      "input": {
+        "arguments": "--artifact-id=BLP-MINIMAL"
+      },
+      "expected_behavior": {
+        "handles_minimal_blueprint": true,
+        "provides_suggestions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Iteration"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：Artifact 不存在",
+      "description": "验证不存在制品的处理",
+      "input": {
+        "arguments": "--artifact-id=BLP-NONEXISTENT"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_artifacts": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "available artifacts"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：不支持的制品类型",
+      "description": "验证对 Intent 制品的拒绝",
+      "input": {
+        "arguments": "--artifact-id=INT-001"
+      },
+      "expected_behavior": {
+        "rejects_invalid_type": true,
+        "shows_supported_types": true,
+        "suggests_solution": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Invalid artifact type"
+        },
+        {
+          "type": "contains",
+          "value": "Blueprint"
+        },
+        {
+          "type": "contains",
+          "value": "/ccc:design"
+        }
+      ]
+    },
+    {
+      "id": "error-003",
+      "name": "错误处理：文件生成失败",
+      "description": "验证生成失败时的回滚",
+      "input": {
+        "arguments": "--artifact-id=BLP-001",
+        "simulate_error": "file_generation_failure"
+      },
+      "expected_behavior": {
+        "detects_failure": true,
+        "rolls_back_changes": true,
+        "reports_error": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["generation failure", "生成失败", "rollback"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/blueprint/", "docs/iterations/"],
+    "required_files": [
+      "test-fixtures/artifacts/BLP-REDUNDANT-TOOLS.yaml",
+      "test-fixtures/artifacts/BLP-NO-ERROR-HANDLING.yaml",
+      "test-fixtures/artifacts/BLP-INEFFICIENT-WORKFLOW.yaml",
+      "test-fixtures/artifacts/BLP-OPTIMAL.yaml",
+      "test-fixtures/artifacts/BLP-MINIMAL.yaml",
+      "test-fixtures/artifacts/INT-001.yaml"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 4,
+    "boundary_scenarios": 2,
+    "error_scenarios": 3,
+    "total": 9
+  }
+}

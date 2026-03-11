@@ -1,0 +1,45 @@
+{
+  "name": "lib-design-patterns-evals",
+  "version": "1.0.0",
+  "description": "测试用例：设计模式知识库",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：加载设计模式知识",
+      "description": "验证知识库加载功能",
+      "input": {
+        "context": "loaded_by_subagent"
+      },
+      "expected_behavior": {
+        "provides_design_patterns": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "设计模式"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：查询特定模式",
+      "description": "验证模式查询",
+      "input": {
+        "query": "workflow"
+      },
+      "expected_behavior": {
+        "returns_workflow_patterns": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "workflow"
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "total": 2
+  }
+}

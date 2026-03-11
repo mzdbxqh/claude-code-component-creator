@@ -1,0 +1,175 @@
+{
+  "name": "cmd-fix-evals",
+  "version": "1.0.0",
+  "description": "测试用例：交互式修复审查发现的问题，支持策略选择和并行执行",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：交互式修复",
+      "description": "验证完整交互式修复流程",
+      "input": {
+        "arguments": "--artifact-id=DLV-001",
+        "user_interactions": [
+          {"prompt": "修复策略", "selection": "交互式修复"},
+          {"prompt": "修复范围", "selection": "仅 P0 错误"},
+          {"prompt": "执行确认", "selection": "开始修复"}
+        ]
+      },
+      "expected_behavior": {
+        "loads_review_report": true,
+        "presents_strategies": true,
+        "executes_fixes": true,
+        "generates_fix_report": "docs/fixes/*-fix.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "修复完成"
+        },
+        {
+          "type": "contains",
+          "value": "修复摘要"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/fixes/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：自动修复 P0 问题",
+      "description": "验证全自动修复模式",
+      "input": {
+        "arguments": "--artifact-id=DLV-001 --auto"
+      },
+      "expected_behavior": {
+        "auto_fixes_p0_issues": true,
+        "no_user_interaction": true,
+        "generates_report": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "修复完成"
+        },
+        {
+          "type": "contains",
+          "value": "修复文件数"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：预览修复内容（dry-run）",
+      "description": "验证 dry-run 模式不实际写入",
+      "input": {
+        "arguments": "--artifact-id=DLV-001 --dry-run"
+      },
+      "expected_behavior": {
+        "shows_preview": true,
+        "no_file_changes": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "预览"
+        },
+        {
+          "type": "contains",
+          "value": "dry-run"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：无可修复问题",
+      "description": "验证审查报告无问题时的处理",
+      "input": {
+        "arguments": "--artifact-id=DLV-CLEAN"
+      },
+      "expected_behavior": {
+        "detects_no_issues": true,
+        "exits_gracefully": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["无需修复", "No issues", "已通过"]
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：用户取消修复",
+      "description": "验证用户中途取消的处理",
+      "input": {
+        "arguments": "--artifact-id=DLV-001",
+        "user_interactions": [
+          {"prompt": "修复策略", "selection": "暂停"}
+        ]
+      },
+      "expected_behavior": {
+        "preserves_review_report": true,
+        "no_changes_made": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["已取消", "cancelled", "保留审查报告"]
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：审查报告不存在",
+      "description": "验证缺少审查报告时的提示",
+      "input": {
+        "arguments": "--artifact-id=DLV-999"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "suggests_running_review": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["审查报告不存在", "run /ccc:review", "请先执行"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：文件写入失败",
+      "description": "验证写入失败时的回滚机制",
+      "input": {
+        "arguments": "--artifact-id=DLV-001 --auto",
+        "simulate_error": "write_permission_denied"
+      },
+      "expected_behavior": {
+        "rolls_back_changes": true,
+        "reports_error": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["回滚", "rollback", "写入失败"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/reviews/", "docs/fixes/"],
+    "required_files": [
+      "docs/reviews/test-review.md",
+      "test-fixtures/artifacts/DLV-001.yaml"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 2,
+    "error_scenarios": 2,
+    "total": 7
+  }
+}

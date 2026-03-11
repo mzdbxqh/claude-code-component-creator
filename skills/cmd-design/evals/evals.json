@@ -1,0 +1,144 @@
+{
+  "name": "cmd-design-evals",
+  "version": "1.0.0",
+  "description": "测试用例：生成 Blueprint 制品，使用 5 阶段设计流程",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：从 Intent 生成 Blueprint",
+      "description": "验证基本设计流程：读取 Intent → 生成 Blueprint",
+      "input": {
+        "arguments": "--name=deploy-skill"
+      },
+      "expected_behavior": {
+        "creates_files": [
+          "docs/designs/*.md",
+          "docs/ccc/blueprint/*.yaml"
+        ],
+        "contains_sections": ["workflow", "tools", "evidence_chain", "policies"]
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Design Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Blueprint Generated"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/designs/"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/ccc/blueprint/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：指定 Intent ID 设计",
+      "description": "验证多 Intent 环境下的选择功能",
+      "input": {
+        "arguments": "--name=api-service --intent-id=INT-001"
+      },
+      "expected_behavior": {
+        "uses_specific_intent": "INT-001",
+        "generates_blueprint": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Design Complete"
+        },
+        {
+          "type": "contains",
+          "value": "api-service"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：多语言支持（英文）",
+      "description": "验证英文输出功能",
+      "input": {
+        "arguments": "--name=test-skill --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Design Complete"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：缺少 name 参数",
+      "description": "验证必填参数检查",
+      "input": {
+        "arguments": ""
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "suggests_usage": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["--name", "required", "必需"]
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：Intent 不存在",
+      "description": "验证对不存在 Intent 的处理",
+      "input": {
+        "arguments": "--name=test --intent-id=INT-999"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_intents": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "available"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：Blueprint 生成失败",
+      "description": "验证生成失败时的错误提示",
+      "input": {
+        "arguments": "--name=invalid-design --intent-id=current"
+      },
+      "expected_behavior": {
+        "handles_failure": true,
+        "provides_guidance": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["error", "failed", "review"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/intent/", "docs/designs/", "docs/ccc/blueprint/"],
+    "required_files": ["docs/ccc/intent/test-intent.yaml"],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 1,
+    "error_scenarios": 2,
+    "total": 6
+  }
+}

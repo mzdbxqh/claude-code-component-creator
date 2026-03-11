@@ -158,9 +158,9 @@ Token 消耗分析：
 原 skill: report-renderer
   ↓
 拆分后:
-  - review-report-renderer (处理审阅类报告)
-  - architecture-report-renderer (处理架构类报告)
-  - dependency-report-renderer (处理依赖类报告)
+  - ccc:review-report-renderer (处理审阅类报告)
+  - ccc:architecture-report-renderer (处理架构类报告)
+  - ccc:dependency-report-renderer (处理依赖类报告)
 ```
 
 **优势**：
@@ -675,9 +675,9 @@ eval-orchestrator:
   - report-renderer (deprecated, 指向新 skills)
 
 阶段 2: 创建新 skills
-  - review-report-renderer
-  - architecture-report-renderer
-  - dependency-report-renderer
+  - ccc:review-report-renderer
+  - ccc:architecture-report-renderer
+  - ccc:dependency-report-renderer
 
 阶段 3: 过渡期 (2-4 周)
   - 原 skill 自动路由到新 skills
@@ -779,9 +779,9 @@ eval-orchestrator:
 推荐策略: 按输入类型拆分
   
 拆分方案:
-  - review-report-renderer (120 行)
-  - architecture-report-renderer (100 行)
-  - dependency-report-renderer (90 行)
+  - ccc:review-report-renderer (120 行)
+  - ccc:architecture-report-renderer (100 行)
+  - ccc:dependency-report-renderer (90 行)
   
 预期收益:
   - Token 降低: 65%
@@ -797,15 +797,15 @@ eval-orchestrator:
 
 **优先级 1 (立即处理)**：
 - `report-renderer` (419 行，评分 87) → 按输入类型拆分
-- `blueprint-core` (414 行，评分 63) → 按知识域拆分
+- `ccc:blueprint-core` (414 行，评分 63) → 按知识域拆分
 
 **优先级 2 (计划处理)**：
-- `eval-grader` (399 行，评分 72) → 按工作流拆分
-- `eval-parser` (398 行) → 待诊断
+- `ccc:eval-grader` (399 行，评分 72) → 按工作流拆分
+- `ccc:eval-parser` (398 行) → 待诊断
 
 **优先级 3 (观察)**：
-- `linkage-validator` (387 行) → 待诊断
-- `intent-core` (387 行) → 待诊断
+- `ccc:linkage-validator` (387 行) → 待诊断
+- `ccc:intent-core` (387 行) → 待诊断
 
 ### 修复建议更新
 
@@ -844,8 +844,8 @@ eval-orchestrator:
 | 触发信号 | 推荐策略 | 典型场景 |
 |---------|---------|---------|
 | 多种输入类型 | 策略 1 | report-renderer |
-| 多个知识域 | 策略 2 | blueprint-core |
-| 早期分叉 | 策略 3 | eval-grader |
+| 多个知识域 | 策略 2 | ccc:blueprint-core |
+| 早期分叉 | 策略 3 | ccc:eval-grader |
 | 新手/专家 | 策略 4 | reviewer |
 | 高频/低频 | 策略 5 | fixer |
 

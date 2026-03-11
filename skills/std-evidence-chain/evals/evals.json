@@ -1,0 +1,44 @@
+{
+  "name": "std-evidence-chain-evals",
+  "version": "1.0.0",
+  "description": "测试用例：证据链规范",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：提供证据链规范",
+      "description": "验证证据链定义提供",
+      "input": {
+        "context": "auto_discovered"
+      },
+      "expected_behavior": {
+        "provides_evidence_chain_spec": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "证据链"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：验证证据链完整性",
+      "description": "验证证据链检查功能",
+      "input": {
+        "validate": "test-evidence-chain"
+      },
+      "expected_behavior": {
+        "validates_completeness": true
+      },
+      "assertions": [
+        {
+          "type": "execution_success": true
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "total": 2
+  }
+}

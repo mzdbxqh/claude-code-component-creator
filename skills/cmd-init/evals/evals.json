@@ -1,0 +1,163 @@
+{
+  "name": "cmd-init-evals",
+  "version": "1.0.0",
+  "description": "测试用例：创建 Intent 制品，使用 4 问框架分析用户需求",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：创建简单工具类 Skill",
+      "description": "验证基本功能：能否正确创建 Intent 制品",
+      "input": {
+        "arguments": "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
+      },
+      "expected_behavior": {
+        "creates_file": "docs/ccc/intent/*.yaml",
+        "contains_sections": ["artifact", "metadata", "requirements", "constraints", "decisions"],
+        "quality_score": ">= 80"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Intent created"
+        },
+        {
+          "type": "contains",
+          "value": "Component type:"
+        },
+        {
+          "type": "contains",
+          "value": "Quality score:"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/ccc/intent/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：创建复杂多阶段工具",
+      "description": "验证复杂需求处理：能否分析多功能域和约束条件",
+      "input": {
+        "arguments": "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要配置验证和回滚功能"
+      },
+      "expected_behavior": {
+        "infers_complexity": "complex",
+        "identifies_multiple_domains": true,
+        "quality_score": ">= 85"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Intent created"
+        },
+        {
+          "type": "contains",
+          "value": "Hard constraints"
+        },
+        {
+          "type": "contains",
+          "value": "Complexity:"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：多语言支持（英文）",
+      "description": "验证多语言输出功能",
+      "input": {
+        "arguments": "I want to create a code review assistant --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us",
+        "contains_english_output": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Intent created"
+        },
+        {
+          "type": "contains",
+          "value": "Component type:"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：交互式输入（无参数）",
+      "description": "验证无参数调用时的交互式提示",
+      "input": {
+        "arguments": ""
+      },
+      "expected_behavior": {
+        "prompts_user": true,
+        "message": "Please describe what you want to create"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "describe"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：质量分数过低（模糊需求）",
+      "description": "验证对模糊需求的处理和建议",
+      "input": {
+        "arguments": "做个东西"
+      },
+      "expected_behavior": {
+        "quality_score": "< 50",
+        "provides_suggestions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Intent created"
+        },
+        {
+          "type": "contains",
+          "value": "Warning"
+        },
+        {
+          "type": "contains",
+          "value": "Quality score"
+        },
+        {
+          "type": "contains",
+          "value": "Suggestion"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：不支持的语言参数",
+      "description": "验证对无效语言参数的处理",
+      "input": {
+        "arguments": "创建工具 --lang=invalid"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "suggests_valid_options": ["zh-cn", "en-us", "ja-jp"]
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["Invalid language", "不支持的语言", "zh-cn", "en-us", "ja-jp"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/intent/"],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 2,
+    "error_scenarios": 1,
+    "total": 6
+  }
+}

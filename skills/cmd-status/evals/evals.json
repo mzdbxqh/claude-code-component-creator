@@ -1,0 +1,97 @@
+{
+  "name": "cmd-status-evals",
+  "version": "1.0.0",
+  "description": "测试用例：显示项目工作流状态和制品进度",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：查看当前项目状态",
+      "description": "验证基本状态显示功能",
+      "input": {
+        "arguments": ""
+      },
+      "expected_behavior": {
+        "shows_artifacts": true,
+        "shows_progress": true,
+        "suggests_next_action": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Project:"
+        },
+        {
+          "type": "contains",
+          "value": "Artifacts"
+        },
+        {
+          "type": "contains",
+          "value": "Progress:"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：指定项目ID",
+      "description": "验证多项目支持",
+      "input": {
+        "arguments": "--project-id=my-project"
+      },
+      "expected_behavior": {
+        "loads_specific_project": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "my-project"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：空项目（无制品）",
+      "description": "验证无制品时的提示",
+      "input": {
+        "arguments": "--project-id=empty-project"
+      },
+      "expected_behavior": {
+        "detects_no_artifacts": true,
+        "suggests_init": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["No artifacts", "无制品", "/ccc:init"]
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：项目不存在",
+      "description": "验证不存在项目的处理",
+      "input": {
+        "arguments": "--project-id=nonexistent"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_projects": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/status/", "test-fixtures/projects/"],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 2,
+    "boundary_scenarios": 1,
+    "error_scenarios": 1,
+    "total": 4
+  }
+}

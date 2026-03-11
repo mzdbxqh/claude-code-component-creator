@@ -151,10 +151,10 @@
 
 | 组件 | 测试用例数 | 占比 |
 |------|------------|------|
-| intent-core | 10 | 13% |
-| blueprint-core | 14 | 19% |
-| delivery-core | 14 | 19% |
-| test-sandbox-core | 14 | 19% |
+| ccc:intent-core | 10 | 13% |
+| ccc:blueprint-core | 14 | 19% |
+| ccc:delivery-core | 14 | 19% |
+| ccc:test-sandbox-core | 14 | 19% |
 | integration | 21 | 28% |
 | commands | 2 | 2% |
 

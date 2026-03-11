@@ -1,0 +1,177 @@
+{
+  "name": "cmd-trace-evals",
+  "version": "1.0.0",
+  "description": "测试用例：生成完整的需求到实现的追溯链路",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：生成项目追溯矩阵",
+      "description": "验证完整追溯链路生成",
+      "input": {
+        "arguments": "test-project"
+      },
+      "expected_behavior": {
+        "collects_artifacts": true,
+        "generates_traceability_matrix": true,
+        "calculates_coverage": true,
+        "creates_report": "docs/traces/*-trace.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Traceability Matrix"
+        },
+        {
+          "type": "contains",
+          "value": "Coverage:"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/traces/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：多语言支持（英文）",
+      "description": "验证英文追溯报告",
+      "input": {
+        "arguments": "test-project --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Traceability Matrix"
+        },
+        {
+          "type": "contains",
+          "value": "Coverage"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：大型项目（100+ 需求）",
+      "description": "验证大型项目的性能和分模块展示",
+      "input": {
+        "arguments": "large-project"
+      },
+      "expected_behavior": {
+        "handles_large_project": true,
+        "provides_modular_view": true,
+        "completes_in_reasonable_time": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Traceability Matrix"
+        },
+        {
+          "type": "execution_time",
+          "value": "< 120s"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：低覆盖率项目",
+      "description": "验证大量缺口的分析和建议",
+      "input": {
+        "arguments": "low-coverage-project"
+      },
+      "expected_behavior": {
+        "identifies_gaps": true,
+        "provides_recommendations": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Gaps"
+        },
+        {
+          "type": "contains",
+          "value": "Coverage:"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：项目不存在",
+      "description": "验证不存在项目的处理",
+      "input": {
+        "arguments": "nonexistent-project"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_projects": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "/ccc:projects"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：无可追溯制品",
+      "description": "验证空项目的处理",
+      "input": {
+        "arguments": "empty-project"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "suggests_creating_artifacts": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["no artifacts", "无制品", "/ccc:init"]
+        }
+      ]
+    },
+    {
+      "id": "error-003",
+      "name": "错误处理：制品链接缺失",
+      "description": "验证断链时的警告和继续处理",
+      "input": {
+        "arguments": "broken-links-project"
+      },
+      "expected_behavior": {
+        "detects_broken_links": true,
+        "continues_processing": true,
+        "reports_warnings": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "warning"
+        },
+        {
+          "type": "contains",
+          "value": "Coverage:"
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": [
+      "test-fixtures/projects/test-project/",
+      "test-fixtures/projects/large-project/",
+      "test-fixtures/projects/low-coverage-project/",
+      "test-fixtures/projects/empty-project/",
+      "test-fixtures/projects/broken-links-project/",
+      "docs/traces/"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 2,
+    "boundary_scenarios": 2,
+    "error_scenarios": 3,
+    "total": 7
+  }
+}

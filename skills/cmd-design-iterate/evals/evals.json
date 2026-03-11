@@ -1,0 +1,133 @@
+{
+  "name": "cmd-design-iterate-evals",
+  "version": "1.0.0",
+  "description": "测试用例：分析现有组件与目标状态的差异，生成增量改进方案",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：基础组件迭代",
+      "description": "验证现有组件的差异分析和增量方案生成",
+      "input": {
+        "arguments": "test-fixtures/components/deploy.md"
+      },
+      "expected_behavior": {
+        "analyzes_current_state": true,
+        "identifies_gaps": true,
+        "generates_incremental_plan": true,
+        "includes_evidence_chain": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "差异分析"
+        },
+        {
+          "type": "contains",
+          "value": "增量方案"
+        },
+        {
+          "type": "contains",
+          "value": "变更证据链"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：Subagent 组件优化",
+      "description": "验证 Subagent 架构优化建议",
+      "input": {
+        "arguments": "test-fixtures/components/docker-builder.md --lang=en-us"
+      },
+      "expected_behavior": {
+        "output_language": "en-us",
+        "analyzes_architecture": true,
+        "provides_optimization_suggestions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "architecture"
+        },
+        {
+          "type": "contains",
+          "value": "optimization"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：复杂组件重构迭代",
+      "description": "验证复杂组件的分阶段迭代计划",
+      "input": {
+        "arguments": "test-fixtures/components/complex-reviewer.md"
+      },
+      "expected_behavior": {
+        "handles_complex_component": true,
+        "generates_phased_plan": true,
+        "includes_rollback_strategy": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "分阶段"
+        },
+        {
+          "type": "contains",
+          "value": "回滚策略"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：组件文件不存在",
+      "description": "验证不存在文件的处理",
+      "input": {
+        "arguments": "/nonexistent/component.md"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "displays_path": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "文件"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：无效的组件格式",
+      "description": "验证无效组件文件的处理",
+      "input": {
+        "arguments": "test-fixtures/components/invalid.md"
+      },
+      "expected_behavior": {
+        "detects_invalid_format": true,
+        "provides_guidance": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["Invalid", "无效", "格式"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["test-fixtures/components/", "docs/designs/"],
+    "required_files": [
+      "test-fixtures/components/deploy.md",
+      "test-fixtures/components/docker-builder.md",
+      "test-fixtures/components/complex-reviewer.md",
+      "test-fixtures/components/invalid.md"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 2,
+    "boundary_scenarios": 1,
+    "error_scenarios": 2,
+    "total": 5
+  }
+}

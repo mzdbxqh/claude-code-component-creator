@@ -1,0 +1,170 @@
+{
+  "name": "cmd-test-sandbox-evals",
+  "version": "1.0.0",
+  "description": "测试用例：运行自动化沙箱测试验证 CCC 插件功能",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：运行所有测试用例",
+      "description": "验证完整测试套件执行",
+      "input": {
+        "arguments": ""
+      },
+      "expected_behavior": {
+        "runs_all_test_cases": true,
+        "generates_test_report": true,
+        "calculates_pass_rate": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "CCC Sandbox Test Report"
+        },
+        {
+          "type": "contains",
+          "value": "Test Cases:"
+        },
+        {
+          "type": "contains",
+          "value": "Coverage:"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：运行特定测试用例",
+      "description": "验证单个测试用例执行",
+      "input": {
+        "arguments": "--test-case=TC-001"
+      },
+      "expected_behavior": {
+        "runs_specific_test": "TC-001",
+        "reports_result": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "TC-001"
+        },
+        {
+          "type": "contains_any",
+          "values": ["PASSED", "FAILED"]
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：Dry Run 模式",
+      "description": "验证预览模式不创建实际文件",
+      "input": {
+        "arguments": "--dry-run"
+      },
+      "expected_behavior": {
+        "simulates_tests": true,
+        "no_file_creation": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "DRY RUN"
+        },
+        {
+          "type": "contains",
+          "value": "Test Cases"
+        }
+      ]
+    },
+    {
+      "id": "normal-004",
+      "name": "正常场景：详细输出模式",
+      "description": "验证 verbose 模式的详细信息",
+      "input": {
+        "arguments": "--verbose"
+      },
+      "expected_behavior": {
+        "shows_detailed_output": true,
+        "includes_step_details": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Test Environment"
+        },
+        {
+          "type": "contains",
+          "value": "Running Tests"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：所有测试失败",
+      "description": "验证全部失败时的报告",
+      "input": {
+        "arguments": "",
+        "simulate_condition": "all_tests_fail"
+      },
+      "expected_behavior": {
+        "reports_all_failures": true,
+        "provides_diagnostic_info": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "FAILED"
+        },
+        {
+          "type": "contains",
+          "value": "Pass Rate: 0%"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：无效的测试用例 ID",
+      "description": "验证不存在测试用例的处理",
+      "input": {
+        "arguments": "--test-case=TC-999"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_tests": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "available"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：测试环境创建失败",
+      "description": "验证环境准备失败时的降级处理",
+      "input": {
+        "arguments": "",
+        "simulate_error": "environment_creation_failure"
+      },
+      "expected_behavior": {
+        "uses_memory_simulation": true,
+        "continues_testing": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["memory", "内存模拟", "fallback"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["test-fixtures/", "docs/ccc/"],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 4,
+    "boundary_scenarios": 1,
+    "error_scenarios": 2,
+    "total": 7
+  }
+}

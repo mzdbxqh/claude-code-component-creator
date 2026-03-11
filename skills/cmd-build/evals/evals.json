@@ -1,0 +1,201 @@
+{
+  "name": "cmd-build-evals",
+  "version": "1.0.0",
+  "description": "测试用例：从 Blueprint 生成生产就绪的交付物包",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：构建简单 Skill",
+      "description": "验证基本构建流程：Blueprint → Delivery",
+      "input": {
+        "arguments": "--artifact-id=BLP-001"
+      },
+      "expected_behavior": {
+        "loads_blueprint": true,
+        "generates_skill_md": true,
+        "generates_tests": true,
+        "creates_delivery": "docs/ccc/delivery/*-DLV-*/",
+        "generates_build_report": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Build Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Files Generated"
+        },
+        {
+          "type": "contains",
+          "value": "SUCCESS"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/ccc/delivery/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：构建多组件系统",
+      "description": "验证复杂系统构建（Subagents + Commands）",
+      "input": {
+        "arguments": "--artifact-id=BLP-COMPLEX"
+      },
+      "expected_behavior": {
+        "generates_multiple_agents": true,
+        "generates_commands": true,
+        "organizes_directory_structure": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Build Complete"
+        },
+        {
+          "type": "contains",
+          "value": "agents/"
+        },
+        {
+          "type": "contains",
+          "value": "commands/"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：重新构建（覆盖）",
+      "description": "验证重新构建时的覆盖行为",
+      "input": {
+        "arguments": "--artifact-id=BLP-001"
+      },
+      "expected_behavior": {
+        "overwrites_existing_delivery": true,
+        "preserves_timestamp": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Build Complete"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：最小化 Blueprint",
+      "description": "验证最小必填字段的 Blueprint",
+      "input": {
+        "arguments": "--artifact-id=BLP-MINIMAL"
+      },
+      "expected_behavior": {
+        "handles_minimal_blueprint": true,
+        "uses_default_templates": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Build Complete"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/ccc/delivery/"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：超大 Blueprint（复杂工作流）",
+      "description": "验证复杂 Blueprint 的构建性能",
+      "input": {
+        "arguments": "--artifact-id=BLP-LARGE"
+      },
+      "expected_behavior": {
+        "handles_complex_blueprint": true,
+        "completes_in_reasonable_time": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Build Complete"
+        },
+        {
+          "type": "execution_time",
+          "value": "< 120s"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：Blueprint 不存在",
+      "description": "验证不存在 Blueprint 的处理",
+      "input": {
+        "arguments": "--artifact-id=BLP-NONEXISTENT"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_blueprints": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "available blueprints"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：Blueprint 格式无效",
+      "description": "验证无效 Blueprint 的错误提示",
+      "input": {
+        "arguments": "--artifact-id=BLP-INVALID"
+      },
+      "expected_behavior": {
+        "detects_invalid_format": true,
+        "shows_parsing_error": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["Invalid", "无效", "parsing error"]
+        }
+      ]
+    },
+    {
+      "id": "error-003",
+      "name": "错误处理：目录创建失败",
+      "description": "验证权限错误处理",
+      "input": {
+        "arguments": "--artifact-id=BLP-001",
+        "simulate_error": "directory_permission_denied"
+      },
+      "expected_behavior": {
+        "handles_permission_error": true,
+        "reports_error_details": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["permission", "权限", "failed"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/blueprint/", "docs/ccc/delivery/"],
+    "required_files": [
+      "test-fixtures/artifacts/BLP-001.yaml",
+      "test-fixtures/artifacts/BLP-COMPLEX.yaml",
+      "test-fixtures/artifacts/BLP-MINIMAL.yaml",
+      "test-fixtures/artifacts/BLP-LARGE.yaml",
+      "test-fixtures/artifacts/BLP-INVALID.yaml"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 2,
+    "error_scenarios": 3,
+    "total": 8
+  }
+}

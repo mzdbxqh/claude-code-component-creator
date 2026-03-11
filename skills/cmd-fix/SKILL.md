@@ -215,11 +215,11 @@ AskUserQuestion(
 
 ### 步骤 5: 并行修复执行
 
-使用 `Task` 工具并行调用 SubAgent 工厂：
+使用 `Agent` 工具并行调用 SubAgent 工厂：
 
 ```yaml
 # 调用 ccc:metadata-fix-agent
-Task(
+Agent(
   subagent_type: "general-purpose",
   prompt: "修复以下文件的元数据问题：
     - command/deploy.md: 添加 argument-hint
@@ -241,13 +241,13 @@ Task(
 )
 ```
 
-**注意**: 实际执行时使用 `Task` 工具，参数格式为：
+**注意**: 实际执行时使用 `Agent` 工具，参数格式为：
 - `subagent_type`: 指定子代理类型（如 `general-purpose`）
 - `prompt`: 详细的修复指令
 
 或者使用专用 SubAgent（如已定义）:
 ```yaml
-Task(
+Agent(
   subagent_type: "metadata-fix-agent",
   arguments: {
     files: ["command/deploy.md", "skills/reviewer/SKILL.md"],

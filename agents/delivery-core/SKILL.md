@@ -6,7 +6,7 @@ tools:
   - Read
   - Write
   - Bash
-  - Task
+  - Agent
 permissionMode: prompt
 skills:
   - ccc:std-component-selection

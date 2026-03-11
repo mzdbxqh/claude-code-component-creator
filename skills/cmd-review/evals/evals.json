@@ -1,0 +1,192 @@
+{
+  "name": "cmd-review-evals",
+  "version": "1.0.0",
+  "description": "测试用例：执行全面组件质量审查，覆盖 76+ 反模式规则和 8 个评估维度",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：审查整个项目目录",
+      "description": "验证全面项目审查功能",
+      "input": {
+        "arguments": "--target=./test-fixtures/sample-plugin"
+      },
+      "expected_behavior": {
+        "scans_all_components": true,
+        "applies_all_dimensions": 8,
+        "generates_report": true,
+        "creates_file": "docs/reviews/*-comprehensive-review.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "审查报告"
+        },
+        {
+          "type": "contains",
+          "value": "综合评分"
+        },
+        {
+          "type": "contains",
+          "value": "维度评分"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/reviews/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：审查 CCC 工件",
+      "description": "验证工件审查（向后兼容）",
+      "input": {
+        "arguments": "--artifact-id=DLV-001"
+      },
+      "expected_behavior": {
+        "loads_artifact": true,
+        "generates_report": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "审查报告"
+        },
+        {
+          "type": "contains",
+          "value": "DLV-001"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：快速审查（跳过架构分析）",
+      "description": "验证 --no-arch 参数",
+      "input": {
+        "arguments": "--target=. --no-arch"
+      },
+      "expected_behavior": {
+        "skips_architecture_check": true,
+        "runs_7_dimensions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "审查报告"
+        },
+        {
+          "type": "not_contains",
+          "value": "架构分析"
+        }
+      ]
+    },
+    {
+      "id": "normal-004",
+      "name": "正常场景：仅架构分析",
+      "description": "验证 --arch-only 参数",
+      "input": {
+        "arguments": "--target=. --arch-only"
+      },
+      "expected_behavior": {
+        "runs_only_architecture": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "架构分析"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：空目录审查",
+      "description": "验证对空目录的处理",
+      "input": {
+        "arguments": "--target=./test-fixtures/empty-dir"
+      },
+      "expected_behavior": {
+        "handles_empty_directory": true,
+        "shows_message": "No components found"
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["No components", "未找到组件", "empty"]
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：大型项目（100+ 文件）",
+      "description": "验证扩展性和性能",
+      "input": {
+        "arguments": "--target=./test-fixtures/large-plugin"
+      },
+      "expected_behavior": {
+        "handles_large_codebase": true,
+        "provides_progress_feedback": true,
+        "completes_in_reasonable_time": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "审查报告"
+        },
+        {
+          "type": "execution_time",
+          "value": "< 300s"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：无效路径",
+      "description": "验证对不存在路径的处理",
+      "input": {
+        "arguments": "--target=/nonexistent/path"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "suggests_valid_path": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "invalid path"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：artifact 不存在",
+      "description": "验证对不存在工件的处理",
+      "input": {
+        "arguments": "--artifact-id=INVALID-999"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_artifacts": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "available artifacts", "可用工件"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": [
+      "test-fixtures/sample-plugin/skills/",
+      "test-fixtures/empty-dir/",
+      "test-fixtures/large-plugin/",
+      "docs/reviews/"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 4,
+    "boundary_scenarios": 2,
+    "error_scenarios": 2,
+    "total": 8
+  }
+}

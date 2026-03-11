@@ -90,7 +90,7 @@ evals/
   "name": "简单技能创建 - TODO 查找器",
   "prompt": "我想要一个技能来快速查找项目中的 TODO 注释",
   "category": "simple-skill",
-  "expectedWorkflow": ["intent-core", "blueprint-core", "delivery-core"],
+  "expectedWorkflow": ["ccc:intent-core", "ccc:blueprint-core", "ccc:delivery-core"],
   "expectedArtifacts": [
     "docs/ccc/intent/INT-*.yaml",
     "docs/ccc/blueprint/BLP-*.yaml",
@@ -191,7 +191,7 @@ cat evals/evals.json
   "name": "测试名称",
   "prompt": "测试输入描述",
   "category": "simple-skill|complex-subagent|data-transform|comprehensive-review|quick-workflow|boundary",
-  "expectedWorkflow": ["intent-core", "blueprint-core"],
+  "expectedWorkflow": ["ccc:intent-core", "ccc:blueprint-core"],
   "expectedArtifacts": ["docs/ccc/intent/INT-*.yaml"],
   "qualityThresholds": {
     "intentQuality": 80,

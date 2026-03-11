@@ -1,0 +1,243 @@
+{
+  "name": "cmd-validate-evals",
+  "version": "1.0.0",
+  "description": "测试用例：验证制品的语法、Schema 和 Token 预算",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：验证 Blueprint 制品",
+      "description": "验证完整的 Blueprint 验证流程",
+      "input": {
+        "arguments": "--artifact-id=BLP-001"
+      },
+      "expected_behavior": {
+        "validates_yaml_syntax": true,
+        "validates_schema": true,
+        "checks_token_budget": true,
+        "verifies_cross_references": true,
+        "generates_report": "docs/validations/*-validation.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Validation Report"
+        },
+        {
+          "type": "contains",
+          "value": "YAML syntax"
+        },
+        {
+          "type": "contains",
+          "value": "Schema"
+        },
+        {
+          "type": "contains",
+          "value": "Token budget"
+        },
+        {
+          "type": "contains",
+          "value": "Status:"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：验证 Intent 制品",
+      "description": "验证 Intent 制品的质量评估",
+      "input": {
+        "arguments": "--artifact-id=INT-003"
+      },
+      "expected_behavior": {
+        "validates_intent_schema": true,
+        "provides_quality_assessment": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Validation Report"
+        },
+        {
+          "type": "contains",
+          "value": "INT-003"
+        },
+        {
+          "type": "contains",
+          "value": "Quality assessment"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：验证 Delivery 制品",
+      "description": "验证 Delivery 文件完整性",
+      "input": {
+        "arguments": "--artifact-id=DLV-001"
+      },
+      "expected_behavior": {
+        "checks_file_completeness": true,
+        "validates_skill_md_structure": true,
+        "verifies_compliance_score": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Delivery structure"
+        },
+        {
+          "type": "contains",
+          "value": "Required files"
+        },
+        {
+          "type": "contains",
+          "value": "Compliance score"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：Token 预算超限",
+      "description": "验证 Token 超限时的警告",
+      "input": {
+        "arguments": "--artifact-id=BLP-LARGE"
+      },
+      "expected_behavior": {
+        "detects_token_overflow": true,
+        "provides_recommendations": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Token budget"
+        },
+        {
+          "type": "contains",
+          "value": "EXCEEDED"
+        },
+        {
+          "type": "contains",
+          "value": "Recommendation"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：外部工具不可用",
+      "description": "验证外部工具缺失时的降级处理",
+      "input": {
+        "arguments": "--artifact-id=BLP-001",
+        "simulate_condition": "yamllint_not_installed"
+      },
+      "expected_behavior": {
+        "skips_external_tool": true,
+        "continues_validation": true,
+        "notes_skipped_check": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "skipped"
+        },
+        {
+          "type": "contains",
+          "value": "Install"
+        },
+        {
+          "type": "contains",
+          "value": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：YAML 语法错误",
+      "description": "验证语法错误的详细提示",
+      "input": {
+        "arguments": "--artifact-id=BLP-SYNTAX-ERROR"
+      },
+      "expected_behavior": {
+        "detects_syntax_error": true,
+        "shows_line_number": true,
+        "provides_suggestion": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "YAML syntax error"
+        },
+        {
+          "type": "contains",
+          "value": "Line"
+        },
+        {
+          "type": "contains",
+          "value": "Suggestion"
+        },
+        {
+          "type": "contains",
+          "value": "FAILED"
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：Schema 不符合",
+      "description": "验证 Schema 违规的详细报告",
+      "input": {
+        "arguments": "--artifact-id=BLP-SCHEMA-INVALID"
+      },
+      "expected_behavior": {
+        "detects_schema_violations": true,
+        "lists_missing_fields": true,
+        "lists_invalid_values": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Schema validation failed"
+        },
+        {
+          "type": "contains",
+          "value": "Missing required fields"
+        },
+        {
+          "type": "contains",
+          "value": "Invalid field values"
+        }
+      ]
+    },
+    {
+      "id": "error-003",
+      "name": "错误处理：Artifact 不存在",
+      "description": "验证不存在制品的处理",
+      "input": {
+        "arguments": "--artifact-id=NONEXISTENT"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "lists_available_artifacts": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "available"]
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["docs/ccc/blueprint/", "docs/ccc/intent/", "docs/validations/"],
+    "required_files": [
+      "test-fixtures/artifacts/BLP-001.yaml",
+      "test-fixtures/artifacts/BLP-SYNTAX-ERROR.yaml",
+      "test-fixtures/artifacts/BLP-SCHEMA-INVALID.yaml",
+      "test-fixtures/artifacts/BLP-LARGE.yaml"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 2,
+    "error_scenarios": 3,
+    "total": 8
+  }
+}

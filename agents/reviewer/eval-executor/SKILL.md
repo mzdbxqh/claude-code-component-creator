@@ -5,7 +5,7 @@ model: sonnet
 tools:
   - Read
   - Write
-  - Task
+  - Agent
   - Glob
 permissionMode: prompt
 skills:

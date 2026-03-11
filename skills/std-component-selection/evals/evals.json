@@ -1,0 +1,54 @@
+{
+  "name": "std-component-selection-evals",
+  "version": "1.0.0",
+  "description": "测试用例：组件选型决策规则",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：提供选型指导",
+      "description": "验证选型决策树提供",
+      "input": {
+        "context": "auto_discovered"
+      },
+      "expected_behavior": {
+        "provides_decision_tree": true,
+        "explains_three_roles": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "cmd-"
+        },
+        {
+          "type": "contains",
+          "value": "std-"
+        },
+        {
+          "type": "contains",
+          "value": "lib-"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：典型组合模式查询",
+      "description": "验证组合模式建议",
+      "input": {
+        "query": "combination_patterns"
+      },
+      "expected_behavior": {
+        "provides_patterns": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "组合模式"
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "total": 2
+  }
+}

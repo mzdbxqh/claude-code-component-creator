@@ -1,0 +1,238 @@
+{
+  "name": "cmd-implement-evals",
+  "version": "1.0.0",
+  "description": "测试用例：执行迭代计划，应用增量变更并验证",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：实施完整的重构计划",
+      "description": "验证完整的多阶段实施流程",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/component-extraction.md"
+      },
+      "expected_behavior": {
+        "validates_context": true,
+        "executes_all_phases": true,
+        "runs_tests": true,
+        "generates_report": "docs/implementations/*-impl.md"
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Implementation Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Phases Executed"
+        },
+        {
+          "type": "contains",
+          "value": "Tests Passed"
+        },
+        {
+          "type": "file_exists",
+          "value": "docs/implementations/"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：分阶段实施（执行第一阶段）",
+      "description": "验证单阶段执行功能",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/database-migration.md --phase=1"
+      },
+      "expected_behavior": {
+        "executes_single_phase": 1,
+        "suggests_next_phase": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Phase 1"
+        },
+        {
+          "type": "contains",
+          "value": "Next:"
+        },
+        {
+          "type": "contains",
+          "value": "--phase=2"
+        }
+      ]
+    },
+    {
+      "id": "normal-003",
+      "name": "正常场景：预览模式（Dry Run）",
+      "description": "验证 dry-run 不实际修改文件",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/api-refactor.md --dry-run"
+      },
+      "expected_behavior": {
+        "shows_planned_changes": true,
+        "no_file_modifications": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "DRY RUN"
+        },
+        {
+          "type": "contains",
+          "value": "Planned Changes"
+        },
+        {
+          "type": "contains",
+          "value": "Run without --dry-run"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：单阶段计划",
+      "description": "验证只有一个阶段的计划",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/simple-rename.md"
+      },
+      "expected_behavior": {
+        "handles_single_phase_plan": true,
+        "completes_successfully": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Implementation Complete"
+        },
+        {
+          "type": "contains",
+          "value": "Phases Executed: 1/1"
+        }
+      ]
+    },
+    {
+      "id": "boundary-002",
+      "name": "边界情况：大型计划（10+ 阶段）",
+      "description": "验证复杂多阶段计划的性能",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/large-migration.md"
+      },
+      "expected_behavior": {
+        "handles_many_phases": true,
+        "provides_progress_feedback": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Implementation Complete"
+        },
+        {
+          "type": "execution_time",
+          "value": "< 600s"
+        }
+      ]
+    },
+    {
+      "id": "error-001",
+      "name": "错误处理：计划文件不存在",
+      "description": "验证不存在计划文件的处理",
+      "input": {
+        "arguments": "--plan=/nonexistent/plan.md"
+      },
+      "expected_behavior": {
+        "shows_error": true,
+        "displays_path": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["not found", "不存在", "Plan file"]
+        }
+      ]
+    },
+    {
+      "id": "error-002",
+      "name": "错误处理：状态不匹配",
+      "description": "验证当前状态与计划假设不一致时的处理",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/mismatched-state.md"
+      },
+      "expected_behavior": {
+        "detects_state_mismatch": true,
+        "shows_diff": true,
+        "asks_confirmation": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["State mismatch", "状态不匹配", "confirmation"]
+        }
+      ]
+    },
+    {
+      "id": "error-003",
+      "name": "错误处理：测试失败回滚",
+      "description": "验证测试失败时的回滚机制",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/with-failing-test.md"
+      },
+      "expected_behavior": {
+        "detects_test_failure": true,
+        "rolls_back_changes": true,
+        "reports_error": true
+      },
+      "assertions": [
+        {
+          "type": "contains_any",
+          "values": ["Test failure", "Rollback", "回滚"]
+        }
+      ]
+    },
+    {
+      "id": "error-004",
+      "name": "错误处理：阶段依赖未满足",
+      "description": "验证阶段依赖检查",
+      "input": {
+        "arguments": "--plan=test-fixtures/plans/dependent-phases.md --phase=3"
+      },
+      "expected_behavior": {
+        "detects_missing_dependencies": true,
+        "lists_required_phases": true,
+        "suggests_solution": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "Phase dependency"
+        },
+        {
+          "type": "contains",
+          "value": "requires"
+        },
+        {
+          "type": "contains",
+          "value": "Suggestion"
+        }
+      ]
+    }
+  ],
+  "test_fixtures": {
+    "required_directories": ["test-fixtures/plans/", "docs/implementations/"],
+    "required_files": [
+      "test-fixtures/plans/component-extraction.md",
+      "test-fixtures/plans/database-migration.md",
+      "test-fixtures/plans/api-refactor.md",
+      "test-fixtures/plans/simple-rename.md",
+      "test-fixtures/plans/large-migration.md",
+      "test-fixtures/plans/mismatched-state.md",
+      "test-fixtures/plans/with-failing-test.md",
+      "test-fixtures/plans/dependent-phases.md"
+    ],
+    "cleanup_after_test": true
+  },
+  "coverage": {
+    "normal_scenarios": 3,
+    "boundary_scenarios": 2,
+    "error_scenarios": 4,
+    "total": 9
+  }
+}

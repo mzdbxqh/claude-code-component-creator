@@ -5,7 +5,7 @@ model: haiku
 tools:
   - Read
   - Write
-  - Task
+  - Agent
   - Grep
   - Glob
 permissionMode: prompt

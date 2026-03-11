@@ -15,10 +15,10 @@ python3 scripts/analyze-plugin-structure.py --check-context
 
 ```
 SubAgent Context Analysis:
-- intent-core: fork (isolated) ✅
-- blueprint-core: fork (isolated) ✅
-- delivery-core: fork (isolated) ✅
-- review-core: fork (isolated) ✅
+- ccc:intent-core: fork (isolated) ✅
+- ccc:blueprint-core: fork (isolated) ✅
+- ccc:delivery-core: fork (isolated) ✅
+- ccc:review-core: fork (isolated) ✅
 ```
 
 ## 测试 2: 长上下文规则有效性

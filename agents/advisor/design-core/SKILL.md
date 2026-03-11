@@ -180,7 +180,7 @@ tools:
   - Read
   - Write
   - Bash
-  - Task
+  - Agent
 permissionMode: prompt
 ---
 ```
@@ -384,7 +384,7 @@ docs/designs/incomplete/stage-2-architecture.md
    - Command 应依赖隐式发现，subagent 使用初始加载
 
 3. **任务复杂度** → fork/main
-   - 多步骤 + 使用 Write/Task → fork
+   - 多步骤 + 使用 Write/Agent → fork
    - 简单、单步骤、只读 → main
 
 **快速参考表：**
@@ -393,7 +393,7 @@ docs/designs/incomplete/stage-2-architecture.md
 |------|--------|------|
 | 需要用户交互 | main | 访问主会话历史 |
 | Command 加载 3+ skill | 重新设计 | 上下文消耗过大 |
-| 多步骤 + Write/Task | fork | 隔离执行环境 |
+| 多步骤 + Write/Agent | fork | 隔离执行环境 |
 | 简单只读查询 | main | 无需隔离 |
 
 ### Model Selection Guide

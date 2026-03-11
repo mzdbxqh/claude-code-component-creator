@@ -1,0 +1,63 @@
+{
+  "name": "lib-antipatterns-evals",
+  "version": "1.0.0",
+  "description": "测试用例：反模式知识库",
+  "test_cases": [
+    {
+      "id": "normal-001",
+      "name": "正常场景：加载反模式知识",
+      "description": "验证知识库加载功能",
+      "input": {
+        "context": "loaded_by_subagent"
+      },
+      "expected_behavior": {
+        "provides_antipatterns": true,
+        "covers_8_dimensions": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "反模式"
+        }
+      ]
+    },
+    {
+      "id": "normal-002",
+      "name": "正常场景：查询特定维度反模式",
+      "description": "验证反模式分类查询",
+      "input": {
+        "query": "security"
+      },
+      "expected_behavior": {
+        "returns_security_antipatterns": true
+      },
+      "assertions": [
+        {
+          "type": "contains",
+          "value": "security"
+        }
+      ]
+    },
+    {
+      "id": "boundary-001",
+      "name": "边界情况：查询不存在的维度",
+      "description": "验证无效查询处理",
+      "input": {
+        "query": "invalid_dimension"
+      },
+      "expected_behavior": {
+        "returns_empty_or_suggestion": true
+      },
+      "assertions": [
+        {
+          "type": "execution_success": true
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "normal_scenarios": 2,
+    "boundary_scenarios": 1,
+    "total": 3
+  }
+}

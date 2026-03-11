@@ -22,7 +22,7 @@
 
 ### 前置条件
 - 所有 advisor/*-core Subagent 可用
-- design-new-core 已配置
+- ccc:design-new-core 已配置
 - 输出目录 `docs/designs/` 可写
 
 ### 测试步骤
@@ -51,27 +51,27 @@ User: /commands/ci.md
 
 #### Step 3: 验证各阶段执行
 
-**Stage 1: requirement-core**
+**Stage 1: ccc:requirement-core**
 - [ ] 成功执行
 - [ ] 生成需求规格说明书
 - [ ] 展示关键决策：需求范围确认
 
-**Stage 2: architect-core**
+**Stage 2: ccc:architect-core**
 - [ ] 成功执行
 - [ ] 推荐组件类型：Skill
 - [ ] 展示关键决策：组件类型与清单
 
-**Stage 3: design-core**
+**Stage 3: ccc:design-core**
 - [ ] 成功执行
 - [ ] 生成详细设计
 - [ ] 展示关键决策：执行流程设计
 
-**Stage 4: validator-core**
+**Stage 4: ccc:validator-core**
 - [ ] 成功执行
 - [ ] 生成验证报告
 - [ ] 合规性检查通过
 
-**Stage 5: planner-core**
+**Stage 5: ccc:planner-core**
 - [ ] 成功执行
 - [ ] 生成实施计划
 - [ ] 展示关键决策：里程碑与交付物
@@ -120,8 +120,8 @@ User: /commands/ci.md
 
 ### 前置条件
 - 存在测试组件: `commands/deploy.md`
-- design-iterate-core 已配置
-- dependency-analyzer 可用
+- ccc:design-iterate-core 已配置
+- ccc:dependency-analyzer 可用
 
 ### 测试步骤
 
@@ -233,9 +233,9 @@ User: 保持现有 Docker 功能不变
 
 ### 前置条件
 - 存在测试组件集
-- dependency-analyzer 可用
-- review-core 已配置
-- review-aggregator 已配置
+- ccc:dependency-analyzer 可用
+- ccc:review-core 已配置
+- ccc:review-aggregator 已配置
 
 ### 测试步骤
 
@@ -295,7 +295,7 @@ test-deploy (Command)
 
 #### Step 4: 验证并行审阅
 
-- [ ] 为每个组件调用 review-core
+- [ ] 为每个组件调用 ccc:review-core
 - [ ] 按组件类型加载对应反模式
   - Command 反模式 → test-deploy
   - Subagent 反模式 → test-builder, test-validator

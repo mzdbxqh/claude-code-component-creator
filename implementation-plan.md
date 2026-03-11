@@ -276,7 +276,7 @@ echo '{"reportType":"review-aggregated"}' > /tmp/test-review.json
 **步骤 3: 记录测试结果**
 ```markdown
 # 测试结果
-- review-report-renderer: ✅ 通过
+- ccc:review-report-renderer: ✅ 通过
 - Token 消耗: 419 → 120 (降低 71%)
 ```
 
@@ -474,7 +474,7 @@ git commit -m "[test] 验证 blueprint-core 拆分结果"
 
 **已完成拆分**:
 - report-renderer → 4 个专用 renderers
-- blueprint-core → 3 个专用 blueprint cores
+- ccc:ccc:blueprint-core → 3 个专用 blueprint cores
 ```
 
 **步骤 2: 提交**
@@ -543,7 +543,7 @@ git commit -m "[docs] 创建拆分决策检查清单"
 - 5 维度诊断框架
 - 5 种系统化拆分策略
 - report-renderer 拆分为 4 个专用 renderers
-- blueprint-core 拆分为 3 个专用 cores
+- ccc:blueprint-core 拆分为 3 个专用 cores
 
 ### Changed
 - SCALE-001 修复建议升级为 5 步诊断流程
@@ -642,8 +642,8 @@ done
 **步骤 3: 记录结果**
 ```markdown
 # 质量验证报告
-- review-report-renderer: 92/100 ✅
-- architecture-report-renderer: 90/100 ✅
+- ccc:review-report-renderer: 92/100 ✅
+- ccc:architecture-report-renderer: 90/100 ✅
 - Token 降低: 65% ✅
 ```
 
