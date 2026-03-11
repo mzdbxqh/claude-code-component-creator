@@ -3,7 +3,7 @@ name: ccc:cmd-build
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
-description: "从 Blueprint 生成生产就绪的交付物包。适用场景：代码生成、文档生成、测试框架创建。输出包含 SKILL.md、实现代码、测试文件、README 和 metadata.yaml 的完整 Delivery 制品。支持多组件系统（Skill、Subagent、Command、Hook）和构建验证。关键动作：生成、构建、打包、交付。主工作流的终点。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "从Blueprint生成生产就绪交付物。触发：构建/生成/打包。输出完整Delivery制品。主工作流终点。"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 

@@ -3,7 +3,7 @@ name: ccc:cmd-test-sandbox
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
-description: "运行自动化沙箱测试验证 CCC 插件功能。适用场景：集成测试、工作流验证、质量门禁。输出包含测试用例结果、通过率统计、质量评分和失败诊断的测试报告。支持 5 个测试类别（Simple Skill、Complex SubAgent、Data Transform、Review、Quick Workflow）和 Dry Run 模式。关键动作：测试、验证、评估、诊断。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "沙箱测试验证CCC插件功能。触发：测试/验证/质量检查。输出测试报告和评分。"
 argument-hint: "[--test-case=<id>] [--dry-run] [--verbose]"
 ---
 

@@ -3,7 +3,7 @@ name: ccc:cmd-review
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "执行全面的组件质量审查，覆盖 76+ 条反模式规则和 8 个评估维度（意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性）。适用场景：设计评审、代码审查、架构验证、迁移计划审阅。输出包含详细的问题清单、维度评分和改进建议的审查报告。关键动作：审查、评估、检测、建议。多流程的检查点。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

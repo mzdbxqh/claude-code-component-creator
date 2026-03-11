@@ -1,6 +1,6 @@
 ---
 name: ccc:std-workflow-attribution
-description: "工作流归属标注规范 | 适用于设计和审查Claude Code插件时检查工作流定位。Use when designing or reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
+description: "工作流归属标注规范。检查组件的工作流定位标注。用于设计和审查插件流程定位。"
 context: main
 allowed-tools: []
 model: sonnet

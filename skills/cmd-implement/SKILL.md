@@ -3,7 +3,7 @@ name: ccc:cmd-implement
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
-description: "执行迭代计划，应用增量变更并验证。适用场景：代码重构执行、分阶段迁移、增量功能实现。输出包含修改文件列表、测试结果和实施报告。支持整体实施、分阶段执行、Dry Run 预览模式。包含回滚支持和依赖关系验证。关键动作：执行、应用、验证、回滚。代码迭代流程的第2步。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "执行迭代计划，应用增量变更。触发：执行/应用/实施。支持整体/分阶段/预览模式。代码迭代第2步。"
 argument-hint: "--plan=<iteration-plan-path> [--phase=<phase-number>] [--dry-run]"
 ---
 

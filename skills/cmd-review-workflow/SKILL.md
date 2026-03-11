@@ -3,7 +3,7 @@ name: ccc:cmd-review-workflow
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "按工作流顺序审查多个组件，生成健康度报告。适用场景：工作流完整性检查、阶段交接验证、依赖关系分析。输出包含工作流完整性评分、阶段交接清晰度、依赖健康度和并行化机会的健康度报告。支持浅层/完整两种审查深度。关键动作：审查、分析、评估、优化。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "按工作流顺序审查组件。触发：工作流审查/完整性检查。输出健康度报告和并行化建议。"
 argument-hint: "[--artifact-id=<id>] [--depth=shallow|full]"
 ---
 

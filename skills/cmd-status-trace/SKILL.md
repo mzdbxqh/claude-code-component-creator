@@ -3,7 +3,7 @@ name: ccc:cmd-status-trace
 model: sonnet
 context: fork
 allowed-tools: [Read, Glob, Grep]
-description: "显示需求覆盖的可追溯性矩阵。适用场景：需求追踪、覆盖率分析、缺口识别。输出包含 Intent→Blueprint→Delivery 映射表、覆盖率百分比、缺失项分析和改进行动项的追溯报告。支持按类型过滤、特定需求追溯、JSON 导出。关键动作：追溯、映射、分析、识别。独立工具。 [支持平台: macOS, Linux, Windows]"
+description: "显示需求覆盖的追溯矩阵。触发：追踪/覆盖率/缺口。输出映射表和覆盖率百分比。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: ccc:std-evidence-chain
-description: "证据链规范。确保从工作流需求到 Skill 实现的完整可追溯性。Use when designing or reviewing components. [支持平台: macOS, Linux, Windows]"
+description: "证据链规范。确保工作流需求到实现的完整追溯性。用于设计和审阅组件。"
 model: sonnet
 allowed-tools: []
 context: main

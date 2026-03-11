@@ -3,7 +3,7 @@ name: ccc:cmd-iterate
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "迭代 Blueprint 制品，生成改进版本。适用场景：设计优化、工具选择简化、工作流重构、错误处理增强。输出包含变更列表、改进依据和新版本 Blueprint 的迭代报告。自动检测改进机会（工具冗余、步骤重复、缺失边界处理）并生成递增 ID 的新制品。关键动作：优化、简化、增强、迭代。制品迭代流程的核心。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "迭代优化Blueprint，生成改进版本。触发：优化/简化/重构。自动检测改进机会，递增ID。"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

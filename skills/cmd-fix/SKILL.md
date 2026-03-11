@@ -3,7 +3,7 @@ name: ccc:cmd-fix
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "交互式修复审查发现的问题，支持策略选择和并行执行。适用场景：审查后修复、问题整改、质量改进。输出包含修复摘要、变更详情和修复报告。支持全自动、交互式、手动三种修复模式，通过 SubAgent 工厂批量处理多文件修改。关键动作：修复、整改、改进、验证。多流程的修复点。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "交互式修复审查问题。触发：修复/整改/改进。支持自动/交互/手动三种模式。"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 ---
 

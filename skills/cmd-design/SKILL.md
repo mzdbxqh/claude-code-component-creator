@@ -3,7 +3,7 @@ name: ccc:cmd-design
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "生成 Blueprint 制品，使用 5 阶段设计流程（需求分析→架构选型→详细设计→验证→规划）。适用场景：从 Intent 创建详细设计方案。输出包含工作流步骤、工具选择、证据链和设计文档的 Blueprint YAML 制品。关键动作：设计、选型、定义、验证。主工作流的第2步。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "5阶段设计流程生成Blueprint。触发：设计/创建方案。从Intent创建详细设计。主工作流第2步。"
 argument-hint: "--name=<name> [--intent-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

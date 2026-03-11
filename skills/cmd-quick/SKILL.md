@@ -3,7 +3,7 @@ name: ccc:cmd-quick
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "一键执行从需求到交付的完整流程（init→design→build）。适用场景：快速原型、简单项目、学习演示。输出包含 Intent、Blueprint、Delivery 三个制品和渐进式过程反馈。支持自动质量检查、部分失败恢复、多语言输出。关键动作：自动化、集成、加速、简化。快捷工具（集成多个流程）。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "一键执行完整流程(init→design→build)。触发：快速/原型/一键。输出完整制品包。"
 argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"
 ---
 

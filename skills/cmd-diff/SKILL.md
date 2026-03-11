@@ -3,7 +3,7 @@ name: ccc:cmd-diff
 model: sonnet
 context: fork
 allowed-tools: [Read, Glob, Grep]
-description: "对比两个制品版本的差异。适用场景：版本对比、变更审查、迭代分析。输出包含新增元素、修改元素、删除元素和变更影响的差异报告。支持 Intent、Blueprint、Delivery 同类型对比，提供 JSON/Markdown 导出格式。关键动作：对比、分析、导出、展示。独立工具。 [支持平台: macOS, Linux, Windows]"
+description: "对比两个制品版本的差异。触发：对比/差异/变更。输出增删改的差异报告。"
 argument-hint: "[--from=id] [--to=id] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

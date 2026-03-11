@@ -1,6 +1,6 @@
 ---
 name: ccc:std-naming-rules
-description: "命名规则检查标准。适用于审阅 Claude Code 插件时的命名规范检查。包含 Skill 命名规则（cmd-/std-/lib-前缀）、Subagent 命名规则、触发路径规则。Use when reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
+description: "命名规则检查标准。定义Skill/Subagent命名规范。用于审阅插件命名合规性。"
 model: sonnet
 allowed-tools: []
 context: main

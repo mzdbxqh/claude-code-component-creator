@@ -3,7 +3,7 @@ name: ccc:cmd-status
 model: sonnet
 context: fork
 allowed-tools: [Read, Glob, Grep]
-description: "显示项目工作流状态和制品进度。适用场景：项目进度查看、制品追踪、工作流健康检查。输出包含制品列表（Intent、Blueprint、Delivery）、完成度百分比、阶段指示器和推荐下一步操作的状态报告。支持多项目管理、孤立制品检测、历史归档查询。关键动作：查询、显示、追踪、检查。独立工具。 [支持平台: macOS, Linux, Windows]"
+description: "显示工作流状态和制品进度。触发：状态/进度/查询。输出制品列表和推荐下一步。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

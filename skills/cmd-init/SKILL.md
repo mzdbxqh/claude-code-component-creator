@@ -1,6 +1,6 @@
 ---
 name: ccc:cmd-init
-description: "创建 Intent 制品，使用 4 问框架分析用户需求。适用场景：项目启动、需求澄清、组件类型推断。输出包含需求分析、约束条件、设计决策和质量评分的 Intent YAML 制品。关键动作：分析、澄清、推断、生成。主工作流的起点。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "4问框架分析需求，创建Intent。触发：启动/初始化/需求。输出Intent制品。主工作流起点。"
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]

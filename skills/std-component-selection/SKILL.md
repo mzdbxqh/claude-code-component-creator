@@ -1,6 +1,6 @@
 ---
 name: ccc:std-component-selection
-description: "组件选型决策规则。适用于设计和审阅 Claude Code 插件时的组件类型选择。提供 Skill 三种角色（cmd-/std-/lib-）决策树和典型组合模式。Use when designing or reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
+description: "组件选型决策规则。定义Skill三角色(cmd-/std-/lib-)决策树。用于设计和审阅插件。"
 model: sonnet
 allowed-tools: []
 context: main

@@ -3,7 +3,7 @@ name: ccc:cmd-validate
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "验证制品的语法、Schema 和 Token 预算。适用场景：Blueprint 验证、Intent 检查、Delivery 完整性确认。输出包含 YAML 语法检查、Schema 符合性验证、Token 使用率分析和交叉引用检查的验证报告。支持外部工具集成（yamllint、schema validator）。关键动作：验证、检查、分析、确认。主工作流的第5步。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "验证制品语法、Schema和Token预算。触发：验证/检查/确认。输出验证报告。主工作流第5步。"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

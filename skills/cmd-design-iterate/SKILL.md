@@ -3,7 +3,7 @@ name: ccc:cmd-design-iterate
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "分析现有组件与目标状态的差异，生成增量改进方案。适用场景：组件重构、功能升级、架构优化。输出包含差异分析、影响评估、增量方案和变更证据链的迭代设计文档。支持基础组件、Subagent、复杂工作流的分阶段迭代规划。关键动作：分析、对比、规划、设计。代码迭代流程的起点。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "分析组件差异，生成增量改进方案。触发：重构/升级/优化。输出差异分析和迭代设计文档。"
 argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"
 ---
 

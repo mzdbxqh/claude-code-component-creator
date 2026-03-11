@@ -3,7 +3,7 @@ name: ccc:cmd-review-migration-plan
 model: sonnet
 context: fork
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "审查 Agent→Skill 迁移计划质量。适用场景：迁移方案评估、架构改造审查、风险评估。输出包含 5 个批次检测结果（文档结构、依赖分析、风险评估、最佳实践、工作量规划）共 21 个检测点的审查报告。支持并行检测、JSON/Markdown 双格式输出。关键动作：审查、检测、评估、建议。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "审查Agent→Skill迁移计划质量。触发：迁移审查/方案评估。输出21个检测点的审查报告。"
 argument-hint: "<file-path> [--format=json|markdown] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

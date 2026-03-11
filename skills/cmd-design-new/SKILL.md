@@ -3,7 +3,7 @@ name: ccc:cmd-design-new
 model: sonnet
 context: fork
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "从零设计组件，使用 5 阶段交互式流程（需求分析→架构设计→详细设计→验证→规划）。适用场景：新组件创建、复杂系统设计、工作流规划。输出包含完整证据链（能力需求表、Skill 映射表、验证清单）和 Blueprint 制品的设计文档。支持 Command、Subagent、端到端工作流设计。关键动作：设计、规划、引导、创建。主工作流的变体（等同 design）。 [支持平台: macOS, Linux, Windows (via WSL)]"
+description: "5阶段交互式设计新组件。触发：新建/创建组件，复杂设计。输出Blueprint。等同design的交互版。"
 argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
 ---
 

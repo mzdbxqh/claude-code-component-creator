@@ -3,7 +3,7 @@ name: ccc:cmd-trace
 model: sonnet
 context: fork
 allowed-tools: [Read, Glob, Grep]
-description: "生成完整的需求到实现的追溯链路。适用场景：全面追溯、合规审计、质量验证。输出包含需求映射表（Requirement→Blueprint→File:Line）、覆盖率统计、缺口分析和改进建议的追溯报告。支持大型项目分模块展示、多语言输出。关键动作：追溯、映射、验证、分析。独立工具。 [支持平台: macOS, Linux, Windows]"
+description: "生成需求到实现的追溯链路。触发：追溯/审计/验证。输出映射表和覆盖率统计。"
 argument-hint: "<project-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 

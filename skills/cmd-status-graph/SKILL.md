@@ -3,7 +3,7 @@ name: ccc:cmd-status-graph
 model: sonnet
 context: fork
 allowed-tools: [Read, Glob, Grep]
-description: "生成制品依赖关系的可视化 ASCII 图。适用场景：依赖分析、架构理解、项目可视化。输出包含 Intent→Blueprint→Delivery 关系树、状态指示器、简化视图和 JSON 导出选项的依赖图。支持深度限制、状态过滤、复杂项目分层显示。关键动作：可视化、分析、导出、展示。独立工具。 [支持平台: macOS, Linux, Windows]"
+description: "生成制品依赖的ASCII图。触发：可视化/依赖图/关系图。输出关系树和状态指示器。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
