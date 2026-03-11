@@ -13,16 +13,32 @@ description:
     MCP 服务器配置必须包含必需的字段：
     - name: 服务器名称
     - version: 版本号
-    - transport: 传输方式 (stdio/sse)
+    - transport: 传输方式 (stdio/http/sse)
+
+    **传输方式推荐**（基于官方最新标准）：
+    - **http**: 推荐，支持远程服务器，易于部署和扩展
+    - **stdio**: 适用于本地进程通信
+    - **sse**: 已弃用，不推荐使用
   en: |
     MCP server configuration must include required fields:
     - name: Server name
     - version: Version number
-    - transport: Transport method (stdio/sse)
+    - transport: Transport method (stdio/http/sse)
+
+    **Transport recommendations** (based on latest official standards):
+    - **http**: Recommended, supports remote servers, easy deployment and scaling
+    - **stdio**: Suitable for local process communication
+    - **sse**: Deprecated, not recommended
 
 rationale:
-  zh: "完整的配置是 MCP 服务器正常运行的基础。"
-  en: "Complete configuration is the foundation for MCP server operation."
+  zh: "基于官方MCP规范 (mcp.md)，完整的配置是MCP服务器正常运行的基础。推荐使用http传输以获得更好的可扩展性"
+  en: "Per official MCP specification (mcp.md), complete configuration is the foundation for MCP server operation. HTTP transport is recommended for better scalability"
+
+official_reference:
+  document: "markdown_docs/mcp.md"
+  section: "MCP Transport"
+  checkpoints: ["OFF-DEP-001", "OFF-DEP-002"]
+  quote: "MCP支持http/stdio/sse传输。推荐使用http以获得更好的可扩展性。sse传输已弃用。"
 
 handbook_reference: "Chapter 8.2"
 
@@ -41,24 +57,52 @@ fix:
 examples:
   bad:
     zh: |
+      # 错误1: 缺少必需字段
       server:
         name: my-server
         # 缺少 version 和 transport
+
+      # 错误2: 使用已弃用的sse
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: sse  # ⚠️ 已弃用
     en: |
+      # Error 1: Missing required fields
       server:
         name: my-server
         # missing version and transport
+
+      # Error 2: Using deprecated sse
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: sse  # ⚠️ Deprecated
   good:
     zh: |
+      # 推荐：使用http传输
       server:
         name: my-server
         version: 1.0.0
-        transport: stdio
+        transport: http  # ✅ 推荐
+
+      # 或使用stdio（本地进程）
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: stdio  # ✅ 适用于本地
     en: |
+      # Recommended: Use http transport
       server:
         name: my-server
         version: 1.0.0
-        transport: stdio
+        transport: http  # ✅ Recommended
+
+      # Or use stdio (local process)
+      server:
+        name: my-server
+        version: 1.0.0
+        transport: stdio  # ✅ For local use
 
 tags: ["config", "server", "mcp"]
 related_rules: []

@@ -1,0 +1,216 @@
+id: MCP-009
+name: http-transport-best-practices
+severity: warning
+component_type: mcp
+category: architecture
+
+title:
+  zh: "HTTP传输最佳实践"
+  en: "HTTP transport best practices"
+
+description:
+  zh: |
+    使用HTTP传输时，应遵循以下最佳实践：
+
+    **1. 端口配置**：
+    - 使用标准端口（80/443）或自定义端口
+    - 避免使用特权端口（<1024）需要root权限
+    - 配置端口冲突检测
+
+    **2. HTTPS/TLS支持**：
+    - 生产环境必须使用HTTPS（非localhost）
+    - 配置TLS证书验证
+    - 支持现代TLS版本（TLS 1.2+）
+
+    **3. 超时和重试**：
+    - 配置合理的连接超时（建议5-30秒）
+    - 配置读写超时（建议30-60秒）
+    - 实现指数退避重试策略
+
+    **4. 错误处理**：
+    - 返回标准HTTP状态码
+    - 提供详细的错误信息
+    - 实现优雅降级
+
+    **5. 性能优化**：
+    - 启用HTTP/2或HTTP/3
+    - 使用连接池
+    - 实现请求限流
+
+    **6. 监控和日志**：
+    - 记录请求/响应日志
+    - 实现健康检查端点
+    - 监控性能指标
+  en: |
+    When using HTTP transport, follow these best practices:
+
+    **1. Port Configuration**:
+    - Use standard ports (80/443) or custom ports
+    - Avoid privileged ports (<1024) requiring root
+    - Configure port conflict detection
+
+    **2. HTTPS/TLS Support**:
+    - Production must use HTTPS (non-localhost)
+    - Configure TLS certificate validation
+    - Support modern TLS versions (TLS 1.2+)
+
+    **3. Timeouts and Retries**:
+    - Configure reasonable connection timeout (5-30s recommended)
+    - Configure read/write timeout (30-60s recommended)
+    - Implement exponential backoff retry strategy
+
+    **4. Error Handling**:
+    - Return standard HTTP status codes
+    - Provide detailed error messages
+    - Implement graceful degradation
+
+    **5. Performance Optimization**:
+    - Enable HTTP/2 or HTTP/3
+    - Use connection pooling
+    - Implement rate limiting
+
+    **6. Monitoring and Logging**:
+    - Log requests/responses
+    - Implement health check endpoint
+    - Monitor performance metrics
+
+rationale:
+  zh: "基于官方MCP规范 (mcp.md)，HTTP传输是推荐的方式，遵循最佳实践可提高可靠性和安全性"
+  en: "Per official MCP specification (mcp.md), HTTP transport is recommended; following best practices improves reliability and security"
+
+official_reference:
+  document: "markdown_docs/mcp.md"
+  section: "MCP HTTP Transport"
+  checkpoints: ["OFF-DEP-001", "OFF-DEP-002"]
+  quote: "HTTP传输是推荐的MCP传输方式。应配置HTTPS、超时、重试和错误处理。"
+
+detection:
+  method: config-check
+  checks:
+    - name: missing-timeout
+      description: "检测是否配置超时"
+      severity: warning
+    - name: no-https-in-prod
+      description: "生产环境未使用HTTPS"
+      severity: error
+    - name: no-health-check
+      description: "缺少健康检查端点"
+      severity: info
+    - name: no-retry-strategy
+      description: "缺少重试策略"
+      severity: warning
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      完善HTTP传输配置：
+      1. 添加timeout配置
+      2. 生产环境启用HTTPS
+      3. 实现健康检查端点
+      4. 配置重试策略
+      5. 添加错误处理
+    en: |
+      Improve HTTP transport configuration:
+      1. Add timeout configuration
+      2. Enable HTTPS in production
+      3. Implement health check endpoint
+      4. Configure retry strategy
+      5. Add error handling
+
+examples:
+  bad:
+    zh: |
+      # ❌ 不推荐：缺少关键配置
+      server:
+        name: my-mcp-server
+        version: 1.0.0
+        transport: http
+        port: 8080
+        # 缺少timeout配置
+        # 缺少HTTPS配置
+        # 缺少健康检查
+    en: |
+      # ❌ Not recommended: Missing critical configuration
+      server:
+        name: my-mcp-server
+        version: 1.0.0
+        transport: http
+        port: 8080
+        # Missing timeout configuration
+        # Missing HTTPS configuration
+        # Missing health check
+  good:
+    zh: |
+      # ✅ 推荐：完整的HTTP传输配置
+      server:
+        name: my-mcp-server
+        version: 1.0.0
+        transport: http
+        port: 8080
+
+        # HTTPS配置（生产环境）
+        tls:
+          enabled: true
+          cert_file: "/path/to/cert.pem"
+          key_file: "/path/to/key.pem"
+
+        # 超时配置
+        timeouts:
+          connection: 10s
+          read: 30s
+          write: 30s
+
+        # 重试策略
+        retry:
+          max_attempts: 3
+          backoff: exponential
+          initial_delay: 1s
+
+        # 健康检查
+        health_check:
+          endpoint: "/health"
+          interval: 30s
+
+        # 日志配置
+        logging:
+          level: info
+          request_logging: true
+    en: |
+      # ✅ Recommended: Complete HTTP transport configuration
+      server:
+        name: my-mcp-server
+        version: 1.0.0
+        transport: http
+        port: 8080
+
+        # HTTPS configuration (production)
+        tls:
+          enabled: true
+          cert_file: "/path/to/cert.pem"
+          key_file: "/path/to/key.pem"
+
+        # Timeout configuration
+        timeouts:
+          connection: 10s
+          read: 30s
+          write: 30s
+
+        # Retry strategy
+        retry:
+          max_attempts: 3
+          backoff: exponential
+          initial_delay: 1s
+
+        # Health check
+        health_check:
+          endpoint: "/health"
+          interval: 30s
+
+        # Logging configuration
+        logging:
+          level: info
+          request_logging: true
+
+tags: ["architecture", "http", "transport", "mcp", "best-practices"]
+related_rules: ["MCP-001", "MCP-004", "MCP-008"]
