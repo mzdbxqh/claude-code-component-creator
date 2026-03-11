@@ -1,58 +1,263 @@
 id: SKILL-004
 name: token-excessive
 severity: warning
-component_type: all
-category: performance
+component_type: skill
+category: scalability
 
 title:
-  zh: "Token 使用量过高"
-  en: "Excessive token usage"
+  zh: "Skill 内容超出预算"
+  en: "Skill content exceeds budget"
 
 description:
   zh: |
-    Skill 文档过长会导致每次调用消耗过多 Token，增加成本并可能超出上下文窗口。
-    建议 Skill 文档控制在 2000 Token 以内，长文档应分章节组织。
+    Skill 描述字符数会动态缩放，受限于上下文窗口预算。
+
+    **官方预算规则**：
+    - 默认预算：上下文窗口的 **2%**
+    - 回退值：**16,000 字符**（当窗口大小未知时）
+    - 环境变量：`SLASH_COMMAND_TOOL_CHAR_BUDGET` 可覆盖默认限制
+
+    **优化建议**：
+    - 使用支持文件减少主 Skill 大小（OFF-SCA-005）
+    - 精简描述，仅保留核心信息
+    - 将详细文档放在 support/ 目录
+    - 使用 SKILL.md 引用外部文件
+
+    **注意**：预算是字符数而非 token 数，但两者正相关。
   en: |
-    Overly long skill documentation consumes excessive tokens per invocation, increasing costs and potentially exceeding context window.
-    Recommended skill documentation should be under 2000 tokens, long documents should be organized in sections.
+    Skill description character count is dynamically scaled, limited by context window budget.
+
+    **Official Budget Rules**:
+    - Default budget: **2%** of context window
+    - Fallback: **16,000 characters** (when window size unknown)
+    - Environment variable: `SLASH_COMMAND_TOOL_CHAR_BUDGET` can override default limit
+
+    **Optimization Recommendations**:
+    - Use support files to reduce main Skill size (OFF-SCA-005)
+    - Streamline description, keep only core information
+    - Place detailed docs in support/ directory
+    - Reference external files from SKILL.md
+
+    **Note**: Budget is character count, not token count, but they correlate.
 
 rationale:
-  zh: "Token 消耗直接影响运行成本和上下文窗口使用，精简的文档更高效。"
-  en: "Token consumption directly impacts operating costs and context window usage; concise documentation is more efficient."
+  zh: "基于官方标准 (skills.md OFF-SCA-001~005)，Skill 描述受上下文窗口预算限制，过长会被截断或影响性能"
+  en: "Per official standards (skills.md OFF-SCA-001~005), Skill descriptions are budget-limited; excessive length causes truncation or performance impact"
 
-handbook_reference: "Chapter 4.5"
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Token Budget and Scalability"
+  checkpoints: ["OFF-SCA-001", "OFF-SCA-002", "OFF-SCA-003", "OFF-SCA-004", "OFF-SCA-005"]
+  quote: "skill 描述字符预算动态缩放，默认为上下文窗口 2%，回退为 16,000 字符。使用支持文件减少主 skill 大小。"
 
 detection:
-  method: custom
-  custom_function: "check_token_count"
-  file_pattern: '*.md'
-  threshold: 2000
+  method: character-count
+  thresholds:
+    recommended: 16000  # 官方回退值
+    warning: 20000      # 超出建议值
+    error: 30000        # 严重超标
+  note: "实际预算为上下文窗口2%，此处使用保守估计"
+  check_support_files: true  # 检查是否可拆分到support/
 
 fix:
   automatic: false
   suggestion:
     zh: |
-      1. 删除冗余描述
-      2. 将详细内容移至外部文档，使用链接引用
-      3. 使用更简洁的表达方式
-      4. 提供快速参考模式（100-200 tokens）
+      **策略1：拆分到支持文件**
+      ```
+      skill-name/
+        SKILL.md          (核心内容，<5000字符)
+        support/
+          detailed-guide.md
+          examples.md
+          api-reference.md
+      ```
+
+      在 SKILL.md 中引用：
+      ```markdown
+      详细说明请参考 support/detailed-guide.md
+      ```
+
+      **策略2：使用环境变量调整预算**
+      ```bash
+      export SLASH_COMMAND_TOOL_CHAR_BUDGET=20000
+      ```
+
+      **策略3：精简核心内容**
+      - 移除冗余描述
+      - 简化示例代码
+      - 提供快速参考部分
+      - 使用要点列表代替长段落
+
+      **策略4：检查当前字符数**
+      ```bash
+      wc -m SKILL.md  # 查看字符数
+      ```
     en: |
-      1. Remove redundant descriptions
-      2. Move detailed content to external docs, use links
-      3. Use more concise expressions
-      4. Provide quick reference mode (100-200 tokens)
+      **Strategy 1: Split to support files**
+      ```
+      skill-name/
+        SKILL.md          (core content, <5000 chars)
+        support/
+          detailed-guide.md
+          examples.md
+          api-reference.md
+      ```
+
+      Reference in SKILL.md:
+      ```markdown
+      See support/detailed-guide.md for details
+      ```
+
+      **Strategy 2: Adjust budget via environment variable**
+      ```bash
+      export SLASH_COMMAND_TOOL_CHAR_BUDGET=20000
+      ```
+
+      **Strategy 3: Streamline core content**
+      - Remove redundant descriptions
+      - Simplify code examples
+      - Provide quick reference section
+      - Use bullet points instead of long paragraphs
+
+      **Strategy 4: Check current character count**
+      ```bash
+      wc -m SKILL.md  # Check character count
+      ```
 
 examples:
   bad:
     zh: |
-      （文档超过 2000 Token，包含大量重复描述和过长的示例）
+      ❌ 错误：单文件包含所有内容（>30,000字符）
+      ```markdown
+      # My Skill
+
+      （5,000字符的详细说明）
+      （10,000字符的API文档）
+      （8,000字符的示例代码）
+      （7,000字符的故障排查指南）
+
+      总计：30,000+ 字符，远超16,000回退值
+      ```
+      ❌ 超出预算，可能被截断
+      ❌ 每次调用浪费大量 token
     en: |
-      (Document exceeds 2000 tokens with repetitive descriptions and overly long examples)
+      ❌ Error: Single file with all content (>30,000 chars)
+      ```markdown
+      # My Skill
+
+      (5,000 chars detailed explanation)
+      (10,000 chars API docs)
+      (8,000 chars example code)
+      (7,000 chars troubleshooting)
+
+      Total: 30,000+ chars, far exceeds 16,000 fallback
+      ```
+      ❌ Exceeds budget, may be truncated
+      ❌ Wastes tokens on every invocation
   good:
     zh: |
-      （精炼的文档，核心信息明确，示例简洁，提供快速参考）
-    en: |
-      (Concise document with clear core information, brief examples, and quick reference)
+      ✅ 正确1：拆分文件结构
+      ```
+      data-processor/
+        SKILL.md (4,500字符 - 核心工作流)
+        support/
+          api-reference.md (API详细文档)
+          examples.md (完整示例)
+          troubleshooting.md (故障排查)
+      ```
 
-tags: ["performance", "token", "cost", "scalability", "skill"]
-related_rules: ["SKILL-014"]
+      SKILL.md 内容：
+      ```markdown
+      # Data Processor
+
+      数据处理工具，支持 CSV、JSON 和 XML 格式。
+
+      ## 快速开始
+      1. 读取数据文件
+      2. 应用转换规则
+      3. 输出处理结果
+
+      详细文档：
+      - API 参考：support/api-reference.md
+      - 完整示例：support/examples.md
+      - 故障排查：support/troubleshooting.md
+      ```
+      ✅ 核心文件简洁
+      ✅ 详细内容外部引用
+
+      ✅ 正确2：精简描述
+      ```markdown
+      # Code Analyzer
+
+      静态代码分析工具。
+
+      ## 用法
+      /analyze <file_path>
+
+      ## 支持语言
+      - JavaScript/TypeScript
+      - Python
+      - Rust
+
+      ## 输出
+      JSON格式的问题列表
+
+      详见：support/detailed-guide.md
+      ```
+      ✅ 约2,000字符
+      ✅ 提供核心信息+引用
+    en: |
+      ✅ Good 1: Split file structure
+      ```
+      data-processor/
+        SKILL.md (4,500 chars - core workflow)
+        support/
+          api-reference.md (detailed API docs)
+          examples.md (complete examples)
+          troubleshooting.md (troubleshooting)
+      ```
+
+      SKILL.md content:
+      ```markdown
+      # Data Processor
+
+      Data processing tool supporting CSV, JSON, and XML.
+
+      ## Quick Start
+      1. Read data file
+      2. Apply transformation rules
+      3. Output results
+
+      Detailed docs:
+      - API reference: support/api-reference.md
+      - Examples: support/examples.md
+      - Troubleshooting: support/troubleshooting.md
+      ```
+      ✅ Core file concise
+      ✅ Details externally referenced
+
+      ✅ Good 2: Streamlined description
+      ```markdown
+      # Code Analyzer
+
+      Static code analysis tool.
+
+      ## Usage
+      /analyze <file_path>
+
+      ## Supported Languages
+      - JavaScript/TypeScript
+      - Python
+      - Rust
+
+      ## Output
+      JSON list of issues
+
+      See: support/detailed-guide.md
+      ```
+      ✅ ~2,000 characters
+      ✅ Provides core info + references
+
+tags: ["scalability", "performance", "budget", "skill", "token"]
+related_rules: ["SKILL-014", "ARCH-005"]
