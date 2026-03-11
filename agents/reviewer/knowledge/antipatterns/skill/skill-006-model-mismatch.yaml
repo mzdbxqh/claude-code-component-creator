@@ -1,53 +1,190 @@
 id: SKILL-006
 name: model-mismatch
-severity: warning
+severity: info
 component_type: skill
-category: metadata
+category: configuration
 
 title:
-  zh: "模型选择不当"
-  en: "Model selection mismatch"
+  zh: "模型选择建议"
+  en: "Model selection recommendation"
 
 description:
   zh: |
-    Skill 选择的模型与其复杂度不匹配。
-    简单任务使用 sonnet/opus 造成浪费，复杂任务使用 haiku 导致质量下降。
+    Skill 的 model 字段支持 4 个选项，应根据任务复杂度选择。
+
+    **官方支持的模型选项**：
+    - **inherit**: 使用主对话模型（默认，推荐）
+    - **haiku**: 快速、简单的任务
+    - **sonnet**: 中等复杂度任务
+    - **opus**: 复杂推理和代码生成
+
+    **inherit 的优势**：
+    - 自动适配用户当前使用的模型
+    - 用户切换模型时 Skill 自动跟随
+    - 大多数场景推荐使用
+
+    **注意**: 这是建议而非强制要求，model选择取决于具体需求。
   en: |
-    Selected model doesn't match skill complexity.
-    Simple tasks using sonnet/opus is wasteful; complex tasks using haiku degrades quality.
+    Skill's model field supports 4 options; choose based on task complexity.
+
+    **Official Model Options**:
+    - **inherit**: Use main conversation model (default, recommended)
+    - **haiku**: Fast, simple tasks
+    - **sonnet**: Medium complexity tasks
+    - **opus**: Complex reasoning and code generation
+
+    **Advantages of inherit**:
+    - Automatically adapts to user's current model
+    - Skill follows when user switches models
+    - Recommended for most scenarios
+
+    **Note**: This is a recommendation, not a requirement; model choice depends on specific needs.
 
 rationale:
-  zh: "合理选择模型可以平衡成本和质量。"
-  en: "Proper model selection balances cost and quality."
+  zh: "基于官方标准 (skills.md OFF-LLM-011~013, sub-agents.md OFF-LLM-001~003)，model字段支持inherit选项，这是有效且推荐的默认值"
+  en: "Per official standards (skills.md OFF-LLM-011~013, sub-agents.md OFF-LLM-001~003), model field supports inherit option, which is valid and recommended default"
 
-handbook_reference: "Chapter 4.2"
+official_reference:
+  document: "markdown_docs/skills.md, markdown_docs/sub-agents.md"
+  section: "Model Configuration"
+  checkpoints: ["OFF-LLM-001", "OFF-LLM-002", "OFF-LLM-003", "OFF-LLM-011"]
+  quote: "model 字段支持 sonnet/opus/haiku/inherit。inherit 使用主对话模型，是默认值。"
 
 detection:
-  method: custom
-  custom_function: "check_model_complexity_match"
-  file_pattern: '*.md'
+  method: recommendation-check
+  check_for:
+    - explicit_model_without_reason: "明确指定模型但无说明原因"
+    - potentially_overspecified: "可能过度指定模型"
+  valid_models: ["inherit", "haiku", "sonnet", "opus"]
 
 fix:
   automatic: false
   suggestion:
     zh: |
-      - haiku: 简单、快速的任务
-      - sonnet: 中等复杂度任务（默认）
-      - opus: 复杂推理、代码生成任务
+      **推荐策略**：
+
+      1. **默认使用 inherit**（大多数情况）：
+         ```yaml
+         ---
+         model: inherit  # 或省略（默认值）
+         ---
+         ```
+
+      2. **特定需求场景**：
+         - 简单快速任务 → haiku
+         - 复杂推理任务 → opus
+         - 成本优化场景 → haiku
+         - 质量优先场景 → sonnet/opus
+
+      3. **在文档中说明model选择原因**：
+         ```markdown
+         ## Model Selection
+         使用 opus 因为此任务需要复杂代码生成和多步推理
+         ```
     en: |
-      - haiku: Simple, fast tasks
-      - sonnet: Medium complexity tasks (default)
-      - opus: Complex reasoning, code generation
+      **Recommended Strategy**:
+
+      1. **Default to inherit** (most cases):
+         ```yaml
+         ---
+         model: inherit  # or omit (default)
+         ---
+         ```
+
+      2. **Specific need scenarios**:
+         - Simple fast tasks → haiku
+         - Complex reasoning → opus
+         - Cost optimization → haiku
+         - Quality priority → sonnet/opus
+
+      3. **Document model choice reasoning**:
+         ```markdown
+         ## Model Selection
+         Using opus because task requires complex code generation and multi-step reasoning
+         ```
 
 examples:
   bad:
     zh: |
-      （一个简单的文件读取 Skill 使用了 model: opus）
+      ❌ 不推荐：简单任务过度指定模型
+      ```yaml
+      ---
+      name: list-files
+      model: opus  # ❌ 列文件用opus浪费
+      ---
+      ```
+
+      ❌ 不推荐：无inherit选项认知
+      ```markdown
+      # 文档说明
+      必须使用 sonnet 或 opus，不支持其他选项
+      ❌ 忽略了 inherit 选项
+      ```
     en: |
-      (A simple file reading skill using model: opus)
+      ❌ Not recommended: Over-specifying model for simple task
+      ```yaml
+      ---
+      name: list-files
+      model: opus  # ❌ Wasteful for file listing
+      ---
+      ```
+
+      ❌ Not recommended: Unaware of inherit option
+      ```markdown
+      # Documentation
+      Must use sonnet or opus, no other options supported
+      ❌ Ignores inherit option
+      ```
   good:
     zh: |
-      （复杂代码生成任务使用 model: opus）
+      ✅ 推荐1：使用 inherit（默认）
+      ```yaml
+      ---
+      name: data-processor
+      # model字段省略，使用inherit默认值
+      ---
+      ✅ 跟随用户模型选择
+      ✅ 自动适配
+      ```
+
+      ✅ 推荐2：明确使用 inherit
+      ```yaml
+      ---
+      name: code-analyzer
+      model: inherit
+      ---
+      ## Model Note
+      使用 inherit 以适应用户的模型偏好
+      ✅ 明确且有说明
+      ```
+
+      ✅ 推荐3：特定模型有原因
+      ```yaml
+      ---
+      name: complex-refactoring
+      model: opus
+      ---
+      ## Model Selection
+      使用 opus 因为此任务需要：
+      - 复杂代码结构分析
+      - 多步骤推理
+      - 高质量代码生成
+      ✅ 有明确原因
+      ```
+
+      ✅ 推荐4：成本优化场景
+      ```yaml
+      ---
+      name: quick-formatter
+      model: haiku
+      ---
+      ## Model Note
+      格式化任务简单快速，haiku足够且高效
+      ✅ 合理的成本优化
+      ```
+
+tags: ["configuration", "model", "performance", "skill"]
+related_rules: ["SUB-002", "ARCH-010"]
       （简单查询任务使用 model: haiku）
     en: |
       (Complex code generation using model: opus)
