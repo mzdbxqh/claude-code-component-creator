@@ -1,3 +1,10 @@
 {
-  "hooks": {}
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "script": "hooks/scripts/security-check.sh",
+      "timeout": 5000,
+      "description": "安全检查：验证工具使用是否符合最小权限原则"
+    }
+  ]
 }
