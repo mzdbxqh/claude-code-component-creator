@@ -2,8 +2,8 @@
 name: ccc:cmd-review
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "质量审查 | 场景: 多流程的检查点"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+description: "执行全面的组件质量审查，覆盖 76+ 条反模式规则和 8 个评估维度（意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性）。适用场景：设计评审、代码审查、架构验证、迁移计划审阅。输出包含详细的问题清单、维度评分和改进建议的审查报告。关键动作：审查、评估、检测、建议。多流程的检查点。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -15,6 +15,18 @@ argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migra
 - **制品迭代**: `iterate` → **review** → `fix` → `build`
 
 Performs comprehensive component quality review using 76+ antipatterns across 8 dimensions.
+
+## 模型要求
+
+- **推荐**: Claude Opus 4.5+ (最高质量,全面审查)
+- **可用**: Claude Sonnet 4.5+ (高效能,标准审查)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep, Task)
+- 需要支持多轮对话和复杂分析
+- 需要处理 76+ 条反模式规则
+- 建议上下文窗口 >= 200K tokens (处理大型代码库审查)
 
 ## Usage
 
@@ -63,6 +75,83 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | `--arch-only` | 仅运行架构检查，跳过其他维度 |
 
 **注意**: 8 个评估维度始终默认开启，无法单独禁用某个维度。如需快速审查，使用 `--no-arch`。
+
+---
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和并行执行：
+
+### 核心 Agents
+- **ccc:reviewer-core**: 审查协调器，负责整体审查流程编排
+- **ccc:review-core**: 智能审阅核心，基于组件类型加载反模式库执行深度质量检查
+- **ccc:architecture-analyzer**: 架构分析器，执行 L1+L2 架构分析（工作流/组件/职责/协作/命令）
+- **ccc:dependency-analyzer**: 依赖分析器，检查链路验证（调用图/循环依赖/隐式调用）
+- **ccc:linkage-validator**: 链路验证器，验证 skills 字段引用完整性
+- **ccc:review-aggregator**: 审查结果聚合器，汇总多维度审查结果
+- **ccc:report-renderer**: 报告渲染器，生成最终的审查报告
+
+### 辅助 Agents
+- **ccc:workflow-discoverer**: 工作流发现器，识别工作流模式和阶段
+- **ccc:eval-executor**: Eval 执行器，运行测试用例和基准测试
+- **ccc:eval-grader**: Eval 评分器，对测试结果打分
+- **ccc:eval-parser**: Eval 解析器，解析 evals.json 测试定义
+
+### 调度策略
+- **串行执行**: cmd-review → ccc:reviewer-core → ccc:review-aggregator → ccc:report-renderer
+- **并行执行**:
+  - 8 维度检查并行：意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性
+  - 架构分析并行：architecture-analyzer + dependency-analyzer + linkage-validator
+  - Eval 执行并行（可选）：eval-executor + eval-grader + eval-parser
+- **错误处理**: 单个维度失败不影响其他维度，继续执行并在报告中标记
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:reviewer-core | 审查目标路径/工件 ID + 参数 | 审查任务分解 |
+| ccc:review-core | 组件文件 + 反模式规则 | 单个组件审查结果（JSON）|
+| ccc:architecture-analyzer | 所有组件 | 架构分析报告 |
+| ccc:dependency-analyzer | 所有组件 | 依赖关系图和问题 |
+| ccc:linkage-validator | 所有组件 | 链路验证结果 |
+| ccc:review-aggregator | 所有审查结果 | 聚合评分和问题清单 |
+| ccc:report-renderer | 聚合结果 | Markdown 审查报告 |
+| ccc:eval-executor | 测试定义 | 测试执行结果 |
+
+### 调用示例
+```
+用户: /ccc:review --target=/path/to/project
+  ↓
+cmd-review 解析参数和扫描目标
+  ↓
+调用 ccc:reviewer-core (编排审查流程)
+  ↓
+并行执行多维度检查:
+  - ccc:review-core (8 维度规则检查) × N 个组件
+  - ccc:architecture-analyzer (L1+L2 分析)
+  - ccc:dependency-analyzer (链路验证)
+  - ccc:linkage-validator (引用检查)
+  - eval-executor (可选，测试执行)
+  ↓
+调用 review-aggregator (聚合结果)
+  ↓
+调用 report-renderer (生成报告)
+  ↓
+cmd-review 输出摘要和报告路径
+```
+
+### Eval 机制（可选）
+当使用 `--with-eval` 参数时，审查流程会额外执行 Eval 机制：
+```
+cmd-review --with-eval
+  ↓
+eval-parser 解析 evals/evals.json
+  ↓
+eval-executor 执行测试用例 (with-skill vs baseline)
+  ↓
+eval-grader 评分和对比
+  ↓
+结果合并到审查报告的可测试性维度
+```
 
 ---
 

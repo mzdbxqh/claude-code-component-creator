@@ -1,6 +1,9 @@
 ---
 name: ccc:cmd-design-new
-description: "从零设计 | 场景: 主工作流的变体（等同design）"
+model: sonnet
+context: fork
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+description: "从零设计组件，使用 5 阶段交互式流程（需求分析→架构设计→详细设计→验证→规划）。适用场景：新组件创建、复杂系统设计、工作流规划。输出包含完整证据链（能力需求表、Skill 映射表、验证清单）和 Blueprint 制品的设计文档。支持 Command、Subagent、端到端工作流设计。关键动作：设计、规划、引导、创建。主工作流的变体（等同 design）。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -9,6 +12,51 @@ argument-hint: "[component-name] [--lang=zh-cn|en-us|ja-jp]"
 **完整流程**: **design-new** → `review` → `fix` → `validate` → `build`
 
 Design new component from scratch - 5-stage workflow (requirements→architecture→design→validation→planning) to create complete component design.
+
+## 模型要求
+
+- **推荐**: Claude Opus 4.5+ (最高质量,复杂架构设计)
+- **可用**: Claude Sonnet 4.5+ (高效能,标准设计)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和复杂推理
+- 需要高级架构决策能力
+- 建议上下文窗口 >= 200K tokens (处理完整设计流程和模式库)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和执行：
+
+### 核心 Agents
+- **ccc:design-new-core**: 新设计核心，负责引导交互式设计流程和生成完整证据链
+
+### 调度策略
+- **串行执行**: cmd-design-new → ccc:design-new-core → 5 阶段设计流程
+- **并行执行**: 无（设计阶段有依赖关系）
+- **错误处理**: 任何阶段失败时允许用户返回上一阶段重新设计
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:design-new-core | 用户交互输入 + lang 参数 | 设计文档 + Blueprint 制品 |
+
+### 调用示例
+```
+用户: /ccc:design-new
+  ↓
+cmd-design-new 启动交互式流程
+  ↓
+调用 ccc:design-new-core (5 阶段设计):
+  Phase 1: 需求分析 (交互式提问)
+  Phase 2: 架构设计 (组件选型)
+  Phase 3: 详细设计 (工作流定义)
+  Phase 4: 验证 (证据链生成)
+  Phase 5: 规划 (实施步骤)
+  ↓
+cmd-design-new 生成设计文档和 Blueprint 制品
+```
 
 ## 用法 (Usage)
 

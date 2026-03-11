@@ -1,11 +1,23 @@
 ---
 name: ccc:std-naming-rules
-description: "命名规则检查标准。适用于审阅 Claude Code 插件时的命名规范检查。包含 Skill 命名规则（cmd-/std-/lib-前缀）、Subagent 命名规则、触发路径规则。Use when reviewing Claude Code plugins."
+description: "命名规则检查标准。适用于审阅 Claude Code 插件时的命名规范检查。包含 Skill 命名规则（cmd-/std-/lib-前缀）、Subagent 命名规则、触发路径规则。Use when reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
 model: sonnet
+allowed-tools: []
 context: main
 ---
 
 # 命名规则检查标准
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速加载,知识库类 Skill)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 作为知识库 Skill,无需 Tool Use
+- 通过 skills 字段加载到 Subagent 中
+- 建议上下文窗口 >= 50K tokens
 
 ## Skill 命名规则
 

@@ -1,11 +1,23 @@
 ---
 name: ccc:std-evidence-chain
-description: "证据链规范。确保从工作流需求到 Skill 实现的完整可追溯性。Use when designing or reviewing components."
+description: "证据链规范。确保从工作流需求到 Skill 实现的完整可追溯性。Use when designing or reviewing components. [支持平台: macOS, Linux, Windows]"
 model: sonnet
+allowed-tools: []
 context: main
 ---
 
 # 证据链规范
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速加载,知识库类 Skill)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 作为知识库 Skill,无需 Tool Use
+- 通过 skills 字段加载到 Subagent 中
+- 建议上下文窗口 >= 50K tokens
 
 ## 核心原则
 

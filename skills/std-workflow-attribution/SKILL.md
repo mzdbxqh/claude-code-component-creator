@@ -1,11 +1,23 @@
 ---
 name: ccc:std-workflow-attribution
-description: "工作流归属标注规范 | 适用于设计和审查Claude Code插件时检查工作流定位。Use when designing or reviewing Claude Code plugins."
+description: "工作流归属标注规范 | 适用于设计和审查Claude Code插件时检查工作流定位。Use when designing or reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
 context: main
+allowed-tools: []
 model: sonnet
 ---
 
 # 工作流归属标注规范
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速加载,知识库类 Skill)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 作为知识库 Skill,无需 Tool Use
+- 通过 skills 字段加载到 Subagent 中
+- 建议上下文窗口 >= 50K tokens
 
 ## 目的
 

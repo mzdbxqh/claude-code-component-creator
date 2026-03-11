@@ -2,14 +2,52 @@
 name: ccc:cmd-status-trace
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "追溯矩阵 | 场景: 独立工具"
+allowed-tools: [Read, Glob, Grep]
+description: "显示需求覆盖的可追溯性矩阵。适用场景：需求追踪、覆盖率分析、缺口识别。输出包含 Intent→Blueprint→Delivery 映射表、覆盖率百分比、缺失项分析和改进行动项的追溯报告。支持按类型过滤、特定需求追溯、JSON 导出。关键动作：追溯、映射、分析、识别。独立工具。 [支持平台: macOS, Linux, Windows]"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status-trace
 
 Displays traceability matrix showing requirement coverage from intent through blueprint to delivery with gap analysis and action items.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速推理,适用于简单追溯)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Glob, Grep)
+- 需要支持多轮对话
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+本 skill 主要使用文件扫描和映射分析，不需要专门的 SubAgent。直接使用 Read, Glob, Grep 工具完成。
+
+### 调度策略
+- **串行执行**: cmd-status-trace → 扫描制品 → 构建追溯矩阵 → 分析覆盖率
+- **并行执行**: 无（追溯分析为简单操作）
+- **错误处理**: 制品缺失时标记为缺口；引用断裂时记录未覆盖项
+
+### 调用示例
+```
+用户: /ccc:status-trace
+  ↓
+cmd-status-trace 扫描所有制品并构建追溯关系
+  ↓
+生成追溯矩阵:
+  需求 1 → Blueprint 元素 A → Delivery 文件 X
+  需求 2 → Blueprint 元素 B → (未实现)
+  ↓
+计算覆盖率: 85% (17/20)
+  ↓
+输出追溯报告
+```
 
 ## Usage
 

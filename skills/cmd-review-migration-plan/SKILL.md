@@ -1,12 +1,67 @@
 ---
 name: ccc:cmd-review-migration-plan
-description: "改造方案审阅 | 场景: 独立工具"
+model: sonnet
+context: fork
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+description: "审查 Agent→Skill 迁移计划质量。适用场景：迁移方案评估、架构改造审查、风险评估。输出包含 5 个批次检测结果（文档结构、依赖分析、风险评估、最佳实践、工作量规划）共 21 个检测点的审查报告。支持并行检测、JSON/Markdown 双格式输出。关键动作：审查、检测、评估、建议。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "<file-path> [--format=json|markdown] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:review-migration-plan
 
 Reviews Agent→Skill migration plan quality - checks completeness, risk assessment, and best practice compliance.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,深度分析)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep, Task)
+- 需要支持多轮对话和并行检测
+- 需要处理 21 个检测点的完整分析
+- 建议上下文窗口 >= 200K tokens (处理完整迁移计划)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和并行执行：
+
+### 核心 Agents
+- **ccc:migration-review-aggregator**: 迁移审查聚合器，协调 5 个批次的并行检测
+- **ccc:migration-reviewer-core**: 迁移审查核心，执行单个批次的检测任务
+- **ccc:migration-report-renderer**: 迁移报告渲染器，生成 JSON/Markdown 格式报告
+
+### 调度策略
+- **串行执行**: cmd-review-migration-plan → ccc:migration-review-aggregator → migration-report-renderer
+- **并行执行**: 5 个批次的检测并行执行（文档结构、依赖分析、风险评估、最佳实践、工作量规划）
+- **错误处理**: 单个批次失败不影响其他批次，继续执行并在报告中标记
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:migration-review-aggregator | 迁移计划文档路径 | 所有批次检测结果 |
+| ccc:migration-reviewer-core | 单个批次检测任务 | 批次检测结果（JSON）|
+| ccc:migration-report-renderer | 聚合检测结果 + format 参数 | JSON/Markdown 报告 |
+
+### 调用示例
+```
+用户: /ccc:review-migration-plan agent-to-skill-detailed-plan.md
+  ↓
+cmd-review-migration-plan 读取迁移计划文档
+  ↓
+调用 migration-review-aggregator (协调并行检测):
+  并行执行:
+    - Batch 1: 文档结构检测 (5 个检测点)
+    - Batch 2: 依赖分析检测 (4 个检测点)
+    - Batch 3: 风险评估检测 (4 个检测点)
+    - Batch 4: 最佳实践检测 (4 个检测点)
+    - Batch 5: 工作量规划检测 (4 个检测点)
+  ↓
+调用 migration-report-renderer (生成报告)
+  ↓
+cmd-review-migration-plan 输出 JSON 报告
+```
 
 ## 用法
 
@@ -42,8 +97,8 @@ Reviews Agent→Skill migration plan quality - checks completeness, risk assessm
 
 ## 工作流程
 
-1. **启动聚合器**：调用 `migration-review-aggregator` Subagent
-2. **并行检测**：聚合器并行启动 5 个 `migration-reviewer-core` 实例
+1. **启动聚合器**：调用 `ccc:migration-review-aggregator` Subagent
+2. **并行检测**：聚合器并行启动 5 个 `ccc:migration-reviewer-core` 实例
 3. **收集结果**：等待所有批次完成
 4. **生成报告**：整合结果并输出
 
@@ -155,7 +210,7 @@ ls -la docs/reviews/
 ```
 用户调用 /review-migration-plan
     ↓
-调用 migration-review-aggregator
+调用 ccc:migration-review-aggregator
     ↓
 并行启动 5 个 migration-reviewer-core
     ↓
@@ -174,8 +229,8 @@ ls -la docs/reviews/
 
 ## 相关组件
 
-- **migration-review-aggregator**: 结果聚合器 (`reviewer/migration-review-aggregator/SKILL.md`)
-- **migration-reviewer-core**: 检测核心 (`reviewer/migration-reviewer-core/SKILL.md`)
+- **ccc:migration-review-aggregator**: 结果聚合器 (`reviewer/migration-review-aggregator/SKILL.md`)
+- **ccc:migration-reviewer-core**: 检测核心 (`reviewer/migration-reviewer-core/SKILL.md`)
 - **检测模式定义**: (`reviewer/knowledge/migration-patterns/batches/`)
 
 ## 使用示例 (Examples)

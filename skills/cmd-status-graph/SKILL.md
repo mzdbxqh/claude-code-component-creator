@@ -2,14 +2,51 @@
 name: ccc:cmd-status-graph
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "依赖关系图 | 场景: 独立工具"
+allowed-tools: [Read, Glob, Grep]
+description: "生成制品依赖关系的可视化 ASCII 图。适用场景：依赖分析、架构理解、项目可视化。输出包含 Intent→Blueprint→Delivery 关系树、状态指示器、简化视图和 JSON 导出选项的依赖图。支持深度限制、状态过滤、复杂项目分层显示。关键动作：可视化、分析、导出、展示。独立工具。 [支持平台: macOS, Linux, Windows]"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status-graph
 
 Generates visual ASCII dependency graph of all artifacts in project showing relationships between intents, blueprints, and deliveries with status indicators.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速推理,适用于简单可视化)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Glob, Grep)
+- 需要支持多轮对话
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+本 skill 主要使用文件扫描和图形渲染，不需要专门的 SubAgent。直接使用 Read, Glob, Grep 工具完成。
+
+### 调度策略
+- **串行执行**: cmd-status-graph → 扫描制品 → 构建依赖图 → 渲染 ASCII 图
+- **并行执行**: 无（图形生成为简单操作）
+- **错误处理**: 制品不存在时返回空图；依赖关系断裂时标记为孤立节点
+
+### 调用示例
+```
+用户: /ccc:status-graph
+  ↓
+cmd-status-graph 扫描所有制品并构建依赖关系
+  ↓
+生成 ASCII 依赖图:
+  Intent-001
+    └─ Blueprint-002
+       └─ Delivery-003 (已完成)
+  ↓
+输出可视化图形
+```
 
 ## Usage
 

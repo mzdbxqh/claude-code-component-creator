@@ -2,8 +2,8 @@
 name: ccc:cmd-validate
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "验证制品 | 场景: 主工作流的第5步"
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+description: "验证制品的语法、Schema 和 Token 预算。适用场景：Blueprint 验证、Intent 检查、Delivery 完整性确认。输出包含 YAML 语法检查、Schema 符合性验证、Token 使用率分析和交叉引用检查的验证报告。支持外部工具集成（yamllint、schema validator）。关键动作：验证、检查、分析、确认。主工作流的第5步。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -12,6 +12,82 @@ argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 **完整流程**: `init` → `design` → `review` → `fix` → **validate** → `build`
 
 Validates artifacts using external tools including YAML lint, schema validation, and token count analysis.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速验证,适用于简单检查)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Write, Edit, Glob, Grep)
+- 需要支持 Bash 调用外部验证工具 (yamllint, schema validator)
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和串行执行：
+
+### 核心 Agents
+- **ccc:validator-core**: 验证核心，协调所有验证任务和生成验证报告
+
+### 调度策略
+- **串行执行**: cmd-validate → ccc:validator-core → 执行所有验证步骤
+- **并行执行**: 无（验证步骤有依赖关系）
+- **错误处理**:
+  - YAML 语法错误时终止流程
+  - Schema 验证失败时继续其他检查，最后汇总报告
+  - Token 超限时仅警告，不终止流程
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:validator-core | 制品文件路径 + artifact-id | 验证报告（包含所有检查结果）|
+
+### 调用示例
+```
+用户: /ccc:validate --artifact-id=BLP-001
+  ↓
+cmd-validate 定位制品文件
+  ↓
+调用 ccc:validator-core (执行所有验证):
+  Step 1: 加载制品文件
+  Step 2: YAML 语法验证 (yamllint)
+  Step 3: Schema 符合性验证
+  Step 4: Token 预算分析
+  Step 5: 交叉引用检查
+  Step 6: 生成验证报告
+  ↓
+cmd-validate 输出验证摘要
+```
+
+### 验证流程细节
+```
+validator-core 内部工作流:
+├─ Phase 1: 文件加载
+│   ├─ 定位制品文件 (docs/ccc/{intent|blueprint|delivery}/)
+│   ├─ 解析 YAML 内容
+│   └─ 确定制品类型
+├─ Phase 2: 语法验证
+│   ├─ 调用 yamllint (如可用)
+│   ├─ 检查缩进和格式
+│   └─ 定位错误位置
+├─ Phase 3: Schema 验证
+│   ├─ 加载对应的 Schema 定义
+│   ├─ 验证必填字段
+│   ├─ 检查字段类型
+│   └─ 验证字段关系
+├─ Phase 4: Token 分析
+│   ├─ 统计 Token 数量
+│   ├─ 分析 Token 分布
+│   ├─ 对比预算限制
+│   └─ 生成优化建议
+└─ Phase 5: 引用检查
+    ├─ 验证 intent_id 引用
+    ├─ 检查 blueprint_id 链接
+    ├─ 验证工具引用
+    └─ 检查 skills 字段引用
+```
 
 ## Usage
 
@@ -25,6 +101,76 @@ Validates artifacts using external tools including YAML lint, schema validation,
 | Parameter | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `--lang` | `zh-cn`, `en-us`, `ja-jp` | `zh-cn` | 输出语言 (Output language) |
+
+## Workflow
+
+### 输入要求
+- **必需参数**: `--artifact-id=<id>` 待验证的制品 ID（支持 BLP、INT、DLV）
+- **可选参数**: `--lang=zh-cn|en-us|ja-jp` 输出语言（默认 zh-cn）
+- **前置条件**:
+  - 目标制品文件必须存在于对应目录
+  - 验证工具可选（如 yamllint），缺失时跳过对应检查
+
+### 执行步骤
+
+**Step 1: 加载制品文件**
+- 根据 artifact-id 定位制品文件路径
+- 读取制品内容（YAML 格式）
+- 解析制品类型（Intent、Blueprint、Delivery）
+- **错误处理**: 制品不存在时列出可用制品供选择；artifact-id 格式无效时提示正确格式
+
+**Step 2: YAML 语法验证**
+- 使用 yamllint（如可用）检查语法
+- 检测缩进错误、非法字符、格式问题
+- 定位具体错误行号和列号
+- **错误处理**: yamllint 不可用时跳过此检查并记录警告；语法错误时显示错误位置和修复建议
+
+**Step 3: Schema 符合性验证**
+- 加载对应制品类型的 Schema 定义
+- 验证必填字段完整性
+- 检查字段类型和值合法性
+- 验证字段关系和依赖规则
+- **错误处理**: Schema 文件缺失时使用内置规则验证；验证失败时列出所有不符合项
+
+**Step 4: Token 预算分析**
+- 统计制品总 Token 数量
+- 分析各部分 Token 分布（metadata、workflow、tools 等）
+- 对比预算限制（如 Blueprint 限制 4000 tokens）
+- 计算使用率和剩余空间
+- **错误处理**: Token 超限时提供优化建议（简化步骤、拆分组件）
+
+**Step 5: 交叉引用检查**
+- 验证 intent_id 引用的制品存在性
+- 检查 blueprint_id 链接完整性
+- 验证工具引用的有效性
+- **错误处理**: 引用缺失时标记为警告而非错误；允许部分引用无效
+
+**Step 6: 生成验证报告**
+- 汇总所有验证结果
+- 计算综合通过状态
+- 生成详细报告文件
+- 输出控制台摘要
+- **错误处理**: 报告写入失败时输出到控制台；目录不存在时自动创建
+
+### 预期输出
+- **主要制品**: `docs/validations/YYYY-MM-DD-<artifact-id>-validation.md`
+- **验证报告结构**:
+  - 概览（制品 ID、验证日期、整体状态）
+  - YAML 验证结果（语法检查通过/失败）
+  - Schema 符合性（字段完整性、类型正确性）
+  - Token 预算分析（使用率、分布图）
+  - 交叉引用检查（引用完整性）
+  - 质量评估（可选，针对 Intent/Blueprint）
+  - 改进建议（问题修复指导）
+- **控制台输出**: 简化的验证摘要，显示通过/失败状态和关键指标
+
+### 错误处理
+- **制品不存在** → 列出可用制品并提示使用 `/ccc:status` 查看所有制品
+- **YAML 语法错误** → 显示错误行号、列号和具体问题，提供修复建议
+- **Schema 验证失败** → 列出所有不符合项，标注优先级（P0 错误、P1 警告）
+- **Token 超限** → 提供详细 Token 分布，建议使用 `/ccc:iterate` 优化
+- **外部工具不可用** → 跳过该检查，标记为"部分验证"，建议安装缺失工具
+- **通用错误** → 显示已完成的检查结果，标记未完成项，保存部分报告
 
 ## Output Specification
 

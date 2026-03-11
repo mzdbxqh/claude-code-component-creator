@@ -2,14 +2,54 @@
 name: ccc:cmd-trace
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "完整追溯 | 场景: 独立工具"
+allowed-tools: [Read, Glob, Grep]
+description: "生成完整的需求到实现的追溯链路。适用场景：全面追溯、合规审计、质量验证。输出包含需求映射表（Requirement→Blueprint→File:Line）、覆盖率统计、缺口分析和改进建议的追溯报告。支持大型项目分模块展示、多语言输出。关键动作：追溯、映射、验证、分析。独立工具。 [支持平台: macOS, Linux, Windows]"
 argument-hint: "<project-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:trace
 
 Generates comprehensive traceability matrix linking intent requirements to blueprint elements and delivery implementations with coverage analysis.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速推理,适用于简单追溯)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Glob, Grep)
+- 需要支持多轮对话
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+本 skill 主要使用文件扫描和追溯分析，不需要专门的 SubAgent。直接使用 Read, Glob, Grep 工具完成。
+
+### 调度策略
+- **串行执行**: cmd-trace → 扫描项目制品 → 构建完整追溯链 → 分析覆盖率
+- **并行执行**: 无（追溯链生成为简单操作）
+- **错误处理**: 项目不存在时提示用户；追溯链断裂时在报告中标记缺口
+
+### 调用示例
+```
+用户: /ccc:trace my-project
+  ↓
+cmd-trace 扫描项目所有制品:
+  - Intent 制品
+  - Blueprint 制品
+  - Delivery 制品
+  ↓
+构建完整追溯链:
+  需求 → Blueprint 元素 → 实现文件:行号
+  ↓
+分析覆盖率并识别缺口
+  ↓
+生成详细追溯报告
+```
 
 ## Global Parameter
 

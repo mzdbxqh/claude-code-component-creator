@@ -2,8 +2,8 @@
 name: ccc:cmd-quick
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "快速完整流程 | 场景: 快捷工具（集成多个流程）"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+description: "一键执行从需求到交付的完整流程（init→design→build）。适用场景：快速原型、简单项目、学习演示。输出包含 Intent、Blueprint、Delivery 三个制品和渐进式过程反馈。支持自动质量检查、部分失败恢复、多语言输出。关键动作：自动化、集成、加速、简化。快捷工具（集成多个流程）。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -12,6 +12,55 @@ argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"
 **等价流程**: **quick** ≈ `init` → `design` → `build`（自动化执行）
 
 Executes complete workflow from intent to delivery in a single command with auto-approval options.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,完整流程)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep, Task)
+- 需要支持多轮对话和自动化流程
+- 需要执行 init → design → build 完整流程
+- 建议上下文窗口 >= 200K tokens (处理完整端到端流程)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行端到端任务执行：
+
+### 核心 Agents
+本 skill 是集成型命令，内部串行调用其他 cmd skills 完成工作流，使用的 SubAgents 包括：
+- **ccc:intent-core**: 通过 cmd-init 调用，创建 Intent 制品
+- **advisor-core, requirement-core, architect-core, blueprint-core**: 通过 cmd-design 调用，生成 Blueprint 制品
+- **blueprint-core, delivery-core, checkpoint-core**: 通过 cmd-build 调用，生成 Delivery 制品
+
+### 调度策略
+- **串行执行**: cmd-quick → cmd-init → cmd-design → cmd-build
+- **并行执行**: 无（端到端流程需按顺序执行）
+- **错误处理**: 任何阶段失败时保存已完成的制品并提供继续执行的命令
+
+### Agent 输入输出
+| Stage | 输入 | 输出 |
+|-------|------|------|
+| cmd-init | 需求描述 | Intent 制品 |
+| cmd-design | Intent 制品 | Blueprint 制品 |
+| cmd-build | Blueprint 制品 | Delivery 制品 |
+
+### 调用示例
+```
+用户: /ccc:quick "我要做一个自动部署工具"
+  ↓
+cmd-quick 启动端到端流程
+  ↓
+Step 1: 调用 cmd-init (创建 Intent)
+  ↓ 自动批准 Intent
+Step 2: 调用 cmd-design (生成 Blueprint)
+  ↓ 自动批准 Blueprint
+Step 3: 调用 cmd-build (生成 Delivery)
+  ↓
+cmd-quick 输出完整制品路径和摘要
+```
 
 ## Usage
 

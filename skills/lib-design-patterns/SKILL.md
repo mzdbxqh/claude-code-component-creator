@@ -1,11 +1,23 @@
 ---
 name: ccc:lib-design-patterns
-description: "设计模式知识库。包含 CCC 5 阶段设计流程的模式库（需求分析、架构选型、详细设计、验证、规划）。由 Subagent 通过 skills: 字段加载。"
+description: "设计模式知识库。包含 CCC 5 阶段设计流程的模式库（需求分析、架构选型、详细设计、验证、规划）。由 Subagent 通过 skills: 字段加载。 [支持平台: macOS, Linux, Windows]"
 model: sonnet
+allowed-tools: []
 context: main
 ---
 
 # 设计模式知识库
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速加载,知识库类 Skill)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 作为知识库 Skill,无需 Tool Use
+- 通过 skills 字段加载到 Subagent 中
+- 建议上下文窗口 >= 50K tokens
 
 ## Purpose
 

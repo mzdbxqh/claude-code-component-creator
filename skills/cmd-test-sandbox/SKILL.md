@@ -2,14 +2,61 @@
 name: ccc:cmd-test-sandbox
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "沙箱测试 | 场景: 独立工具"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
+description: "运行自动化沙箱测试验证 CCC 插件功能。适用场景：集成测试、工作流验证、质量门禁。输出包含测试用例结果、通过率统计、质量评分和失败诊断的测试报告。支持 5 个测试类别（Simple Skill、Complex SubAgent、Data Transform、Review、Quick Workflow）和 Dry Run 模式。关键动作：测试、验证、评估、诊断。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--test-case=<id>] [--dry-run] [--verbose]"
 ---
 
 # /ccc:test-sandbox
 
 Runs automated sandbox tests to verify CCC plugin functionality including intent→blueprint→delivery workflow and review features.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,完整测试)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和测试执行
+- 需要处理完整工作流测试
+- 建议上下文窗口 >= 200K tokens (处理多个测试用例)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+- **ccc:test-sandbox-core**: 沙箱测试核心，负责测试环境准备、用例执行和结果收集
+
+### 调度策略
+- **串行执行**: cmd-test-sandbox → ccc:test-sandbox-core → 逐个执行测试用例
+- **并行执行**: 无（测试用例顺序执行以避免干扰）
+- **错误处理**: 单个测试失败时记录结果，继续执行其他测试
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:test-sandbox-core | 测试用例 ID 列表 + 运行参数 | 测试报告（通过率、失败诊断）|
+
+### 调用示例
+```
+用户: /ccc:test-sandbox
+  ↓
+cmd-test-sandbox 准备测试环境
+  ↓
+调用 ccc:test-sandbox-core (执行所有测试用例):
+  TC-001: TODO 查找器 (Simple Skill)
+  TC-002: 代码审查器 (Complex SubAgent)
+  TC-003: YAML 转 JSON (Data Transform)
+  TC-004: 全面项目审查 (Review)
+  TC-005: 一键快速工作流 (Quick Workflow)
+  ↓
+收集测试结果并生成报告
+  ↓
+cmd-test-sandbox 输出测试摘要和通过率
+```
 
 ## Usage
 

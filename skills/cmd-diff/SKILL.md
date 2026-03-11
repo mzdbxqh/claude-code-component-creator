@@ -2,14 +2,53 @@
 name: ccc:cmd-diff
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "对比制品差异 | 场景: 独立工具"
+allowed-tools: [Read, Glob, Grep]
+description: "对比两个制品版本的差异。适用场景：版本对比、变更审查、迭代分析。输出包含新增元素、修改元素、删除元素和变更影响的差异报告。支持 Intent、Blueprint、Delivery 同类型对比，提供 JSON/Markdown 导出格式。关键动作：对比、分析、导出、展示。独立工具。 [支持平台: macOS, Linux, Windows]"
 argument-hint: "[--from=id] [--to=id] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:diff
 
 Compares differences between two artifact versions including intents, blueprints, and deliveries with detailed change summaries and export capabilities.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速推理,适用于简单对比)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Glob, Grep)
+- 需要支持多轮对话
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+本 skill 主要使用文件读取和差异对比，不需要专门的 SubAgent。直接使用 Read, Glob, Grep 工具完成。
+
+### 调度策略
+- **串行执行**: cmd-diff → 读取两个制品 → 对比差异 → 生成报告
+- **并行执行**: 无（差异对比为简单操作）
+- **错误处理**: 制品不存在时提示用户确认 ID；制品类型不匹配时报错
+
+### 调用示例
+```
+用户: /ccc:diff --from=BLP-001 --to=BLP-002
+  ↓
+cmd-diff 读取两个 Blueprint 制品:
+  - docs/ccc/blueprint/*-BLP-001.yaml
+  - docs/ccc/blueprint/*-BLP-002.yaml
+  ↓
+对比差异:
+  - 新增元素 (Added)
+  - 修改元素 (Modified)
+  - 删除元素 (Removed)
+  ↓
+生成差异报告
+```
 
 ## Usage
 

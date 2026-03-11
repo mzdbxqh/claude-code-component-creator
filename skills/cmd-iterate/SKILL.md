@@ -2,8 +2,8 @@
 name: ccc:cmd-iterate
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "迭代Blueprint | 场景: 制品迭代流程的核心"
+allowed-tools: [Read, Write, Edit, Glob, Grep]
+description: "迭代 Blueprint 制品，生成改进版本。适用场景：设计优化、工具选择简化、工作流重构、错误处理增强。输出包含变更列表、改进依据和新版本 Blueprint 的迭代报告。自动检测改进机会（工具冗余、步骤重复、缺失边界处理）并生成递增 ID 的新制品。关键动作：优化、简化、增强、迭代。制品迭代流程的核心。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -12,6 +12,55 @@ argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"
 **完整流程**: Blueprint-v1 → **iterate** → Blueprint-v2 → `review` → `fix` → `build`
 
 Iterates on existing blueprint artifacts to create improved versions with refinement tracking and change documentation.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,深度优化)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和设计优化
+- 需要检测改进机会和生成优化方案
+- 建议上下文窗口 >= 200K tokens (处理完整 Blueprint 迭代)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+- **ccc:blueprint-core**: Blueprint 解析器，读取和分析现有 Blueprint 制品
+- **ccc:architect-core**: 架构优化器，识别改进机会并生成优化方案
+
+### 调度策略
+- **串行执行**: cmd-iterate → ccc:blueprint-core → ccc:architect-core → 生成新版本 Blueprint
+- **并行执行**: 无（迭代流程需按顺序执行）
+- **错误处理**: 制品不存在时列出可用制品；未检测到改进点时报告"无需修改"
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:blueprint-core | Blueprint 制品路径 | 解析后的数据结构 |
+| ccc:architect-core | 现有 Blueprint + 改进目标 | 优化后的 Blueprint 数据 |
+
+### 调用示例
+```
+用户: /ccc:iterate --artifact-id=BLP-001
+  ↓
+cmd-iterate 读取现有 Blueprint
+  ↓
+调用 ccc:blueprint-core (解析和分析)
+  ↓
+调用 ccc:architect-core (检测改进机会):
+  - 工具冗余检测
+  - 步骤重复检测
+  - 缺失边界处理检测
+  ↓
+生成优化方案并创建新版本 Blueprint (BLP-002)
+  ↓
+cmd-iterate 输出迭代报告和新制品路径
+```
 
 ## Usage
 

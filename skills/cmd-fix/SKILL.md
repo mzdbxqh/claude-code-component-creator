@@ -2,8 +2,8 @@
 name: ccc:cmd-fix
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "修复问题 | 场景: 多流程的修复点"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+description: "交互式修复审查发现的问题，支持策略选择和并行执行。适用场景：审查后修复、问题整改、质量改进。输出包含修复摘要、变更详情和修复报告。支持全自动、交互式、手动三种修复模式，通过 SubAgent 工厂批量处理多文件修改。关键动作：修复、整改、改进、验证。多流程的修复点。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 ---
 
@@ -15,6 +15,98 @@ argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 - **制品迭代**: `iterate` → `review` → **fix** → `build`
 
 Interactive repair workflow with AskUserQuestion strategy selection and SubAgent factory execution.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,复杂问题修复)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep, Task)
+- 需要支持多轮对话和交互式决策
+- 需要处理审查报告和问题修复
+- 建议上下文窗口 >= 200K tokens (处理完整审查报告和代码修复)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和并行执行：
+
+### 核心 Agents
+- **ccc:fix-orchestrator**: 修复编排器，协调交互式修复流程，分派 SubAgent 工厂执行批量修复
+- **ccc:review-fix-connector**: 审查-修复连接器，解析审查报告并转换为修复任务
+- **ccc:metadata-fix-agent**: 元数据修复代理，专门修复 frontmatter 字段缺失问题
+- **ccc:tool-declare-agent**: 工具声明代理，补充 allowed-tools 字段
+- **ccc:doc-complete-agent**: 文档补全代理，扩展 description 和补充缺失章节
+
+### 调度策略
+- **串行执行**: cmd-fix → ccc:fix-orchestrator → review-fix-connector → 并行派发修复 agents
+- **并行执行**:
+  - 按问题类型并行派发专门的修复 agents
+  - 每个文件的修复串行执行，避免冲突
+- **错误处理**:
+  - 单个文件修复失败时记录错误，继续修复其他文件
+  - 关键修复失败时终止流程并生成修复报告
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:fix-orchestrator | 审查报告 + 修复策略 | 修复任务分解 |
+| ccc:review-fix-connector | 审查报告 | 结构化问题清单 |
+| ccc:metadata-fix-agent | 文件路径 + 缺失字段 | 修复后的 frontmatter |
+| ccc:tool-declare-agent | 文件路径 + 使用的工具列表 | 补充的 allowed-tools |
+| ccc:doc-complete-agent | 文件路径 + 缺失章节 | 补充的文档内容 |
+
+### 调用示例（全自动模式）
+```
+用户: /ccc:fix --artifact-id=DLV-001 --auto
+  ↓
+cmd-fix 读取审查报告
+  ↓
+调用 fix-orchestrator (策略=全自动)
+  ↓
+调用 review-fix-connector (解析问题)
+  ↓
+并行派发修复 agents:
+  - metadata-fix-agent (修复 2 个文件的元数据)
+  - tool-declare-agent (补充 3 个文件的工具声明)
+  - doc-complete-agent (扩展 5 个文件的文档)
+  ↓
+聚合修复结果
+  ↓
+cmd-fix 输出修复摘要和报告
+```
+
+### 调用示例（交互式模式）
+```
+用户: /ccc:fix --artifact-id=DLV-001
+  ↓
+cmd-fix 读取审查报告并显示问题摘要
+  ↓
+AskUserQuestion: 选择修复策略
+  用户选择: "交互式修复"
+  ↓
+AskUserQuestion: 选择修复范围
+  用户选择: "P0 + P1"
+  ↓
+AskUserQuestion: 确认执行
+  用户确认
+  ↓
+调用 fix-orchestrator (策略=交互式, 范围=P0+P1)
+  ↓
+... (后续流程同全自动模式)
+```
+
+### SubAgent 工厂模式
+fix-orchestrator 采用工厂模式派发专门的修复 agents：
+```
+问题类型 → 对应的修复 Agent
+├─ SKILL-001 (frontmatter 缺失) → metadata-fix-agent
+├─ SKILL-002 (tools 未声明) → tool-declare-agent
+├─ SKILL-003 (description 过短) → doc-complete-agent
+├─ SKILL-004 (缺少示例) → doc-complete-agent
+└─ ... (更多问题类型)
+```
 
 ## 参数
 
@@ -126,7 +218,7 @@ AskUserQuestion(
 使用 `Task` 工具并行调用 SubAgent 工厂：
 
 ```yaml
-# 调用 metadata-fix-agent
+# 调用 ccc:metadata-fix-agent
 Task(
   subagent_type: "general-purpose",
   prompt: "修复以下文件的元数据问题：
@@ -134,14 +226,14 @@ Task(
     - skills/reviewer/SKILL.md: 添加 model 声明"
 )
 
-# 调用 tool-declare-agent
+# 调用 ccc:tool-declare-agent
 Task(
   subagent_type: "general-purpose",
   prompt: "为以下文件添加工具权限声明：
     - skills/reviewer/SKILL.md: allowed-tools"
 )
 
-# 调用 doc-complete-agent
+# 调用 ccc:doc-complete-agent
 Task(
   subagent_type: "general-purpose",
   prompt: "为以下文件添加使用示例：

@@ -1,9 +1,9 @@
 ---
 name: ccc:cmd-init
-description: "创建Intent制品 | 场景: 主工作流的起点"
+description: "创建 Intent 制品，使用 4 问框架分析用户需求。适用场景：项目启动、需求澄清、组件类型推断。输出包含需求分析、约束条件、设计决策和质量评分的 Intent YAML 制品。关键动作：分析、澄清、推断、生成。主工作流的起点。 [支持平台: macOS, Linux, Windows (via WSL)]"
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+allowed-tools: [Read, Write, Edit, Glob, Grep]
 argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -12,6 +12,18 @@ argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
 **完整流程**: **init** → `design` → `review` → `fix` → `validate` → `build`
 
 Create Intent artifact using 4-question framework. Analyzes user requirement and generates structured Intent with cognitive load management.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,复杂需求分析)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和需求澄清
+- 需要使用 4 问框架进行需求分析
+- 建议上下文窗口 >= 100K tokens
 
 ## Usage
 
@@ -26,6 +38,38 @@ Create Intent artifact using 4-question framework. Analyzes user requirement and
 | Parameter | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `--lang` | `zh-cn`, `en-us`, `ja-jp` | `zh-cn` | 输出语言 (Output language) |
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和执行：
+
+### 核心 Agents
+- **ccc:intent-core**: 意图分析和需求澄清核心，使用 4 问框架提取用户需求
+
+### 调度策略
+- **串行执行**: cmd-init → ccc:intent-core
+- **并行执行**: 无（单一 agent 执行）
+- **错误处理**: agent 失败时提示用户补充信息并重试
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:intent-core | 用户需求描述 + lang 参数 | Intent YAML 制品 |
+
+### 调用示例
+```
+用户: /ccc:init "我要做一个自动部署工具"
+  ↓
+cmd-init 接收参数
+  ↓
+调用 ccc:intent-core (requirement="我要做一个自动部署工具", lang="zh-cn")
+  ↓
+ccc:intent-core 执行 4 问框架分析
+  ↓
+生成 Intent 制品: docs/ccc/intent/2026-03-02-INT-001.yaml
+  ↓
+cmd-init 输出摘要和下一步建议
+```
 
 ## Workflow
 

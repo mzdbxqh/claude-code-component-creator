@@ -2,8 +2,8 @@
 name: ccc:cmd-implement
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "执行迭代计划 | 场景: 代码迭代流程的第2步"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
+description: "执行迭代计划，应用增量变更并验证。适用场景：代码重构执行、分阶段迁移、增量功能实现。输出包含修改文件列表、测试结果和实施报告。支持整体实施、分阶段执行、Dry Run 预览模式。包含回滚支持和依赖关系验证。关键动作：执行、应用、验证、回滚。代码迭代流程的第2步。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "--plan=<iteration-plan-path> [--phase=<phase-number>] [--dry-run]"
 ---
 
@@ -12,6 +12,53 @@ argument-hint: "--plan=<iteration-plan-path> [--phase=<phase-number>] [--dry-run
 **完整流程**: `design-iterate` → **implement** → `review` → `fix`
 
 Implements iteration plans from design-iterate, applying changes incrementally with validation and rollback support.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,复杂重构)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和代码重构
+- 需要处理迭代计划和增量变更
+- 建议上下文窗口 >= 200K tokens (处理完整重构计划)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+- **ccc:planner-core**: 计划解析器，读取和解析迭代计划文档
+
+### 调度策略
+- **串行执行**: cmd-implement → ccc:planner-core → 执行变更步骤
+- **并行执行**: 无（增量变更需按顺序执行）
+- **错误处理**: 任何步骤失败时支持回滚到上一个稳定状态
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:planner-core | 迭代计划文档路径 | 解析后的执行步骤和依赖关系 |
+
+### 调用示例
+```
+用户: /ccc:implement --plan=docs/designs/my-refactor.md
+  ↓
+cmd-implement 读取计划文档
+  ↓
+调用 ccc:planner-core (解析计划和依赖)
+  ↓
+逐步执行变更:
+  Step 1: 验证当前状态
+  Step 2: 应用变更 (Phase 1)
+  Step 3: 运行测试
+  Step 4: 应用变更 (Phase 2)
+  ...
+  ↓
+cmd-implement 生成实施报告
+```
 
 ## Usage
 

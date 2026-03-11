@@ -1,11 +1,23 @@
 ---
 name: ccc:std-component-selection
-description: "组件选型决策规则。适用于设计和审阅 Claude Code 插件时的组件类型选择。提供 Skill 三种角色（cmd-/std-/lib-）决策树和典型组合模式。Use when designing or reviewing Claude Code plugins."
+description: "组件选型决策规则。适用于设计和审阅 Claude Code 插件时的组件类型选择。提供 Skill 三种角色（cmd-/std-/lib-）决策树和典型组合模式。Use when designing or reviewing Claude Code plugins. [支持平台: macOS, Linux, Windows]"
 model: sonnet
+allowed-tools: []
 context: main
 ---
 
 # 组件选型决策规则
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速加载,知识库类 Skill)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 作为知识库 Skill,无需 Tool Use
+- 通过 skills 字段加载到 Subagent 中
+- 建议上下文窗口 >= 50K tokens
 
 ## Purpose
 
@@ -97,9 +109,9 @@ context: main
 格式：<domain>-<role>-core 或 <domain>-<specific-function>
 
 示例：
-  review-core              → 审阅领域核心组件
-  advisor-core             → 顾问领域核心组件
-  architecture-analyzer    → 架构分析组件
+  ccc:review-core              → 审阅领域核心组件
+  ccc:advisor-core             → 顾问领域核心组件
+  ccc:architecture-analyzer    → 架构分析组件
 ```
 
 ---

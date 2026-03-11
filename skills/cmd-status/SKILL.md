@@ -2,14 +2,51 @@
 name: ccc:cmd-status
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "查询项目状态 | 场景: 独立工具"
+allowed-tools: [Read, Glob, Grep]
+description: "显示项目工作流状态和制品进度。适用场景：项目进度查看、制品追踪、工作流健康检查。输出包含制品列表（Intent、Blueprint、Delivery）、完成度百分比、阶段指示器和推荐下一步操作的状态报告。支持多项目管理、孤立制品检测、历史归档查询。关键动作：查询、显示、追踪、检查。独立工具。 [支持平台: macOS, Linux, Windows]"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /ccc:status
 
 Displays current project workflow state and artifact status including intent, blueprint, and delivery progress with stage indicators.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Haiku 3.5+ (快速推理,适用于简单查询)
+- **最小**: Claude Haiku 3.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Read, Glob, Grep)
+- 需要支持多轮对话
+- 建议上下文窗口 >= 100K tokens
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务执行：
+
+### 核心 Agents
+本 skill 主要使用文件扫描和状态收集，不需要专门的 SubAgent。直接使用 Read, Glob, Grep 工具完成。
+
+### 调度策略
+- **串行执行**: cmd-status → 扫描制品目录 → 收集状态信息 → 生成报告
+- **并行执行**: 无（状态查询为简单操作）
+- **错误处理**: 制品目录不存在时返回空状态；制品解析失败时跳过该制品
+
+### 调用示例
+```
+用户: /ccc:status
+  ↓
+cmd-status 扫描制品目录:
+  - docs/ccc/intent/ (查找 Intent 制品)
+  - docs/ccc/blueprint/ (查找 Blueprint 制品)
+  - docs/ccc/delivery/ (查找 Delivery 制品)
+  ↓
+分析制品状态和依赖关系
+  ↓
+生成状态报告并推荐下一步操作
+```
 
 ## Usage
 

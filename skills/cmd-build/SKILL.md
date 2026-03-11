@@ -2,8 +2,8 @@
 name: ccc:cmd-build
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "构建交付 | 场景: 主工作流的终点"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
+description: "从 Blueprint 生成生产就绪的交付物包。适用场景：代码生成、文档生成、测试框架创建。输出包含 SKILL.md、实现代码、测试文件、README 和 metadata.yaml 的完整 Delivery 制品。支持多组件系统（Skill、Subagent、Command、Hook）和构建验证。关键动作：生成、构建、打包、交付。主工作流的终点。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
@@ -12,6 +12,87 @@ argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
 **完整流程**: `init` → `design` → `review` → `fix` → `validate` → **build**
 
 Generates complete production-ready deliverable packages from validated blueprints including SKILL.md, implementation code, tests, and documentation.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,复杂代码生成)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep)
+- 需要支持多轮对话和代码生成
+- 需要处理多文件生成和模板渲染
+- 建议上下文窗口 >= 200K tokens (处理完整 Blueprint 和代码生成)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和串行执行：
+
+### 核心 Agents
+- **ccc:blueprint-core**: Blueprint 解析器，读取和验证 Blueprint 制品
+- **ccc:delivery-core**: 交付物生成核心，协调所有代码生成任务
+- **ccc:checkpoint-core**: 检查点核心，在关键步骤验证生成结果
+
+### 调度策略
+- **串行执行**: cmd-build → ccc:blueprint-core → ccc:delivery-core → ccc:checkpoint-core
+- **并行执行**: 无（按顺序生成文件）
+- **错误处理**:
+  - Blueprint 解析失败时终止流程
+  - 单个文件生成失败时记录错误，继续生成其他文件
+  - 关键文件（SKILL.md）生成失败时终止流程
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:blueprint-core | Blueprint YAML 文件路径 | 解析后的数据结构 |
+| ccc:delivery-core | Blueprint 数据 + lang 参数 | 生成的所有文件 |
+| ccc:checkpoint-core | 生成的文件列表 | 验证报告 |
+
+### 调用示例
+```
+用户: /ccc:build --artifact-id=BLP-001
+  ↓
+cmd-build 定位 Blueprint 文件
+  ↓
+调用 ccc:blueprint-core (解析和验证 Blueprint)
+  ↓
+调用 ccc:delivery-core (生成所有交付物):
+  Step 1: 生成 SKILL.md
+  Step 2: 生成实现代码 (implementation/)
+  Step 3: 生成测试文件 (tests/)
+  Step 4: 生成文档 (README.md)
+  Step 5: 生成元数据 (metadata.yaml)
+  ↓
+调用 ccc:checkpoint-core (验证生成结果)
+  ↓
+cmd-build 打包 Delivery 制品
+  ↓
+输出构建报告和制品路径
+```
+
+### 生成流程细节
+```
+delivery-core 内部工作流:
+├─ Phase 1: SKILL.md 生成
+│   ├─ 提取 frontmatter (name, model, context, tools, description)
+│   ├─ 生成工作流章节
+│   ├─ 生成参数说明
+│   └─ 生成示例和错误处理
+├─ Phase 2: 实现代码生成
+│   ├─ 创建 implementation/ 目录
+│   ├─ 根据工作流生成代码文件
+│   └─ 添加代码注释和文档字符串
+├─ Phase 3: 测试生成
+│   ├─ 创建 tests/ 目录
+│   ├─ 生成测试用例
+│   └─ 创建测试夹具 (test-fixtures/)
+├─ Phase 4: 文档生成
+│   ├─ 生成 README.md
+│   └─ 生成使用指南
+└─ Phase 5: 元数据生成
+    └─ 创建 metadata.yaml (包含版本、依赖等)
+```
 
 ## Usage
 

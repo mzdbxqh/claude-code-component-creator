@@ -2,14 +2,65 @@
 name: ccc:cmd-review-workflow
 model: sonnet
 context: fork
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
-description: "工作流审阅 | 场景: 独立工具"
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+description: "按工作流顺序审查多个组件，生成健康度报告。适用场景：工作流完整性检查、阶段交接验证、依赖关系分析。输出包含工作流完整性评分、阶段交接清晰度、依赖健康度和并行化机会的健康度报告。支持浅层/完整两种审查深度。关键动作：审查、分析、评估、优化。独立工具。 [支持平台: macOS, Linux, Windows (via WSL)]"
 argument-hint: "[--artifact-id=<id>] [--depth=shallow|full]"
 ---
 
 # /ccc:review-workflow
 
 Reviews multiple components in workflow order, generating workflow health report with dependency analysis and parallelization opportunities.
+
+## 模型要求
+
+- **推荐**: Claude Sonnet 4.5+ (高效能,最佳性价比)
+- **可用**: Claude Opus 4.5+ (最高质量,深度分析)
+- **最小**: Claude Sonnet 4.5+ (最低要求)
+
+### 功能需求
+- 需要支持 Tool Use (Bash, Read, Write, Edit, Glob, Grep, Task)
+- 需要支持多轮对话和工作流分析
+- 需要处理依赖关系和并行化分析
+- 建议上下文窗口 >= 200K tokens (处理完整工作流)
+
+## SubAgents 协作
+
+本工作流使用以下 SubAgents 进行任务分解和执行：
+
+### 核心 Agents
+- **ccc:workflow-discoverer**: 工作流发现器，识别工作流阶段和组件依赖关系
+- **ccc:reviewer-core**: 审查协调器，按工作流顺序审查各个组件
+- **ccc:review-aggregator**: 审查结果聚合器，生成工作流健康度报告
+
+### 调度策略
+- **串行执行**: cmd-review-workflow → ccc:workflow-discoverer → reviewer-core → review-aggregator
+- **并行执行**: 同一阶段的独立组件可并行审查
+- **错误处理**: 单个组件审查失败不影响其他组件，继续执行
+
+### Agent 输入输出
+| Agent | 输入 | 输出 |
+|-------|------|------|
+| ccc:workflow-discoverer | Blueprint 制品 | 工作流阶段和组件列表 |
+| ccc:reviewer-core | 组件列表 + 审查深度 | 各组件审查结果 |
+| ccc:review-aggregator | 所有审查结果 | 工作流健康度报告 |
+
+### 调用示例
+```
+用户: /ccc:review-workflow --artifact-id=BLP-001
+  ↓
+cmd-review-workflow 读取 Blueprint
+  ↓
+调用 workflow-discoverer (识别工作流阶段)
+  ↓
+调用 ccc:reviewer-core (按阶段审查组件):
+  并行审查 Phase 1 组件
+  并行审查 Phase 2 组件
+  并行审查 Phase 3 组件
+  ↓
+调用 review-aggregator (生成健康度报告)
+  ↓
+cmd-review-workflow 输出报告
+```
 
 ## 参数
 
@@ -59,10 +110,10 @@ Phase 3: Build
 
 ```
 依赖链分析:
-  intent-core → advisor-core: ✅ (工具权限一致)
-  advisor-core → architect-core: ✅ (模型兼容)
-  architect-core → design-core: ⚠️ (调用深度 +1)
-  design-core → delivery-core: ✅ (无问题)
+  ccc:intent-core → ccc:advisor-core: ✅ (工具权限一致)
+  ccc:advisor-core → ccc:architect-core: ✅ (模型兼容)
+  ccc:architect-core → ccc:design-core: ⚠️ (调用深度 +1)
+  ccc:design-core → ccc:delivery-core: ✅ (无问题)
 
 识别并行机会:
   - Design 阶段：advisor-core 和 architect-core 可并行
@@ -199,10 +250,10 @@ Phase 3: Build
 ## 依赖关系健康度
 
 调用链分析:
-- intent-core → advisor-core: ✅
-- advisor-core → architect-core: ✅
-- architect-core → design-core: ⚠️ (调用深度 +1)
-- design-core → delivery-core: ✅
+- ccc:ccc:intent-core → ccc:advisor-core: ✅
+- ccc:ccc:advisor-core → ccc:architect-core: ✅
+- ccc:ccc:architect-core → ccc:design-core: ⚠️ (调用深度 +1)
+- ccc:ccc:design-core → ccc:delivery-core: ✅
 
 依赖健康度评分：90% ⚠️
 
