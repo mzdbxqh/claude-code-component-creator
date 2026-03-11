@@ -1,0 +1,928 @@
+id: DEP-002
+name: lsp-server-misconfiguration
+severity: warning
+component_type: plugin
+category: dependency
+
+title:
+  zh: "LSP Server 配置不当"
+  en: "LSP Server misconfiguration"
+
+description:
+  zh: |
+    LSP (Language Server Protocol) servers 为 Claude 提供代码智能和语言特性。
+
+    **配置位置**：
+    - 必须在 `.lsp.json` 文件中配置
+    - 不能在 `settings.json` 中配置
+    - 不能在 `hooks.json` 中配置
+
+    **配置格式**：
+    ```json
+    {
+      "lspServers": {
+        "server-name": {
+          "command": "language-server",
+          "args": ["--stdio"],
+          "initializationOptions": {...},
+          "fileWatcher": {
+            "patterns": ["**/*.{js,ts}"]
+          }
+        }
+      }
+    }
+    ```
+
+    **常见用途**：
+    - ✅ 代码补全和导航
+    - ✅ 语法检查和错误诊断
+    - ✅ 重构支持
+    - ✅ 符号查找和定义跳转
+    - ❌ 简单的语法高亮（IDE 功能）
+    - ❌ 编译和构建（用 Bash 工具）
+
+    **与 MCP Servers 的区别**：
+    - MCP: 外部工具和数据访问
+    - LSP: 代码智能和语言特性
+
+  en: |
+    LSP (Language Server Protocol) servers provide code intelligence and language features to Claude.
+
+    **Config Location**:
+    - Must be configured in `.lsp.json` file
+    - Cannot be in `settings.json`
+    - Cannot be in `hooks.json`
+
+    **Config Format**:
+    ```json
+    {
+      "lspServers": {
+        "server-name": {
+          "command": "language-server",
+          "args": ["--stdio"],
+          "initializationOptions": {...},
+          "fileWatcher": {
+            "patterns": ["**/*.{js,ts}"]
+          }
+        }
+      }
+    }
+    ```
+
+    **Common Uses**:
+    - ✅ Code completion and navigation
+    - ✅ Syntax checking and error diagnostics
+    - ✅ Refactoring support
+    - ✅ Symbol search and definition jumping
+    - ❌ Simple syntax highlighting (IDE feature)
+    - ❌ Compilation and building (use Bash tool)
+
+    **vs MCP Servers**:
+    - MCP: External tools and data access
+    - LSP: Code intelligence and language features
+
+rationale:
+  zh: "基于官方规范 (lsp-servers.md OFF-DEP-016~018, OFF-CFG-021)，LSP servers 必须在 .lsp.json 中配置"
+  en: "Per official specs (lsp-servers.md OFF-DEP-016~018, OFF-CFG-021), LSP servers must be configured in .lsp.json"
+
+detection:
+  method: config-validation
+  checks:
+    - file: ".lsp.json"
+      required: true
+      schema: "lspServers object"
+    - file: "settings.json"
+      forbidden_keys: ["lspServers"]
+    - command_check: "验证 LSP server 可执行文件存在"
+
+official_reference:
+  document: "markdown_docs/lsp-servers.md"
+  section: "LSP Server 配置"
+  lines: "52-98"
+  quote: "LSP servers 在 .lsp.json 中配置。不支持 settings.json 中的 lspServers 字段。"
+
+examples:
+  bad:
+    zh: |
+      错误1：在 settings.json 中配置 LSP
+      ```json
+      // settings.json (错误！)
+      {
+        "agent": {...},
+        "lspServers": {
+          "typescript": {...}
+        }
+      }
+
+      应该在 .lsp.json 中配置
+      ```
+
+      错误2：缺少必要字段
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "python": {
+            "command": "pyls"
+          }
+        }
+      }
+
+      缺少 args 字段
+      LSP server 无法正确启动
+      ```
+
+      错误3：LSP server 命令不存在
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "tsserver",
+            "args": ["--stdio"]
+          }
+        }
+      }
+
+      但 tsserver 未安装
+      Claude 无法启动 LSP server
+      ```
+
+      错误4：README 未说明 LSP 依赖
+      ```markdown
+      # TypeScript Plugin
+
+      ## Installation
+      Copy files to plugin directory
+
+      未说明需要安装 typescript-language-server
+      用户不知道如何配置
+      ```
+    en: |
+      Error 1: Configure LSP in settings.json
+      ```json
+      // settings.json (wrong!)
+      {
+        "agent": {...},
+        "lspServers": {
+          "typescript": {...}
+        }
+      }
+
+      Should be configured in .lsp.json
+      ```
+
+      Error 2: Missing required fields
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "python": {
+            "command": "pyls"
+          }
+        }
+      }
+
+      Missing args field
+      LSP server cannot start correctly
+      ```
+
+      Error 3: LSP server command doesn't exist
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "tsserver",
+            "args": ["--stdio"]
+          }
+        }
+      }
+
+      But tsserver not installed
+      Claude cannot start LSP server
+      ```
+
+      Error 4: README doesn't mention LSP dependency
+      ```markdown
+      # TypeScript Plugin
+
+      ## Installation
+      Copy files to plugin directory
+
+      Doesn't mention need to install typescript-language-server
+      User doesn't know how to configure
+      ```
+
+  good:
+    zh: |
+      正确1：标准 LSP 配置
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "initializationOptions": {
+              "preferences": {
+                "importModuleSpecifierPreference": "relative"
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          }
+        }
+      }
+
+      完整配置，包含初始化选项和文件监控
+      ```
+
+      正确2：完整的 README 说明
+      ```markdown
+      # TypeScript Development Plugin
+
+      Provides TypeScript code intelligence via LSP.
+
+      ## Prerequisites
+
+      1. Install Node.js 18+
+      2. Install TypeScript Language Server:
+         ```bash
+         npm install -g typescript-language-server typescript
+         ```
+
+      ## Installation
+
+      ### 1. Install Plugin
+      ```bash
+      cp -r typescript-plugin ~/.claude/plugins/
+      ```
+
+      ### 2. Configure LSP Server
+      Create or edit `~/.lsp.json`:
+      ```json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "initializationOptions": {
+              "preferences": {
+                "importModuleSpecifierPreference": "relative"
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          }
+        }
+      }
+      ```
+
+      ## Verification
+
+      1. Open TypeScript project
+      2. Ask Claude: "Show me the type definition of this function"
+      3. Claude should use LSP to provide accurate type information
+
+      ## Troubleshooting
+
+      ### LSP server not starting
+      - Check installation: `which typescript-language-server`
+      - Verify TypeScript: `tsc --version`
+      - Check logs: `~/.claude/logs/lsp-typescript.log`
+
+      ### No code intelligence
+      - Verify file patterns match your files
+      - Check tsconfig.json exists in project root
+      - Restart Claude Code
+      ```
+
+      正确3：Python LSP 配置
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "python": {
+            "command": "pylsp",
+            "args": [],
+            "initializationOptions": {
+              "pylsp": {
+                "plugins": {
+                  "pycodestyle": {
+                    "enabled": true,
+                    "maxLineLength": 100
+                  },
+                  "pylint": {"enabled": false},
+                  "autopep8": {"enabled": true}
+                }
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.py"]
+            }
+          }
+        }
+      }
+      ```
+
+      README 说明：
+      ```markdown
+      ## Python LSP Server
+
+      ### Installation
+      ```bash
+      pip install 'python-lsp-server[all]'
+      ```
+
+      ### Features
+      - Code completion
+      - Error checking (pycodestyle)
+      - Auto-formatting (autopep8)
+      - Import organization
+
+      ### Configuration
+      See .lsp.json example above.
+      Customize plugin settings in initializationOptions.
+      ```
+
+      正确4：多语言 LSP 配置
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          },
+          "python": {
+            "command": "pylsp",
+            "args": [],
+            "fileWatcher": {
+              "patterns": ["**/*.py"]
+            }
+          },
+          "rust": {
+            "command": "rust-analyzer",
+            "args": [],
+            "fileWatcher": {
+              "patterns": ["**/*.rs"]
+            }
+          }
+        }
+      }
+
+      支持多种语言的代码智能
+      每个 LSP server 处理对应文件类型
+      ```
+
+      正确5：项目级 LSP 配置
+      ```json
+      // project/.lsp.json
+      {
+        "lspServers": {
+          "project-custom": {
+            "command": "./scripts/custom-lsp-server.sh",
+            "args": ["--project-root", "${PWD}"],
+            "fileWatcher": {
+              "patterns": ["**/*.custom"]
+            }
+          }
+        }
+      }
+
+      项目特定的 LSP server
+      仅在该项目目录下生效
+      支持自定义语言或 DSL
+      ```
+
+      正确6：文件监控模式
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "fileWatcher": {
+              "patterns": [
+                "**/*.ts",
+                "**/*.tsx",
+                "!**/node_modules/**",
+                "!**/.git/**",
+                "!**/dist/**"
+              ]
+            }
+          }
+        }
+      }
+
+      包含正向和排除模式
+      避免监控不必要的文件
+      提升性能
+      ```
+
+      正确7：验证 LSP 功能
+      ```markdown
+      # Post-Installation Verification
+
+      ## Test LSP Server
+
+      1. **Open a TypeScript file**:
+         ```bash
+         claude
+         # Open TypeScript project
+         ```
+
+      2. **Test code intelligence**:
+         Ask Claude:
+         - "Show me the type of this variable"
+         - "Find all references to this function"
+         - "Go to definition of this import"
+
+      3. **Test diagnostics**:
+         - Introduce syntax error
+         - Ask Claude to check for errors
+         - LSP should report the error
+
+      ## Expected Behavior
+
+      Claude should:
+      - ✅ Provide accurate type information
+      - ✅ Navigate to definitions
+      - ✅ Find references across files
+      - ✅ Report syntax errors
+      - ✅ Suggest code completions
+
+      ## Troubleshooting
+
+      If not working:
+      1. Check LSP logs: `~/.claude/logs/lsp-*.log`
+      2. Verify LSP server: `typescript-language-server --version`
+      3. Test LSP manually:
+         ```bash
+         echo '{"jsonrpc":"2.0","method":"initialize",...}' | typescript-language-server --stdio
+         ```
+      ```
+
+      正确8：LSP 性能优化
+      ```markdown
+      # LSP Performance Optimization
+
+      ## File Watching
+
+      Exclude unnecessary directories:
+      ```json
+      {
+        "fileWatcher": {
+          "patterns": [
+            "src/**/*.ts",
+            "!**/node_modules/**",
+            "!**/build/**",
+            "!**/.next/**"
+          ]
+        }
+      }
+      ```
+
+      ## Initialization Options
+
+      Disable expensive features:
+      ```json
+      {
+        "initializationOptions": {
+          "preferences": {
+            "disableSuggestions": false,
+            "includeCompletionsForModuleExports": true,
+            "includeCompletionsWithInsertText": true
+          }
+        }
+      }
+      ```
+
+      ## Large Projects
+
+      For projects >1000 files:
+      - Use strict file patterns
+      - Disable watch for build outputs
+      - Consider project-specific LSP config
+      ```
+    en: |
+      Good 1: Standard LSP configuration
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "initializationOptions": {
+              "preferences": {
+                "importModuleSpecifierPreference": "relative"
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          }
+        }
+      }
+
+      Complete config with initialization options and file watching
+      ```
+
+      Good 2: Complete README instructions
+      ```markdown
+      # TypeScript Development Plugin
+
+      Provides TypeScript code intelligence via LSP.
+
+      ## Prerequisites
+
+      1. Install Node.js 18+
+      2. Install TypeScript Language Server:
+         ```bash
+         npm install -g typescript-language-server typescript
+         ```
+
+      ## Installation
+
+      ### 1. Install Plugin
+      ```bash
+      cp -r typescript-plugin ~/.claude/plugins/
+      ```
+
+      ### 2. Configure LSP Server
+      Create or edit `~/.lsp.json`:
+      ```json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "initializationOptions": {
+              "preferences": {
+                "importModuleSpecifierPreference": "relative"
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          }
+        }
+      }
+      ```
+
+      ## Verification
+
+      1. Open TypeScript project
+      2. Ask Claude: "Show me the type definition of this function"
+      3. Claude should use LSP to provide accurate type information
+
+      ## Troubleshooting
+
+      ### LSP server not starting
+      - Check installation: `which typescript-language-server`
+      - Verify TypeScript: `tsc --version`
+      - Check logs: `~/.claude/logs/lsp-typescript.log`
+
+      ### No code intelligence
+      - Verify file patterns match your files
+      - Check tsconfig.json exists in project root
+      - Restart Claude Code
+      ```
+
+      Good 3: Python LSP configuration
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "python": {
+            "command": "pylsp",
+            "args": [],
+            "initializationOptions": {
+              "pylsp": {
+                "plugins": {
+                  "pycodestyle": {
+                    "enabled": true,
+                    "maxLineLength": 100
+                  },
+                  "pylint": {"enabled": false},
+                  "autopep8": {"enabled": true}
+                }
+              }
+            },
+            "fileWatcher": {
+              "patterns": ["**/*.py"]
+            }
+          }
+        }
+      }
+      ```
+
+      README explains:
+      ```markdown
+      ## Python LSP Server
+
+      ### Installation
+      ```bash
+      pip install 'python-lsp-server[all]'
+      ```
+
+      ### Features
+      - Code completion
+      - Error checking (pycodestyle)
+      - Auto-formatting (autopep8)
+      - Import organization
+
+      ### Configuration
+      See .lsp.json example above.
+      Customize plugin settings in initializationOptions.
+      ```
+
+      Good 4: Multi-language LSP configuration
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "fileWatcher": {
+              "patterns": ["**/*.{ts,tsx,js,jsx}"]
+            }
+          },
+          "python": {
+            "command": "pylsp",
+            "args": [],
+            "fileWatcher": {
+              "patterns": ["**/*.py"]
+            }
+          },
+          "rust": {
+            "command": "rust-analyzer",
+            "args": [],
+            "fileWatcher": {
+              "patterns": ["**/*.rs"]
+            }
+          }
+        }
+      }
+
+      Support code intelligence for multiple languages
+      Each LSP server handles corresponding file types
+      ```
+
+      Good 5: Project-level LSP configuration
+      ```json
+      // project/.lsp.json
+      {
+        "lspServers": {
+          "project-custom": {
+            "command": "./scripts/custom-lsp-server.sh",
+            "args": ["--project-root", "${PWD}"],
+            "fileWatcher": {
+              "patterns": ["**/*.custom"]
+            }
+          }
+        }
+      }
+
+      Project-specific LSP server
+      Only active in this project directory
+      Support custom languages or DSLs
+      ```
+
+      Good 6: File watching patterns
+      ```json
+      // .lsp.json
+      {
+        "lspServers": {
+          "typescript": {
+            "command": "typescript-language-server",
+            "args": ["--stdio"],
+            "fileWatcher": {
+              "patterns": [
+                "**/*.ts",
+                "**/*.tsx",
+                "!**/node_modules/**",
+                "!**/.git/**",
+                "!**/dist/**"
+              ]
+            }
+          }
+        }
+      }
+
+      Include positive and exclude patterns
+      Avoid watching unnecessary files
+      Improve performance
+      ```
+
+      Good 7: Verify LSP functionality
+      ```markdown
+      # Post-Installation Verification
+
+      ## Test LSP Server
+
+      1. **Open a TypeScript file**:
+         ```bash
+         claude
+         # Open TypeScript project
+         ```
+
+      2. **Test code intelligence**:
+         Ask Claude:
+         - "Show me the type of this variable"
+         - "Find all references to this function"
+         - "Go to definition of this import"
+
+      3. **Test diagnostics**:
+         - Introduce syntax error
+         - Ask Claude to check for errors
+         - LSP should report the error
+
+      ## Expected Behavior
+
+      Claude should:
+      - ✅ Provide accurate type information
+      - ✅ Navigate to definitions
+      - ✅ Find references across files
+      - ✅ Report syntax errors
+      - ✅ Suggest code completions
+
+      ## Troubleshooting
+
+      If not working:
+      1. Check LSP logs: `~/.claude/logs/lsp-*.log`
+      2. Verify LSP server: `typescript-language-server --version`
+      3. Test LSP manually:
+         ```bash
+         echo '{"jsonrpc":"2.0","method":"initialize",...}' | typescript-language-server --stdio
+         ```
+      ```
+
+      Good 8: LSP performance optimization
+      ```markdown
+      # LSP Performance Optimization
+
+      ## File Watching
+
+      Exclude unnecessary directories:
+      ```json
+      {
+        "fileWatcher": {
+          "patterns": [
+            "src/**/*.ts",
+            "!**/node_modules/**",
+            "!**/build/**",
+            "!**/.next/**"
+          ]
+        }
+      }
+      ```
+
+      ## Initialization Options
+
+      Disable expensive features:
+      ```json
+      {
+        "initializationOptions": {
+          "preferences": {
+            "disableSuggestions": false,
+            "includeCompletionsForModuleExports": true,
+            "includeCompletionsWithInsertText": true
+          }
+        }
+      }
+      ```
+
+      ## Large Projects
+
+      For projects >1000 files:
+      - Use strict file patterns
+      - Disable watch for build outputs
+      - Consider project-specific LSP config
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **修复 LSP Server 配置**:
+
+      1. **移动配置到正确位置**：
+         - 从 settings.json 移到 .lsp.json
+         - 从 hooks.json 移到 .lsp.json
+
+      2. **修复配置格式**：
+         ```json
+         // .lsp.json
+         {
+           "lspServers": {
+             "server-name": {
+               "command": "lsp-server",
+               "args": ["--stdio"],
+               "fileWatcher": {
+                 "patterns": ["**/*.ext"]
+               }
+             }
+           }
+         }
+         ```
+
+      3. **安装 LSP server**：
+         ```bash
+         # TypeScript
+         npm install -g typescript-language-server
+
+         # Python
+         pip install python-lsp-server
+
+         # Rust
+         rustup component add rust-analyzer
+         ```
+
+      4. **文档完善**：
+         ```markdown
+         ## LSP Server Setup
+
+         1. Install LSP server: ...
+         2. Create .lsp.json
+         3. Verify with test file
+
+         Features:
+         - Code completion
+         - Error checking
+         - Navigation
+         ```
+
+      **检查清单**:
+      - [ ] .lsp.json 文件存在
+      - [ ] LSP server 已安装
+      - [ ] 文件监控模式正确
+      - [ ] README 说明安装步骤
+      - [ ] 提供验证方法
+    en: |
+      **Fix LSP Server Configuration**:
+
+      1. **Move config to correct location**:
+         - From settings.json to .lsp.json
+         - From hooks.json to .lsp.json
+
+      2. **Fix config format**:
+         ```json
+         // .lsp.json
+         {
+           "lspServers": {
+             "server-name": {
+               "command": "lsp-server",
+               "args": ["--stdio"],
+               "fileWatcher": {
+                 "patterns": ["**/*.ext"]
+               }
+             }
+           }
+         }
+         ```
+
+      3. **Install LSP server**:
+         ```bash
+         # TypeScript
+         npm install -g typescript-language-server
+
+         # Python
+         pip install python-lsp-server
+
+         # Rust
+         rustup component add rust-analyzer
+         ```
+
+      4. **Documentation improvements**:
+         ```markdown
+         ## LSP Server Setup
+
+         1. Install LSP server: ...
+         2. Create .lsp.json
+         3. Verify with test file
+
+         Features:
+         - Code completion
+         - Error checking
+         - Navigation
+         ```
+
+      **Checklist**:
+      - [ ] .lsp.json file exists
+      - [ ] LSP server installed
+      - [ ] File watching patterns correct
+      - [ ] README explains install steps
+      - [ ] Provides verification method
+
+tags: ["lsp", "dependency", "configuration", "code-intelligence", "language-server"]
+related_rules: ["CFG-003", "DEP-001", "DEP-003"]

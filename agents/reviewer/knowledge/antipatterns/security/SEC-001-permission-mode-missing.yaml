@@ -1,0 +1,745 @@
+id: SEC-001
+name: permission-mode-missing
+severity: warning
+component_type: skill
+category: security
+
+title:
+  zh: "Skill 缺少 permissionMode 声明"
+  en: "Skill missing permissionMode declaration"
+
+description:
+  zh: |
+    Skills 应该声明 permissionMode 控制工具使用权限。
+
+    **permissionMode 值**：
+    - `prompt`: 每次工具使用都要求用户确认（安全，默认）
+    - `auto`: 自动执行工具，无需确认（便捷，需谨慎）
+
+    **安全原则**：
+    - 修改操作 → prompt （git commit, 文件修改）
+    - 只读操作 → auto （代码分析，文档查询）
+    - 敏感操作 → prompt （网络请求，数据库）
+    - 不确定时 → prompt （默认安全）
+
+    **工具权限**：
+    - `allowed-tools`: 明确允许的工具列表
+    - 未列出的工具需要单独确认
+
+    **最佳实践**：
+    - 所有 Skills 都应明确声明 permissionMode
+    - 在 README 中说明权限模式的选择理由
+    - auto 模式需要在文档中特别说明
+
+  en: |
+    Skills should declare permissionMode to control tool usage permissions.
+
+    **permissionMode values**:
+    - `prompt`: Require user confirmation for each tool use (safe, default)
+    - `auto`: Auto-execute tools without confirmation (convenient, use carefully)
+
+    **Security Principles**:
+    - Modifying operations → prompt (git commit, file modification)
+    - Read-only operations → auto (code analysis, doc queries)
+    - Sensitive operations → prompt (network requests, database)
+    - When unsure → prompt (default safe)
+
+    **Tool Permissions**:
+    - `allowed-tools`: Explicit list of allowed tools
+    - Unlisted tools need separate confirmation
+
+    **Best Practices**:
+    - All Skills should explicitly declare permissionMode
+    - Explain permission mode choice in README
+    - auto mode needs special documentation
+
+rationale:
+  zh: "基于官方规范 (skills.md OFF-SEC-025~027)，permissionMode 控制 Skill 的工具执行权限"
+  en: "Per official specs (skills.md OFF-SEC-025~027), permissionMode controls Skill tool execution permissions"
+
+detection:
+  method: frontmatter-check
+  indicators:
+    - missing_field: "SKILL.md 未声明 permissionMode"
+    - wrong_value: "permissionMode 值不是 prompt 或 auto"
+    - undocumented: "README 未说明权限模式"
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "权限模式"
+  lines: "145-178"
+  quote: "permissionMode 控制工具执行权限。prompt 需要确认，auto 自动执行。"
+
+examples:
+  bad:
+    zh: |
+      错误1：未声明 permissionMode
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "分析代码质量"
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      ```
+      未声明 permissionMode
+      用户不知道权限行为
+
+      错误2：修改操作使用 auto
+      ```yaml
+      ---
+      name: auto-committer
+      description: "自动提交代码"
+      permissionMode: auto
+      allowed-tools:
+        - Bash
+      ---
+
+      # Auto Committer
+
+      自动执行 git commit 和 git push
+      ```
+      危险！自动执行修改操作
+      应该使用 prompt 模式
+
+      错误3：敏感操作使用 auto
+      ```yaml
+      ---
+      name: api-caller
+      description: "调用外部 API"
+      permissionMode: auto
+      allowed-tools:
+        - WebFetch
+      ---
+
+      # API Caller
+
+      自动调用第三方 API
+      ```
+      网络请求应该需要确认
+      可能泄漏信息或产生费用
+
+      错误4：README 未说明权限模式
+      ```markdown
+      # Code Formatter
+
+      ## Usage
+      /format <file>
+
+      未说明使用 auto 还是 prompt
+      用户不知道是否会自动修改文件
+      ```
+    en: |
+      Error 1: No permissionMode declared
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "Analyze code quality"
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      ```
+      No permissionMode declared
+      User doesn't know permission behavior
+
+      Error 2: Modifying operation uses auto
+      ```yaml
+      ---
+      name: auto-committer
+      description: "Auto commit code"
+      permissionMode: auto
+      allowed-tools:
+        - Bash
+      ---
+
+      # Auto Committer
+
+      Auto-execute git commit and git push
+      ```
+      Dangerous! Auto-executes modifying operations
+      Should use prompt mode
+
+      Error 3: Sensitive operation uses auto
+      ```yaml
+      ---
+      name: api-caller
+      description: "Call external APIs"
+      permissionMode: auto
+      allowed-tools:
+        - WebFetch
+      ---
+
+      # API Caller
+
+      Auto-call third-party APIs
+      ```
+      Network requests should need confirmation
+      May leak info or incur costs
+
+      Error 4: README doesn't explain permission mode
+      ```markdown
+      # Code Formatter
+
+      ## Usage
+      /format <file>
+
+      Doesn't explain if auto or prompt
+      User doesn't know if files will be auto-modified
+      ```
+
+  good:
+    zh: |
+      正确1：只读分析使用 auto
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "代码质量分析"
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+
+      # Code Analyzer
+
+      ## Permission Mode: `auto`
+
+      **Why auto?**
+      - Only reads files, doesn't modify
+      - No side effects
+      - Safe for automated analysis
+
+      **Tools used**:
+      - Read: Read source files
+      - Grep: Search patterns
+
+      No confirmation needed for read-only analysis.
+      ```
+
+      正确2：修改操作使用 prompt
+      ```yaml
+      ---
+      name: code-formatter
+      description: "代码格式化"
+      permissionMode: prompt
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # Code Formatter
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Modifies files (Write tool)
+      - User should review changes
+      - Prevents accidental modifications
+
+      **Workflow**:
+      1. Reads file
+      2. Analyzes formatting
+      3. **Asks for confirmation** before writing
+      4. Writes formatted file
+
+      You'll be asked to confirm each file modification.
+      ```
+
+      正确3：Git 操作使用 prompt
+      ```yaml
+      ---
+      name: smart-commit
+      description: "智能 Git 提交"
+      permissionMode: prompt
+      allowed-tools:
+        - Bash
+        - Read
+      ---
+
+      # Smart Commit
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Executes git commands
+      - Modifies repository state
+      - Should review before commit
+
+      **Security**:
+      - User approves each git command
+      - Can review commit message
+      - Can abort if needed
+
+      **Tools**:
+      - Bash: Execute git commands
+      - Read: Read file changes
+      ```
+
+      正确4：网络请求使用 prompt
+      ```yaml
+      ---
+      name: api-client
+      description: "API 客户端"
+      permissionMode: prompt
+      allowed-tools:
+        - WebFetch
+        - Read
+      ---
+
+      # API Client
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Makes network requests
+      - May expose sensitive data
+      - API calls may have costs
+
+      **What you'll confirm**:
+      - API endpoint and method
+      - Request payload
+      - Headers (tokens, etc.)
+
+      Each API call requires your approval.
+      ```
+
+      正确5：混合模式组合
+      ```yaml
+      Plugin with 2 Skills:
+
+      skills/analyzer/SKILL.md:
+      ---
+      name: analyzer
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      # Read-only analysis, safe for auto
+
+      skills/deployer/SKILL.md:
+      ---
+      name: deployer
+      permissionMode: prompt
+      allowed-tools:
+        - Bash
+      ---
+      # Deployment commands, need confirmation
+      ```
+
+      README 说明：
+      ```markdown
+      ## Skills
+
+      ### analyzer (auto mode)
+      - Read-only code analysis
+      - No confirmation needed
+      - Safe automated scanning
+
+      ### deployer (prompt mode)
+      - Deployment commands
+      - Confirmation required
+      - Prevents accidental deploys
+      ```
+
+      正确6：文档说明权限影响
+      ```markdown
+      # Permission Mode Guide
+
+      ## prompt mode
+      - **When**: Modifying operations, sensitive actions
+      - **Behavior**: User confirms each tool use
+      - **Use for**: git, Write, WebFetch, Bash commands
+
+      ## auto mode
+      - **When**: Read-only, no side effects
+      - **Behavior**: Tools execute automatically
+      - **Use for**: Read, Grep, analysis tasks
+
+      ## Example: Code Review Skill
+
+      ```yaml
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ```
+
+      Why auto?
+      - Only reads code
+      - No modifications
+      - No network/database access
+      - Pure analysis
+
+      ## Example: Code Fix Skill
+
+      ```yaml
+      permissionMode: prompt
+      allowed-tools:
+        - Read
+        - Write
+      ```
+
+      Why prompt?
+      - Modifies source files
+      - User should review changes
+      - Prevents unwanted edits
+      ```
+
+      正确7：安全决策树
+      ```markdown
+      # Permission Mode Decision Tree
+
+      ```
+      Does Skill modify files or state?
+        ├─ Yes → permissionMode: prompt
+        │         Examples:
+        │         - Write tool
+        │         - git commands
+        │         - Database updates
+        │
+        └─ No → Does Skill access network/sensitive data?
+                ├─ Yes → permissionMode: prompt
+                │         Examples:
+                │         - WebFetch
+                │         - API calls
+                │         - Database queries
+                │
+                └─ No → permissionMode: auto
+                          Examples:
+                          - Read files
+                          - Grep patterns
+                          - Pure analysis
+      ```
+
+      ## Default Rule
+
+      **When unsure, use `prompt`**
+
+      Better to ask unnecessarily than to execute dangerous operations automatically.
+      ```
+    en: |
+      Good 1: Read-only analysis uses auto
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "Code quality analysis"
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+
+      # Code Analyzer
+
+      ## Permission Mode: `auto`
+
+      **Why auto?**
+      - Only reads files, doesn't modify
+      - No side effects
+      - Safe for automated analysis
+
+      **Tools used**:
+      - Read: Read source files
+      - Grep: Search patterns
+
+      No confirmation needed for read-only analysis.
+      ```
+
+      Good 2: Modifying operation uses prompt
+      ```yaml
+      ---
+      name: code-formatter
+      description: "Code formatting"
+      permissionMode: prompt
+      allowed-tools:
+        - Read
+        - Write
+      ---
+
+      # Code Formatter
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Modifies files (Write tool)
+      - User should review changes
+      - Prevents accidental modifications
+
+      **Workflow**:
+      1. Reads file
+      2. Analyzes formatting
+      3. **Asks for confirmation** before writing
+      4. Writes formatted file
+
+      You'll be asked to confirm each file modification.
+      ```
+
+      Good 3: Git operations use prompt
+      ```yaml
+      ---
+      name: smart-commit
+      description: "Smart Git commit"
+      permissionMode: prompt
+      allowed-tools:
+        - Bash
+        - Read
+      ---
+
+      # Smart Commit
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Executes git commands
+      - Modifies repository state
+      - Should review before commit
+
+      **Security**:
+      - User approves each git command
+      - Can review commit message
+      - Can abort if needed
+
+      **Tools**:
+      - Bash: Execute git commands
+      - Read: Read file changes
+      ```
+
+      Good 4: Network requests use prompt
+      ```yaml
+      ---
+      name: api-client
+      description: "API client"
+      permissionMode: prompt
+      allowed-tools:
+        - WebFetch
+        - Read
+      ---
+
+      # API Client
+
+      ## Permission Mode: `prompt`
+
+      **Why prompt?**
+      - Makes network requests
+      - May expose sensitive data
+      - API calls may have costs
+
+      **What you'll confirm**:
+      - API endpoint and method
+      - Request payload
+      - Headers (tokens, etc.)
+
+      Each API call requires your approval.
+      ```
+
+      Good 5: Mixed mode combination
+      ```yaml
+      Plugin with 2 Skills:
+
+      skills/analyzer/SKILL.md:
+      ---
+      name: analyzer
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ---
+      # Read-only analysis, safe for auto
+
+      skills/deployer/SKILL.md:
+      ---
+      name: deployer
+      permissionMode: prompt
+      allowed-tools:
+        - Bash
+      ---
+      # Deployment commands, need confirmation
+      ```
+
+      README explains:
+      ```markdown
+      ## Skills
+
+      ### analyzer (auto mode)
+      - Read-only code analysis
+      - No confirmation needed
+      - Safe automated scanning
+
+      ### deployer (prompt mode)
+      - Deployment commands
+      - Confirmation required
+      - Prevents accidental deploys
+      ```
+
+      Good 6: Document permission impact
+      ```markdown
+      # Permission Mode Guide
+
+      ## prompt mode
+      - **When**: Modifying operations, sensitive actions
+      - **Behavior**: User confirms each tool use
+      - **Use for**: git, Write, WebFetch, Bash commands
+
+      ## auto mode
+      - **When**: Read-only, no side effects
+      - **Behavior**: Tools execute automatically
+      - **Use for**: Read, Grep, analysis tasks
+
+      ## Example: Code Review Skill
+
+      ```yaml
+      permissionMode: auto
+      allowed-tools:
+        - Read
+        - Grep
+      ```
+
+      Why auto?
+      - Only reads code
+      - No modifications
+      - No network/database access
+      - Pure analysis
+
+      ## Example: Code Fix Skill
+
+      ```yaml
+      permissionMode: prompt
+      allowed-tools:
+        - Read
+        - Write
+      ```
+
+      Why prompt?
+      - Modifies source files
+      - User should review changes
+      - Prevents unwanted edits
+      ```
+
+      Good 7: Security decision tree
+      ```markdown
+      # Permission Mode Decision Tree
+
+      ```
+      Does Skill modify files or state?
+        ├─ Yes → permissionMode: prompt
+        │         Examples:
+        │         - Write tool
+        │         - git commands
+        │         - Database updates
+        │
+        └─ No → Does Skill access network/sensitive data?
+                ├─ Yes → permissionMode: prompt
+                │         Examples:
+                │         - WebFetch
+                │         - API calls
+                │         - Database queries
+                │
+                └─ No → permissionMode: auto
+                          Examples:
+                          - Read files
+                          - Grep patterns
+                          - Pure analysis
+      ```
+
+      ## Default Rule
+
+      **When unsure, use `prompt`**
+
+      Better to ask unnecessarily than to execute dangerous operations automatically.
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加 permissionMode 声明**:
+
+      1. **评估操作类型**：
+         - 修改操作 → prompt
+         - 只读操作 → auto
+         - 敏感操作 → prompt
+         - 不确定 → prompt （默认安全）
+
+      2. **添加到 frontmatter**：
+         ```yaml
+         ---
+         name: my-skill
+         description: "..."
+         permissionMode: prompt  # 或 auto
+         allowed-tools:
+           - Read
+           - Write
+         ---
+         ```
+
+      3. **文档说明**：
+         ```markdown
+         ## Permission Mode
+
+         This skill uses `prompt` mode because:
+         - Modifies files
+         - Requires user review
+
+         You'll be asked to confirm each operation.
+         ```
+
+      **决策表**:
+
+      | 操作类型 | permissionMode | 示例 |
+      |---------|----------------|------|
+      | 只读分析 | auto | Read, Grep |
+      | 文件修改 | prompt | Write |
+      | Git 操作 | prompt | Bash (git) |
+      | 网络请求 | prompt | WebFetch |
+      | 数据库 | prompt | 数据库工具 |
+
+      **默认规则**: 不确定时使用 prompt
+    en: |
+      **Add permissionMode declaration**:
+
+      1. **Evaluate operation type**:
+         - Modifying operations → prompt
+         - Read-only operations → auto
+         - Sensitive operations → prompt
+         - Uncertain → prompt (default safe)
+
+      2. **Add to frontmatter**:
+         ```yaml
+         ---
+         name: my-skill
+         description: "..."
+         permissionMode: prompt  # or auto
+         allowed-tools:
+           - Read
+           - Write
+         ---
+         ```
+
+      3. **Document**:
+         ```markdown
+         ## Permission Mode
+
+         This skill uses `prompt` mode because:
+         - Modifies files
+         - Requires user review
+
+         You'll be asked to confirm each operation.
+         ```
+
+      **Decision Table**:
+
+      | Operation Type | permissionMode | Examples |
+      |---------------|----------------|----------|
+      | Read-only | auto | Read, Grep |
+      | File modify | prompt | Write |
+      | Git ops | prompt | Bash (git) |
+      | Network | prompt | WebFetch |
+      | Database | prompt | DB tools |
+
+      **Default Rule**: Use prompt when unsure
+
+tags: ["security", "permission", "skill", "auto", "prompt", "safety"]
+related_rules: ["SEC-002", "SKILL-001", "CFG-001"]
