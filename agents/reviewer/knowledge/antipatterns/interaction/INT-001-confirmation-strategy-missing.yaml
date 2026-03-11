@@ -1,0 +1,914 @@
+id: INT-001
+name: confirmation-strategy-missing
+severity: info
+component_type: skill
+category: interaction
+
+title:
+  zh: "确认策略缺失"
+  en: "Confirmation strategy missing"
+
+description:
+  zh: |
+    Skills 应该设计合理的确认策略，平衡用户体验和安全性。
+
+    **确认策略要素**：
+    - **permissionMode**: prompt（需要确认）vs auto（自动执行）
+    - **确认时机**: 何时需要用户确认
+    - **批量操作**: 多个操作的确认粒度
+    - **风险分级**: 根据操作风险选择策略
+
+    **决策原则**：
+    - 修改操作 → prompt
+    - 只读操作 → auto
+    - 敏感操作 → prompt + 详细说明
+    - 批量操作 → 提供确认摘要
+
+    **用户体验**：
+    - 避免过度确认（疲劳）
+    - 提供清晰的操作预览
+    - 支持批量确认选项
+    - 记录用户偏好
+
+  en: |
+    Skills should design reasonable confirmation strategies balancing UX and security.
+
+    **Confirmation Strategy Elements**:
+    - **permissionMode**: prompt (require confirmation) vs auto (automatic)
+    - **Confirmation Timing**: When to require user confirmation
+    - **Batch Operations**: Confirmation granularity for multiple actions
+    - **Risk Leveling**: Choose strategy based on operation risk
+
+    **Decision Principles**:
+    - Modification operations → prompt
+    - Read-only operations → auto
+    - Sensitive operations → prompt + detailed explanation
+    - Batch operations → Provide confirmation summary
+
+    **User Experience**:
+    - Avoid over-confirmation (fatigue)
+    - Provide clear operation preview
+    - Support batch confirmation options
+    - Remember user preferences
+
+rationale:
+  zh: "基于官方建议 (interaction.md OFF-INT-014~016)，合理的确认策略提升用户信任和效率"
+  en: "Per official recommendations (interaction.md OFF-INT-014~016), reasonable confirmation strategy improves user trust and efficiency"
+
+detection:
+  method: pattern-check
+  indicators:
+    - dangerous_auto: "危险操作使用 auto 模式"
+    - safe_prompt: "安全操作过度使用 prompt"
+    - no_preview: "缺少操作预览"
+    - batch_individual: "批量操作逐个确认"
+
+official_reference:
+  document: "markdown_docs/interaction-patterns.md"
+  section: "确认策略"
+  lines: "145-198"
+  quote: "修改操作使用 prompt。只读操作使用 auto。批量操作提供摘要。"
+
+examples:
+  bad:
+    zh: |
+      错误1：危险操作使用 auto
+      ```yaml
+      ---
+      name: delete-all-files
+      permissionMode: auto
+      ---
+
+      # Delete All Files
+
+      删除项目中的所有文件。
+
+      ❌ 破坏性操作应该使用 prompt
+      ❌ 没有任何确认就执行删除
+      ```
+
+      错误2：只读操作过度确认
+      ```yaml
+      ---
+      name: list-files
+      permissionMode: prompt
+      ---
+
+      # List Files
+
+      列出当前目录的文件。
+
+      ❌ 只读操作不需要 prompt
+      ❌ 频繁确认影响用户体验
+      ```
+
+      错误3：批量操作逐个确认
+      ```yaml
+      ---
+      name: format-files
+      permissionMode: prompt
+      ---
+
+      # Format Files
+
+      格式化 100 个文件。
+
+      对每个文件弹出确认:
+      "Format file1.js? (y/n)"
+      "Format file2.js? (y/n)"
+      ...
+
+      ❌ 用户需要确认 100 次
+      ❌ 应该提供批量确认选项
+      ```
+
+      错误4：无操作预览
+      ```yaml
+      ---
+      name: refactor-code
+      permissionMode: prompt
+      ---
+
+      # Refactor Code
+
+      重构代码结构。
+
+      确认消息: "Execute refactoring? (y/n)"
+
+      ❌ 没有说明会修改什么
+      ❌ 用户无法评估风险
+      ```
+    en: |
+      Error 1: Dangerous operation with auto
+      ```yaml
+      ---
+      name: delete-all-files
+      permissionMode: auto
+      ---
+
+      # Delete All Files
+
+      Delete all files in project.
+
+      ❌ Destructive operation should use prompt
+      ❌ Executes deletion without any confirmation
+      ```
+
+      Error 2: Over-confirmation for read-only
+      ```yaml
+      ---
+      name: list-files
+      permissionMode: prompt
+      ---
+
+      # List Files
+
+      List files in current directory.
+
+      ❌ Read-only operation doesn't need prompt
+      ❌ Frequent confirmation impacts UX
+      ```
+
+      Error 3: Individual confirmation for batch
+      ```yaml
+      ---
+      name: format-files
+      permissionMode: prompt
+      ---
+
+      # Format Files
+
+      Format 100 files.
+
+      Confirm for each file:
+      "Format file1.js? (y/n)"
+      "Format file2.js? (y/n)"
+      ...
+
+      ❌ User needs to confirm 100 times
+      ❌ Should provide batch confirmation
+      ```
+
+      Error 4: No operation preview
+      ```yaml
+      ---
+      name: refactor-code
+      permissionMode: prompt
+      ---
+
+      # Refactor Code
+
+      Refactor code structure.
+
+      Confirmation: "Execute refactoring? (y/n)"
+
+      ❌ Doesn't explain what will be changed
+      ❌ User cannot assess risk
+      ```
+
+  good:
+    zh: |
+      正确1：风险分级的确认策略
+      ```yaml
+      # 只读操作 - auto
+      ---
+      name: analyze-code
+      permissionMode: auto
+      ---
+
+      # 非破坏性修改 - prompt
+      ---
+      name: format-code
+      permissionMode: prompt
+      ---
+
+      # 破坏性操作 - prompt + 详细说明
+      ---
+      name: delete-files
+      permissionMode: prompt
+      ---
+
+      ✅ 根据风险选择模式
+      ✅ 平衡安全和效率
+      ```
+
+      正确2：批量操作确认
+      ```yaml
+      ---
+      name: format-files
+      permissionMode: prompt
+      ---
+
+      # Format Files
+
+      格式化多个文件。
+
+      ## 确认策略
+
+      **批量确认摘要**:
+      ```
+      即将格式化 45 个文件:
+      - src/: 30 个文件
+      - tests/: 15 个文件
+
+      预计耗时: 约 10 秒
+      可撤销: 是（git可恢复）
+
+      继续? (y/n)
+      ```
+
+      **可选的粒度**:
+      - `--confirm-all`: 批量确认所有
+      - `--confirm-dir`: 按目录确认
+      - `--confirm-each`: 逐个确认
+
+      ✅ 提供批量确认选项
+      ✅ 显示操作摘要
+      ✅ 支持不同粒度
+      ```
+
+      正确3：详细的操作预览
+      ```yaml
+      ---
+      name: refactor-imports
+      permissionMode: prompt
+      ---
+
+      # Refactor Imports
+
+      重构 import 语句。
+
+      ## 确认消息设计
+
+      ```
+      即将执行重构:
+
+      📊 影响范围:
+      - 文件数: 23 个
+      - 代码行: ~450 行
+      - 估计耗时: 30 秒
+
+      🔄 将要修改:
+      - 统一 import 语法（require → import）
+      - 删除未使用的 imports
+      - 按字母排序 imports
+
+      📝 变更预览:
+      src/utils.js:
+        - const fs = require('fs')
+        + import fs from 'fs'
+
+      src/index.js:
+        - import { unused } from './lib'
+        + // removed unused import
+
+      ⚠️ 建议:
+      - 确保已提交代码到 Git
+      - 建议先在测试分支执行
+
+      继续执行? (y/n)
+      输入 'preview' 查看所有变更
+      输入 'n' 取消操作
+      ```
+
+      ✅ 清晰的影响范围
+      ✅ 具体的变更说明
+      ✅ 风险提示
+      ✅ 预览选项
+      ```
+
+      正确4：分阶段确认
+      ```yaml
+      ---
+      name: migrate-database
+      permissionMode: prompt
+      ---
+
+      # Migrate Database
+
+      数据库迁移工具。
+
+      ## 分阶段确认策略
+
+      **阶段 1: 预检查**（自动）
+      - 检查数据库连接
+      - 验证迁移脚本
+      - 分析影响范围
+
+      **阶段 2: 确认执行**（需要确认）
+      ```
+      预检查完成 ✓
+
+      迁移计划:
+      - 表修改: 3 个表
+      - 数据迁移: 约 10,000 条记录
+      - 预计耗时: 2-3 分钟
+      - 回滚方案: 已准备
+
+      是否执行迁移? (y/n)
+      ```
+
+      **阶段 3: 执行中**（进度反馈）
+      ```
+      执行中... [████████░░] 80%
+      - 已迁移: 8,000 条记录
+      - 剩余时间: 约 30 秒
+      ```
+
+      **阶段 4: 完成验证**（自动）
+      - 数据完整性检查
+      - 生成迁移报告
+
+      ✅ 分阶段确认
+      ✅ 清晰的进度反馈
+      ✅ 自动验证
+      ```
+
+      正确5：用户偏好记忆
+      ```yaml
+      ---
+      name: deploy
+      permissionMode: prompt
+      ---
+
+      # Deploy
+
+      部署应用。
+
+      ## 偏好记忆
+
+      **首次使用**:
+      ```
+      即将部署到生产环境。
+
+      ⚠️ 这是高风险操作！
+
+      是否记住你的确认偏好? (y/n)
+      - 选择 'y': 未来部署会使用相同策略
+      - 选择 'n': 每次都会询问
+
+      默认: 每次询问（推荐）
+      ```
+
+      **后续使用**:
+      ```
+      根据你的偏好设置，将自动执行部署。
+
+      如需修改偏好: /deploy --reset-preferences
+      如需本次确认: /deploy --confirm
+      ```
+
+      **偏好存储**:
+      ```json
+      // ~/.claude/preferences/deploy.json
+      {
+        "confirmBeforeDeploy": true,
+        "environments": {
+          "production": "always-confirm",
+          "staging": "auto",
+          "development": "auto"
+        }
+      }
+      ```
+
+      ✅ 记住用户选择
+      ✅ 提供重置选项
+      ✅ 按环境区分
+      ```
+
+      正确6：确认决策树
+      ```markdown
+      # Confirmation Decision Tree
+
+      ## 操作类型判断
+
+      ### 只读操作
+      - 列表查询（ls, status）
+      - 数据读取（read, cat）
+      - 分析计算（analyze, check）
+      → **permissionMode: auto**
+
+      ### 非破坏性修改
+      - 代码格式化（format）
+      - Import 整理（organize-imports）
+      - 注释添加（add-comments）
+      → **permissionMode: prompt**
+      → 提供变更预览
+
+      ### 破坏性操作
+      - 文件删除（delete, remove）
+      - 数据库修改（migrate, drop）
+      - 配置变更（reconfigure）
+      → **permissionMode: prompt**
+      → 详细影响说明
+      → 回滚方案说明
+
+      ### 批量操作
+      - 多文件操作
+      - 批量修改
+      → **提供批量确认**
+      → 显示操作摘要
+      → 支持粒度选择
+
+      ### 高风险操作
+      - 生产部署（deploy-prod）
+      - 权限变更（chmod, chown）
+      - 系统配置（system-config）
+      → **多重确认**
+      → 需要明确输入（如: "yes, deploy to production"）
+      → 二次确认机制
+      ```
+
+      正确7：渐进式确认
+      ```yaml
+      ---
+      name: large-refactor
+      permissionMode: prompt
+      ---
+
+      # Large Refactor
+
+      大规模代码重构。
+
+      ## 渐进式确认
+
+      **步骤 1: 影响分析**（自动）
+      ```
+      分析完成。
+      将影响 156 个文件，约 12,000 行代码。
+
+      继续查看详情? (y/n)
+      ```
+
+      **步骤 2: 风险评估**（需要确认）
+      ```
+      风险评估:
+      - 低风险修改: 120 个文件（格式化、重命名）
+      - 中风险修改: 30 个文件（逻辑重构）
+      - 高风险修改: 6 个文件（架构变更）
+
+      建议分批执行。是否继续? (y/n)
+      ```
+
+      **步骤 3: 执行计划**（需要确认）
+      ```
+      执行计划:
+
+      批次 1（低风险）: 120 个文件
+        预计耗时: 2 分钟
+        可独立回滚: 是
+
+      批次 2（中风险）: 30 个文件
+        预计耗时: 5 分钟
+        需要测试验证: 是
+
+      批次 3（高风险）: 6 个文件
+        预计耗时: 15 分钟
+        需要人工审查: 是
+
+      选择执行方式:
+      1. 执行批次 1（推荐）
+      2. 执行全部
+      3. 取消操作
+      ```
+
+      ✅ 逐步展示信息
+      ✅ 分批执行降低风险
+      ✅ 给用户控制权
+      ```
+    en: |
+      Good 1: Risk-graded confirmation strategy
+      ```yaml
+      # Read-only - auto
+      ---
+      name: analyze-code
+      permissionMode: auto
+      ---
+
+      # Non-destructive modification - prompt
+      ---
+      name: format-code
+      permissionMode: prompt
+      ---
+
+      # Destructive operation - prompt + detailed explanation
+      ---
+      name: delete-files
+      permissionMode: prompt
+      ---
+
+      ✅ Choose mode based on risk
+      ✅ Balance security and efficiency
+      ```
+
+      Good 2: Batch operation confirmation
+      ```yaml
+      ---
+      name: format-files
+      permissionMode: prompt
+      ---
+
+      # Format Files
+
+      Format multiple files.
+
+      ## Confirmation Strategy
+
+      **Batch confirmation summary**:
+      ```
+      About to format 45 files:
+      - src/: 30 files
+      - tests/: 15 files
+
+      Estimated time: ~10 seconds
+      Reversible: Yes (via git)
+
+      Continue? (y/n)
+      ```
+
+      **Optional granularity**:
+      - `--confirm-all`: Batch confirm all
+      - `--confirm-dir`: Confirm by directory
+      - `--confirm-each`: Confirm individually
+
+      ✅ Provide batch confirmation
+      ✅ Show operation summary
+      ✅ Support different granularity
+      ```
+
+      Good 3: Detailed operation preview
+      ```yaml
+      ---
+      name: refactor-imports
+      permissionMode: prompt
+      ---
+
+      # Refactor Imports
+
+      Refactor import statements.
+
+      ## Confirmation Message Design
+
+      ```
+      About to execute refactoring:
+
+      📊 Scope:
+      - Files: 23
+      - Lines: ~450
+      - Estimated time: 30 seconds
+
+      🔄 Changes:
+      - Unify import syntax (require → import)
+      - Remove unused imports
+      - Sort imports alphabetically
+
+      📝 Preview:
+      src/utils.js:
+        - const fs = require('fs')
+        + import fs from 'fs'
+
+      src/index.js:
+        - import { unused } from './lib'
+        + // removed unused import
+
+      ⚠️ Recommendations:
+      - Ensure code is committed to Git
+      - Suggest running on test branch first
+
+      Continue? (y/n)
+      Type 'preview' to see all changes
+      Type 'n' to cancel
+      ```
+
+      ✅ Clear scope of impact
+      ✅ Specific change description
+      ✅ Risk warnings
+      ✅ Preview option
+      ```
+
+      Good 4: Staged confirmation
+      ```yaml
+      ---
+      name: migrate-database
+      permissionMode: prompt
+      ---
+
+      # Migrate Database
+
+      Database migration tool.
+
+      ## Staged Confirmation Strategy
+
+      **Stage 1: Pre-check** (automatic)
+      - Check database connection
+      - Validate migration scripts
+      - Analyze impact scope
+
+      **Stage 2: Confirm execution** (requires confirmation)
+      ```
+      Pre-check complete ✓
+
+      Migration plan:
+      - Table modifications: 3 tables
+      - Data migration: ~10,000 records
+      - Estimated time: 2-3 minutes
+      - Rollback plan: Ready
+
+      Execute migration? (y/n)
+      ```
+
+      **Stage 3: Executing** (progress feedback)
+      ```
+      Executing... [████████░░] 80%
+      - Migrated: 8,000 records
+      - Time remaining: ~30 seconds
+      ```
+
+      **Stage 4: Completion verification** (automatic)
+      - Data integrity check
+      - Generate migration report
+
+      ✅ Staged confirmation
+      ✅ Clear progress feedback
+      ✅ Automatic verification
+      ```
+
+      Good 5: User preference memory
+      ```yaml
+      ---
+      name: deploy
+      permissionMode: prompt
+      ---
+
+      # Deploy
+
+      Deploy application.
+
+      ## Preference Memory
+
+      **First use**:
+      ```
+      About to deploy to production.
+
+      ⚠️ This is a high-risk operation!
+
+      Remember your confirmation preference? (y/n)
+      - Choose 'y': Future deploys use same strategy
+      - Choose 'n': Ask every time
+
+      Default: Ask every time (recommended)
+      ```
+
+      **Subsequent use**:
+      ```
+      Based on your preference, will auto-execute deployment.
+
+      To change preference: /deploy --reset-preferences
+      To confirm this time: /deploy --confirm
+      ```
+
+      **Preference storage**:
+      ```json
+      // ~/.claude/preferences/deploy.json
+      {
+        "confirmBeforeDeploy": true,
+        "environments": {
+          "production": "always-confirm",
+          "staging": "auto",
+          "development": "auto"
+        }
+      }
+      ```
+
+      ✅ Remember user choice
+      ✅ Provide reset option
+      ✅ Differentiate by environment
+      ```
+
+      Good 6: Confirmation decision tree
+      ```markdown
+      # Confirmation Decision Tree
+
+      ## Operation Type Assessment
+
+      ### Read-only Operations
+      - List queries (ls, status)
+      - Data reading (read, cat)
+      - Analysis calculations (analyze, check)
+      → **permissionMode: auto**
+
+      ### Non-destructive Modifications
+      - Code formatting (format)
+      - Import organization (organize-imports)
+      - Comment addition (add-comments)
+      → **permissionMode: prompt**
+      → Provide change preview
+
+      ### Destructive Operations
+      - File deletion (delete, remove)
+      - Database modifications (migrate, drop)
+      - Configuration changes (reconfigure)
+      → **permissionMode: prompt**
+      → Detailed impact explanation
+      → Rollback plan description
+
+      ### Batch Operations
+      - Multi-file operations
+      - Bulk modifications
+      → **Provide batch confirmation**
+      → Show operation summary
+      → Support granularity selection
+
+      ### High-risk Operations
+      - Production deployment (deploy-prod)
+      - Permission changes (chmod, chown)
+      - System configuration (system-config)
+      → **Multiple confirmations**
+      → Require explicit input (e.g., "yes, deploy to production")
+      → Double confirmation mechanism
+      ```
+
+      Good 7: Progressive confirmation
+      ```yaml
+      ---
+      name: large-refactor
+      permissionMode: prompt
+      ---
+
+      # Large Refactor
+
+      Large-scale code refactoring.
+
+      ## Progressive Confirmation
+
+      **Step 1: Impact analysis** (automatic)
+      ```
+      Analysis complete.
+      Will affect 156 files, ~12,000 lines of code.
+
+      Continue to see details? (y/n)
+      ```
+
+      **Step 2: Risk assessment** (requires confirmation)
+      ```
+      Risk assessment:
+      - Low-risk changes: 120 files (formatting, renaming)
+      - Medium-risk changes: 30 files (logic refactoring)
+      - High-risk changes: 6 files (architecture changes)
+
+      Recommend batched execution. Continue? (y/n)
+      ```
+
+      **Step 3: Execution plan** (requires confirmation)
+      ```
+      Execution plan:
+
+      Batch 1 (low-risk): 120 files
+        Estimated time: 2 minutes
+        Independently reversible: Yes
+
+      Batch 2 (medium-risk): 30 files
+        Estimated time: 5 minutes
+        Requires test validation: Yes
+
+      Batch 3 (high-risk): 6 files
+        Estimated time: 15 minutes
+        Requires manual review: Yes
+
+      Choose execution:
+      1. Execute Batch 1 (recommended)
+      2. Execute all
+      3. Cancel operation
+      ```
+
+      ✅ Progressively reveal information
+      ✅ Batched execution reduces risk
+      ✅ Give user control
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **设计确认策略**:
+
+      1. **评估操作风险**：
+         - 只读 → auto
+         - 修改 → prompt
+         - 破坏性 → prompt + 详细说明
+         - 批量 → 批量确认
+
+      2. **设置 permissionMode**：
+         ```yaml
+         ---
+         name: my-skill
+         permissionMode: prompt  # or auto
+         ---
+         ```
+
+      3. **提供操作预览**：
+         ```markdown
+         ## 确认消息
+
+         即将执行:
+         - 影响范围: X 个文件
+         - 预计耗时: Y 秒
+         - 可撤销: 是/否
+
+         继续? (y/n)
+         ```
+
+      4. **批量操作优化**：
+         - 显示操作摘要而非逐个确认
+         - 提供 --confirm-all 选项
+         - 支持按目录/类型批量确认
+
+      **确认策略检查清单**:
+      - [ ] permissionMode 符合操作风险
+      - [ ] 危险操作有详细说明
+      - [ ] 批量操作有摘要确认
+      - [ ] 提供操作预览或影响范围
+      - [ ] 避免过度确认
+    en: |
+      **Design confirmation strategy**:
+
+      1. **Assess operation risk**:
+         - Read-only → auto
+         - Modification → prompt
+         - Destructive → prompt + detailed explanation
+         - Batch → batch confirmation
+
+      2. **Set permissionMode**:
+         ```yaml
+         ---
+         name: my-skill
+         permissionMode: prompt  # or auto
+         ---
+         ```
+
+      3. **Provide operation preview**:
+         ```markdown
+         ## Confirmation Message
+
+         About to execute:
+         - Scope: X files
+         - Estimated time: Y seconds
+         - Reversible: Yes/No
+
+         Continue? (y/n)
+         ```
+
+      4. **Optimize batch operations**:
+         - Show summary instead of individual confirmations
+         - Provide --confirm-all option
+         - Support batch confirmation by directory/type
+
+      **Confirmation Strategy Checklist**:
+      - [ ] permissionMode matches operation risk
+      - [ ] Dangerous operations have detailed explanation
+      - [ ] Batch operations have summary confirmation
+      - [ ] Provide operation preview or impact scope
+      - [ ] Avoid over-confirmation
+
+tags: ["interaction", "confirmation", "permission", "ux", "security"]
+related_rules: ["SKILL-003", "SEC-001", "SKILL-023", "SKILL-024"]

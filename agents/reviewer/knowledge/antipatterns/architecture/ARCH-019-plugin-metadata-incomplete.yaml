@@ -1,0 +1,738 @@
+id: ARCH-019
+name: plugin-metadata-incomplete
+severity: warning
+component_type: plugin
+category: architecture
+
+title:
+  zh: "插件元数据不完整"
+  en: "Plugin metadata incomplete"
+
+description:
+  zh: |
+    插件应该包含完整的元数据信息，提升可发现性和用户体验。
+
+    **必需字段**：
+    - **name**: 插件唯一标识符
+    - **version**: 语义化版本号 (semver)
+    - **description**: 插件功能描述
+    - **author**: 作者信息
+
+    **推荐字段**：
+    - **homepage**: 项目主页或仓库
+    - **license**: 许可证类型
+    - **keywords**: 搜索关键词
+    - **compatibility**: Claude Code 版本兼容性
+    - **dependencies**: 外部依赖声明
+
+    **最佳实践**：
+    - 使用语义化版本
+    - 提供清晰的描述
+    - 声明兼容性范围
+    - 列出所有依赖
+
+  en: |
+    Plugins should include complete metadata for discoverability and user experience.
+
+    **Required Fields**:
+    - **name**: Unique plugin identifier
+    - **version**: Semantic version (semver)
+    - **description**: Plugin functionality description
+    - **author**: Author information
+
+    **Recommended Fields**:
+    - **homepage**: Project homepage or repository
+    - **license**: License type
+    - **keywords**: Search keywords
+    - **compatibility**: Claude Code version compatibility
+    - **dependencies**: External dependency declarations
+
+    **Best Practices**:
+    - Use semantic versioning
+    - Provide clear description
+    - Declare compatibility range
+    - List all dependencies
+
+rationale:
+  zh: "基于官方建议 (plugin-system.md OFF-CFG-008~010)，完整元数据提升插件可维护性和用户信任"
+  en: "Per official recommendations (plugin-system.md OFF-CFG-008~010), complete metadata improves plugin maintainability and user trust"
+
+detection:
+  method: config-check
+  indicators:
+    - missing_required: "缺少必需字段"
+    - vague_description: "描述过于简短或模糊"
+    - no_version: "未指定版本号"
+    - no_compatibility: "未声明兼容性"
+
+official_reference:
+  document: "markdown_docs/plugin-system.md"
+  section: "插件元数据"
+  lines: "89-142"
+  quote: "plugin.json 必须包含 name、version、description。推荐 author、homepage、license。"
+
+examples:
+  bad:
+    zh: |
+      错误1：缺少必需字段
+      ```json
+      {
+        "name": "my-plugin"
+      }
+
+      ❌ 缺少 version
+      ❌ 缺少 description
+      ❌ 用户不知道插件功能
+      ```
+
+      错误2：版本号不规范
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "latest",
+        "description": "Analyze code"
+      }
+
+      ❌ "latest" 不是语义化版本
+      应该使用: "1.0.0", "0.2.1" 等
+      ```
+
+      错误3：描述过于简短
+      ```json
+      {
+        "name": "git-tools",
+        "version": "1.0.0",
+        "description": "Git"
+      }
+
+      ❌ 描述太简短
+      用户无法了解具体功能
+      ```
+
+      错误4：未声明依赖
+      ```json
+      {
+        "name": "data-processor",
+        "version": "1.0.0",
+        "description": "Process data files"
+      }
+
+      实际依赖:
+      - Node.js >= 16
+      - jq 命令行工具
+      - Python 3.8+
+
+      ❌ 未在 metadata 中声明
+      用户无法预知环境要求
+      ```
+    en: |
+      Error 1: Missing required fields
+      ```json
+      {
+        "name": "my-plugin"
+      }
+
+      ❌ Missing version
+      ❌ Missing description
+      ❌ User doesn't know plugin functionality
+      ```
+
+      Error 2: Non-standard version
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "latest",
+        "description": "Analyze code"
+      }
+
+      ❌ "latest" is not semantic version
+      Should use: "1.0.0", "0.2.1", etc.
+      ```
+
+      Error 3: Too brief description
+      ```json
+      {
+        "name": "git-tools",
+        "version": "1.0.0",
+        "description": "Git"
+      }
+
+      ❌ Description too brief
+      User cannot understand specific features
+      ```
+
+      Error 4: Undeclared dependencies
+      ```json
+      {
+        "name": "data-processor",
+        "version": "1.0.0",
+        "description": "Process data files"
+      }
+
+      Actual dependencies:
+      - Node.js >= 16
+      - jq CLI tool
+      - Python 3.8+
+
+      ❌ Not declared in metadata
+      User cannot anticipate environment requirements
+      ```
+
+  good:
+    zh: |
+      正确1：完整的元数据
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "1.2.0",
+        "description": "静态代码分析工具，支持 JavaScript、TypeScript、Python 代码质量检查和安全扫描",
+        "author": {
+          "name": "张三",
+          "email": "zhangsan@example.com"
+        },
+        "homepage": "https://github.com/zhangsan/code-analyzer",
+        "license": "MIT",
+        "keywords": ["code", "analyzer", "linter", "security"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        }
+      }
+
+      ✅ 所有必需字段完整
+      ✅ 描述清晰具体
+      ✅ 作者信息完整
+      ✅ 声明兼容性
+      ```
+
+      正确2：声明依赖
+      ```json
+      {
+        "name": "git-workflow",
+        "version": "2.0.1",
+        "description": "Git 工作流自动化工具，提供提交规范检查、分支管理和代码审查集成",
+        "author": "李四",
+        "homepage": "https://github.com/lisi/git-workflow",
+        "license": "Apache-2.0",
+        "keywords": ["git", "workflow", "automation"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0",
+          "git": ">=2.30.0"
+        },
+        "dependencies": {
+          "external": [
+            "git >= 2.30.0",
+            "gh CLI (optional, for PR features)"
+          ],
+          "mcp": [
+            "@modelcontextprotocol/server-github"
+          ]
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 85,
+          "platforms": ["macOS", "Linux", "Windows"]
+        }
+      }
+
+      ✅ 完整的依赖声明
+      ✅ 平台兼容性说明
+      ✅ 可选依赖标注
+      ✅ 质量指标透明
+      ```
+
+      正确3：多语言支持
+      ```json
+      {
+        "name": "data-transformer",
+        "version": "0.5.0",
+        "description": {
+          "en": "Transform data between JSON, YAML, CSV, and XML formats with validation",
+          "zh": "在 JSON、YAML、CSV 和 XML 格式之间转换数据并验证"
+        },
+        "author": {
+          "name": "王五",
+          "email": "wangwu@example.com",
+          "url": "https://wangwu.dev"
+        },
+        "homepage": "https://github.com/wangwu/data-transformer",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/wangwu/data-transformer.git"
+        },
+        "bugs": "https://github.com/wangwu/data-transformer/issues",
+        "license": "MIT",
+        "keywords": ["data", "transform", "json", "yaml", "csv", "xml"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0 <2.0.0"
+        },
+        "dependencies": {
+          "external": [
+            "Node.js >= 16.0.0",
+            "jq >= 1.6 (for JSON processing)",
+            "yq >= 4.0 (for YAML processing)"
+          ]
+        }
+      }
+
+      ✅ 多语言描述
+      ✅ 详细的作者信息
+      ✅ 仓库和问题追踪链接
+      ✅ 明确的兼容性范围
+      ```
+
+      正确4：Beta版本标注
+      ```json
+      {
+        "name": "ai-assistant",
+        "version": "0.3.0-beta.2",
+        "description": "AI辅助代码生成和重构工具（Beta测试版）",
+        "author": "赵六团队",
+        "homepage": "https://ai-assistant.dev",
+        "license": "MIT",
+        "keywords": ["ai", "code-generation", "refactoring"],
+        "compatibility": {
+          "claudeCode": ">=1.2.0"
+        },
+        "metadata": {
+          "maturity": "beta",
+          "stability": "experimental",
+          "breaking-changes": "可能在 1.0.0 之前发生 API 变化",
+          "feedback": "https://github.com/team/ai-assistant/discussions"
+        }
+      }
+
+      ✅ Beta 版本号格式正确
+      ✅ 明确标注成熟度
+      ✅ 警告潜在变化
+      ✅ 提供反馈渠道
+      ```
+
+      正确5：企业级元数据
+      ```json
+      {
+        "name": "enterprise-security-scanner",
+        "version": "3.1.4",
+        "description": "企业级安全扫描工具，支持 OWASP Top 10、CWE 和自定义安全规则",
+        "author": {
+          "name": "安全团队",
+          "organization": "某某科技有限公司",
+          "email": "security@company.com"
+        },
+        "homepage": "https://security.company.com/scanner",
+        "license": "Commercial",
+        "keywords": ["security", "scanner", "owasp", "enterprise"],
+        "compatibility": {
+          "claudeCode": ">=1.5.0",
+          "platforms": ["Linux", "macOS"]
+        },
+        "dependencies": {
+          "external": [
+            "Docker >= 20.10",
+            "Trivy >= 0.40",
+            "Semgrep >= 1.0"
+          ],
+          "mcp": [],
+          "lsp": []
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 92,
+          "certifications": ["SOC 2", "ISO 27001"],
+          "support": "enterprise@company.com",
+          "documentation": "https://docs.company.com/scanner",
+          "pricing": "Enterprise license required"
+        }
+      }
+
+      ✅ 企业级信息完整
+      ✅ 合规认证标注
+      ✅ 支持渠道清晰
+      ✅ 授权信息透明
+      ```
+
+      正确6：版本演进示例
+      ```markdown
+      # Version Evolution
+
+      ## v1.0.0 (Initial Release)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "1.0.0",
+        "description": "Basic functionality",
+        "author": "开发者"
+      }
+      ```
+
+      ## v1.5.0 (Adding Metadata)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "1.5.0",
+        "description": "Enhanced with more features",
+        "author": "开发者",
+        "homepage": "https://github.com/dev/my-plugin",
+        "license": "MIT",
+        "keywords": ["tool", "automation"]
+      }
+      ```
+
+      ## v2.0.0 (Complete Metadata)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "2.0.0",
+        "description": "Full-featured automation tool with AI assistance",
+        "author": {
+          "name": "开发者",
+          "email": "dev@example.com"
+        },
+        "homepage": "https://github.com/dev/my-plugin",
+        "license": "MIT",
+        "keywords": ["tool", "automation", "ai"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        },
+        "dependencies": {
+          "external": ["Node.js >= 16"]
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 80
+        }
+      }
+      ```
+
+      ✅ 逐步完善元数据
+      ✅ 版本号反映成熟度
+      ```
+    en: |
+      Good 1: Complete metadata
+      ```json
+      {
+        "name": "code-analyzer",
+        "version": "1.2.0",
+        "description": "Static code analysis tool with JavaScript, TypeScript, Python quality checks and security scanning",
+        "author": {
+          "name": "Zhang San",
+          "email": "zhangsan@example.com"
+        },
+        "homepage": "https://github.com/zhangsan/code-analyzer",
+        "license": "MIT",
+        "keywords": ["code", "analyzer", "linter", "security"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        }
+      }
+
+      ✅ All required fields complete
+      ✅ Clear specific description
+      ✅ Complete author info
+      ✅ Declared compatibility
+      ```
+
+      Good 2: Declare dependencies
+      ```json
+      {
+        "name": "git-workflow",
+        "version": "2.0.1",
+        "description": "Git workflow automation tool with commit linting, branch management, and code review integration",
+        "author": "Li Si",
+        "homepage": "https://github.com/lisi/git-workflow",
+        "license": "Apache-2.0",
+        "keywords": ["git", "workflow", "automation"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0",
+          "git": ">=2.30.0"
+        },
+        "dependencies": {
+          "external": [
+            "git >= 2.30.0",
+            "gh CLI (optional, for PR features)"
+          ],
+          "mcp": [
+            "@modelcontextprotocol/server-github"
+          ]
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 85,
+          "platforms": ["macOS", "Linux", "Windows"]
+        }
+      }
+
+      ✅ Complete dependency declaration
+      ✅ Platform compatibility stated
+      ✅ Optional dependencies marked
+      ✅ Quality metrics transparent
+      ```
+
+      Good 3: Multi-language support
+      ```json
+      {
+        "name": "data-transformer",
+        "version": "0.5.0",
+        "description": {
+          "en": "Transform data between JSON, YAML, CSV, and XML formats with validation",
+          "zh": "在 JSON、YAML、CSV 和 XML 格式之间转换数据并验证"
+        },
+        "author": {
+          "name": "Wang Wu",
+          "email": "wangwu@example.com",
+          "url": "https://wangwu.dev"
+        },
+        "homepage": "https://github.com/wangwu/data-transformer",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/wangwu/data-transformer.git"
+        },
+        "bugs": "https://github.com/wangwu/data-transformer/issues",
+        "license": "MIT",
+        "keywords": ["data", "transform", "json", "yaml", "csv", "xml"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0 <2.0.0"
+        },
+        "dependencies": {
+          "external": [
+            "Node.js >= 16.0.0",
+            "jq >= 1.6 (for JSON processing)",
+            "yq >= 4.0 (for YAML processing)"
+          ]
+        }
+      }
+
+      ✅ Multi-language description
+      ✅ Detailed author info
+      ✅ Repository and issue tracking links
+      ✅ Clear compatibility range
+      ```
+
+      Good 4: Beta version labeling
+      ```json
+      {
+        "name": "ai-assistant",
+        "version": "0.3.0-beta.2",
+        "description": "AI-powered code generation and refactoring tool (Beta)",
+        "author": "Zhao Liu Team",
+        "homepage": "https://ai-assistant.dev",
+        "license": "MIT",
+        "keywords": ["ai", "code-generation", "refactoring"],
+        "compatibility": {
+          "claudeCode": ">=1.2.0"
+        },
+        "metadata": {
+          "maturity": "beta",
+          "stability": "experimental",
+          "breaking-changes": "API may change before 1.0.0",
+          "feedback": "https://github.com/team/ai-assistant/discussions"
+        }
+      }
+
+      ✅ Correct beta version format
+      ✅ Clearly marked maturity
+      ✅ Warning of potential changes
+      ✅ Feedback channel provided
+      ```
+
+      Good 5: Enterprise-grade metadata
+      ```json
+      {
+        "name": "enterprise-security-scanner",
+        "version": "3.1.4",
+        "description": "Enterprise security scanner supporting OWASP Top 10, CWE, and custom security rules",
+        "author": {
+          "name": "Security Team",
+          "organization": "Company Technology Ltd.",
+          "email": "security@company.com"
+        },
+        "homepage": "https://security.company.com/scanner",
+        "license": "Commercial",
+        "keywords": ["security", "scanner", "owasp", "enterprise"],
+        "compatibility": {
+          "claudeCode": ">=1.5.0",
+          "platforms": ["Linux", "macOS"]
+        },
+        "dependencies": {
+          "external": [
+            "Docker >= 20.10",
+            "Trivy >= 0.40",
+            "Semgrep >= 1.0"
+          ],
+          "mcp": [],
+          "lsp": []
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 92,
+          "certifications": ["SOC 2", "ISO 27001"],
+          "support": "enterprise@company.com",
+          "documentation": "https://docs.company.com/scanner",
+          "pricing": "Enterprise license required"
+        }
+      }
+
+      ✅ Complete enterprise info
+      ✅ Compliance certifications noted
+      ✅ Clear support channels
+      ✅ Transparent licensing info
+      ```
+
+      Good 6: Version evolution example
+      ```markdown
+      # Version Evolution
+
+      ## v1.0.0 (Initial Release)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "1.0.0",
+        "description": "Basic functionality",
+        "author": "Developer"
+      }
+      ```
+
+      ## v1.5.0 (Adding Metadata)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "1.5.0",
+        "description": "Enhanced with more features",
+        "author": "Developer",
+        "homepage": "https://github.com/dev/my-plugin",
+        "license": "MIT",
+        "keywords": ["tool", "automation"]
+      }
+      ```
+
+      ## v2.0.0 (Complete Metadata)
+      ```json
+      {
+        "name": "my-plugin",
+        "version": "2.0.0",
+        "description": "Full-featured automation tool with AI assistance",
+        "author": {
+          "name": "Developer",
+          "email": "dev@example.com"
+        },
+        "homepage": "https://github.com/dev/my-plugin",
+        "license": "MIT",
+        "keywords": ["tool", "automation", "ai"],
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        },
+        "dependencies": {
+          "external": ["Node.js >= 16"]
+        },
+        "metadata": {
+          "maturity": "stable",
+          "testCoverage": 80
+        }
+      }
+      ```
+
+      ✅ Gradually improving metadata
+      ✅ Version reflects maturity
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **完善插件元数据**:
+
+      1. **添加必需字段**：
+         ```json
+         {
+           "name": "my-plugin",
+           "version": "1.0.0",
+           "description": "详细的功能描述",
+           "author": "作者名称"
+         }
+         ```
+
+      2. **使用语义化版本**：
+         - 主版本: 不兼容的 API 变化
+         - 次版本: 向后兼容的功能添加
+         - 修订版本: 向后兼容的问题修复
+         - 预发布: 1.0.0-alpha.1, 1.0.0-beta.2
+
+      3. **添加推荐字段**：
+         ```json
+         {
+           "homepage": "https://github.com/user/plugin",
+           "license": "MIT",
+           "keywords": ["tool", "automation"],
+           "compatibility": {
+             "claudeCode": ">=1.0.0"
+           }
+         }
+         ```
+
+      4. **声明依赖**：
+         ```json
+         {
+           "dependencies": {
+             "external": ["Node.js >= 16", "jq >= 1.6"],
+             "mcp": ["@modelcontextprotocol/server-github"]
+           }
+         }
+         ```
+
+      **元数据检查清单**:
+      - [ ] name, version, description, author 完整
+      - [ ] 版本号符合 semver 规范
+      - [ ] 描述清晰具体（>20字）
+      - [ ] 添加 homepage/license/keywords
+      - [ ] 声明 compatibility
+      - [ ] 列出所有 external dependencies
+    en: |
+      **Complete plugin metadata**:
+
+      1. **Add required fields**:
+         ```json
+         {
+           "name": "my-plugin",
+           "version": "1.0.0",
+           "description": "Detailed functionality description",
+           "author": "Author name"
+         }
+         ```
+
+      2. **Use semantic versioning**:
+         - Major: Incompatible API changes
+         - Minor: Backward-compatible features
+         - Patch: Backward-compatible fixes
+         - Pre-release: 1.0.0-alpha.1, 1.0.0-beta.2
+
+      3. **Add recommended fields**:
+         ```json
+         {
+           "homepage": "https://github.com/user/plugin",
+           "license": "MIT",
+           "keywords": ["tool", "automation"],
+           "compatibility": {
+             "claudeCode": ">=1.0.0"
+           }
+         }
+         ```
+
+      4. **Declare dependencies**:
+         ```json
+         {
+           "dependencies": {
+             "external": ["Node.js >= 16", "jq >= 1.6"],
+             "mcp": ["@modelcontextprotocol/server-github"]
+           }
+         }
+         ```
+
+      **Metadata Checklist**:
+      - [ ] name, version, description, author complete
+      - [ ] Version follows semver
+      - [ ] Description clear and specific (>20 chars)
+      - [ ] Added homepage/license/keywords
+      - [ ] Declared compatibility
+      - [ ] Listed all external dependencies
+
+tags: ["architecture", "metadata", "plugin", "configuration", "versioning"]
+related_rules: ["QUA-002", "DOC-001", "DEP-001", "DEP-002"]
