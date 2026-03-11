@@ -1,0 +1,679 @@
+id: TEST-001
+name: test-coverage-missing
+severity: info
+component_type: all
+category: testability
+
+title:
+  zh: "组件缺少测试覆盖"
+  en: "Component missing test coverage"
+
+description:
+  zh: |
+    所有 Claude Code 组件都应该包含测试用例验证功能。
+
+    **测试类型**：
+    - **单元测试**: 测试单个 Skill/SubAgent 的核心功能
+    - **集成测试**: 测试组件与 Claude Code 的集成
+    - **端到端测试**: 测试完整工作流
+
+    **测试方式**：
+    - 手动测试说明 (README 中的测试步骤)
+    - 自动化测试脚本 (推荐)
+    - 示例输入输出
+
+    **最佳实践**：
+    - 每个 Skill/SubAgent 至少有基础测试
+    - 测试覆盖核心功能和边界情况
+    - 提供测试数据和预期结果
+    - 在 README 中说明如何运行测试
+
+  en: |
+    All Claude Code components should include test cases to verify functionality.
+
+    **Test Types**:
+    - **Unit tests**: Test core functionality of individual Skill/SubAgent
+    - **Integration tests**: Test component integration with Claude Code
+    - **End-to-end tests**: Test complete workflows
+
+    **Test Methods**:
+    - Manual testing instructions (test steps in README)
+    - Automated test scripts (recommended)
+    - Example inputs/outputs
+
+    **Best Practices**:
+    - Each Skill/SubAgent has at least basic tests
+    - Tests cover core functionality and edge cases
+    - Provide test data and expected results
+    - Explain how to run tests in README
+
+rationale:
+  zh: "基于官方建议 (testing.md OFF-TEST-001~003)，测试确保组件质量和可靠性"
+  en: "Per official recommendations (testing.md OFF-TEST-001~003), tests ensure component quality and reliability"
+
+detection:
+  method: file-check
+  indicators:
+    - missing_test_dir: "无 tests/ 目录"
+    - missing_test_doc: "README 未说明测试方法"
+    - no_examples: "无示例输入输出"
+
+official_reference:
+  document: "markdown_docs/testing-best-practices.md"
+  section: "组件测试"
+  lines: "34-89"
+  quote: "所有组件应包含测试。手动测试步骤或自动化测试脚本。"
+
+examples:
+  bad:
+    zh: |
+      错误1：完全没有测试
+      ```
+      my-plugin/
+        skills/
+          analyzer/
+            SKILL.md
+        README.md
+
+      无测试目录
+      README 未说明如何测试
+      ```
+
+      错误2：README 未说明测试方法
+      ```markdown
+      # Code Analyzer
+
+      ## Installation
+      Copy to skills/analyzer/
+
+      ## Usage
+      /analyze <file>
+
+      未提供测试步骤
+      用户不知道如何验证功能
+      ```
+
+      错误3：缺少示例输入输出
+      ```markdown
+      # Data Transformer
+
+      ## Usage
+      /transform <data>
+
+      未说明输入格式
+      未展示输出结果
+      用户无法验证是否正常工作
+      ```
+    en: |
+      Error 1: No tests at all
+      ```
+      my-plugin/
+        skills/
+          analyzer/
+            SKILL.md
+        README.md
+
+      No test directory
+      README doesn't explain how to test
+      ```
+
+      Error 2: README doesn't explain testing
+      ```markdown
+      # Code Analyzer
+
+      ## Installation
+      Copy to skills/analyzer/
+
+      ## Usage
+      /analyze <file>
+
+      No test steps provided
+      User doesn't know how to verify functionality
+      ```
+
+      Error 3: Missing example inputs/outputs
+      ```markdown
+      # Data Transformer
+
+      ## Usage
+      /transform <data>
+
+      Doesn't explain input format
+      Doesn't show output results
+      User cannot verify if working correctly
+      ```
+
+  good:
+    zh: |
+      正确1：手动测试说明
+      ```markdown
+      # Code Analyzer
+
+      ## Testing
+
+      ### Manual Testing
+
+      1. **Create test file**:
+         ```bash
+         echo "function test() { console.log('test'); }" > test.js
+         ```
+
+      2. **Run analyzer**:
+         ```
+         /analyze test.js
+         ```
+
+      3. **Expected output**:
+         ```
+         Function: test
+         Lines: 1
+         Complexity: Low
+         ```
+
+      ### Test Cases
+
+      #### Case 1: Simple function
+      - Input: `function foo() { return 1; }`
+      - Expected: Complexity Low, Lines 1
+
+      #### Case 2: Complex function
+      - Input: `function bar() { if (x) { for... } else... }`
+      - Expected: Complexity High, Lines 5+
+
+      ### Edge Cases
+      - Empty file → "No code found"
+      - Invalid syntax → "Syntax error detected"
+      ```
+
+      正确2：自动化测试脚本
+      ```
+      my-plugin/
+        skills/
+          analyzer/
+            SKILL.md
+        tests/
+          test-analyzer.sh
+          test-cases/
+            simple.js
+            complex.js
+        README.md
+      ```
+
+      tests/test-analyzer.sh:
+      ```bash
+      #!/bin/bash
+
+      echo "Testing Code Analyzer..."
+
+      # Test 1: Simple function
+      result=$(claude "/analyze tests/test-cases/simple.js")
+      if [[ "$result" == *"Complexity: Low"* ]]; then
+        echo "✓ Test 1 passed"
+      else
+        echo "✗ Test 1 failed"
+        exit 1
+      fi
+
+      # Test 2: Complex function
+      result=$(claude "/analyze tests/test-cases/complex.js")
+      if [[ "$result" == *"Complexity: High"* ]]; then
+        echo "✓ Test 2 passed"
+      else
+        echo "✗ Test 2 failed"
+        exit 1
+      fi
+
+      echo "All tests passed!"
+      ```
+
+      README:
+      ```markdown
+      ## Testing
+
+      Run automated tests:
+      ```bash
+      chmod +x tests/test-analyzer.sh
+      ./tests/test-analyzer.sh
+      ```
+
+      Expected output:
+      ```
+      Testing Code Analyzer...
+      ✓ Test 1 passed
+      ✓ Test 2 passed
+      All tests passed!
+      ```
+      ```
+
+      正确3：完整测试文档
+      ```markdown
+      # Data Transformer
+
+      ## Testing
+
+      ### Quick Smoke Test
+
+      ```bash
+      echo '{"name": "test"}' | claude "/transform json-to-yaml"
+      ```
+
+      Expected:
+      ```yaml
+      name: test
+      ```
+
+      ### Comprehensive Test Suite
+
+      #### Test 1: JSON to YAML
+      **Input**:
+      ```json
+      {"users": [{"name": "Alice", "age": 30}]}
+      ```
+
+      **Command**:
+      ```
+      /transform json-to-yaml input.json
+      ```
+
+      **Expected Output**:
+      ```yaml
+      users:
+        - name: Alice
+          age: 30
+      ```
+
+      #### Test 2: YAML to JSON
+      **Input**:
+      ```yaml
+      config:
+        debug: true
+        port: 8080
+      ```
+
+      **Expected**:
+      ```json
+      {"config": {"debug": true, "port": 8080}}
+      ```
+
+      ### Edge Cases
+
+      | Input | Expected Behavior |
+      |-------|-------------------|
+      | Empty file | "No data to transform" |
+      | Invalid JSON | "JSON parse error" |
+      | Malformed YAML | "YAML parse error" |
+      | Unsupported format | "Format not supported" |
+
+      ### Performance Tests
+
+      - Small file (<1KB): <1s
+      - Medium file (1-10MB): <5s
+      - Large file (>10MB): Show progress
+
+      ### Automated Test Script
+
+      Run full test suite:
+      ```bash
+      npm test
+      ```
+
+      or manually:
+      ```bash
+      bash tests/run-all-tests.sh
+      ```
+      ```
+
+      正确4：集成测试
+      ```markdown
+      # Plugin Integration Tests
+
+      ## Testing with Claude Code
+
+      ### Setup Test Environment
+      ```bash
+      # Install plugin
+      cp -r my-plugin ~/.claude/plugins/
+
+      # Start Claude Code in test mode
+      claude --test-mode
+      ```
+
+      ### Integration Test 1: Skill Loading
+      ```
+      Expected: Plugin skills appear in skill list
+      Test: List all skills
+      Verify: /my-plugin:skill-name is available
+      ```
+
+      ### Integration Test 2: Hook Execution
+      ```
+      Expected: Hooks trigger on events
+      Test: Create file (trigger PreToolUse hook)
+      Verify: Hook validation runs
+      ```
+
+      ### Integration Test 3: MCP Server
+      ```
+      Expected: MCP server starts and provides tools
+      Test: Check available tools
+      Verify: Custom MCP tools listed
+      ```
+
+      ## Automated Integration Tests
+
+      ```bash
+      # Run integration test suite
+      npm run test:integration
+      ```
+
+      Tests:
+      1. Plugin loads successfully
+      2. Skills are discoverable
+      3. Hooks execute correctly
+      4. MCP/LSP servers start
+      5. Permissions work correctly
+      ```
+    en: |
+      Good 1: Manual testing instructions
+      ```markdown
+      # Code Analyzer
+
+      ## Testing
+
+      ### Manual Testing
+
+      1. **Create test file**:
+         ```bash
+         echo "function test() { console.log('test'); }" > test.js
+         ```
+
+      2. **Run analyzer**:
+         ```
+         /analyze test.js
+         ```
+
+      3. **Expected output**:
+         ```
+         Function: test
+         Lines: 1
+         Complexity: Low
+         ```
+
+      ### Test Cases
+
+      #### Case 1: Simple function
+      - Input: `function foo() { return 1; }`
+      - Expected: Complexity Low, Lines 1
+
+      #### Case 2: Complex function
+      - Input: `function bar() { if (x) { for... } else... }`
+      - Expected: Complexity High, Lines 5+
+
+      ### Edge Cases
+      - Empty file → "No code found"
+      - Invalid syntax → "Syntax error detected"
+      ```
+
+      Good 2: Automated test scripts
+      ```
+      my-plugin/
+        skills/
+          analyzer/
+            SKILL.md
+        tests/
+          test-analyzer.sh
+          test-cases/
+            simple.js
+            complex.js
+        README.md
+      ```
+
+      tests/test-analyzer.sh:
+      ```bash
+      #!/bin/bash
+
+      echo "Testing Code Analyzer..."
+
+      # Test 1: Simple function
+      result=$(claude "/analyze tests/test-cases/simple.js")
+      if [[ "$result" == *"Complexity: Low"* ]]; then
+        echo "✓ Test 1 passed"
+      else
+        echo "✗ Test 1 failed"
+        exit 1
+      fi
+
+      # Test 2: Complex function
+      result=$(claude "/analyze tests/test-cases/complex.js")
+      if [[ "$result" == *"Complexity: High"* ]]; then
+        echo "✓ Test 2 passed"
+      else
+        echo "✗ Test 2 failed"
+        exit 1
+      fi
+
+      echo "All tests passed!"
+      ```
+
+      README:
+      ```markdown
+      ## Testing
+
+      Run automated tests:
+      ```bash
+      chmod +x tests/test-analyzer.sh
+      ./tests/test-analyzer.sh
+      ```
+
+      Expected output:
+      ```
+      Testing Code Analyzer...
+      ✓ Test 1 passed
+      ✓ Test 2 passed
+      All tests passed!
+      ```
+      ```
+
+      Good 3: Complete test documentation
+      ```markdown
+      # Data Transformer
+
+      ## Testing
+
+      ### Quick Smoke Test
+
+      ```bash
+      echo '{"name": "test"}' | claude "/transform json-to-yaml"
+      ```
+
+      Expected:
+      ```yaml
+      name: test
+      ```
+
+      ### Comprehensive Test Suite
+
+      #### Test 1: JSON to YAML
+      **Input**:
+      ```json
+      {"users": [{"name": "Alice", "age": 30}]}
+      ```
+
+      **Command**:
+      ```
+      /transform json-to-yaml input.json
+      ```
+
+      **Expected Output**:
+      ```yaml
+      users:
+        - name: Alice
+          age: 30
+      ```
+
+      #### Test 2: YAML to JSON
+      **Input**:
+      ```yaml
+      config:
+        debug: true
+        port: 8080
+      ```
+
+      **Expected**:
+      ```json
+      {"config": {"debug": true, "port": 8080}}
+      ```
+
+      ### Edge Cases
+
+      | Input | Expected Behavior |
+      |-------|-------------------|
+      | Empty file | "No data to transform" |
+      | Invalid JSON | "JSON parse error" |
+      | Malformed YAML | "YAML parse error" |
+      | Unsupported format | "Format not supported" |
+
+      ### Performance Tests
+
+      - Small file (<1KB): <1s
+      - Medium file (1-10MB): <5s
+      - Large file (>10MB): Show progress
+
+      ### Automated Test Script
+
+      Run full test suite:
+      ```bash
+      npm test
+      ```
+
+      or manually:
+      ```bash
+      bash tests/run-all-tests.sh
+      ```
+      ```
+
+      Good 4: Integration tests
+      ```markdown
+      # Plugin Integration Tests
+
+      ## Testing with Claude Code
+
+      ### Setup Test Environment
+      ```bash
+      # Install plugin
+      cp -r my-plugin ~/.claude/plugins/
+
+      # Start Claude Code in test mode
+      claude --test-mode
+      ```
+
+      ### Integration Test 1: Skill Loading
+      ```
+      Expected: Plugin skills appear in skill list
+      Test: List all skills
+      Verify: /my-plugin:skill-name is available
+      ```
+
+      ### Integration Test 2: Hook Execution
+      ```
+      Expected: Hooks trigger on events
+      Test: Create file (trigger PreToolUse hook)
+      Verify: Hook validation runs
+      ```
+
+      ### Integration Test 3: MCP Server
+      ```
+      Expected: MCP server starts and provides tools
+      Test: Check available tools
+      Verify: Custom MCP tools listed
+      ```
+
+      ## Automated Integration Tests
+
+      ```bash
+      # Run integration test suite
+      npm run test:integration
+      ```
+
+      Tests:
+      1. Plugin loads successfully
+      2. Skills are discoverable
+      3. Hooks execute correctly
+      4. MCP/LSP servers start
+      5. Permissions work correctly
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **添加测试覆盖**:
+
+      1. **最简单**: 在 README 添加手动测试步骤
+         ```markdown
+         ## Testing
+
+         1. Run: `/my-skill test-input`
+         2. Expected: [describe output]
+         3. Edge cases: [list edge cases]
+         ```
+
+      2. **推荐**: 创建测试脚本
+         ```bash
+         tests/
+           test.sh          # 测试脚本
+           test-cases/      # 测试数据
+             input.txt
+             expected.txt
+         ```
+
+      3. **最佳**: 自动化测试套件
+         ```bash
+         tests/
+           unit/            # 单元测试
+           integration/     # 集成测试
+           e2e/             # 端到端测试
+         ```
+
+      **最小要求**:
+      - [ ] README 有测试说明
+      - [ ] 至少 2-3 个测试用例
+      - [ ] 包含边界情况
+      - [ ] 提供预期结果
+    en: |
+      **Add test coverage**:
+
+      1. **Simplest**: Add manual test steps to README
+         ```markdown
+         ## Testing
+
+         1. Run: `/my-skill test-input`
+         2. Expected: [describe output]
+         3. Edge cases: [list edge cases]
+         ```
+
+      2. **Recommended**: Create test scripts
+         ```bash
+         tests/
+           test.sh          # Test script
+           test-cases/      # Test data
+             input.txt
+             expected.txt
+         ```
+
+      3. **Best**: Automated test suite
+         ```bash
+         tests/
+           unit/            # Unit tests
+           integration/     # Integration tests
+           e2e/             # End-to-end tests
+         ```
+
+      **Minimum Requirements**:
+      - [ ] README has testing instructions
+      - [ ] At least 2-3 test cases
+      - [ ] Includes edge cases
+      - [ ] Provides expected results
+
+tags: ["testing", "quality", "verification", "test-coverage", "automation"]
+related_rules: ["QUA-001", "DOC-001", "TEST-002"]

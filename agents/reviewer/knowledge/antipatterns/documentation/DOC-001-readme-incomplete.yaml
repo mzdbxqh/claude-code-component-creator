@@ -1,0 +1,727 @@
+id: DOC-001
+name: readme-incomplete
+severity: info
+component_type: all
+category: documentation
+
+title:
+  zh: "README 文档不完整"
+  en: "README documentation incomplete"
+
+description:
+  zh: |
+    所有 Claude Code 组件都应该有完整的 README 文档。
+
+    **必需内容**：
+    - **简介**: 组件功能和用途
+    - **安装**: 详细安装步骤
+    - **使用**: 使用方法和示例
+    - **配置**: 配置选项说明
+    - **测试**: 如何测试验证
+    - **故障排除**: 常见问题解决
+
+    **可选内容**：
+    - 架构说明
+    - 贡献指南
+    - 许可证
+    - 更新日志
+
+    **质量标准**：
+    - 清晰的标题和结构
+    - 完整的代码示例
+    - 实际可运行的命令
+    - 预期输出展示
+
+  en: |
+    All Claude Code components should have complete README documentation.
+
+    **Required Sections**:
+    - **Overview**: Component功能 and purpose
+    - **Installation**: Detailed install steps
+    - **Usage**: Usage methods and examples
+    - **Configuration**: Config options explained
+    - **Testing**: How to test and verify
+    - **Troubleshooting**: Common issues and solutions
+
+    **Optional Sections**:
+    - Architecture explanation
+    - Contributing guidelines
+    - License
+    - Changelog
+
+    **Quality Standards**:
+    - Clear headings and structure
+    - Complete code examples
+    - Runnable commands
+    - Expected output shown
+
+rationale:
+  zh: "基于官方建议 (documentation.md OFF-DOC-001~003)，完整文档提升用户体验和组件可用性"
+  en: "Per official recommendations (documentation.md OFF-DOC-001~003), complete documentation improves UX and component usability"
+
+detection:
+  method: content-check
+  indicators:
+    - missing_sections: "缺少必需章节"
+    - incomplete_examples: "示例不完整或无法运行"
+    - no_troubleshooting: "无故障排除说明"
+
+official_reference:
+  document: "markdown_docs/documentation-standards.md"
+  section: "README 要求"
+  lines: "45-98"
+  quote: "README 必须包含: 简介、安装、使用、配置、测试。清晰示例和故障排除。"
+
+examples:
+  bad:
+    zh: |
+      错误1：极简 README
+      ```markdown
+      # My Plugin
+
+      A plugin for Claude Code.
+
+      ## Installation
+      Copy files.
+
+      仅有标题和一句话
+      无具体安装步骤
+      无使用说明
+      ```
+
+      错误2：无法运行的示例
+      ```markdown
+      # Code Formatter
+
+      ## Usage
+      /format
+
+      示例不完整
+      用户不知道如何使用
+      缺少参数说明
+      ```
+
+      错误3：无故障排除
+      ```markdown
+      # Database Plugin
+
+      ## Installation
+      1. npm install
+      2. Configure .env
+
+      ## Usage
+      /db-query "SELECT..."
+
+      安装可能失败
+      配置可能错误
+      但无故障排除说明
+      ```
+    en: |
+      Error 1: Minimal README
+      ```markdown
+      # My Plugin
+
+      A plugin for Claude Code.
+
+      ## Installation
+      Copy files.
+
+      Only title and one sentence
+      No specific install steps
+      No usage instructions
+      ```
+
+      Error 2: Non-runnable examples
+      ```markdown
+      # Code Formatter
+
+      ## Usage
+      /format
+
+      Example incomplete
+      User doesn't know how to use
+      Missing parameter explanation
+      ```
+
+      Error 3: No troubleshooting
+      ```markdown
+      # Database Plugin
+
+      ## Installation
+      1. npm install
+      2. Configure .env
+
+      ## Usage
+      /db-query "SELECT..."
+
+      Installation may fail
+      Configuration may be wrong
+      But no troubleshooting section
+      ```
+
+  good:
+    zh: |
+      正确1：完整的 README
+      ```markdown
+      # Code Analyzer Plugin
+
+      静态代码分析工具，检测代码质量问题。
+
+      ## Features
+
+      - 复杂度分析
+      - 代码异味检测
+      - 最佳实践建议
+      - 多语言支持 (JS, Python, Java)
+
+      ## Installation
+
+      ### Prerequisites
+      - Node.js 18+
+      - Claude Code CLI
+
+      ### Install Plugin
+      ```bash
+      # Clone repository
+      git clone https://github.com/user/code-analyzer-plugin
+      cd code-analyzer-plugin
+
+      # Install to Claude Code
+      cp -r . ~/.claude/plugins/code-analyzer
+      ```
+
+      ### Verify Installation
+      ```bash
+      claude
+      # In Claude, check:
+      # /code-analyzer should be available
+      ```
+
+      ## Configuration
+
+      Optional: Create `~/.claude/code-analyzer-config.json`:
+      ```json
+      {
+        "maxComplexity": 10,
+        "ignorePatterns": ["**/*.test.js"],
+        "rules": {
+          "no-console": "warn",
+          "complexity": "error"
+        }
+      }
+      ```
+
+      ## Usage
+
+      ### Basic Analysis
+      ```bash
+      /analyze <file>
+      ```
+
+      Example:
+      ```bash
+      /analyze src/utils.js
+      ```
+
+      Output:
+      ```
+      Analyzing src/utils.js...
+
+      Issues found:
+      - Line 45: High complexity (score: 15)
+      - Line 67: Code smell: Long parameter list
+      - Line 89: Best practice: Use const instead of let
+
+      Summary: 3 issues (1 error, 2 warnings)
+      ```
+
+      ### Full Project Scan
+      ```bash
+      /analyze-project
+      ```
+
+      This will scan all files in current directory.
+
+      ### Custom Rules
+      ```bash
+      /analyze --rules custom-rules.json <file>
+      ```
+
+      ## Testing
+
+      ### Quick Test
+      ```bash
+      echo "function test() { if (a) { if (b) { if (c) { return 1; } } } }" > test.js
+      /analyze test.js
+      ```
+
+      Expected: High complexity warning
+
+      ### Full Test Suite
+      ```bash
+      npm test
+      ```
+
+      See [tests/README.md](tests/README.md) for details.
+
+      ## Troubleshooting
+
+      ### Issue: Plugin not found
+      **Symptom**: `/analyze` command not available
+
+      **Solutions**:
+      1. Verify installation:
+         ```bash
+         ls ~/.claude/plugins/code-analyzer
+         ```
+      2. Restart Claude Code
+      3. Check logs: `~/.claude/logs/`
+
+      ### Issue: Analysis fails
+      **Symptom**: "Analysis error" message
+
+      **Solutions**:
+      1. Check file exists and readable
+      2. Verify file encoding (UTF-8)
+      3. Try with `--debug` flag:
+         ```bash
+         /analyze --debug <file>
+         ```
+
+      ### Issue: Too many false positives
+      **Solution**: Adjust config:
+      ```json
+      {
+        "maxComplexity": 20,
+        "rules": {
+          "complexity": "warn"
+        }
+      }
+      ```
+
+      ## Architecture
+
+      ```
+      code-analyzer/
+        skills/
+          analyze/          # Main analysis skill
+          analyze-project/  # Project scanner
+        lib/
+          parsers/          # Language parsers
+          rules/            # Analysis rules
+        tests/
+        README.md
+      ```
+
+      ## Contributing
+
+      See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+      ## License
+
+      MIT License - see [LICENSE](LICENSE)
+
+      ## Changelog
+
+      ### v1.0.0 (2026-03-11)
+      - Initial release
+      - Support JS, Python, Java
+      ```
+
+      正确2：包含视频演示
+      ```markdown
+      # Visual Dashboard Plugin
+
+      ## Quick Demo
+
+      ![Demo](docs/demo.gif)
+
+      Watch: [5-minute video tutorial](https://youtube.com/...)
+
+      ## Installation
+      [详细步骤...]
+
+      ## Usage Examples
+
+      ### Example 1: Create Dashboard
+      ![Step 1](docs/step1.png)
+      ```bash
+      /dashboard create my-dashboard
+      ```
+      ![Result](docs/result1.png)
+
+      ### Example 2: Add Widget
+      ![Step 2](docs/step2.png)
+      ```bash
+      /dashboard add-widget chart
+      ```
+
+      Visual examples help users understand quickly.
+      ```
+
+      正确3：分层文档
+      ```markdown
+      # Advanced Plugin
+
+      ## Quick Start
+
+      For most users:
+      ```bash
+      npm install @user/advanced-plugin
+      /plugin-command
+      ```
+
+      Done! See [Basic Usage](#basic-usage) below.
+
+      ---
+
+      ## Basic Usage
+
+      Simple examples for common tasks...
+
+      ---
+
+      ## Advanced Usage
+
+      For power users, see [Advanced Guide](docs/ADVANCED.md):
+      - Custom configurations
+      - API integration
+      - Scripting
+
+      ---
+
+      ## Full Documentation
+
+      - [Installation Guide](docs/INSTALL.md)
+      - [Configuration Reference](docs/CONFIG.md)
+      - [API Documentation](docs/API.md)
+      - [Troubleshooting](docs/TROUBLESHOOTING.md)
+      - [FAQ](docs/FAQ.md)
+
+      Progressive disclosure: Basic first, advanced later.
+      ```
+    en: |
+      Good 1: Complete README
+      ```markdown
+      # Code Analyzer Plugin
+
+      Static code analysis tool for detecting code quality issues.
+
+      ## Features
+
+      - Complexity analysis
+      - Code smell detection
+      - Best practice suggestions
+      - Multi-language support (JS, Python, Java)
+
+      ## Installation
+
+      ### Prerequisites
+      - Node.js 18+
+      - Claude Code CLI
+
+      ### Install Plugin
+      ```bash
+      # Clone repository
+      git clone https://github.com/user/code-analyzer-plugin
+      cd code-analyzer-plugin
+
+      # Install to Claude Code
+      cp -r . ~/.claude/plugins/code-analyzer
+      ```
+
+      ### Verify Installation
+      ```bash
+      claude
+      # In Claude, check:
+      # /code-analyzer should be available
+      ```
+
+      ## Configuration
+
+      Optional: Create `~/.claude/code-analyzer-config.json`:
+      ```json
+      {
+        "maxComplexity": 10,
+        "ignorePatterns": ["**/*.test.js"],
+        "rules": {
+          "no-console": "warn",
+          "complexity": "error"
+        }
+      }
+      ```
+
+      ## Usage
+
+      ### Basic Analysis
+      ```bash
+      /analyze <file>
+      ```
+
+      Example:
+      ```bash
+      /analyze src/utils.js
+      ```
+
+      Output:
+      ```
+      Analyzing src/utils.js...
+
+      Issues found:
+      - Line 45: High complexity (score: 15)
+      - Line 67: Code smell: Long parameter list
+      - Line 89: Best practice: Use const instead of let
+
+      Summary: 3 issues (1 error, 2 warnings)
+      ```
+
+      ### Full Project Scan
+      ```bash
+      /analyze-project
+      ```
+
+      This will scan all files in current directory.
+
+      ### Custom Rules
+      ```bash
+      /analyze --rules custom-rules.json <file>
+      ```
+
+      ## Testing
+
+      ### Quick Test
+      ```bash
+      echo "function test() { if (a) { if (b) { if (c) { return 1; } } } }" > test.js
+      /analyze test.js
+      ```
+
+      Expected: High complexity warning
+
+      ### Full Test Suite
+      ```bash
+      npm test
+      ```
+
+      See [tests/README.md](tests/README.md) for details.
+
+      ## Troubleshooting
+
+      ### Issue: Plugin not found
+      **Symptom**: `/analyze` command not available
+
+      **Solutions**:
+      1. Verify installation:
+         ```bash
+         ls ~/.claude/plugins/code-analyzer
+         ```
+      2. Restart Claude Code
+      3. Check logs: `~/.claude/logs/`
+
+      ### Issue: Analysis fails
+      **Symptom**: "Analysis error" message
+
+      **Solutions**:
+      1. Check file exists and readable
+      2. Verify file encoding (UTF-8)
+      3. Try with `--debug` flag:
+         ```bash
+         /analyze --debug <file>
+         ```
+
+      ### Issue: Too many false positives
+      **Solution**: Adjust config:
+      ```json
+      {
+        "maxComplexity": 20,
+        "rules": {
+          "complexity": "warn"
+        }
+      }
+      ```
+
+      ## Architecture
+
+      ```
+      code-analyzer/
+        skills/
+          analyze/          # Main analysis skill
+          analyze-project/  # Project scanner
+        lib/
+          parsers/          # Language parsers
+          rules/            # Analysis rules
+        tests/
+        README.md
+      ```
+
+      ## Contributing
+
+      See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+      ## License
+
+      MIT License - see [LICENSE](LICENSE)
+
+      ## Changelog
+
+      ### v1.0.0 (2026-03-11)
+      - Initial release
+      - Support JS, Python, Java
+      ```
+
+      Good 2: Include video demo
+      ```markdown
+      # Visual Dashboard Plugin
+
+      ## Quick Demo
+
+      ![Demo](docs/demo.gif)
+
+      Watch: [5-minute video tutorial](https://youtube.com/...)
+
+      ## Installation
+      [Detailed steps...]
+
+      ## Usage Examples
+
+      ### Example 1: Create Dashboard
+      ![Step 1](docs/step1.png)
+      ```bash
+      /dashboard create my-dashboard
+      ```
+      ![Result](docs/result1.png)
+
+      ### Example 2: Add Widget
+      ![Step 2](docs/step2.png)
+      ```bash
+      /dashboard add-widget chart
+      ```
+
+      Visual examples help users understand quickly.
+      ```
+
+      Good 3: Layered documentation
+      ```markdown
+      # Advanced Plugin
+
+      ## Quick Start
+
+      For most users:
+      ```bash
+      npm install @user/advanced-plugin
+      /plugin-command
+      ```
+
+      Done! See [Basic Usage](#basic-usage) below.
+
+      ---
+
+      ## Basic Usage
+
+      Simple examples for common tasks...
+
+      ---
+
+      ## Advanced Usage
+
+      For power users, see [Advanced Guide](docs/ADVANCED.md):
+      - Custom configurations
+      - API integration
+      - Scripting
+
+      ---
+
+      ## Full Documentation
+
+      - [Installation Guide](docs/INSTALL.md)
+      - [Configuration Reference](docs/CONFIG.md)
+      - [API Documentation](docs/API.md)
+      - [Troubleshooting](docs/TROUBLESHOOTING.md)
+      - [FAQ](docs/FAQ.md)
+
+      Progressive disclosure: Basic first, advanced later.
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **完善 README 文档**:
+
+      **最小模板**:
+      ```markdown
+      # [组件名称]
+
+      [一句话描述]
+
+      ## Installation
+      [详细安装步骤，可复制粘贴]
+
+      ## Usage
+      [基本使用示例，包含输入输出]
+
+      ## Configuration
+      [配置选项，如果有]
+
+      ## Testing
+      [如何测试验证]
+
+      ## Troubleshooting
+      [常见问题 1-3 个]
+      ```
+
+      **检查清单**:
+      - [ ] 标题和简介
+      - [ ] 完整安装步骤
+      - [ ] 可运行的示例
+      - [ ] 预期输出展示
+      - [ ] 配置说明（如需要）
+      - [ ] 测试方法
+      - [ ] 故障排除
+
+      **质量标准**:
+      - 所有命令都可直接复制运行
+      - 示例使用实际数据
+      - 包含截图或输出示例
+      - 故障排除覆盖常见错误
+    en: |
+      **Complete README documentation**:
+
+      **Minimum Template**:
+      ```markdown
+      # [Component Name]
+
+      [One-sentence description]
+
+      ## Installation
+      [Detailed install steps, copy-pasteable]
+
+      ## Usage
+      [Basic usage examples with inputs/outputs]
+
+      ## Configuration
+      [Config options, if any]
+
+      ## Testing
+      [How to test and verify]
+
+      ## Troubleshooting
+      [1-3 common issues]
+      ```
+
+      **Checklist**:
+      - [ ] Title and overview
+      - [ ] Complete install steps
+      - [ ] Runnable examples
+      - [ ] Expected output shown
+      - [ ] Configuration explained (if needed)
+      - [ ] Testing method
+      - [ ] Troubleshooting
+
+      **Quality Standards**:
+      - All commands copy-pasteable
+      - Examples use real data
+      - Include screenshots or output samples
+      - Troubleshooting covers common errors
+
+tags: ["documentation", "readme", "quality", "user-experience", "completeness"]
+related_rules: ["DOC-002", "TEST-001", "QUA-001"]
