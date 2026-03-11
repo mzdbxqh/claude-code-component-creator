@@ -1,0 +1,728 @@
+id: SCA-004
+name: worktree-isolation-missing
+severity: info
+component_type: subagent
+category: scalability
+
+title:
+  zh: "并行任务未使用 isolation: worktree"
+  en: "Parallel task not using isolation: worktree"
+
+description:
+  zh: |
+    SubAgents 支持 isolation: worktree 在独立 Git 工作树中运行任务。
+
+    **isolation: worktree 的作用**：
+    - 为 SubAgent 创建独立的 Git 工作树
+    - 避免多个 SubAgent 修改同一文件冲突
+    - 支持真正的并行开发
+
+    **适用场景**：
+    - ✅ 并行开发多个特性分支
+    - ✅ 同时修改不同文件的独立任务
+    - ✅ 需要隔离的实验性修改
+    - ❌ 只读任务（分析、审查）
+    - ❌ 需要共享工作区状态的任务
+    - ❌ 非 Git 项目
+
+    **前提条件**：
+    - 项目必须是 Git 仓库
+    - 需要足够磁盘空间（每个 worktree 是项目副本）
+
+    **使用方式**：
+    ```python
+    Task(
+        subagent_type="feature-developer",
+        prompt="开发新功能",
+        isolation="worktree"
+    )
+    # SubAgent 在独立 worktree 中工作
+    # 完成后自动合并或创建 PR
+    ```
+
+    **与 background: true 的组合**：
+    - background: true + isolation: worktree = 完全并行开发
+    - 多个 SubAgent 可同时开发不同特性
+
+  en: |
+    SubAgents support isolation: worktree to run tasks in isolated Git worktrees.
+
+    **isolation: worktree purpose**:
+    - Create independent Git worktree for SubAgent
+    - Avoid conflicts when multiple SubAgents modify same files
+    - Support true parallel development
+
+    **Use Cases**:
+    - ✅ Parallel development of multiple feature branches
+    - ✅ Independent tasks modifying different files
+    - ✅ Experimental changes needing isolation
+    - ❌ Read-only tasks (analysis, review)
+    - ❌ Tasks needing shared workspace state
+    - ❌ Non-Git projects
+
+    **Prerequisites**:
+    - Project must be Git repository
+    - Need sufficient disk space (each worktree is project copy)
+
+    **Usage**:
+    ```python
+    Task(
+        subagent_type="feature-developer",
+        prompt="Develop new feature",
+        isolation="worktree"
+    )
+    # SubAgent works in isolated worktree
+    # Auto-merges or creates PR after completion
+    ```
+
+    **Combined with background: true**:
+    - background: true + isolation: worktree = fully parallel development
+    - Multiple SubAgents can develop different features simultaneously
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-SCA-017~018)，isolation: worktree 提供真正的并行开发能力"
+  en: "Per official features (sub-agents.md OFF-SCA-017~018), isolation: worktree provides true parallel development capability"
+
+detection:
+  method: pattern-analysis
+  indicators:
+    - parallel_keyword: "并行|parallel|同时|simultaneous|分支|branch"
+      weight: 2
+    - modify_keyword: "修改|modify|开发|develop|重构|refactor"
+      weight: 2
+    - no_isolation_field: "SKILL.md 未提及 isolation"
+      weight: 1
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "工作树隔离"
+  lines: "420-458"
+  quote: "isolation: worktree 创建独立 Git 工作树。多个 SubAgent 可并行修改不同特性。"
+
+examples:
+  bad:
+    zh: |
+      错误1：并行特性开发无隔离
+      ```python
+      # 尝试并行开发三个特性
+      Task(subagent_type="feature-a-dev", prompt="开发特性A")
+      Task(subagent_type="feature-b-dev", prompt="开发特性B")
+      Task(subagent_type="feature-c-dev", prompt="开发特性C")
+
+      # 问题:
+      # - 三个 SubAgent 在同一工作区
+      # - 可能修改同一文件导致冲突
+      # - 无法真正并行（Git 状态共享）
+      ```
+
+      错误2：实验性修改污染主工作区
+      ```python
+      Task(
+          subagent_type="experimental-refactor",
+          prompt="尝试新的架构重构"
+      )
+
+      # SubAgent 在主工作区修改
+      # 如果实验失败，需要手动清理
+      # 可能影响其他正在进行的工作
+      ```
+
+      错误3：README 未说明隔离需求
+      ```markdown
+      # Feature Developer SubAgent
+
+      ## Usage
+      Task(subagent_type="feature-developer", prompt="开发功能")
+
+      未说明是否需要 isolation: worktree
+      用户可能并行运行多个实例导致冲突
+      ```
+
+      错误4：只读任务使用 worktree
+      ```python
+      Task(
+          subagent_type="code-analyzer",
+          prompt="分析代码质量",
+          isolation="worktree"
+      )
+
+      # 只读分析不需要隔离
+      # worktree 浪费磁盘空间和创建时间
+      ```
+    en: |
+      Error 1: Parallel feature development without isolation
+      ```python
+      # Try to develop three features in parallel
+      Task(subagent_type="feature-a-dev", prompt="Develop feature A")
+      Task(subagent_type="feature-b-dev", prompt="Develop feature B")
+      Task(subagent_type="feature-c-dev", prompt="Develop feature C")
+
+      # Problems:
+      # - Three SubAgents in same workspace
+      # - May modify same file causing conflicts
+      # - Cannot truly parallelize (shared Git state)
+      ```
+
+      Error 2: Experimental changes pollute main workspace
+      ```python
+      Task(
+          subagent_type="experimental-refactor",
+          prompt="Try new architecture refactor"
+      )
+
+      # SubAgent modifies in main workspace
+      # If experiment fails, need manual cleanup
+      # May affect other ongoing work
+      ```
+
+      Error 3: README doesn't explain isolation needs
+      ```markdown
+      # Feature Developer SubAgent
+
+      ## Usage
+      Task(subagent_type="feature-developer", prompt="Develop feature")
+
+      Doesn't explain if isolation: worktree needed
+      User may run multiple instances in parallel causing conflicts
+      ```
+
+      Error 4: Read-only task uses worktree
+      ```python
+      Task(
+          subagent_type="code-analyzer",
+          prompt="Analyze code quality",
+          isolation="worktree"
+      )
+
+      # Read-only analysis doesn't need isolation
+      # worktree wastes disk space and creation time
+      ```
+
+  good:
+    zh: |
+      正确1：并行特性开发使用 worktree
+      ```python
+      # 并行开发三个特性，每个独立 worktree
+      feature_a = Task(
+          subagent_type="feature-developer",
+          prompt="开发特性A：用户认证",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      feature_b = Task(
+          subagent_type="feature-developer",
+          prompt="开发特性B：数据导出",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      feature_c = Task(
+          subagent_type="feature-developer",
+          prompt="开发特性C：API 优化",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      # 三个特性在独立 worktree 中并行开发
+      # 无冲突，真正的并行
+      ```
+
+      正确2：实验性修改使用隔离
+      ```python
+      Task(
+          subagent_type="experimental-refactor",
+          prompt="尝试新架构（实验性）",
+          isolation="worktree"
+      )
+
+      # 实验在独立 worktree 中
+      # 成功 → 合并回主分支
+      # 失败 → 删除 worktree，主工作区不受影响
+      ```
+
+      正确3：文档说明 worktree 使用
+      ```yaml
+      ---
+      name: feature-developer
+      description: "并行特性开发"
+      tools:
+        - Read
+        - Write
+        - Bash
+      ---
+
+      # Feature Developer
+
+      开发新特性，支持并行开发
+
+      ## Usage
+
+      **单特性（主工作区）**:
+      ```python
+      Task(subagent_type="feature-developer", prompt="开发功能")
+      ```
+
+      **并行多特性（推荐 worktree）**:
+      ```python
+      Task(
+          subagent_type="feature-developer",
+          prompt="开发功能A",
+          isolation="worktree",
+          run_in_background=True
+      )
+      ```
+
+      ## Why worktree?
+      - ✅ 支持真正的并行开发
+      - ✅ 每个特性独立分支和工作区
+      - ✅ 避免文件修改冲突
+      - ✅ 失败时不影响主工作区
+
+      ## Prerequisites
+      - Git repository required
+      - ~500MB disk space per worktree
+      ```
+
+      正确4：只读任务不使用 worktree
+      ```yaml
+      ---
+      name: code-reviewer
+      description: "代码审查"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Code Reviewer
+
+      只读审查，无需 worktree
+
+      ## Usage
+      ```python
+      Task(subagent_type="code-reviewer", prompt="审查代码")
+      # 不使用 isolation，直接在主工作区读取
+      ```
+
+      ## Why no worktree?
+      - 只读分析，不修改文件
+      - 避免不必要的 worktree 开销
+      ```
+
+      正确5：组合 background 和 worktree
+      ```python
+      # 最大化并行: 后台 + worktree
+      test_dev = Task(
+          subagent_type="test-developer",
+          prompt="编写单元测试",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      docs_dev = Task(
+          subagent_type="docs-developer",
+          prompt="更新文档",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      # 两个开发任务:
+      # - 独立 worktree（无冲突）
+      # - 后台执行（不阻塞）
+      # - 真正的并行开发
+      ```
+
+      正确6：条件使用 worktree
+      ```yaml
+      ---
+      name: flexible-developer
+      description: "灵活开发器"
+      ---
+
+      # Flexible Developer
+
+      根据任务类型选择是否使用 worktree
+
+      ## Usage Decision
+
+      **小修改（主工作区）**:
+      ```python
+      Task(
+          subagent_type="flexible-developer",
+          prompt="修复拼写错误"
+      )
+      # 简单修改，无需 worktree
+      ```
+
+      **大特性（worktree）**:
+      ```python
+      Task(
+          subagent_type="flexible-developer",
+          prompt="重构认证系统",
+          isolation="worktree"
+      )
+      # 大规模修改，使用 worktree 隔离
+      ```
+
+      **并行开发（必须 worktree）**:
+      ```python
+      Task(..., isolation="worktree", run_in_background=True)
+      Task(..., isolation="worktree", run_in_background=True)
+      # 并行任务必须隔离
+      ```
+
+      ## Decision Guide
+      | 场景 | worktree? | 原因 |
+      |------|-----------|------|
+      | 单文件小修改 | ❌ No | 开销不值得 |
+      | 大特性开发 | ✅ Yes | 隔离安全 |
+      | 并行多特性 | ✅ Yes | 避免冲突 |
+      | 实验性修改 | ✅ Yes | 失败隔离 |
+      | 只读分析 | ❌ No | 不修改文件 |
+      ```
+
+      正确7：自动清理 worktree
+      ```markdown
+      # Feature Developer
+
+      ## Worktree Lifecycle
+
+      1. **Create**: SubAgent 启动时创建 worktree
+      2. **Work**: 在独立 worktree 中开发
+      3. **Merge**: 完成后合并回主分支
+      4. **Cleanup**: 自动删除 worktree
+
+      ## Manual Cleanup
+
+      If needed:
+      ```bash
+      git worktree list
+      git worktree remove <path>
+      ```
+
+      ## Disk Space
+      - Each worktree: ~project size
+      - Recommend: >2GB free space per parallel task
+      ```
+    en: |
+      Good 1: Parallel feature development with worktree
+      ```python
+      # Develop three features in parallel, each in independent worktree
+      feature_a = Task(
+          subagent_type="feature-developer",
+          prompt="Develop feature A: User auth",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      feature_b = Task(
+          subagent_type="feature-developer",
+          prompt="Develop feature B: Data export",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      feature_c = Task(
+          subagent_type="feature-developer",
+          prompt="Develop feature C: API optimization",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      # Three features develop in parallel in isolated worktrees
+      # No conflicts, true parallelism
+      ```
+
+      Good 2: Experimental changes use isolation
+      ```python
+      Task(
+          subagent_type="experimental-refactor",
+          prompt="Try new architecture (experimental)",
+          isolation="worktree"
+      )
+
+      # Experiment in isolated worktree
+      # Success → merge back to main branch
+      # Failure → delete worktree, main workspace unaffected
+      ```
+
+      Good 3: Document worktree usage
+      ```yaml
+      ---
+      name: feature-developer
+      description: "Parallel feature development"
+      tools:
+        - Read
+        - Write
+        - Bash
+      ---
+
+      # Feature Developer
+
+      Develop new features, supports parallel development
+
+      ## Usage
+
+      **Single feature (main workspace)**:
+      ```python
+      Task(subagent_type="feature-developer", prompt="Develop feature")
+      ```
+
+      **Parallel features (recommend worktree)**:
+      ```python
+      Task(
+          subagent_type="feature-developer",
+          prompt="Develop feature A",
+          isolation="worktree",
+          run_in_background=True
+      )
+      ```
+
+      ## Why worktree?
+      - ✅ Support true parallel development
+      - ✅ Each feature has independent branch and workspace
+      - ✅ Avoid file modification conflicts
+      - ✅ Failure doesn't affect main workspace
+
+      ## Prerequisites
+      - Git repository required
+      - ~500MB disk space per worktree
+      ```
+
+      Good 4: Read-only task doesn't use worktree
+      ```yaml
+      ---
+      name: code-reviewer
+      description: "Code review"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Code Reviewer
+
+      Read-only review, no worktree needed
+
+      ## Usage
+      ```python
+      Task(subagent_type="code-reviewer", prompt="Review code")
+      # No isolation, read directly from main workspace
+      ```
+
+      ## Why no worktree?
+      - Read-only analysis, doesn't modify files
+      - Avoid unnecessary worktree overhead
+      ```
+
+      Good 5: Combine background and worktree
+      ```python
+      # Maximize parallelism: background + worktree
+      test_dev = Task(
+          subagent_type="test-developer",
+          prompt="Write unit tests",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      docs_dev = Task(
+          subagent_type="docs-developer",
+          prompt="Update docs",
+          isolation="worktree",
+          run_in_background=True
+      )
+
+      # Two development tasks:
+      # - Independent worktrees (no conflicts)
+      # - Background execution (non-blocking)
+      # - True parallel development
+      ```
+
+      Good 6: Conditional worktree usage
+      ```yaml
+      ---
+      name: flexible-developer
+      description: "Flexible developer"
+      ---
+
+      # Flexible Developer
+
+      Choose whether to use worktree based on task type
+
+      ## Usage Decision
+
+      **Small changes (main workspace)**:
+      ```python
+      Task(
+          subagent_type="flexible-developer",
+          prompt="Fix typo"
+      )
+      # Simple change, no worktree needed
+      ```
+
+      **Large feature (worktree)**:
+      ```python
+      Task(
+          subagent_type="flexible-developer",
+          prompt="Refactor auth system",
+          isolation="worktree"
+      )
+      # Large-scale changes, use worktree isolation
+      ```
+
+      **Parallel development (must use worktree)**:
+      ```python
+      Task(..., isolation="worktree", run_in_background=True)
+      Task(..., isolation="worktree", run_in_background=True)
+      # Parallel tasks must be isolated
+      ```
+
+      ## Decision Guide
+      | Scenario | worktree? | Reason |
+      |----------|-----------|--------|
+      | Single file small fix | ❌ No | Overhead not worth it |
+      | Large feature dev | ✅ Yes | Safe isolation |
+      | Parallel features | ✅ Yes | Avoid conflicts |
+      | Experimental changes | ✅ Yes | Failure isolation |
+      | Read-only analysis | ❌ No | Doesn't modify |
+      ```
+
+      Good 7: Auto cleanup worktree
+      ```markdown
+      # Feature Developer
+
+      ## Worktree Lifecycle
+
+      1. **Create**: Worktree created when SubAgent starts
+      2. **Work**: Develop in isolated worktree
+      3. **Merge**: Merge back to main branch after completion
+      4. **Cleanup**: Auto-delete worktree
+
+      ## Manual Cleanup
+
+      If needed:
+      ```bash
+      git worktree list
+      git worktree remove <path>
+      ```
+
+      ## Disk Space
+      - Each worktree: ~project size
+      - Recommend: >2GB free space per parallel task
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要 isolation: worktree**:
+
+      ✅ **应该使用 worktree**：
+      - 并行开发多个特性
+      - 大规模代码修改
+      - 实验性重构
+      - 需要独立分支工作
+
+      ❌ **不应使用 worktree**：
+      - 只读任务（分析、审查）
+      - 简单的单文件修改
+      - 非 Git 项目
+      - 磁盘空间不足
+
+      **调用方式**:
+
+      ```python
+      Task(
+          subagent_type="developer",
+          prompt="开发特性",
+          isolation="worktree",
+          run_in_background=True  # 组合使用
+      )
+      ```
+
+      **文档模板**:
+
+      ```markdown
+      ## Isolation
+
+      **Supports**: Git worktree isolation
+      **Use when**: Parallel development or experimental changes
+      **Disk space**: ~500MB per worktree
+
+      ## Usage
+      ```python
+      Task(..., isolation="worktree")
+      ```
+      ```
+
+      **决策表**:
+
+      | 任务特性 | worktree? | 原因 |
+      |---------|-----------|------|
+      | 只读分析 | ❌ No | 不修改文件 |
+      | 单文件修改 | ❌ No | 开销不值 |
+      | 大特性开发 | ✅ Yes | 隔离安全 |
+      | 并行开发 | ✅ Yes | 避免冲突 |
+      | 实验性修改 | ✅ Yes | 失败隔离 |
+
+      **前提条件检查**:
+      - [ ] 项目是 Git 仓库
+      - [ ] 磁盘空间 >2GB
+      - [ ] 需要并行或隔离
+    en: |
+      **Evaluate if isolation: worktree needed**:
+
+      ✅ **Should use worktree**:
+      - Parallel development of multiple features
+      - Large-scale code changes
+      - Experimental refactoring
+      - Need independent branch work
+
+      ❌ **Shouldn't use worktree**:
+      - Read-only tasks (analysis, review)
+      - Simple single-file changes
+      - Non-Git projects
+      - Insufficient disk space
+
+      **Invocation**:
+
+      ```python
+      Task(
+          subagent_type="developer",
+          prompt="Develop feature",
+          isolation="worktree",
+          run_in_background=True  # Combine
+      )
+      ```
+
+      **Documentation Template**:
+
+      ```markdown
+      ## Isolation
+
+      **Supports**: Git worktree isolation
+      **Use when**: Parallel development or experimental changes
+      **Disk space**: ~500MB per worktree
+
+      ## Usage
+      ```python
+      Task(..., isolation="worktree")
+      ```
+      ```
+
+      **Decision Table**:
+
+      | Task Feature | worktree? | Reason |
+      |--------------|-----------|--------|
+      | Read-only | ❌ No | Doesn't modify |
+      | Single file | ❌ No | Overhead |
+      | Large feature | ✅ Yes | Safe isolation |
+      | Parallel dev | ✅ Yes | Avoid conflicts |
+      | Experimental | ✅ Yes | Failure isolation |
+
+      **Prerequisites Check**:
+      - [ ] Project is Git repo
+      - [ ] Disk space >2GB
+      - [ ] Need parallel/isolation
+
+tags: ["subagent", "scalability", "worktree", "isolation", "parallel", "git"]
+related_rules: ["SCA-003", "SCA-001", "SUB-001"]

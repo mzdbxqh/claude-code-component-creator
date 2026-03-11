@@ -1,0 +1,692 @@
+id: SCA-003
+name: background-execution-missing
+severity: info
+component_type: subagent
+category: scalability
+
+title:
+  zh: "长时间任务未使用 background: true"
+  en: "Long-running task not using background: true"
+
+description:
+  zh: |
+    SubAgents 支持 background: true 在后台运行长时间任务。
+
+    **background: true 的作用**：
+    - SubAgent 在后台独立执行
+    - 主 agent 可以继续处理其他任务
+    - 通过 output_file 检查进度和结果
+
+    **适用场景**：
+    - ✅ 长时间运行任务（测试、构建、分析）
+    - ✅ 不需要立即结果的任务
+    - ✅ 并行执行多个独立任务
+    - ❌ 需要立即结果的任务
+    - ❌ 后续任务依赖结果的任务
+
+    **使用方式**：
+    ```python
+    # 启动后台任务
+    result = Task(
+        subagent_type="test-runner",
+        prompt="运行所有测试",
+        run_in_background=True
+    )
+    # result.output_file: 输出文件路径
+
+    # 继续其他工作...
+
+    # 稍后检查结果
+    Read(file_path=result.output_file)
+    ```
+
+    **与 once: true 的区别**：
+    - once: true: 控制执行次数（会话内只执行一次）
+    - background: true: 控制执行方式（后台执行）
+
+  en: |
+    SubAgents support background: true for running long tasks in background.
+
+    **background: true purpose**:
+    - SubAgent executes independently in background
+    - Main agent can continue other tasks
+    - Check progress/results via output_file
+
+    **Use Cases**:
+    - ✅ Long-running tasks (tests, builds, analysis)
+    - ✅ Tasks not needing immediate results
+    - ✅ Parallel execution of independent tasks
+    - ❌ Tasks needing immediate results
+    - ❌ Tasks whose results are dependencies
+
+    **Usage**:
+    ```python
+    # Start background task
+    result = Task(
+        subagent_type="test-runner",
+        prompt="Run all tests",
+        run_in_background=True
+    )
+    # result.output_file: output file path
+
+    # Continue other work...
+
+    # Check results later
+    Read(file_path=result.output_file)
+    ```
+
+    **vs once: true**:
+    - once: true: Controls execution count (once per session)
+    - background: true: Controls execution mode (background)
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-SCA-015~016)，background: true 支持并行和长时间任务优化"
+  en: "Per official features (sub-agents.md OFF-SCA-015~016), background: true supports parallelism and long task optimization"
+
+detection:
+  method: pattern-analysis
+  indicators:
+    - long_running_keyword: "测试|test|构建|build|分析|analyze|扫描|scan"
+      weight: 2
+    - description_mentions_time: "长时间|耗时|slow|time-consuming"
+      weight: 3
+    - no_background_field: "SKILL.md 未提及 background"
+      weight: 1
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "后台执行"
+  lines: "368-395"
+  quote: "run_in_background: true 让 SubAgent 后台运行。结果写入 output_file。"
+
+examples:
+  bad:
+    zh: |
+      错误1：测试任务阻塞主 agent
+      ```yaml
+      ---
+      name: test-runner
+      description: "运行所有单元测试和集成测试"
+      tools:
+        - Bash
+      ---
+
+      # Test Runner
+
+      运行项目的所有测试套件（预计 5-10 分钟）
+      ```
+
+      调用方式：
+      ```python
+      Task(subagent_type="test-runner", prompt="运行测试")
+      # 主 agent 等待 5-10 分钟
+      # 无法处理其他任务
+      ```
+
+      错误2：多个长任务串行执行
+      ```python
+      # 串行执行三个长任务
+      Task(subagent_type="test-runner", prompt="运行测试")       # 10 分钟
+      Task(subagent_type="build-docs", prompt="构建文档")        # 5 分钟
+      Task(subagent_type="security-scan", prompt="安全扫描")     # 15 分钟
+      # 总计: 30 分钟
+
+      # 应该并行执行
+      ```
+
+      错误3：README 未说明执行时间
+      ```markdown
+      # Code Analyzer
+
+      ## Usage
+      Task(subagent_type="code-analyzer")
+
+      未提及可能需要 10 分钟
+      用户不知道是否应该使用 background: true
+      ```
+
+      错误4：忽略 output_file
+      ```python
+      result = Task(
+          subagent_type="test-runner",
+          prompt="运行测试",
+          run_in_background=True
+      )
+      # 启动后台任务
+      # 但忘记检查 result.output_file
+      # 任务完成后无法获取结果
+      ```
+    en: |
+      Error 1: Test task blocks main agent
+      ```yaml
+      ---
+      name: test-runner
+      description: "Run all unit and integration tests"
+      tools:
+        - Bash
+      ---
+
+      # Test Runner
+
+      Runs all project test suites (estimated 5-10 minutes)
+      ```
+
+      Invocation:
+      ```python
+      Task(subagent_type="test-runner", prompt="Run tests")
+      # Main agent waits 5-10 minutes
+      # Cannot handle other tasks
+      ```
+
+      Error 2: Multiple long tasks execute serially
+      ```python
+      # Serial execution of three long tasks
+      Task(subagent_type="test-runner", prompt="Run tests")      # 10 min
+      Task(subagent_type="build-docs", prompt="Build docs")      # 5 min
+      Task(subagent_type="security-scan", prompt="Security scan") # 15 min
+      # Total: 30 minutes
+
+      # Should execute in parallel
+      ```
+
+      Error 3: README doesn't mention execution time
+      ```markdown
+      # Code Analyzer
+
+      ## Usage
+      Task(subagent_type="code-analyzer")
+
+      Doesn't mention may take 10 minutes
+      User doesn't know if should use background: true
+      ```
+
+      Error 4: Ignoring output_file
+      ```python
+      result = Task(
+          subagent_type="test-runner",
+          prompt="Run tests",
+          run_in_background=True
+      )
+      # Started background task
+      # But forgot to check result.output_file
+      # Cannot get results after task completes
+      ```
+
+  good:
+    zh: |
+      正确1：测试任务使用后台执行
+      ```yaml
+      ---
+      name: test-runner
+      description: "后台运行测试套件"
+      tools:
+        - Bash
+      ---
+
+      # Test Runner
+
+      运行所有测试（5-10 分钟）
+
+      ## Usage
+
+      **后台模式（推荐）**:
+      ```python
+      result = Task(
+          subagent_type="test-runner",
+          prompt="运行所有测试",
+          run_in_background=True
+      )
+      # 继续其他工作
+      # 稍后检查: Read(file_path=result.output_file)
+      ```
+
+      **同步模式**:
+      ```python
+      Task(subagent_type="test-runner", prompt="运行测试")
+      # 等待完成（10 分钟）
+      ```
+      ```
+
+      正确2：并行执行多个长任务
+      ```python
+      # 并行启动三个任务
+      test_result = Task(
+          subagent_type="test-runner",
+          prompt="运行测试",
+          run_in_background=True
+      )
+
+      docs_result = Task(
+          subagent_type="build-docs",
+          prompt="构建文档",
+          run_in_background=True
+      )
+
+      scan_result = Task(
+          subagent_type="security-scan",
+          prompt="安全扫描",
+          run_in_background=True
+      )
+
+      # 三个任务并行执行，总时间 = max(10, 5, 15) = 15 分钟
+      # 而不是串行的 30 分钟
+
+      # 继续其他工作...
+
+      # 稍后收集结果
+      Read(file_path=test_result.output_file)
+      Read(file_path=docs_result.output_file)
+      Read(file_path=scan_result.output_file)
+      ```
+
+      正确3：文档说明后台执行
+      ```markdown
+      # Long-Running Analyzer
+
+      ## Execution Time
+      - Quick analysis: 1-2 minutes
+      - Full analysis: 10-30 minutes (recommend background mode)
+
+      ## Usage
+
+      ### Background Mode (Recommended for full analysis)
+      ```python
+      result = Task(
+          subagent_type="analyzer",
+          prompt="完整分析",
+          run_in_background=True
+      )
+      print(f"分析中...输出文件: {result.output_file}")
+
+      # 继续其他工作...
+
+      # 稍后检查进度
+      Bash(command=f"tail {result.output_file}")
+      ```
+
+      ### Sync Mode (For quick analysis)
+      ```python
+      Task(subagent_type="analyzer", prompt="快速分析")
+      # 等待 1-2 分钟
+      ```
+
+      ## When to Use Background
+      - ✅ Full codebase analysis (>5 min)
+      - ✅ When you have other tasks to do
+      - ❌ Quick file analysis (<1 min)
+      - ❌ When you need immediate results
+      ```
+
+      正确4：监控后台任务进度
+      ```python
+      # 启动后台任务
+      result = Task(
+          subagent_type="test-runner",
+          prompt="运行测试",
+          run_in_background=True
+      )
+
+      print(f"测试运行中...输出: {result.output_file}")
+
+      # 继续其他工作
+      Task(subagent_type="linter", prompt="代码检查")
+
+      # 检查测试进度
+      Bash(command=f"tail -20 {result.output_file}")
+
+      # 等待完成
+      TaskOutput(task_id=result.task_id, block=True)
+
+      # 读取完整结果
+      Read(file_path=result.output_file)
+      ```
+
+      正确5：条件使用后台模式
+      ```yaml
+      ---
+      name: flexible-analyzer
+      description: "灵活分析器"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Flexible Analyzer
+
+      根据分析范围自动选择执行模式
+
+      ## Usage
+
+      **小文件（同步）**:
+      ```python
+      Task(
+          subagent_type="flexible-analyzer",
+          prompt="分析 utils.py"
+      )
+      ```
+
+      **大项目（后台）**:
+      ```python
+      Task(
+          subagent_type="flexible-analyzer",
+          prompt="分析整个项目",
+          run_in_background=True
+      )
+      ```
+
+      ## Execution Time Guide
+      - Single file: <30s (sync)
+      - Directory: 1-5 min (sync or background)
+      - Full project: >5 min (background recommended)
+      ```
+
+      正确6：组合 maxTurns 和 background
+      ```python
+      # 复杂的长时间任务
+      result = Task(
+          subagent_type="deep-analyzer",
+          prompt="深度分析架构",
+          max_turns=30,           # 允许多轮推理
+          run_in_background=True  # 后台运行
+      )
+
+      # 主 agent 可以继续其他任务
+      # SubAgent 在后台深度分析 30 轮
+      ```
+    en: |
+      Good 1: Test task uses background execution
+      ```yaml
+      ---
+      name: test-runner
+      description: "Run test suite in background"
+      tools:
+        - Bash
+      ---
+
+      # Test Runner
+
+      Runs all tests (5-10 minutes)
+
+      ## Usage
+
+      **Background mode (recommended)**:
+      ```python
+      result = Task(
+          subagent_type="test-runner",
+          prompt="Run all tests",
+          run_in_background=True
+      )
+      # Continue other work
+      # Check later: Read(file_path=result.output_file)
+      ```
+
+      **Sync mode**:
+      ```python
+      Task(subagent_type="test-runner", prompt="Run tests")
+      # Wait for completion (10 min)
+      ```
+      ```
+
+      Good 2: Parallel execution of multiple long tasks
+      ```python
+      # Start three tasks in parallel
+      test_result = Task(
+          subagent_type="test-runner",
+          prompt="Run tests",
+          run_in_background=True
+      )
+
+      docs_result = Task(
+          subagent_type="build-docs",
+          prompt="Build docs",
+          run_in_background=True
+      )
+
+      scan_result = Task(
+          subagent_type="security-scan",
+          prompt="Security scan",
+          run_in_background=True
+      )
+
+      # Three tasks run in parallel, total time = max(10, 5, 15) = 15 min
+      # Instead of serial 30 min
+
+      # Continue other work...
+
+      # Collect results later
+      Read(file_path=test_result.output_file)
+      Read(file_path=docs_result.output_file)
+      Read(file_path=scan_result.output_file)
+      ```
+
+      Good 3: Document background execution
+      ```markdown
+      # Long-Running Analyzer
+
+      ## Execution Time
+      - Quick analysis: 1-2 minutes
+      - Full analysis: 10-30 minutes (recommend background mode)
+
+      ## Usage
+
+      ### Background Mode (Recommended for full analysis)
+      ```python
+      result = Task(
+          subagent_type="analyzer",
+          prompt="Full analysis",
+          run_in_background=True
+      )
+      print(f"Analyzing...output: {result.output_file}")
+
+      # Continue other work...
+
+      # Check progress later
+      Bash(command=f"tail {result.output_file}")
+      ```
+
+      ### Sync Mode (For quick analysis)
+      ```python
+      Task(subagent_type="analyzer", prompt="Quick analysis")
+      # Wait 1-2 minutes
+      ```
+
+      ## When to Use Background
+      - ✅ Full codebase analysis (>5 min)
+      - ✅ When you have other tasks to do
+      - ❌ Quick file analysis (<1 min)
+      - ❌ When you need immediate results
+      ```
+
+      Good 4: Monitor background task progress
+      ```python
+      # Start background task
+      result = Task(
+          subagent_type="test-runner",
+          prompt="Run tests",
+          run_in_background=True
+      )
+
+      print(f"Tests running...output: {result.output_file}")
+
+      # Continue other work
+      Task(subagent_type="linter", prompt="Run linter")
+
+      # Check test progress
+      Bash(command=f"tail -20 {result.output_file}")
+
+      # Wait for completion
+      TaskOutput(task_id=result.task_id, block=True)
+
+      # Read full results
+      Read(file_path=result.output_file)
+      ```
+
+      Good 5: Conditional background mode
+      ```yaml
+      ---
+      name: flexible-analyzer
+      description: "Flexible analyzer"
+      tools:
+        - Read
+        - Grep
+      ---
+
+      # Flexible Analyzer
+
+      Automatically selects execution mode based on scope
+
+      ## Usage
+
+      **Small file (sync)**:
+      ```python
+      Task(
+          subagent_type="flexible-analyzer",
+          prompt="Analyze utils.py"
+      )
+      ```
+
+      **Large project (background)**:
+      ```python
+      Task(
+          subagent_type="flexible-analyzer",
+          prompt="Analyze entire project",
+          run_in_background=True
+      )
+      ```
+
+      ## Execution Time Guide
+      - Single file: <30s (sync)
+      - Directory: 1-5 min (sync or background)
+      - Full project: >5 min (background recommended)
+      ```
+
+      Good 6: Combine maxTurns and background
+      ```python
+      # Complex long-running task
+      result = Task(
+          subagent_type="deep-analyzer",
+          prompt="Deep architecture analysis",
+          max_turns=30,           # Allow multi-turn reasoning
+          run_in_background=True  # Run in background
+      )
+
+      # Main agent can continue other tasks
+      # SubAgent analyzes deeply in background for 30 turns
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否需要 background: true**:
+
+      ✅ **应该使用后台**：
+      - 执行时间 >5 分钟
+      - 测试、构建、分析、扫描
+      - 不需要立即结果
+      - 有多个独立任务可并行
+
+      ❌ **不应使用后台**：
+      - 执行时间 <1 分钟
+      - 需要立即结果
+      - 后续任务依赖结果
+
+      **调用方式**:
+
+      ```python
+      # 后台执行
+      result = Task(
+          subagent_type="my-agent",
+          prompt="...",
+          run_in_background=True
+      )
+
+      # 检查结果
+      Read(file_path=result.output_file)
+      ```
+
+      **文档模板**:
+
+      ```markdown
+      ## Execution Mode
+
+      **Estimated Time**: 10-15 minutes
+
+      **Recommended**: Background mode
+      ```python
+      result = Task(..., run_in_background=True)
+      Read(file_path=result.output_file)
+      ```
+
+      **When to use background**:
+      - Full analysis (>5 min)
+      - When you have other tasks
+      ```
+
+      **决策表**:
+
+      | 任务类型 | 典型耗时 | 推荐模式 |
+      |---------|---------|---------|
+      | 单文件分析 | <1 min | 同步 |
+      | 目录分析 | 1-5 min | 可选 |
+      | 全项目分析 | >5 min | 后台 |
+      | 测试套件 | >5 min | 后台 |
+      | 构建文档 | >3 min | 后台 |
+    en: |
+      **Evaluate if background: true needed**:
+
+      ✅ **Should use background**:
+      - Execution time >5 minutes
+      - Tests, builds, analysis, scans
+      - Don't need immediate results
+      - Have multiple independent tasks to parallelize
+
+      ❌ **Shouldn't use background**:
+      - Execution time <1 minute
+      - Need immediate results
+      - Subsequent tasks depend on results
+
+      **Invocation**:
+
+      ```python
+      # Background execution
+      result = Task(
+          subagent_type="my-agent",
+          prompt="...",
+          run_in_background=True
+      )
+
+      # Check results
+      Read(file_path=result.output_file)
+      ```
+
+      **Documentation Template**:
+
+      ```markdown
+      ## Execution Mode
+
+      **Estimated Time**: 10-15 minutes
+
+      **Recommended**: Background mode
+      ```python
+      result = Task(..., run_in_background=True)
+      Read(file_path=result.output_file)
+      ```
+
+      **When to use background**:
+      - Full analysis (>5 min)
+      - When you have other tasks
+      ```
+
+      **Decision Table**:
+
+      | Task Type | Typical Time | Recommended |
+      |-----------|-------------|-------------|
+      | Single file | <1 min | Sync |
+      | Directory | 1-5 min | Optional |
+      | Full project | >5 min | Background |
+      | Test suite | >5 min | Background |
+      | Build docs | >3 min | Background |
+
+tags: ["subagent", "scalability", "background", "parallel", "performance"]
+related_rules: ["SCA-001", "SCA-002", "SUB-011"]

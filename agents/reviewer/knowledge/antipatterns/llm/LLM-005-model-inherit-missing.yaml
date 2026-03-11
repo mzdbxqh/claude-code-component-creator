@@ -1,0 +1,541 @@
+id: LLM-005
+name: model-inherit-missing
+severity: info
+component_type: subagent
+category: llm
+
+title:
+  zh: "SubAgent 未使用 model: inherit"
+  en: "SubAgent not using model: inherit"
+
+description:
+  zh: |
+    SubAgents 支持 model: inherit 从父 agent 继承模型配置。
+
+    **model 字段值**：
+    - `sonnet`: 使用 Claude Sonnet (默认)
+    - `opus`: 使用 Claude Opus
+    - `haiku`: 使用 Claude Haiku (快速、低成本)
+    - `inherit`: 继承父 agent 的模型 (推荐)
+
+    **inherit 的优势**：
+    - ✅ 用户切换模型时，SubAgent 自动适配
+    - ✅ 保持整个会话的模型一致性
+    - ✅ 简化配置，减少硬编码
+
+    **何时不用 inherit**：
+    - ❌ SubAgent 需要特定模型能力 (如 Opus 的复杂推理)
+    - ❌ 优化成本 (用 Haiku 处理简单任务)
+    - ❌ 性能要求 (用 Haiku 提速)
+
+    **默认行为**：
+    - 不指定 model 字段 → 默认使用 Sonnet
+    - 建议显式设置 model: inherit
+
+  en: |
+    SubAgents support model: inherit to inherit model config from parent agent.
+
+    **model field values**:
+    - `sonnet`: Use Claude Sonnet (default)
+    - `opus`: Use Claude Opus
+    - `haiku`: Use Claude Haiku (fast, low cost)
+    - `inherit`: Inherit parent agent's model (recommended)
+
+    **inherit advantages**:
+    - ✅ SubAgent auto-adapts when user switches models
+    - ✅ Maintains model consistency across session
+    - ✅ Simplifies config, reduces hardcoding
+
+    **When NOT to use inherit**:
+    - ❌ SubAgent needs specific model capability (e.g., Opus complex reasoning)
+    - ❌ Cost optimization (use Haiku for simple tasks)
+    - ❌ Performance requirements (use Haiku for speed)
+
+    **Default behavior**:
+    - No model field → defaults to Sonnet
+    - Recommend explicitly setting model: inherit
+
+rationale:
+  zh: "基于官方功能 (sub-agents.md OFF-LLM-017~018)，model: inherit 提供灵活的模型继承机制"
+  en: "Per official features (sub-agents.md OFF-LLM-017~018), model: inherit provides flexible model inheritance"
+
+detection:
+  method: config-check
+  indicators:
+    - missing_model_field: "SKILL.md 未声明 model 字段"
+    - hardcoded_model: "硬编码模型名称 (sonnet/opus/haiku)"
+    - inconsistent_models: "多个 SubAgent 使用不同模型"
+
+official_reference:
+  document: "markdown_docs/sub-agents.md"
+  section: "模型配置"
+  lines: "285-312"
+  quote: "model: inherit 让 SubAgent 继承调用者模型。用户切换模型时，SubAgent 自动适配。"
+
+examples:
+  bad:
+    zh: |
+      错误1：未指定 model 字段
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "分析代码质量"
+      tools:
+        - Read
+        - Grep
+      ---
+      ```
+      未声明 model，默认使用 Sonnet
+      用户可能想用 Haiku 快速分析
+
+      错误2：硬编码模型
+      ```yaml
+      ---
+      name: quick-validator
+      description: "快速验证"
+      model: haiku
+      ---
+      ```
+      硬编码 Haiku
+      用户切换到 Opus 时，validator 仍用 Haiku
+      可能导致能力不一致
+
+      错误3：多个 SubAgent 模型不一致
+      ```yaml
+      Plugin 包含 3 个 SubAgents:
+      - analyzer: model: sonnet
+      - validator: model: haiku
+      - reporter: (未指定，默认 sonnet)
+
+      用户启动会话时选择 Opus
+      但 SubAgents 仍使用各自硬编码的模型
+      导致能力不一致
+      ```
+
+      错误4：README 未说明模型选择
+      ```markdown
+      # Code Analyzer SubAgent
+
+      ## Installation
+      Copy to agents/code-analyzer/
+
+      ## Usage
+      Task(subagent_type="code-analyzer")
+
+      未说明使用哪个模型
+      用户不知道是否需要特定模型
+      ```
+    en: |
+      Error 1: No model field specified
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "Analyze code quality"
+      tools:
+        - Read
+        - Grep
+      ---
+      ```
+      No model declared, defaults to Sonnet
+      User might want Haiku for quick analysis
+
+      Error 2: Hardcoded model
+      ```yaml
+      ---
+      name: quick-validator
+      description: "Quick validation"
+      model: haiku
+      ---
+      ```
+      Hardcoded Haiku
+      When user switches to Opus, validator still uses Haiku
+      May cause capability inconsistency
+
+      Error 3: Multiple SubAgents with inconsistent models
+      ```yaml
+      Plugin contains 3 SubAgents:
+      - analyzer: model: sonnet
+      - validator: model: haiku
+      - reporter: (not specified, defaults to sonnet)
+
+      User starts session with Opus
+      But SubAgents still use their hardcoded models
+      Causes capability inconsistency
+      ```
+
+      Error 4: README doesn't explain model choice
+      ```markdown
+      # Code Analyzer SubAgent
+
+      ## Installation
+      Copy to agents/code-analyzer/
+
+      ## Usage
+      Task(subagent_type="code-analyzer")
+
+      Doesn't explain which model used
+      User doesn't know if specific model needed
+      ```
+
+  good:
+    zh: |
+      正确1：使用 model: inherit
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "分析代码质量"
+      model: inherit
+      tools:
+        - Read
+        - Grep
+      ---
+      ```
+      继承父 agent 模型
+      用户切换模型时自动适配
+
+      正确2：特定任务使用特定模型
+      ```yaml
+      ---
+      name: simple-formatter
+      description: "简单格式化"
+      model: haiku
+      ---
+      ```
+
+      README 说明：
+      ```markdown
+      ## Model Configuration
+
+      Uses Claude Haiku for fast formatting.
+
+      Why Haiku?
+      - Simple formatting doesn't need Opus/Sonnet
+      - Haiku is 10x faster and cheaper
+      - Quality sufficient for formatting tasks
+      ```
+
+      正确3：复杂任务锁定高级模型
+      ```yaml
+      ---
+      name: architecture-designer
+      description: "设计系统架构"
+      model: opus
+      ---
+      ```
+
+      README 说明：
+      ```markdown
+      ## Model Requirements
+
+      Requires Claude Opus for complex architectural reasoning.
+
+      Why Opus?
+      - Needs deep reasoning about system design
+      - Trade-off analysis requires Opus capabilities
+      - Cost justified for critical architecture decisions
+      ```
+
+      正确4：默认 inherit，支持覆盖
+      ```yaml
+      ---
+      name: flexible-analyzer
+      description: "灵活分析器"
+      model: inherit
+      ---
+      ```
+
+      README 说明：
+      ```markdown
+      ## Model Configuration
+
+      Default: Inherits parent agent's model (recommended)
+
+      Override if needed:
+      1. Quick analysis: Edit SKILL.md to `model: haiku`
+      2. Deep analysis: Edit SKILL.md to `model: opus`
+
+      For most use cases, `inherit` provides the best experience.
+      ```
+
+      正确5：组合使用
+      ```yaml
+      Plugin with 3 SubAgents:
+
+      agents/quick-scanner/SKILL.md:
+      ---
+      name: quick-scanner
+      model: haiku  # 快速扫描用 Haiku
+      ---
+
+      agents/deep-analyzer/SKILL.md:
+      ---
+      name: deep-analyzer
+      model: inherit  # 深度分析继承用户选择
+      ---
+
+      agents/report-generator/SKILL.md:
+      ---
+      name: report-generator
+      model: inherit  # 报告生成继承用户选择
+      ---
+      ```
+
+      README 说明每个 SubAgent 的模型选择理由
+
+      正确6：文档说明 inherit 行为
+      ```markdown
+      # SubAgent Model Configuration Guide
+
+      ## model: inherit Behavior
+
+      When you set `model: inherit`:
+      1. SubAgent uses same model as parent agent
+      2. User can control model via CLI: `claude --model opus`
+      3. Entire workflow uses consistent model
+
+      ## Example
+
+      User starts session:
+      ```bash
+      claude --model opus
+      ```
+
+      All SubAgents with `model: inherit`:
+      - Use Opus (not Sonnet/Haiku)
+      - Maintain consistent capabilities
+      - No configuration changes needed
+
+      ## When to Override
+
+      Use specific model if:
+      - ✅ Task needs specific capability (Opus reasoning)
+      - ✅ Cost optimization critical (Haiku for simple tasks)
+      - ✅ Performance critical (Haiku for speed)
+
+      Otherwise, use `model: inherit` (recommended).
+      ```
+    en: |
+      Good 1: Use model: inherit
+      ```yaml
+      ---
+      name: code-analyzer
+      description: "Analyze code quality"
+      model: inherit
+      tools:
+        - Read
+        - Grep
+      ---
+      ```
+      Inherits parent agent model
+      Auto-adapts when user switches models
+
+      Good 2: Specific task uses specific model
+      ```yaml
+      ---
+      name: simple-formatter
+      description: "Simple formatting"
+      model: haiku
+      ---
+      ```
+
+      README explains:
+      ```markdown
+      ## Model Configuration
+
+      Uses Claude Haiku for fast formatting.
+
+      Why Haiku?
+      - Simple formatting doesn't need Opus/Sonnet
+      - Haiku is 10x faster and cheaper
+      - Quality sufficient for formatting tasks
+      ```
+
+      Good 3: Complex task locks to advanced model
+      ```yaml
+      ---
+      name: architecture-designer
+      description: "Design system architecture"
+      model: opus
+      ---
+      ```
+
+      README explains:
+      ```markdown
+      ## Model Requirements
+
+      Requires Claude Opus for complex architectural reasoning.
+
+      Why Opus?
+      - Needs deep reasoning about system design
+      - Trade-off analysis requires Opus capabilities
+      - Cost justified for critical architecture decisions
+      ```
+
+      Good 4: Default inherit, support override
+      ```yaml
+      ---
+      name: flexible-analyzer
+      description: "Flexible analyzer"
+      model: inherit
+      ---
+      ```
+
+      README explains:
+      ```markdown
+      ## Model Configuration
+
+      Default: Inherits parent agent's model (recommended)
+
+      Override if needed:
+      1. Quick analysis: Edit SKILL.md to `model: haiku`
+      2. Deep analysis: Edit SKILL.md to `model: opus`
+
+      For most use cases, `inherit` provides the best experience.
+      ```
+
+      Good 5: Combined usage
+      ```yaml
+      Plugin with 3 SubAgents:
+
+      agents/quick-scanner/SKILL.md:
+      ---
+      name: quick-scanner
+      model: haiku  # Quick scan uses Haiku
+      ---
+
+      agents/deep-analyzer/SKILL.md:
+      ---
+      name: deep-analyzer
+      model: inherit  # Deep analysis inherits user choice
+      ---
+
+      agents/report-generator/SKILL.md:
+      ---
+      name: report-generator
+      model: inherit  # Report gen inherits user choice
+      ---
+      ```
+
+      README explains rationale for each SubAgent's model choice
+
+      Good 6: Document inherit behavior
+      ```markdown
+      # SubAgent Model Configuration Guide
+
+      ## model: inherit Behavior
+
+      When you set `model: inherit`:
+      1. SubAgent uses same model as parent agent
+      2. User can control model via CLI: `claude --model opus`
+      3. Entire workflow uses consistent model
+
+      ## Example
+
+      User starts session:
+      ```bash
+      claude --model opus
+      ```
+
+      All SubAgents with `model: inherit`:
+      - Use Opus (not Sonnet/Haiku)
+      - Maintain consistent capabilities
+      - No configuration changes needed
+
+      ## When to Override
+
+      Use specific model if:
+      - ✅ Task needs specific capability (Opus reasoning)
+      - ✅ Cost optimization critical (Haiku for simple tasks)
+      - ✅ Performance critical (Haiku for speed)
+
+      Otherwise, use `model: inherit` (recommended).
+      ```
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **评估是否使用 model: inherit**:
+
+      ✅ **推荐使用 inherit**：
+      - 通用 SubAgent（适用于多种场景）
+      - 用户可能想切换模型
+      - 需要与父 agent 保持一致
+
+      ❌ **使用特定模型**：
+      - 任务需要特定能力（Opus 推理）
+      - 成本优化（Haiku 简单任务）
+      - 性能要求（Haiku 提速）
+
+      **添加配置**:
+
+      ```yaml
+      ---
+      name: my-subagent
+      description: "..."
+      model: inherit  # 添加这一行
+      ---
+      ```
+
+      **决策表**:
+
+      | SubAgent 特性 | 推荐 model | 原因 |
+      |--------------|-----------|------|
+      | 通用分析 | inherit | 用户控制 |
+      | 简单格式化 | haiku | 性能优化 |
+      | 复杂设计 | opus | 能力要求 |
+      | 代码审查 | inherit | 灵活适配 |
+
+      **文档模板**:
+
+      ```markdown
+      ## Model Configuration
+
+      - **Default**: `inherit` (uses your selected model)
+      - **Override**: Edit SKILL.md if specific model needed
+      - **Rationale**: [Explain why inherit or specific model]
+      ```
+    en: |
+      **Evaluate if model: inherit needed**:
+
+      ✅ **Recommend inherit**:
+      - General SubAgent (suitable for multiple scenarios)
+      - User might want to switch models
+      - Need consistency with parent agent
+
+      ❌ **Use specific model**:
+      - Task needs specific capability (Opus reasoning)
+      - Cost optimization (Haiku simple tasks)
+      - Performance requirements (Haiku speed)
+
+      **Add Configuration**:
+
+      ```yaml
+      ---
+      name: my-subagent
+      description: "..."
+      model: inherit  # Add this line
+      ---
+      ```
+
+      **Decision Table**:
+
+      | SubAgent Feature | Recommended model | Reason |
+      |-----------------|------------------|--------|
+      | General analysis | inherit | User control |
+      | Simple formatting | haiku | Performance |
+      | Complex design | opus | Capability |
+      | Code review | inherit | Flexible adapt |
+
+      **Documentation Template**:
+
+      ```markdown
+      ## Model Configuration
+
+      - **Default**: `inherit` (uses your selected model)
+      - **Override**: Edit SKILL.md if specific model needed
+      - **Rationale**: [Explain why inherit or specific model]
+      ```
+
+tags: ["subagent", "llm", "model", "inherit", "configuration"]
+related_rules: ["SUB-001", "LLM-001", "CFG-001"]
