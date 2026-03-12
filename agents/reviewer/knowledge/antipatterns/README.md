@@ -36,6 +36,9 @@ antipatterns/
 │   ├── mcp-001-server-config-invalid.yaml
 │   └── ...
 │
+├── plugin/                      # Plugin 反模式 (1 个) [新增 2026-03-12]
+│   └── PLUGIN-001-invalid-manifest-format.yaml
+│
 ├── intent/                      # 意图匹配反模式 (4 个) [新增]
 │   ├── INTENT-001-missing-trigger-scenario.yaml
 │   └── ...
@@ -55,6 +58,9 @@ antipatterns/
 └── scalability/                 # 扩展性反模式 (4 个) [新增]
     ├── SCALE-001-token-usage-awareness.yaml
     └── ...
+
+../schemas/                      # Schema 定义 [新增 2026-03-12]
+└── plugin-json-schema.yaml      # plugin.json 白名单 schema
 ```
 
 ---
@@ -68,6 +74,7 @@ antipatterns/
 | Hook | 10 | 3 | 7 | 0 | Chapter 6 100% |
 | Subagent | 12 | 4 | 8 | 0 | Chapter 7 100% |
 | MCP | 8 | 4 | 4 | 0 | Chapter 8 100% |
+| **Plugin** | **1** | **1** | **0** | **0** | **新增 2026-03-12** |
 | **意图匹配** | **4** | **0** | **2** | **2** | **新增** |
 | **LLM 兼容性** | **3** | **0** | **3** | **0** | **新增** |
 | **安全** | **5** | **2** | **2** | **1** | **新增** |
@@ -78,7 +85,7 @@ antipatterns/
 | **评估测试 (skill-creator)** | **2** | **0** | **1** | **1** | **skill-creator** |
 | **脚本 Bundling (skill-creator)** | **0** | **0** | **0** | **0** | **skill-creator** |
 | **通用规则** | **3** | **1** | **1** | **1** |
-| **总计** | **83** | **23** | **44** | **16** | - |
+| **总计** | **84** | **24** | **44** | **16** | - |
 
 ---
 
@@ -284,6 +291,63 @@ antipatterns/
 
 ---
 
+### Plugin 反模式 (1 个) [新增 2026-03-12]
+
+| ID | 名称 | 严重程度 | 说明 |
+|----|------|----------|------|
+| PLUGIN-001 | invalid-manifest-format | **error** | plugin.json格式不符合Claude Code白名单schema |
+
+**重要说明**:
+- **一票否决规则**: plugin.json格式错误 → 整个plugin无法加载，所有skills/commands/agents不可用
+- **白名单机制**: 仅支持明确定义的字段，任何未知字段将导致manifest验证失败
+- **常见错误**:
+  - `repository` 使用对象格式 `{type, url}` 而非字符串
+  - `author` 包含不支持的 `url` 字段
+  - 包含 `bugs`、`compatibility`、`dependencies`、`metadata` 等不支持的字段
+- **Schema参考**: `schemas/plugin-json-schema.yaml` - 完整的白名单字段定义
+- **官方示例**: 参考 superpowers 和 ralph-loop 的 plugin.json 格式
+- **修复优先级**: P0 - 必须立即修复，否则plugin完全不可用
+
+**检测流程**:
+1. 读取 `.claude-plugin/plugin.json`
+2. 加载白名单schema: `schemas/plugin-json-schema.yaml`
+3. 验证所有字段是否在白名单中
+4. 检查字段类型和格式是否符合定义
+5. 生成详细的修复建议
+
+**修复示例**:
+```json
+// ❌ 错误格式
+{
+  "name": "my-plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/repo.git"
+  },
+  "author": {
+    "name": "John",
+    "email": "john@example.com",
+    "url": "https://john.com"
+  },
+  "bugs": "https://github.com/user/repo/issues",
+  "dependencies": {...}
+}
+
+// ✅ 正确格式
+{
+  "name": "my-plugin",
+  "description": "A plugin for Claude Code",
+  "repository": "https://github.com/user/repo",
+  "author": {
+    "name": "John",
+    "email": "john@example.com"
+  },
+  "homepage": "https://john.com"
+}
+```
+
+---
+
 ## 评估维度权重 (Evaluation Dimension Weights)
 
 | 维度 | 权重 | 规则数 | 一票否决 |
@@ -308,8 +372,9 @@ antipatterns/
 | Chapter 6: Hook 规范 | `hook/` | 10 | event, handler, lifecycle |
 | Chapter 7: Subagent 规范 | `subagent/` | 12 | tools, model, boundaries |
 | Chapter 8: MCP 规范 | `mcp/` | 8 | config, auth, schema |
+| **Plugin 规范 [新增]** | `plugin/` | **1** | **manifest, schema, validation** |
 | **扩展规范** | `intent/`, `llm/`, `security/`, `environment/`, `scalability/` | **19** | intent, llm, security, env, scalability |
-| **总计** | | **76** | |
+| **总计** | | **77** | |
 
 ---
 
@@ -355,15 +420,16 @@ if llm_has_blocker_without_fallback:
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **3.1.0** | 2026-03-12 | 新增Plugin反模式 (PLUGIN-001) + plugin.json白名单schema |
 | **3.0.0** | 2026-03-04 | 新增 7 个评估维度，76 个反模式 |
 | 2.0.0 | 2026-02-28 | 重构为组件类型组织，57 个反模式 |
 | 1.0.0 | 2026-02-27 | 初始版本，36 个反模式 |
 
 ---
 
-**文档版本**: 3.0.0
-**最后更新**: 2026-03-04
-**基于**: HANDBOOK 完整手册 + 7 个新增评估维度
+**文档版本**: 3.1.0
+**最后更新**: 2026-03-12
+**基于**: HANDBOOK 完整手册 + 7 个评估维度 + Plugin配置验证
 
 ## 扩展资源 (Extended Resources)
 

@@ -1,0 +1,564 @@
+id: PLUGIN-001
+name: invalid-manifest-format
+severity: error
+component_type: plugin
+category: config
+
+title:
+  zh: "plugin.json格式不符合Claude Code schema"
+  en: "plugin.json format does not conform to Claude Code schema"
+
+description:
+  zh: |
+    **问题**: plugin.json包含不支持的字段或字段格式错误，导致plugin无法加载。
+
+    **根本原因**: Claude Code使用严格的白名单schema验证plugin.json，任何未知字段或格式错误都会导致"invalid manifest"错误。
+
+    **影响**:
+    - 🔴 Plugin完全无法加载
+    - 🔴 所有skills/commands/agents不可用
+    - 🔴 Debug日志显示"Failed to load plugin: invalid manifest file"
+
+    **白名单字段**:
+
+    **必需字段**:
+    - `name` (string): Plugin名称，仅小写字母和连字符
+    - `description` (string): 简短描述，10-200字符
+
+    **可选字段**:
+    - `version` (string): 语义化版本号 (e.g., "3.1.0")
+    - `author` (object): 作者信息
+      - `name` (string, required): 作者姓名
+      - `email` (string, required): 联系邮箱
+      - ❌ `url`: 不支持
+    - `homepage` (string): 项目主页URL
+    - `repository` (string): 代码仓库URL
+      - ✅ 正确: `"https://github.com/user/repo"`
+      - ❌ 错误: `{"type": "git", "url": "..."}`
+    - `license` (string): 开源协议 (e.g., "MIT")
+    - `keywords` (array): 关键词数组
+
+    **禁止字段**:
+    - ❌ `bugs` - 不支持
+    - ❌ `compatibility` - 不支持
+    - ❌ `dependencies` - 不支持
+    - ❌ `metadata` - 不支持
+    - ❌ `author.url` - author仅支持name和email
+    - ❌ `repository.type` - repository必须是字符串
+    - ❌ `repository.url` - repository必须是字符串
+
+    **检测方法**:
+    1. 读取.claude-plugin/plugin.json
+    2. 对照白名单schema验证所有字段
+    3. 检查字段类型和格式
+    4. 发现任何未知字段或类型错误
+
+  en: |
+    **Problem**: plugin.json contains unsupported fields or invalid formats, preventing plugin from loading.
+
+    **Root Cause**: Claude Code uses strict whitelist schema validation for plugin.json. Any unknown fields or format errors cause "invalid manifest" error.
+
+    **Impact**:
+    - 🔴 Plugin completely fails to load
+    - 🔴 All skills/commands/agents unavailable
+    - 🔴 Debug logs show "Failed to load plugin: invalid manifest file"
+
+    **Whitelist Fields**:
+
+    **Required Fields**:
+    - `name` (string): Plugin name, lowercase letters and hyphens only
+    - `description` (string): Brief description, 10-200 characters
+
+    **Optional Fields**:
+    - `version` (string): Semantic version (e.g., "3.1.0")
+    - `author` (object): Author info
+      - `name` (string, required): Author name
+      - `email` (string, required): Contact email
+      - ❌ `url`: Not supported
+    - `homepage` (string): Project homepage URL
+    - `repository` (string): Repository URL
+      - ✅ Correct: `"https://github.com/user/repo"`
+      - ❌ Wrong: `{"type": "git", "url": "..."}`
+    - `license` (string): License (e.g., "MIT")
+    - `keywords` (array): Keywords array
+
+    **Forbidden Fields**:
+    - ❌ `bugs` - Not supported
+    - ❌ `compatibility` - Not supported
+    - ❌ `dependencies` - Not supported
+    - ❌ `metadata` - Not supported
+    - ❌ `author.url` - author only supports name and email
+    - ❌ `repository.type` - repository must be string
+    - ❌ `repository.url` - repository must be string
+
+    **Detection Method**:
+    1. Read .claude-plugin/plugin.json
+    2. Validate all fields against whitelist schema
+    3. Check field types and formats
+    4. Flag any unknown fields or type errors
+
+rationale:
+  zh: "基于实际修复经验 (2026-03-12 CCC plugin加载失败)，Claude Code使用白名单schema，黑名单方式无法预防未知字段错误"
+  en: "Based on actual fix experience (2026-03-12 CCC plugin load failure), Claude Code uses whitelist schema; blacklist approach cannot prevent unknown field errors"
+
+detection:
+  method: schema-validation
+  indicators:
+    - unknown_fields: "包含未在白名单中的字段"
+    - invalid_types: "字段类型不符合schema定义"
+    - invalid_formats: "字段格式不符合pattern规则"
+    - repository_object: "repository字段使用对象格式而非字符串"
+    - author_url: "author对象包含不支持的url字段"
+
+official_reference:
+  document: "schemas/plugin-json-schema.yaml"
+  section: "字段白名单定义"
+  lines: "1-150"
+  quote: "Claude Code plugin.json白名单schema，定义所有允许的字段和类型。未在白名单中的字段将导致manifest验证失败。"
+
+examples:
+  bad:
+    zh: |
+      错误1：repository使用对象格式
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/user/repo.git"
+        }
+      }
+      ```
+      **问题**: repository必须是字符串，不能是对象
+      **错误**: Failed to load plugin: invalid manifest file
+
+      错误2：author包含url字段
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "author": {
+          "name": "John Doe",
+          "email": "john@example.com",
+          "url": "https://johndoe.com"
+        }
+      }
+      ```
+      **问题**: author仅支持name和email字段
+      **错误**: Failed to load plugin: invalid manifest file
+
+      错误3：包含不支持的字段
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "bugs": "https://github.com/user/repo/issues",
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        },
+        "dependencies": {
+          "external": ["git >= 2.30.0"]
+        },
+        "metadata": {
+          "maturity": "stable"
+        }
+      }
+      ```
+      **问题**: bugs, compatibility, dependencies, metadata都不支持
+      **错误**: Failed to load plugin: invalid manifest file
+
+      错误4：字段类型错误
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "version": 3.1,
+        "keywords": "plugin,tool"
+      }
+      ```
+      **问题**:
+      - version应该是字符串 "3.1.0"，不是数字
+      - keywords应该是数组 ["plugin", "tool"]，不是字符串
+      **错误**: Failed to load plugin: invalid manifest file
+
+    en: |
+      Error 1: repository using object format
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/user/repo.git"
+        }
+      }
+      ```
+      **Issue**: repository must be string, not object
+      **Error**: Failed to load plugin: invalid manifest file
+
+      Error 2: author contains url field
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "author": {
+          "name": "John Doe",
+          "email": "john@example.com",
+          "url": "https://johndoe.com"
+        }
+      }
+      ```
+      **Issue**: author only supports name and email fields
+      **Error**: Failed to load plugin: invalid manifest file
+
+      Error 3: contains unsupported fields
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "bugs": "https://github.com/user/repo/issues",
+        "compatibility": {
+          "claudeCode": ">=1.0.0"
+        },
+        "dependencies": {
+          "external": ["git >= 2.30.0"]
+        },
+        "metadata": {
+          "maturity": "stable"
+        }
+      }
+      ```
+      **Issue**: bugs, compatibility, dependencies, metadata are all unsupported
+      **Error**: Failed to load plugin: invalid manifest file
+
+      Error 4: invalid field types
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A plugin",
+        "version": 3.1,
+        "keywords": "plugin,tool"
+      }
+      ```
+      **Issues**:
+      - version should be string "3.1.0", not number
+      - keywords should be array ["plugin", "tool"], not string
+      **Error**: Failed to load plugin: invalid manifest file
+
+  good:
+    zh: |
+      正确1：最小化配置
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A simple plugin for Claude Code"
+      }
+      ```
+      **说明**: 仅包含必需字段，完全合规
+
+      正确2：完整配置（参考superpowers）
+      ```json
+      {
+        "name": "ccc",
+        "description": "Claude Code Component Creator v3.1 - Intent/Blueprint/Delivery workflow",
+        "version": "3.1.0",
+        "author": {
+          "name": "mzdbxqh",
+          "email": "mzdbxqh@github.com"
+        },
+        "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
+        "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
+        "license": "MIT",
+        "keywords": [
+          "component",
+          "creator",
+          "design",
+          "workflow"
+        ]
+      }
+      ```
+      **说明**:
+      - ✅ repository是字符串而非对象
+      - ✅ author仅包含name和email
+      - ✅ 所有字段都在白名单中
+      - ✅ 字段类型全部正确
+
+      正确3：从package.json迁移
+      ```json
+      {
+        "name": "code-analyzer",
+        "description": "Static code analysis plugin",
+        "version": "1.0.0",
+        "author": {
+          "name": "Alice Smith",
+          "email": "alice@example.com"
+        },
+        "repository": "https://github.com/alice/code-analyzer",
+        "license": "MIT"
+      }
+      ```
+      **迁移说明**:
+      - ❌ 删除了 `bugs` 字段
+      - ❌ 删除了 `engines` 字段
+      - ✅ 将 `repository` 从对象改为字符串
+      - ✅ 从 `author` 删除了 `url` 字段
+      - ✅ 详细信息移到README.md中
+
+    en: |
+      Good 1: Minimal config
+      ```json
+      {
+        "name": "my-plugin",
+        "description": "A simple plugin for Claude Code"
+      }
+      ```
+      **Note**: Only required fields, fully compliant
+
+      Good 2: Complete config (reference superpowers)
+      ```json
+      {
+        "name": "ccc",
+        "description": "Claude Code Component Creator v3.1 - Intent/Blueprint/Delivery workflow",
+        "version": "3.1.0",
+        "author": {
+          "name": "mzdbxqh",
+          "email": "mzdbxqh@github.com"
+        },
+        "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
+        "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
+        "license": "MIT",
+        "keywords": [
+          "component",
+          "creator",
+          "design",
+          "workflow"
+        ]
+      }
+      ```
+      **Notes**:
+      - ✅ repository is string not object
+      - ✅ author only contains name and email
+      - ✅ All fields are in whitelist
+      - ✅ All field types correct
+
+      Good 3: Migrated from package.json
+      ```json
+      {
+        "name": "code-analyzer",
+        "description": "Static code analysis plugin",
+        "version": "1.0.0",
+        "author": {
+          "name": "Alice Smith",
+          "email": "alice@example.com"
+        },
+        "repository": "https://github.com/alice/code-analyzer",
+        "license": "MIT"
+      }
+      ```
+      **Migration notes**:
+      - ❌ Removed `bugs` field
+      - ❌ Removed `engines` field
+      - ✅ Changed `repository` from object to string
+      - ✅ Removed `url` from `author`
+      - ✅ Detailed info moved to README.md
+
+fix:
+  automatic: true
+  suggestion:
+    zh: |
+      **自动修复方案（基于白名单schema）**:
+
+      **步骤1：加载schema**
+      ```bash
+      # 读取白名单schema
+      schema_file="agents/reviewer/knowledge/schemas/plugin-json-schema.yaml"
+      ```
+
+      **步骤2：验证plugin.json**
+      ```python
+      import json
+      import yaml
+
+      # 加载schema
+      with open(schema_file) as f:
+          schema = yaml.safe_load(f)
+
+      # 加载plugin.json
+      with open('.claude-plugin/plugin.json') as f:
+          manifest = json.load(f)
+
+      # 提取白名单字段
+      allowed_fields = set()
+      allowed_fields.update(schema['fields']['required'].keys())
+      allowed_fields.update(schema['fields']['optional'].keys())
+
+      # 检测未知字段
+      unknown_fields = set(manifest.keys()) - allowed_fields
+      ```
+
+      **步骤3：移除不支持字段**
+      ```python
+      # 移除未知字段
+      for field in unknown_fields:
+          print(f"移除不支持的字段: {field}")
+          del manifest[field]
+
+      # 修复author字段
+      if 'author' in manifest and isinstance(manifest['author'], dict):
+          if 'url' in manifest['author']:
+              print("移除author.url，使用homepage代替")
+              # 如果没有homepage，可以将author.url移到homepage
+              if 'homepage' not in manifest and manifest['author']['url']:
+                  manifest['homepage'] = manifest['author']['url']
+              del manifest['author']['url']
+
+      # 修复repository字段
+      if 'repository' in manifest and isinstance(manifest['repository'], dict):
+          print("修复repository格式：对象 → 字符串")
+          if 'url' in manifest['repository']:
+              manifest['repository'] = manifest['repository']['url']
+          else:
+              del manifest['repository']
+      ```
+
+      **步骤4：验证字段类型**
+      ```python
+      # 验证version是字符串
+      if 'version' in manifest and not isinstance(manifest['version'], str):
+          manifest['version'] = str(manifest['version'])
+
+      # 验证keywords是数组
+      if 'keywords' in manifest and isinstance(manifest['keywords'], str):
+          manifest['keywords'] = [kw.strip() for kw in manifest['keywords'].split(',')]
+      ```
+
+      **步骤5：保存修复后的文件**
+      ```python
+      # 保存为格式化JSON
+      with open('.claude-plugin/plugin.json', 'w') as f:
+          json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+      print("✅ plugin.json已修复")
+      ```
+
+      **步骤6：验证修复结果**
+      ```bash
+      # 重启Claude Code验证
+      claude --plugin-dir .
+
+      # 检查debug日志
+      # 应该不再出现 "invalid manifest file" 错误
+      ```
+
+      **手动检查清单**:
+      - [ ] 移除了所有不在白名单中的字段
+      - [ ] repository改为字符串格式
+      - [ ] author.url已删除或移到homepage
+      - [ ] 所有字段类型符合schema定义
+      - [ ] version是字符串 (e.g., "3.1.0")
+      - [ ] keywords是数组
+      - [ ] JSON格式正确（可用jq验证）
+
+    en: |
+      **Automatic Fix (based on whitelist schema)**:
+
+      **Step 1: Load schema**
+      ```bash
+      # Read whitelist schema
+      schema_file="agents/reviewer/knowledge/schemas/plugin-json-schema.yaml"
+      ```
+
+      **Step 2: Validate plugin.json**
+      ```python
+      import json
+      import yaml
+
+      # Load schema
+      with open(schema_file) as f:
+          schema = yaml.safe_load(f)
+
+      # Load plugin.json
+      with open('.claude-plugin/plugin.json') as f:
+          manifest = json.load(f)
+
+      # Extract whitelist fields
+      allowed_fields = set()
+      allowed_fields.update(schema['fields']['required'].keys())
+      allowed_fields.update(schema['fields']['optional'].keys())
+
+      # Detect unknown fields
+      unknown_fields = set(manifest.keys()) - allowed_fields
+      ```
+
+      **Step 3: Remove unsupported fields**
+      ```python
+      # Remove unknown fields
+      for field in unknown_fields:
+          print(f"Removing unsupported field: {field}")
+          del manifest[field]
+
+      # Fix author field
+      if 'author' in manifest and isinstance(manifest['author'], dict):
+          if 'url' in manifest['author']:
+              print("Removing author.url, using homepage instead")
+              # If no homepage, move author.url to homepage
+              if 'homepage' not in manifest and manifest['author']['url']:
+                  manifest['homepage'] = manifest['author']['url']
+              del manifest['author']['url']
+
+      # Fix repository field
+      if 'repository' in manifest and isinstance(manifest['repository'], dict):
+          print("Fixing repository format: object → string")
+          if 'url' in manifest['repository']:
+              manifest['repository'] = manifest['repository']['url']
+          else:
+              del manifest['repository']
+      ```
+
+      **Step 4: Validate field types**
+      ```python
+      # Validate version is string
+      if 'version' in manifest and not isinstance(manifest['version'], str):
+          manifest['version'] = str(manifest['version'])
+
+      # Validate keywords is array
+      if 'keywords' in manifest and isinstance(manifest['keywords'], str):
+          manifest['keywords'] = [kw.strip() for kw in manifest['keywords'].split(',')]
+      ```
+
+      **Step 5: Save fixed file**
+      ```python
+      # Save as formatted JSON
+      with open('.claude-plugin/plugin.json', 'w') as f:
+          json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+      print("✅ plugin.json fixed")
+      ```
+
+      **Step 6: Verify fix**
+      ```bash
+      # Restart Claude Code to verify
+      claude --plugin-dir .
+
+      # Check debug logs
+      # Should no longer see "invalid manifest file" error
+      ```
+
+      **Manual checklist**:
+      - [ ] Removed all fields not in whitelist
+      - [ ] repository changed to string format
+      - [ ] author.url removed or moved to homepage
+      - [ ] All field types match schema definition
+      - [ ] version is string (e.g., "3.1.0")
+      - [ ] keywords is array
+      - [ ] JSON format valid (verify with jq)
+
+tags: ["plugin", "manifest", "config", "schema", "validation", "whitelist", "critical"]
+related_rules: ["SKILL-002", "CMD-012", "SUB-001"]
+
+# 版本历史
+version: "1.0.0"
+created: "2026-03-12"
+last_updated: "2026-03-12"
+based_on: "2026-03-12 CCC plugin加载失败修复经验"

@@ -1,0 +1,236 @@
+# Claude Code Plugin Manifest Schema (plugin.json)
+# 基于官方plugins (superpowers, ralph-loop) 逆向分析
+# 版本: 1.0.0
+# 最后更新: 2026-03-12
+
+schema_version: "1.0"
+schema_type: "plugin-manifest"
+
+description:
+  zh: "Claude Code plugin.json白名单schema，定义所有允许的字段和类型"
+  en: "Claude Code plugin.json whitelist schema defining all allowed fields and types"
+
+# 字段白名单定义
+fields:
+  required:
+    - name:
+        type: string
+        description: "Plugin名称，用作命名空间前缀，仅小写字母和连字符"
+        pattern: "^[a-z][a-z0-9-]*$"
+        examples:
+          - "ccc"
+          - "superpowers"
+          - "ralph-loop"
+
+    - description:
+        type: string
+        description: "Plugin简短描述，一句话说明功能"
+        min_length: 10
+        max_length: 200
+        examples:
+          - "Core skills library for Claude Code: TDD, debugging, collaboration patterns"
+          - "Claude Code Component Creator v3.1 - Intent/Blueprint/Delivery workflow"
+
+  optional:
+    - version:
+        type: string
+        description: "语义化版本号"
+        pattern: "^\\d+\\.\\d+\\.\\d+$"
+        examples:
+          - "5.0.1"
+          - "3.1.0"
+          - "1.0.0"
+
+    - author:
+        type: object
+        description: "作者信息对象"
+        required_fields:
+          - name:
+              type: string
+              description: "作者姓名或组织"
+          - email:
+              type: string
+              description: "联系邮箱"
+              pattern: "^[^@]+@[^@]+\\.[^@]+$"
+        forbidden_fields:
+          - url  # ❌ 不支持此字段
+        examples:
+          - name: "Jesse Vincent"
+            email: "jesse@fsck.com"
+          - name: "mzdbxqh"
+            email: "mzdbxqh@github.com"
+
+    - homepage:
+        type: string
+        description: "项目主页URL"
+        pattern: "^https?://.+"
+        examples:
+          - "https://github.com/obra/superpowers"
+          - "https://github.com/mzdbxqh/claude-code-component-creator"
+
+    - repository:
+        type: string  # ⚠️ 必须是字符串，不能是对象
+        description: "代码仓库URL，必须是字符串格式，不能是{type, url}对象"
+        pattern: "^https?://.+\\.git$|^https?://github\\.com/.+$"
+        examples:
+          - "https://github.com/obra/superpowers"
+          - "https://github.com/mzdbxqh/claude-code-component-creator"
+        anti_examples:
+          - type: git
+            url: "https://github.com/..."  # ❌ 不支持对象格式
+
+    - license:
+        type: string
+        description: "开源协议名称"
+        enum:
+          - "MIT"
+          - "Apache-2.0"
+          - "GPL-3.0"
+          - "BSD-3-Clause"
+          - "ISC"
+        examples:
+          - "MIT"
+
+    - keywords:
+        type: array
+        description: "关键词数组，用于搜索和分类"
+        item_type: string
+        min_items: 1
+        max_items: 20
+        examples:
+          - ["skills", "tdd", "debugging", "collaboration"]
+          - ["component", "creator", "design", "workflow"]
+
+# 禁止的字段（黑名单，用于迁移提示）
+forbidden_fields:
+  - bugs:
+      reason: "Claude Code不支持此字段"
+      alternative: "使用homepage或repository的issues链接"
+
+  - compatibility:
+      reason: "Claude Code不支持此字段"
+      alternative: "在description或README中说明兼容性"
+
+  - dependencies:
+      reason: "Claude Code不支持此字段"
+      alternative: "在README中说明依赖关系"
+
+  - metadata:
+      reason: "Claude Code不支持此字段"
+      alternative: "在README中补充元数据信息"
+
+  - author.url:
+      reason: "author对象仅支持name和email字段"
+      alternative: "使用homepage字段"
+
+  - repository.type:
+      reason: "repository必须是字符串，不能是对象"
+      alternative: "使用字符串URL格式: \"https://github.com/...\""
+
+  - repository.url:
+      reason: "repository必须是字符串，不能是对象"
+      alternative: "使用字符串URL格式: \"https://github.com/...\""
+
+# 验证规则
+validation_rules:
+  - rule: "reject_unknown_fields"
+    severity: error
+    message: "plugin.json包含未知字段，必须移除"
+
+  - rule: "enforce_types"
+    severity: error
+    message: "字段类型不匹配，必须符合schema定义"
+
+  - rule: "require_mandatory_fields"
+    severity: error
+    message: "缺少必需字段"
+
+  - rule: "validate_patterns"
+    severity: error
+    message: "字段格式不符合pattern规则"
+
+# 官方参考示例
+official_examples:
+  superpowers:
+    source: "/Users/mzdbxqh/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.1/.claude-plugin/plugin.json"
+    content: |
+      {
+        "name": "superpowers",
+        "description": "Core skills library for Claude Code: TDD, debugging, collaboration patterns, and proven techniques",
+        "version": "5.0.1",
+        "author": {
+          "name": "Jesse Vincent",
+          "email": "jesse@fsck.com"
+        },
+        "homepage": "https://github.com/obra/superpowers",
+        "repository": "https://github.com/obra/superpowers",
+        "license": "MIT",
+        "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows"]
+      }
+
+  ralph-loop:
+    source: "/Users/mzdbxqh/.claude/plugins/cache/claude-plugins-official/ralph-loop/f70b65538da0/.claude-plugin/plugin.json"
+    content: |
+      {
+        "name": "ralph-loop",
+        "description": "Continuous self-referential AI loops for interactive iterative development",
+        "author": {
+          "name": "Anthropic",
+          "email": "support@anthropic.com"
+        }
+      }
+
+# 迁移指南
+migration_guide:
+  from_npm_package_json:
+    description: "如果从npm package.json迁移，注意以下差异"
+    differences:
+      - field: "repository"
+        npm_format: "{\"type\": \"git\", \"url\": \"...\"}"
+        claude_format: "\"https://github.com/...\""
+
+      - field: "author"
+        npm_format: "可以是字符串或对象，对象可以有url字段"
+        claude_format: "仅支持对象格式，且只能有name和email字段"
+
+      - field: "bugs"
+        npm_format: "支持bugs字段"
+        claude_format: "不支持，应删除"
+
+      - field: "engines"
+        npm_format: "支持engines字段指定Node版本"
+        claude_format: "不支持，应删除"
+
+# 常见错误
+common_errors:
+  - error: "Failed to load plugin: invalid manifest file"
+    cause: "plugin.json格式不符合schema"
+    solution: "对照此schema检查所有字段，移除不支持的字段"
+
+  - error: "repository字段验证失败"
+    cause: "使用了对象格式 {type, url}"
+    solution: "改为字符串格式: \"https://github.com/...\""
+
+  - error: "author.url不支持"
+    cause: "author对象包含url字段"
+    solution: "移除author.url，使用顶层homepage字段"
+
+# 最佳实践
+best_practices:
+  - practice: "最小化字段"
+    description: "仅使用必需字段和真正需要的可选字段，避免冗余"
+
+  - practice: "字符串格式优先"
+    description: "repository等字段使用简单字符串而非复杂对象"
+
+  - practice: "在README中补充详细信息"
+    description: "plugin.json保持简洁，详细信息放在README中"
+
+  - practice: "参考官方plugins"
+    description: "对照superpowers和ralph-loop的plugin.json格式"
+
+# 版本历史
+version_history:
+  - version: "1.0.0"
+    date: "2026-03-12"
+    changes: "基于CCC修复经验创建初始schema，定义白名单字段"
