@@ -1,0 +1,261 @@
+{
+  "version": "1.0.0",
+  "component": "advisor-core",
+  "description": "设计顾问核心组件测试套件 - 执行4个诊断问题，基于决策树推荐架构方案",
+  "testCases": [
+    {
+      "id": "TC-ADV-001",
+      "name": "简单技能架构推荐",
+      "category": "functional",
+      "priority": "P0",
+      "prompt": "我需要一个技能来查找TODO注释",
+      "input": {
+        "intent": {
+          "what": "TODO查找器",
+          "why": "快速找到项目中的待办事项",
+          "target_users": ["开发者"]
+        }
+      },
+      "expectedWorkflow": [
+        "诊断问题1: 组件类型",
+        "诊断问题2: 数据流",
+        "诊断问题3: 复杂度",
+        "诊断问题4: 约束",
+        "生成架构推荐"
+      ],
+      "expectedOutput": {
+        "component_type": "Skill",
+        "architecture_pattern": "simple-reader",
+        "recommended_tools": ["Read", "Grep", "Glob"]
+      },
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "组件类型: Skill"
+        },
+        {
+          "type": "output_contains",
+          "value": "架构推荐"
+        },
+        {
+          "type": "json_field",
+          "field": "component_type",
+          "value": "Skill"
+        }
+      ],
+      "qualityThresholds": {
+        "recommendation_clarity": 85,
+        "reasoning_completeness": 80
+      }
+    },
+    {
+      "id": "TC-ADV-002",
+      "name": "复杂SubAgent架构推荐",
+      "category": "functional",
+      "priority": "P0",
+      "prompt": "需要一个SubAgent自动化代码审查流程",
+      "input": {
+        "intent": {
+          "what": "代码审查器",
+          "why": "自动化代码审查流程",
+          "target_users": ["开发团队"],
+          "constraints": ["支持多种语言", "生成详细报告"]
+        }
+      },
+      "expectedWorkflow": [
+        "诊断问题1: 组件类型 → SubAgent",
+        "诊断问题2: 数据流 → 读取+分析+输出",
+        "诊断问题3: 复杂度 → 高",
+        "诊断问题4: 约束 → 多语言支持",
+        "推荐架构: multi-step-processor"
+      ],
+      "expectedOutput": {
+        "component_type": "SubAgent",
+        "architecture_pattern": "multi-step-processor",
+        "recommended_tools": ["Read", "Grep", "Write", "Task"]
+      },
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "SubAgent"
+        },
+        {
+          "type": "output_contains",
+          "value": "multi-step"
+        },
+        {
+          "type": "json_field",
+          "field": "complexity_level",
+          "value": "high"
+        }
+      ],
+      "qualityThresholds": {
+        "recommendation_clarity": 85,
+        "architecture_justification": 80
+      }
+    },
+    {
+      "id": "TC-ADV-003",
+      "name": "数据流分析准确性",
+      "category": "quality",
+      "priority": "P1",
+      "prompt": "创建一个数据转换工具，将YAML转JSON",
+      "input": {
+        "intent": {
+          "what": "YAML to JSON转换器",
+          "why": "格式转换需求",
+          "input_format": "YAML文件",
+          "output_format": "JSON文件"
+        }
+      },
+      "expectedOutput": {
+        "data_flow": "input → transform → output",
+        "io_pattern": "file-to-file"
+      },
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "数据流"
+        },
+        {
+          "type": "json_field",
+          "field": "io_pattern",
+          "value": "file-to-file"
+        }
+      ],
+      "qualityThresholds": {
+        "data_flow_accuracy": 90
+      }
+    },
+    {
+      "id": "TC-ADV-004",
+      "name": "复杂度评估准确性",
+      "category": "quality",
+      "priority": "P1",
+      "prompt": "构建一个多阶段代码生成器，支持模板、验证、优化",
+      "input": {
+        "intent": {
+          "what": "多阶段代码生成器",
+          "stages": ["模板解析", "代码生成", "语法验证", "优化"],
+          "constraints": ["支持多语言", "可扩展模板系统"]
+        }
+      },
+      "expectedOutput": {
+        "complexity_level": "high",
+        "estimated_token_budget": "50K-100K",
+        "architecture_pattern": "pipeline-processor"
+      },
+      "assertions": [
+        {
+          "type": "json_field",
+          "field": "complexity_level",
+          "value": "high"
+        },
+        {
+          "type": "output_contains",
+          "value": "pipeline"
+        }
+      ],
+      "qualityThresholds": {
+        "complexity_assessment_accuracy": 85
+      }
+    },
+    {
+      "id": "TC-ADV-005",
+      "name": "约束处理能力",
+      "category": "functional",
+      "priority": "P1",
+      "prompt": "开发一个必须离线运行且无外部依赖的工具",
+      "input": {
+        "intent": {
+          "what": "离线日志分析器",
+          "constraints": [
+            "完全离线运行",
+            "无外部API调用",
+            "仅使用标准库"
+          ]
+        }
+      },
+      "expectedOutput": {
+        "constraint_analysis": {
+          "offline_mode": true,
+          "no_external_deps": true
+        },
+        "recommended_tools": ["Read", "Grep", "Write"],
+        "forbidden_tools": ["WebFetch", "Task"]
+      },
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "离线"
+        },
+        {
+          "type": "output_not_contains",
+          "value": "WebFetch"
+        }
+      ],
+      "qualityThresholds": {
+        "constraint_compliance": 95
+      }
+    },
+    {
+      "id": "TC-ADV-006",
+      "name": "决策推理透明度",
+      "category": "quality",
+      "priority": "P1",
+      "prompt": "创建文件同步工具",
+      "expectedOutput": {
+        "decision_reasoning": true,
+        "key_factors_explained": true
+      },
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "选择理由"
+        },
+        {
+          "type": "output_contains",
+          "value": "关键因素"
+        }
+      ],
+      "qualityThresholds": {
+        "reasoning_transparency": 85,
+        "decision_clarity": 80
+      }
+    },
+    {
+      "id": "TC-ADV-007",
+      "name": "性能基准测试",
+      "category": "performance",
+      "priority": "P2",
+      "prompt": "标准技能架构推荐",
+      "assertions": [
+        {
+          "type": "execution_time",
+          "max_seconds": 30
+        },
+        {
+          "type": "token_usage",
+          "max_tokens": 8000
+        }
+      ],
+      "qualityThresholds": {
+        "response_time": "< 30s",
+        "token_efficiency": "< 8K"
+      }
+    }
+  ],
+  "metadata": {
+    "total_tests": 7,
+    "coverage": {
+      "functional": 3,
+      "quality": 3,
+      "performance": 1
+    },
+    "priority_distribution": {
+      "P0": 2,
+      "P1": 4,
+      "P2": 1
+    }
+  }
+}

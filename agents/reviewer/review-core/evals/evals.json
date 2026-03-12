@@ -1,0 +1,259 @@
+{
+  "version": "1.0.0",
+  "component": "review-core",
+  "description": "智能审阅核心组件测试套件 - 基于组件类型加载反模式库执行深度质量检查",
+  "testCases": [
+    {
+      "id": "TC-REV-001",
+      "name": "cmd-* Skill审查测试",
+      "category": "functional",
+      "priority": "P0",
+      "input": {
+        "component_path": "skills/cmd-design/SKILL.md",
+        "component_type": "cmd-skill"
+      },
+      "expectedChecks": [
+        "WORKFLOW-002",
+        "CMD-001",
+        "SKILL-001"
+      ],
+      "excludedChecks": [
+        "INTENT-001",
+        "INTENT-002",
+        "INTENT-003"
+      ],
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "工作流定位"
+        },
+        {
+          "type": "output_not_contains",
+          "value": "触发场景"
+        },
+        {
+          "type": "json_field",
+          "field": "rules_applied",
+          "contains": "WORKFLOW-002"
+        },
+        {
+          "type": "json_field",
+          "field": "rules_applied",
+          "not_contains": "INTENT-001"
+        }
+      ],
+      "qualityThresholds": {
+        "rule_accuracy": 95,
+        "false_positive_rate": "<5%"
+      }
+    },
+    {
+      "id": "TC-REV-002",
+      "name": "std-* Skill审查测试",
+      "category": "functional",
+      "priority": "P0",
+      "input": {
+        "component_path": "skills/std-naming-rules/SKILL.md",
+        "component_type": "std-skill"
+      },
+      "expectedChecks": [
+        "INTENT-001",
+        "INTENT-002",
+        "INTENT-003",
+        "SKILL-001"
+      ],
+      "excludedChecks": [
+        "WORKFLOW-002"
+      ],
+      "assertions": [
+        {
+          "type": "output_contains",
+          "value": "触发场景"
+        },
+        {
+          "type": "output_not_contains",
+          "value": "工作流第"
+        },
+        {
+          "type": "json_field",
+          "field": "rules_applied",
+          "contains": "INTENT-001"
+        }
+      ],
+      "qualityThresholds": {
+        "rule_accuracy": 95
+      }
+    },
+    {
+      "id": "TC-REV-003",
+      "name": "lib-* Skill审查测试",
+      "category": "functional",
+      "priority": "P0",
+      "input": {
+        "component_path": "skills/lib-antipatterns/SKILL.md",
+        "component_type": "lib-skill"
+      },
+      "expectedChecks": [
+        "LIB-002",
+        "SKILL-001"
+      ],
+      "excludedChecks": [
+        "INTENT-001",
+        "WORKFLOW-002"
+      ],
+      "assertions": [
+        {
+          "type": "json_field",
+          "field": "rules_applied",
+          "contains": "LIB-002"
+        },
+        {
+          "type": "json_field",
+          "field": "rules_applied",
+          "not_contains": "INTENT"
+        }
+      ],
+      "qualityThresholds": {
+        "rule_accuracy": 95
+      }
+    },
+    {
+      "id": "TC-REV-004",
+      "name": "8维度全面检查",
+      "category": "quality",
+      "priority": "P1",
+      "input": {
+        "component_path": "skills/cmd-review/SKILL.md"
+      },
+      "expectedChecks": [
+        "intent",
+        "config",
+        "dependency",
+        "security",
+        "environment",
+        "llm",
+        "scalability",
+        "testability"
+      ],
+      "assertions": [
+        {
+          "type": "json_field",
+          "field": "dimensions_checked",
+          "length": 8
+        },
+        {
+          "type": "output_contains",
+          "value": "综合评分"
+        }
+      ],
+      "qualityThresholds": {
+        "dimension_coverage": 100,
+        "check_completeness": 90
+      }
+    },
+    {
+      "id": "TC-REV-005",
+      "name": "反模式检测准确性",
+      "category": "quality",
+      "priority": "P1",
+      "input": {
+        "component_path": "tests/fixtures/components/bad-skill.md",
+        "expected_issues": [
+          {"id": "SKILL-001", "severity": "warning"},
+          {"id": "SEC-001", "severity": "error"}
+        ]
+      },
+      "assertions": [
+        {
+          "type": "json_field",
+          "field": "issues",
+          "contains_item": {"id": "SKILL-001"}
+        },
+        {
+          "type": "json_field",
+          "field": "issues",
+          "contains_item": {"id": "SEC-001"}
+        }
+      ],
+      "qualityThresholds": {
+        "detection_accuracy": 90,
+        "false_positive_rate": "<10%"
+      }
+    },
+    {
+      "id": "TC-REV-006",
+      "name": "评分算法准确性",
+      "category": "quality",
+      "priority": "P1",
+      "input": {
+        "component_path": "tests/fixtures/components/good-skill.md"
+      },
+      "assertions": [
+        {
+          "type": "json_field",
+          "field": "overall_score",
+          "min_value": 85
+        },
+        {
+          "type": "json_field",
+          "field": "dimension_scores",
+          "all_above": 75
+        }
+      ],
+      "qualityThresholds": {
+        "scoring_consistency": 85
+      }
+    },
+    {
+      "id": "TC-REV-007",
+      "name": "性能基准测试",
+      "category": "performance",
+      "priority": "P2",
+      "input": {
+        "component_path": "skills/cmd-design/SKILL.md"
+      },
+      "assertions": [
+        {
+          "type": "execution_time",
+          "max_seconds": 60
+        },
+        {
+          "type": "token_usage",
+          "max_tokens": 5000
+        }
+      ]
+    },
+    {
+      "id": "TC-REV-008",
+      "name": "批量审查性能",
+      "category": "performance",
+      "priority": "P2",
+      "input": {
+        "components": ["skill1", "skill2", "skill3", "skill4", "skill5"]
+      },
+      "assertions": [
+        {
+          "type": "execution_time",
+          "max_seconds": 180
+        },
+        {
+          "type": "token_usage",
+          "max_tokens": 20000
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_tests": 8,
+    "coverage": {
+      "functional": 3,
+      "quality": 3,
+      "performance": 2
+    },
+    "priority_distribution": {
+      "P0": 3,
+      "P1": 3,
+      "P2": 2
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "version": "1.0.0",
+  "component": "blueprint-core",
+  "description": "Blueprint生成器核心组件测试套件 - 创建完整的设计蓝图制品",
+  "testCases": [
+    {
+      "id": "TC-BLP-001",
+      "name": "简单技能Blueprint生成",
+      "category": "functional",
+      "priority": "P0",
+      "input": {
+        "intent_id": "INT-001",
+        "component_type": "Skill",
+        "architecture": "simple-reader"
+      },
+      "expectedArtifacts": [
+        "docs/ccc/blueprint/BLP-*.yaml"
+      ],
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "docs/ccc/blueprint/BLP-*.yaml"
+        },
+        {
+          "type": "yaml_field",
+          "field": "component.type",
+          "value": "Skill"
+        },
+        {
+          "type": "yaml_field",
+          "field": "workflow.steps",
+          "min_length": 3
+        }
+      ],
+      "qualityThresholds": {
+        "completeness": 85,
+        "clarity": 80,
+        "structure_validity": 95
+      }
+    },
+    {
+      "id": "TC-BLP-002",
+      "name": "复杂SubAgent Blueprint生成",
+      "category": "functional",
+      "priority": "P0",
+      "input": {
+        "intent_id": "INT-002",
+        "component_type": "SubAgent",
+        "architecture": "multi-step-processor",
+        "complexity": "high"
+      },
+      "expectedArtifacts": [
+        "docs/ccc/blueprint/BLP-*.yaml"
+      ],
+      "assertions": [
+        {
+          "type": "yaml_field",
+          "field": "workflow.steps",
+          "min_length": 5
+        },
+        {
+          "type": "yaml_field",
+          "field": "component.tools",
+          "contains": ["Read", "Write", "Task"]
+        },
+        {
+          "type": "yaml_field",
+          "field": "complexity",
+          "value": "high"
+        }
+      ],
+      "qualityThresholds": {
+        "completeness": 90,
+        "workflow_logic": 85
+      }
+    },
+    {
+      "id": "TC-BLP-003",
+      "name": "工作流完整性验证",
+      "category": "quality",
+      "priority": "P1",
+      "assertions": [
+        {
+          "type": "yaml_field",
+          "field": "workflow",
+          "has_keys": ["steps", "inputs", "outputs", "error_handling"]
+        },
+        {
+          "type": "yaml_validation",
+          "schema": "blueprint-schema.json"
+        }
+      ],
+      "qualityThresholds": {
+        "workflow_completeness": 90
+      }
+    },
+    {
+      "id": "TC-BLP-004",
+      "name": "工具权限准确性",
+      "category": "quality",
+      "priority": "P1",
+      "assertions": [
+        {
+          "type": "yaml_field",
+          "field": "component.tools",
+          "type": "array"
+        },
+        {
+          "type": "custom_check",
+          "function": "validate_tool_permissions",
+          "description": "验证声明的工具与实际使用一致"
+        }
+      ],
+      "qualityThresholds": {
+        "tool_accuracy": 95
+      }
+    },
+    {
+      "id": "TC-BLP-005",
+      "name": "性能基准",
+      "category": "performance",
+      "priority": "P2",
+      "assertions": [
+        {
+          "type": "execution_time",
+          "max_seconds": 45
+        },
+        {
+          "type": "token_usage",
+          "max_tokens": 10000
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_tests": 5,
+    "coverage": {
+      "functional": 2,
+      "quality": 2,
+      "performance": 1
+    }
+  }
+}

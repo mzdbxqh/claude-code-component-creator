@@ -317,6 +317,178 @@ Git Commits:
 | SubAgent 执行失败 | 重试 1 次，失败后报告部分成功 |
 | Git 提交失败 | 保留修改，提示用户手动提交 |
 
+## 安全考虑
+
+### 输入验证
+
+**artifact-id 验证**:
+```python
+def validate_artifact_id(artifact_id):
+    """验证 artifact-id 格式，防止路径遍历"""
+    # 仅允许字母、数字、连字符
+    if not re.match(r'^[A-Z]+-\d+$', artifact_id):
+        raise ValueError(f"Invalid artifact-id format: {artifact_id}")
+
+    # 禁止路径遍历字符
+    if '..' in artifact_id or '/' in artifact_id:
+        raise SecurityError("Path traversal detected in artifact-id")
+
+    return artifact_id
+```
+
+**文件路径验证**:
+```python
+def validate_file_path(file_path, base_dir):
+    """验证文件路径在允许的目录内"""
+    # 获取绝对路径
+    abs_path = os.path.abspath(file_path)
+    abs_base = os.path.abspath(base_dir)
+
+    # 检查路径是否在基础目录下
+    if not abs_path.startswith(abs_base):
+        raise SecurityError(f"File path outside base directory: {file_path}")
+
+    return abs_path
+```
+
+### 命令执行安全
+
+**禁止直接执行用户输入**:
+```bash
+# ❌ 危险：字符串拼接
+bash -c "fix_command: $user_input"
+
+# ✅ 安全：使用数组和参数化
+declare -a cmd_args=("$@")
+bash -c "${cmd_args[@]}"
+
+# ✅ 更安全：完全避免用户输入执行
+# 使用白名单模式，仅调用预定义的 SubAgent
+```
+
+**SubAgent 调用安全**:
+```python
+# 使用白名单验证 SubAgent 类型
+ALLOWED_SUBAGENTS = {
+    'metadata-fix-agent',
+    'tool-declare-agent',
+    'doc-complete-agent'
+}
+
+def call_subagent(subagent_type, **kwargs):
+    """安全地调用 SubAgent"""
+    if subagent_type not in ALLOWED_SUBAGENTS:
+        raise SecurityError(f"Unknown subagent type: {subagent_type}")
+
+    # 调用前验证参数
+    validate_subagent_params(kwargs)
+
+    # 使用 Agent 工具调用
+    return Agent(subagent_type=subagent_type, **kwargs)
+```
+
+### 文件操作安全
+
+**防止覆盖关键文件**:
+```python
+# 关键文件和目录保护列表
+PROTECTED_PATHS = {
+    '.git',
+    '.env',
+    'credentials.json',
+    'secrets.yaml'
+}
+
+def is_protected_path(file_path):
+    """检查是否为受保护的路径"""
+    for protected in PROTECTED_PATHS:
+        if protected in file_path:
+            return True
+    return False
+
+def safe_write_file(file_path, content):
+    """安全地写入文件"""
+    # 检查路径安全性
+    validate_file_path(file_path, base_dir=PROJECT_ROOT)
+
+    # 检查是否为受保护路径
+    if is_protected_path(file_path):
+        raise SecurityError(f"Cannot modify protected path: {file_path}")
+
+    # 备份原文件
+    if os.path.exists(file_path):
+        backup_path = f"{file_path}.backup"
+        shutil.copy2(file_path, backup_path)
+
+    # 写入文件
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+    except Exception as e:
+        # 恢复备份
+        if os.path.exists(backup_path):
+            shutil.copy2(backup_path, file_path)
+        raise
+```
+
+### 权限最小化
+
+**工具权限说明**:
+- `Bash`: 仅用于 git 操作，不执行用户输入
+- `Read/Write/Edit`: 仅操作项目目录内文件
+- `Glob/Grep`: 仅用于文件搜索，不执行代码
+- `Task`: 仅调用白名单中的 SubAgent
+
+**运行时检查**:
+```yaml
+# 在 SKILL.md frontmatter 中声明
+allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+permissionMode: prompt  # 关键操作需要用户确认
+```
+
+### 审计日志
+
+**记录关键操作**:
+```python
+def audit_log(operation, details):
+    """记录审计日志"""
+    log_entry = {
+        'timestamp': datetime.now().isoformat(),
+        'operation': operation,
+        'details': details,
+        'user': os.getenv('USER'),
+        'artifact_id': current_artifact_id
+    }
+
+    with open('docs/audit.log', 'a') as f:
+        f.write(json.dumps(log_entry) + '\n')
+
+# 使用示例
+audit_log('file_modified', {'path': 'skills/xxx/SKILL.md', 'changes': 3})
+audit_log('subagent_called', {'type': 'metadata-fix-agent', 'files': 2})
+```
+
+### 安全检查清单
+
+修复执行前的安全检查：
+
+- [ ] artifact-id 格式验证（字母数字连字符）
+- [ ] 文件路径验证（禁止路径遍历）
+- [ ] 受保护文件检查（.git, .env, credentials）
+- [ ] SubAgent 类型白名单验证
+- [ ] 工具权限验证（仅使用声明的工具）
+- [ ] 文件备份（修改前备份原文件）
+- [ ] 审计日志（记录所有修改操作）
+
+### 安全最佳实践
+
+1. **永不直接执行用户输入**: 使用白名单和参数化调用
+2. **最小权限原则**: 仅使用必要的工具权限
+3. **输入验证**: 所有外部输入都要验证
+4. **路径验证**: 确保所有文件操作在项目目录内
+5. **备份机制**: 修改前备份，失败时回滚
+6. **审计日志**: 记录所有关键操作
+
 ## 示例
 
 ### 示例 1: 交互式修复

@@ -10,79 +10,297 @@ title:
 
 description:
   zh: |
-    技能如执行 Bash 命令，必须验证用户输入，避免命令注入攻击。
-    重点检测高风险模式：eval、exec、管道到 bash。
+    组件执行 Bash 命令时必须验证用户输入，避免命令注入攻击。
+    命令注入是 OWASP Top 10 安全风险之一，攻击者可通过注入特殊字符执行任意命令。
+    重点检测高风险模式：eval、exec、字符串拼接、未转义的用户输入。
   en: |
-    Skills executing Bash commands must validate user input to avoid command injection attacks.
-    Focus on high-risk patterns: eval, exec, piping to bash.
+    Components executing Bash commands must validate user input to avoid command injection attacks.
+    Command injection is one of the OWASP Top 10 security risks.
+    Focus on high-risk patterns: eval, exec, string concatenation, unescaped user input.
 
 rationale:
-  zh: "基于安全最佳实践，所有外部输入必须验证后才能用于命令执行"
-  en: "Per security best practices, all external input must be validated before command execution"
+  zh: |
+    基于安全最佳实践和 OWASP 指南：
+    1. 所有外部输入必须验证后才能用于命令执行
+    2. 优先使用参数数组而非字符串拼接
+    3. 实施输入白名单验证
+    4. 使用最小权限原则
+  en: |
+    Based on security best practices and OWASP guidelines:
+    1. All external input must be validated before command execution
+    2. Prefer parameter arrays over string concatenation
+    3. Implement input whitelist validation
+    4. Apply principle of least privilege
 
 detection:
-  method: code-analysis
-  risk_patterns:
+  method: pattern-check
+  patterns:
+    # Critical: 直接执行用户输入
     - pattern: 'eval\s+.*\$'
-      risk: critical
-      description: "eval with variable interpolation"
+      severity: critical
+      message: "eval with variable interpolation - 极高风险"
+
     - pattern: 'exec\s+.*\$'
-      risk: critical
-      description: "exec with variable interpolation"
+      severity: critical
+      message: "exec with variable interpolation - 极高风险"
+
     - pattern: '\|.*bash'
-      risk: critical
-      description: "piping to bash"
-    - pattern: 'echo.*\$.*\|.*sh'
-      risk: critical
-      description: "echo variable piped to shell"
+      severity: critical
+      message: "piping to bash - 可执行任意命令"
+
+    - pattern: 'echo.*\$.*\|.*(sh|bash)'
+      severity: critical
+      message: "echo variable piped to shell - 命令注入"
+
+    # High: 字符串拼接执行
+    - pattern: 'bash\s+-c\s+".*\$\{?[a-zA-Z_][a-zA-Z0-9_]*\}?"'
+      severity: error
+      message: "bash -c with string interpolation - 未转义输入"
+
+    - pattern: 'os\.system\(.*\+.*\)'
+      severity: error
+      message: "os.system with string concatenation"
+
+    - pattern: 'subprocess\.(call|run|Popen)\(.*\+.*,.*shell=True'
+      severity: error
+      message: "subprocess with shell=True and concatenation"
+
+    # Medium: 潜在风险模式
+    - pattern: 'user_input|user_command|custom_command|user_provided'
+      context: '(bash|subprocess|os\.system|exec|eval)'
+      severity: warning
+      message: "用户输入用于命令执行 - 需要验证"
+
+    - pattern: 'subprocess\.(call|run|Popen)\(.*shell=True'
+      severity: warning
+      message: "subprocess with shell=True - 建议改用数组参数"
+
+    # SubAgent调用安全
+    - pattern: 'Agent\(.*subagent_type\s*=\s*(?!["''])'
+      severity: warning
+      message: "SubAgent类型来自变量 - 需要白名单验证"
+
+  file_pattern: '**/*.{md,py,sh,yaml,js,ts}'
+
   required_practices:
-    - 输入验证
-    - 参数化命令
-    - 命令白名单
+    - 输入白名单验证
+    - 参数化命令（使用数组）
+    - 输入转义（shlex.quote）
+    - 避免 shell=True
+    - SubAgent 类型白名单
 
 fix:
   automatic: false
   suggestion:
     zh: |
-      **安全实践**:
+      ## 修复方案
 
-      ❌ 不安全:
-      ```bash
-      eval "git worktree add $USER_INPUT"
-      echo "$USER_INPUT" | bash
+      ### 1. 使用参数数组（最推荐）
+
+      ```python
+      # ❌ 危险：字符串拼接
+      os.system(f"git commit -m '{user_message}'")
+      subprocess.run(f"git {user_cmd}", shell=True)
+
+      # ✅ 安全：参数数组
+      subprocess.run(['git', 'commit', '-m', user_message])
+      subprocess.run(['git'] + shlex.split(user_cmd))
       ```
 
-      ✅ 安全:
+      ### 2. 输入白名单验证
+
+      ```python
+      # 定义允许的命令
+      ALLOWED_COMMANDS = {'status', 'diff', 'log', 'show'}
+      ALLOWED_SUBAGENTS = {'metadata-fix-agent', 'tool-declare-agent'}
+
+      def validate_command(cmd):
+          """验证命令是否在白名单中"""
+          if cmd not in ALLOWED_COMMANDS:
+              raise SecurityError(f"Command not allowed: {cmd}")
+          return cmd
+
+      def validate_subagent(subagent_type):
+          """验证SubAgent类型"""
+          if subagent_type not in ALLOWED_SUBAGENTS:
+              raise SecurityError(f"Unknown subagent: {subagent_type}")
+          return subagent_type
+
+      # 使用验证后的输入
+      safe_cmd = validate_command(user_input)
+      subprocess.run(['git', safe_cmd])
+
+      safe_type = validate_subagent(user_provided_type)
+      Agent(subagent_type=safe_type)
+      ```
+
+      ### 3. 输入转义
+
+      ```python
+      import shlex
+
+      # ✅ 转义特殊字符
+      safe_message = shlex.quote(user_message)
+      os.system(f"git commit -m {safe_message}")
+
+      # ✅ 分割命令行参数
+      safe_args = shlex.split(user_input)
+      subprocess.run(['git'] + safe_args)
+      ```
+
+      ### 4. 避免 shell=True
+
+      ```python
+      # ❌ 危险：启用 shell 解释器
+      subprocess.run(user_command, shell=True)
+
+      # ✅ 安全：直接执行命令
+      subprocess.run(shlex.split(user_command))
+      subprocess.run(['git', 'status'])
+      ```
+
+      ### 5. Bash 脚本安全实践
+
       ```bash
-      # 验证输入（白名单）
+      # ❌ 危险：未验证的用户输入
+      eval "git worktree add $USER_INPUT"
+      bash -c "fix_command: $user_input"
+
+      # ✅ 安全：输入验证
+      # 白名单验证（仅允许字母数字连字符）
       if [[ ! "$USER_INPUT" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        echo "Invalid input"
+        echo "Invalid input: only alphanumeric, underscore, hyphen allowed"
         exit 1
       fi
 
-      # 使用引号包裹
-      git worktree add "$SAFE_INPUT"
+      # 使用引号包裹变量
+      git worktree add "$VALIDATED_INPUT"
+
+      # 或使用参数传递
+      git worktree add "${1}"  # $1 is a function parameter
       ```
+
+      ### 6. 文档化安全考虑
+
+      在 SKILL.md 中添加安全章节：
+      ```markdown
+      ## 安全考虑
+
+      ### 输入验证
+      - artifact-id 格式：`^[A-Z]+-\d+$`
+      - 文件路径：必须在项目目录内
+      - 命令参数：使用白名单验证
+
+      ### 命令执行安全
+      - 禁止直接执行用户输入
+      - 使用 SubAgent 白名单模式
+      - 所有 Bash 调用仅用于 git 操作
+
+      ### 权限最小化
+      - allowed-tools: [Read, Write, Edit, Glob, Grep, Task]
+      - permissionMode: prompt
+      ```
+
+      ### 7. 审计日志
+
+      ```python
+      def audit_log(operation, details):
+          """记录安全审计日志"""
+          log_entry = {
+              'timestamp': datetime.now().isoformat(),
+              'operation': operation,
+              'details': details,
+              'user': os.getenv('USER')
+          }
+          with open('docs/audit.log', 'a') as f:
+              f.write(json.dumps(log_entry) + '\n')
+
+      # 记录敏感操作
+      audit_log('command_executed', {'cmd': 'git', 'args': ['commit']})
+      audit_log('file_modified', {'path': 'skills/xxx/SKILL.md'})
+      ```
+
     en: |
-      **Secure Practices**:
+      ## Fix Solutions
 
-      ❌ Insecure:
-      ```bash
-      eval "git worktree add $USER_INPUT"
-      echo "$USER_INPUT" | bash
+      ### 1. Use Parameter Arrays (Most Recommended)
+
+      ```python
+      # ❌ Dangerous: String concatenation
+      os.system(f"git commit -m '{user_message}'")
+
+      # ✅ Safe: Parameter array
+      subprocess.run(['git', 'commit', '-m', user_message])
       ```
 
-      ✅ Secure:
-      ```bash
-      # Validate input (whitelist)
-      if [[ ! "$USER_INPUT" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-        echo "Invalid input"
-        exit 1
-      fi
+      ### 2. Input Whitelist Validation
 
-      # Use quoted variables
-      git worktree add "$SAFE_INPUT"
+      ```python
+      ALLOWED_COMMANDS = {'status', 'diff', 'log'}
+
+      def validate_command(cmd):
+          if cmd not in ALLOWED_COMMANDS:
+              raise SecurityError(f"Command not allowed: {cmd}")
+          return cmd
       ```
 
-tags: ["security", "command-injection", "bash", "input-validation"]
-related_rules: ["SEC-002", "SEC-003"]
+      ### 3. Input Escaping
+
+      ```python
+      import shlex
+      safe_input = shlex.quote(user_input)
+      os.system(f"git commit -m {safe_input}")
+      ```
+
+examples:
+  bad:
+    zh: |
+      ```python
+      # ❌ 极度危险
+      eval(user_input)
+      exec(f"import {user_module}")
+      os.system(f"rm -rf {user_path}")
+
+      # ❌ 高风险
+      bash -c "fix_command: $user_input"
+      echo "$user_input" | bash
+      subprocess.run(user_cmd, shell=True)
+
+      # ❌ 中风险
+      Agent(subagent_type=user_provided_type)  # 未验证
+      ```
+
+  good:
+    zh: |
+      ```python
+      # ✅ 使用参数数组
+      subprocess.run(['git', 'commit', '-m', user_message])
+
+      # ✅ 白名单验证
+      ALLOWED = {'status', 'diff', 'log'}
+      if cmd in ALLOWED:
+          subprocess.run(['git', cmd])
+
+      # ✅ 输入转义
+      import shlex
+      safe = shlex.quote(user_input)
+      os.system(f"git commit -m {safe}")
+
+      # ✅ SubAgent白名单
+      ALLOWED_SUBAGENTS = {'metadata-fix-agent'}
+      if subagent_type in ALLOWED_SUBAGENTS:
+          Agent(subagent_type=subagent_type)
+
+      # ✅ 完全避免用户输入执行
+      TEMPLATES = {'commit': ['git', 'commit', '-m']}
+      cmd = TEMPLATES['commit'] + [user_data]
+      subprocess.run(cmd)
+      ```
+
+tags: ["security", "command-injection", "bash", "input-validation", "owasp"]
+related_rules: ["SEC-002", "SEC-003", "SEC-004", "SEC-005"]
+
+references:
+  owasp: "https://owasp.org/www-community/attacks/Command_Injection"
+  cwe: "CWE-78: OS Command Injection"
+  mitre: "CAPEC-88: OS Command Injection"
