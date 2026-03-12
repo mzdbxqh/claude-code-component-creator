@@ -62,6 +62,111 @@ Design New Core 是新建设计协调组件，负责从零开始协调完整的 
 **输出**: Stage 3 输出
 **错误处理**: 设计不完整时补充缺失部分
 
+### Step 4.2: 设计组件元数据（新增）
+**目标**: 根据组件类型生成推荐的元数据模板（三层防护体系-设计环节）
+
+**操作**:
+
+```python
+def designComponentMetadata(component_type, workflow_position=None):
+    """
+    根据组件类型生成推荐的元数据模板
+
+    Args:
+        component_type: 'cmd-skill' | 'std-skill' | 'lib-skill' | 'agent'
+        workflow_position: {'type': 'main', 'step': 2, 'input': 'intent', 'output': 'blueprint'}
+
+    Returns:
+        metadata_template: 推荐的description和其他元数据
+    """
+    if component_type == 'cmd-skill':
+        if workflow_position:
+            # 主工作流或迭代流程
+            if workflow_position['type'] == 'main':
+                description = f"主工作流第{workflow_position['step']}步。{{核心功能}}。"
+            elif workflow_position['type'] == 'iteration':
+                description = f"代码迭代流程第{workflow_position['step']}步。{{核心功能}}。"
+
+            # 添加输入输出关系
+            if workflow_position.get('input'):
+                description += f"承接{workflow_position['input']}，"
+            if workflow_position.get('output'):
+                description += f"输出给{workflow_position['output']}。"
+        else:
+            # 独立工具
+            description = "独立工具。{核心功能}，无前后依赖。"
+
+        return {
+            'description': description,
+            'argument-hint': '<必需参数> [可选参数]',
+            'allowed-tools': ['Read', 'Write', 'Edit', 'Bash'],
+            'model': 'sonnet',
+            'context': 'fork'
+        }
+
+    elif component_type == 'std-skill':
+        return {
+            'description': '{知识类型}。当{触发场景}时，{动作词}{对象}。{应用范围}。',
+            'model': 'sonnet',
+            'allowed-tools': [],
+            'context': 'main',
+            'examples': [
+                '组件选型决策规则。当设计或审阅插件时，判断应使用cmd-/std-/lib-哪种Skill类型。',
+                '命名规范检查标准。当创建或审阅组件时，验证命名是否符合Skill/Subagent规范。'
+            ]
+        }
+
+    elif component_type == 'lib-skill':
+        return {
+            'description': '{知识库类型}，{数量}定义覆盖{范围}。由Subagent通过skills字段加载。{用途}。',
+            'model': 'haiku',  # lib-* 通常用haiku即可
+            'allowed-tools': [],
+            'context': 'main',
+            'examples': [
+                '反模式知识库，84个定义覆盖8维度。由Subagent通过skills字段加载。用于质量检查。',
+                '设计模式知识库，CCC 5阶段设计流程模式。由Subagent通过skills字段加载。用于架构设计。'
+            ]
+        }
+
+    # 其他类型（agent等）
+    return {}
+```
+
+**输出**:
+- 在设计文档中添加"推荐的元数据模板"章节
+- 包含description示例和填写指导
+
+**错误处理**: 如果组件类型未识别，提供通用模板
+
+**示例输出**（在设计文档中）:
+
+```markdown
+## 组件元数据设计
+
+### cmd-analyze (入口型Skill)
+
+**推荐元数据**:
+```yaml
+name: cmd-analyze
+description: "主工作流第2步。分析代码质量并生成报告。承接init的项目路径，输出分析报告给review。"
+argument-hint: "<project-path> [--depth=shallow|deep]"
+model: sonnet
+context: fork
+allowed-tools: [Read, Grep, Bash]
+```
+
+**说明**:
+- ✅ description说明了工作流位置（第2步）
+- ✅ description说明了输入（init的项目路径）和输出（分析报告给review）
+- ❌ description没有包含触发词（用户直接调用/ccc:analyze，不需要）
+
+**如果改为std-* skill**（供参考）:
+```yaml
+name: std-code-quality-rules
+description: "代码质量检查规则。当分析代码时，验证是否符合最佳实践和安全标准。"
+```
+```
+
 ### Step 4.5: 验证证据链完整性
 **目标**: 确保设计包含完整的可追溯证据链
 **操作**:

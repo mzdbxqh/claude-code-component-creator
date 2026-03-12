@@ -103,9 +103,69 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 **Step 2: 加载反模式规则**
 - 从规则库加载 76+ 条反模式规则
 - 按维度分类（intent、config、dependency、security、environment、llm、scalability、testability）
+- **新增：根据组件类型加载类型特定规则（三层防护体系-评审环节）**
+  - cmd-* skills: 加载工作流规则（WORKFLOW-002），排除触发场景规则（INTENT-001,002,003）
+  - std-* skills: 加载触发场景规则（INTENT-*），排除工作流规则（WORKFLOW-002）
+  - lib-* skills: 加载知识库规则（LIB-*），排除触发场景和工作流规则
 - 加载架构分析规则（L1+L2，15条）
 - 验证规则完整性
 - **错误处理**: 规则文件缺失时使用内置规则；规则解析失败时跳过该规则并记录警告
+
+**类型特定规则加载逻辑**:
+
+```python
+def loadAntipatterns(component_type, skill_name):
+    """
+    根据skill类型加载不同的反模式规则
+
+    Args:
+        component_type: 'skill' | 'command' | 'agent' | 'hook'
+        skill_name: e.g., 'cmd-review', 'std-workflow-attribution'
+
+    Returns:
+        适用的反模式规则列表
+    """
+    if component_type != 'skill':
+        return load_standard_antipatterns(component_type)
+
+    # Skill组件需要区分cmd/std/lib
+    if skill_name.startswith('cmd-'):
+        return load_cmd_antipatterns()
+    elif skill_name.startswith('std-'):
+        return load_std_antipatterns()
+    elif skill_name.startswith('lib-'):
+        return load_lib_antipatterns()
+    else:
+        # 未遵循命名规范
+        return load_standard_antipatterns('skill')
+
+def load_cmd_antipatterns():
+    """cmd-* skills专用规则集"""
+    return [
+        'antipatterns/skill/*.yaml',           # 通用Skill规则
+        'antipatterns/workflow/WORKFLOW-002.yaml',  # cmd专用工作流规则
+        '!antipatterns/intent/INTENT-001.yaml',     # 排除触发场景规则
+        '!antipatterns/intent/INTENT-002.yaml',     # 排除同义词规则
+        '!antipatterns/intent/INTENT-003.yaml',     # 排除排除场景规则
+    ]
+
+def load_std_antipatterns():
+    """std-* skills专用规则集"""
+    return [
+        'antipatterns/skill/*.yaml',      # 通用规则
+        'antipatterns/intent/*.yaml',     # 强制触发场景规则
+        '!antipatterns/workflow/WORKFLOW-002.yaml',  # 排除工作流规则
+    ]
+
+def load_lib_antipatterns():
+    """lib-* skills专用规则集"""
+    return [
+        'antipatterns/skill/*.yaml',      # 通用规则
+        'antipatterns/library/*.yaml',    # lib专用规则
+        '!antipatterns/intent/*.yaml',    # 排除触发场景规则
+        '!antipatterns/workflow/*.yaml',  # 排除工作流规则
+    ]
+```
 
 **Step 3: 执行 8 维度评估**
 - 依次执行 8 个评估维度检测

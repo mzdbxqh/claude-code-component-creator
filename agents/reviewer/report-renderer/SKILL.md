@@ -67,6 +67,43 @@ END CASE
 2. 替换所有占位符为实际数据
 3. 处理条件渲染 (if/else 逻辑)
 4. 处理循环渲染 (for 循环列表)
+5. **新增：工作流章节分离渲染（三层防护体系-评审环节）**
+   - 主工作流和迭代流程分别渲染
+   - 使用独立的ASCII流程图
+   - 标注汇入点和输入输出关系
+
+**工作流章节渲染逻辑**:
+
+```python
+def renderWorkflowSection(workflows):
+    """
+    使用模板渲染工作流章节
+
+    Args:
+        workflows: 从architecture-analyzer获取的工作流元数据
+
+    Returns:
+        渲染后的工作流章节内容
+    """
+    main_wf = [w for w in workflows if w['type'] == 'main']
+    iter_wf = [w for w in workflows if w['type'] == 'iteration']
+    standalone = [w for w in workflows if w['type'] == 'standalone']
+
+    # 生成ASCII图
+    main_wf_ascii = buildMainWorkflowASCII(main_wf)
+    iter_wf_ascii = [buildIterWorkflowASCII(w) for w in iter_wf]
+
+    # 使用模板渲染
+    template = load_template('workflow-section.md')
+    return template.render(
+        main_workflow=main_wf,
+        main_workflow_ascii=main_wf_ascii,
+        iteration_workflows=iter_wf,
+        iter_wf_ascii=iter_wf_ascii,
+        standalone_tools=standalone
+    )
+```
+
 **输出**: 渲染后的 Markdown 内容
 **错误处理**: 占位符未匹配时保留原样并记录警告
 

@@ -63,6 +63,73 @@ Design Iterate Core 是设计迭代组件，负责分析现有组件与目标需
 **输出**: 迭代需求规格
 **错误处理**: 需求模糊时生成澄清问题
 
+### Step 2.5: 检查现有description格式（新增）
+**目标**: 在迭代现有组件时，检查description是否符合类型规范（三层防护体系-设计环节）
+
+**操作**:
+
+```python
+def analyzeExistingDescription(component):
+    """
+    分析现有组件的description，识别潜在问题
+
+    Returns:
+        {
+            'current': '5阶段设计流程生成Blueprint。触发：设计/创建方案。主工作流第2步。',
+            'issues': [
+                {
+                    'code': 'DESC-001',
+                    'message': 'cmd-* skill不需要触发词',
+                    'current_part': '触发：设计/创建方案。',
+                    'suggestion': '移除触发词部分'
+                },
+                {
+                    'code': 'DESC-002',
+                    'message': '工作流位置应放在开头',
+                    'current_order': '功能 → 触发词 → 工作流位置',
+                    'suggested_order': '工作流位置 → 功能 → 输入输出'
+                }
+            ],
+            'suggested': '主工作流第2步。5阶段流程生成Blueprint设计文档。承接init的Intent，输出给review。',
+            'improvement_type': 'description_format'  # 归类到改进类型
+        }
+    """
+    comp_name = component['name']
+    comp_desc = component['description']
+
+    issues = []
+
+    # 根据命名前缀调用对应的验证函数
+    if comp_name.startswith('cmd-'):
+        validation = validate_cmd_description(comp_desc)
+        issues.extend(validation['issues'])
+    elif comp_name.startswith('std-'):
+        validation = validate_std_description(comp_desc)
+        issues.extend(validation['issues'])
+    elif comp_name.startswith('lib-'):
+        validation = validate_lib_description(comp_desc)
+        issues.extend(validation['issues'])
+
+    if issues:
+        # 生成改进建议
+        suggested = generate_improved_description(comp_name, comp_desc, issues)
+
+        return {
+            'current': comp_desc,
+            'issues': issues,
+            'suggested': suggested,
+            'improvement_type': 'description_format'
+        }
+    else:
+        return {'current': comp_desc, 'issues': [], 'suggested': None}
+```
+
+**输出**:
+- 在差异分析中添加"description格式改进"项
+- 在迭代计划中添加"更新description"任务
+
+**错误处理**: 即使无法生成建议，也列出发现的问题
+
 ### Step 3: 差异分析
 **目标**: 识别现状与目标的差距
 **操作**:

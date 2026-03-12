@@ -1,0 +1,82 @@
+id: LIB-002
+name: lib-skill-description-format
+severity: warning
+component_type: skill
+applies_to: lib-*
+
+title:
+  zh: "lib-* skill的description格式不规范"
+  en: "lib-* skill description format non-standard"
+
+description:
+  zh: |
+    lib-* skill的description应该说明：
+    - 知识库类型
+    - 内容数量/规模
+    - 覆盖范围
+    - 加载方式（Subagent通过skills字段）
+
+    **推荐格式**:
+    ```
+    [知识库类型]，[数量]定义覆盖[范围]。由Subagent通过skills字段加载。[用途]。
+    ```
+
+  en: |
+    lib-* skill descriptions should include:
+    - Knowledge base type
+    - Content size/scale
+    - Coverage scope
+    - Loading method (loaded by Subagent via skills field)
+
+detection:
+  method: regex-match
+  pattern: '(知识库|定义覆盖|由Subagent|通过skills字段加载)'
+  file_pattern: 'skills/lib-*/SKILL.md'
+
+examples:
+  bad:
+    zh: |
+      错误:
+      ```yaml
+      description: "反模式定义。检查代码质量。"
+      ```
+
+      问题：
+      - 未说明是知识库
+      - 未说明规模
+      - 未说明加载方式
+
+  good:
+    zh: |
+      正确:
+      ```yaml
+      description: "反模式知识库，84个定义覆盖8维度。由Subagent通过skills字段加载。用于质量检查。"
+      ```
+
+      优点：
+      - 类型明确（知识库）
+      - 规模具体（84个定义，8维度）
+      - 加载方式清晰（Subagent通过skills字段）
+      - 用途说明（质量检查）
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      修改description，包含以下要素：
+
+      ```
+      [知识库类型]，[数量]定义覆盖[范围]。由Subagent通过skills字段加载。[用途]。
+      ```
+
+      示例：
+      - "反模式知识库，84个定义覆盖8维度。由Subagent通过skills字段加载。用于质量检查。"
+      - "设计模式知识库，CCC 5阶段设计流程模式。由Subagent通过skills字段加载。用于架构设计。"
+
+tags: ["library", "lib-skill", "description", "format"]
+
+references:
+  - file: "skills/std-component-selection/SKILL.md"
+    section: "Skill类型的Description规范"
+  - file: "docs/ccc-skill-description-differentiation-plan.md"
+    section: "lib-* Skills的Description模板"

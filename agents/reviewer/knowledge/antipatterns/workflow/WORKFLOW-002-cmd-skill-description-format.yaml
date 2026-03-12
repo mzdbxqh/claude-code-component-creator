@@ -1,0 +1,100 @@
+id: WORKFLOW-002
+name: cmd-skill-description-missing-workflow-info
+severity: warning
+component_type: skill
+applies_to: cmd-*
+
+title:
+  zh: "cmd-* skill的description未说明工作流位置"
+  en: "cmd-* skill description missing workflow position"
+
+description:
+  zh: |
+    cmd-* skill是用户手动触发的，description应该侧重说明：
+    - 在工作流中的位置（第几步）
+    - 承接哪个步骤的输出
+    - 输出给哪个步骤
+
+    **不需要包含**:
+    - 触发词（用户直接调用 /ccc:xxx）
+    - 同义词（不需要LLM匹配）
+
+    **推荐格式**:
+    ```
+    [工作流类型]第X步。[核心功能]。承接[上一步]，输出给[下一步]。
+    ```
+
+    **或（独立工具）**:
+    ```
+    独立工具。[核心功能]，无前后依赖。
+    ```
+
+  en: |
+    cmd-* skills are manually triggered by users. Their descriptions should focus on:
+    - Position in the workflow (step number)
+    - Input source (which step's output)
+    - Output destination (which step receives it)
+
+    **Should NOT include**:
+    - Trigger words (users directly call /ccc:xxx)
+    - Synonyms (no need for LLM matching)
+
+detection:
+  method: regex-match
+  pattern: '(主工作流|迭代流程|独立工具).*(第\d+步|起点|终点|承接|输出给)'
+  file_pattern: 'skills/cmd-*/SKILL.md'
+  negative_match: true  # 不匹配则警告
+
+examples:
+  bad:
+    zh: |
+      错误示例:
+      ```yaml
+      description: "设计组件。触发：设计/创建/制作。生成Blueprint。"
+      ```
+
+      问题：
+      - 有触发词（无意义，用户直接调用 /ccc:design）
+      - 没有工作流位置说明
+      - 用户不知道何时应该使用
+
+  good:
+    zh: |
+      正确示例:
+      ```yaml
+      description: "主工作流第2步。5阶段流程生成Blueprint设计文档。承接init的Intent，输出给review。"
+      ```
+
+      优点：
+      - 明确位置（第2步）
+      - 说明输入（Intent）和输出（Blueprint）
+      - 说明前后关系（承接init，输出给review）
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      修改description，按照以下模板：
+
+      **主工作流cmd skills**:
+      ```
+      主工作流第X步。[功能]。承接[前一步]，输出给[下一步]。
+      ```
+
+      **迭代流程cmd skills**:
+      ```
+      [流程名]第X步。[功能]。承接[前一步]，输出给[下一步]。
+      ```
+
+      **独立工具cmd skills**:
+      ```
+      独立工具。[功能]，无前后依赖。
+      ```
+
+tags: ["workflow", "cmd-skill", "description", "clarity"]
+
+references:
+  - file: "skills/std-component-selection/SKILL.md"
+    section: "Skill类型的Description规范"
+  - file: "docs/ccc-skill-description-differentiation-plan.md"
+    section: "cmd-* Skills的Description模板"

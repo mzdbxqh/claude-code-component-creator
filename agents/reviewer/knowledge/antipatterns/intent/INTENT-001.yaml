@@ -2,6 +2,7 @@ id: INTENT-001
 name: missing-trigger-scenario
 severity: warning
 component_type: skill
+applies_to: std-*
 category: intent-matching
 
 title:
