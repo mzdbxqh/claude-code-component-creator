@@ -1,18 +1,13 @@
 {
   "name": "ccc",
-  "version": "3.1.0",
   "description": "Claude Code Component Creator v3.1 - Intent/Blueprint/Delivery workflow with meta-reflection and comprehensive quality checks",
+  "version": "3.1.0",
   "author": {
     "name": "mzdbxqh",
-    "email": "mzdbxqh@github.com",
-    "url": "https://github.com/mzdbxqh"
+    "email": "mzdbxqh@github.com"
   },
   "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mzdbxqh/claude-code-component-creator.git"
-  },
-  "bugs": "https://github.com/mzdbxqh/claude-code-component-creator/issues",
+  "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
   "license": "MIT",
   "keywords": [
     "component",
@@ -26,28 +21,5 @@
     "quality",
     "antipattern",
     "meta-plugin"
-  ],
-  "compatibility": {
-    "claudeCode": ">=1.0.0"
-  },
-  "dependencies": {
-    "external": [
-      "git >= 2.30.0 (for version control operations)",
-      "jq >= 1.6 (optional, for JSON processing)",
-      "yamllint (optional, for YAML validation)"
-    ],
-    "mcp": [],
-    "lsp": []
-  },
-  "metadata": {
-    "maturity": "stable",
-    "testCoverage": 75,
-    "platforms": [
-      "macOS",
-      "Linux",
-      "Windows (via WSL)"
-    ],
-    "documentation": "https://github.com/mzdbxqh/claude-code-component-creator/tree/main/docs",
-    "changelog": "https://github.com/mzdbxqh/claude-code-component-creator/blob/main/CHANGELOG.md"
-  }
+  ]
 }
