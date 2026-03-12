@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-implement
+name: cmd-implement
 model: sonnet
 context: fork
 disable-model-invocation: true

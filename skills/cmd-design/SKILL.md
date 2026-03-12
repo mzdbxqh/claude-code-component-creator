@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-design
+name: cmd-design
 model: sonnet
 context: fork
 disable-model-invocation: true

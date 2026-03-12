@@ -1,5 +1,5 @@
 ---
-name: ccc:std-workflow-attribution
+name: std-workflow-attribution
 description: "工作流归属标注规范。检查组件的工作流定位标注。用于设计和审查插件流程定位。"
 context: main
 allowed-tools: []
@@ -272,7 +272,7 @@ Performs comprehensive component quality review.
 
 ```yaml
 ---
-name: ccc:cmd-design-iterate
+name: cmd-design-iterate
 description: "生成迭代方案 | 场景: 代码迭代流程的起点"
 ---
 
@@ -287,7 +287,7 @@ Iterate on existing components - analyze current vs target state.
 
 ```yaml
 ---
-name: ccc:cmd-implement
+name: cmd-implement
 description: "执行迭代计划 | 场景: 代码迭代流程的第2步"
 ---
 
@@ -327,7 +327,7 @@ Iterates on existing blueprint artifacts to create improved versions.
 
 ```yaml
 ---
-name: ccc:cmd-status
+name: cmd-status
 description: "查询项目状态 | 场景: 独立工具"
 ---
 
@@ -340,7 +340,7 @@ Displays current project workflow state and artifact status.
 
 ```yaml
 ---
-name: ccc:cmd-diff
+name: cmd-diff
 description: "对比制品差异 | 场景: 独立工具"
 ---
 
@@ -353,7 +353,7 @@ Compares differences between two artifact versions.
 
 ```yaml
 ---
-name: ccc:cmd-quick
+name: cmd-quick
 description: "快速完整流程 | 场景: 快捷工具（集成多个流程）"
 ---
 

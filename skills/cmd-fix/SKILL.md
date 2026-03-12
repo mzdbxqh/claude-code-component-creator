@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-fix
+name: cmd-fix
 model: sonnet
 context: fork
 disable-model-invocation: true

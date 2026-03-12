@@ -1,5 +1,5 @@
 ---
-name: ccc:std-naming-rules
+name: std-naming-rules
 description: "命名规则检查标准。定义Skill/Subagent命名规范。用于审阅插件命名合规性。"
 model: sonnet
 allowed-tools: []

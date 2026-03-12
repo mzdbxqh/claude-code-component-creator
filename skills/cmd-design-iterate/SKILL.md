@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-design-iterate
+name: cmd-design-iterate
 model: sonnet
 context: fork
 disable-model-invocation: true

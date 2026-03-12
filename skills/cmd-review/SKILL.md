@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-review
+name: cmd-review
 model: sonnet
 context: fork
 disable-model-invocation: true

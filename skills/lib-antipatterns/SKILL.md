@@ -1,5 +1,5 @@
 ---
-name: ccc:lib-antipatterns
+name: lib-antipatterns
 description: "反模式知识库，76+定义覆盖8维度。由Subagent通过skills字段加载。用于质量检查。"
 model: sonnet
 allowed-tools: []

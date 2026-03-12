@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-quick
+name: cmd-quick
 model: sonnet
 context: fork
 disable-model-invocation: true

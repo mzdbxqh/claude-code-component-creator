@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-test-sandbox
+name: cmd-test-sandbox
 model: sonnet
 context: fork
 disable-model-invocation: true

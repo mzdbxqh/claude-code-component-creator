@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-validate
+name: cmd-validate
 model: sonnet
 context: fork
 disable-model-invocation: true

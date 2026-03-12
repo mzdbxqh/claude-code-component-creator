@@ -1,5 +1,5 @@
 ---
-name: ccc:std-component-selection
+name: std-component-selection
 description: "组件选型决策规则。定义Skill三角色(cmd-/std-/lib-)决策树。用于设计和审阅插件。"
 model: sonnet
 allowed-tools: []

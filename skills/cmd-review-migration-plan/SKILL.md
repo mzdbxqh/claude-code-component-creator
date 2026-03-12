@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-review-migration-plan
+name: cmd-review-migration-plan
 model: sonnet
 context: fork
 disable-model-invocation: true

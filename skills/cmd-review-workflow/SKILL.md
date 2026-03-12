@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-review-workflow
+name: cmd-review-workflow
 model: sonnet
 context: fork
 disable-model-invocation: true

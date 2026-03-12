@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-diff
+name: cmd-diff
 model: sonnet
 context: fork
 disable-model-invocation: true

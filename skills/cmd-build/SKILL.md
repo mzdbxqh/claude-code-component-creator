@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-build
+name: cmd-build
 model: sonnet
 context: fork
 disable-model-invocation: true
@@ -110,35 +110,67 @@ delivery-core 内部工作流:
 
 ## Workflow
 
-### Step 1: Load Blueprint
-**目标**: 读取并解析蓝图文件
-**操作**: 从 docs/ccc/blueprint/ 加载指定的 BLP 文件
-**输出**: 解析后的蓝图数据结构
-**错误处理**: 蓝图文件不存在时列出可用蓝图并建议选择；蓝图格式无效时显示具体的解析错误位置
+### 输入要求
+- **必需参数**: `--artifact-id=<blueprint-id>` Blueprint 制品 ID
+- **可选参数**: `--lang=zh-cn|en-us|ja-jp` 输出语言（默认 zh-cn）
+- **前置条件**:
+  - Blueprint 制品必须存在且已通过验证
+  - 建议先执行 `/ccc:validate` 确保 Blueprint 质量
 
-### Step 2: Generate SKILL.md
-**目标**: 生成技能定义文件
-**操作**: 根据蓝图生成 SKILL.md 文件
-**输出**: SKILL.md 文件
-**错误处理**: 模板缺失时使用默认模板并记录警告；生成失败时显示错误详情并跳过该文件继续执行
+### 执行步骤
 
-### Step 3: Generate Implementation
-**目标**: 生成实现代码文件
-**操作**: 根据蓝图规范创建代码文件
-**输出**: implementation/ 目录下的代码文件
-**错误处理**: 代码生成失败时记录具体文件错误并继续生成其他文件；目录创建失败时显示权限错误并终止
+**Step 1: 加载 Blueprint**
+- 从 docs/ccc/blueprint/ 读取指定 Blueprint 文件
+- 解析 YAML 结构和组件定义
+- 验证 Blueprint 完整性和合法性
+- **错误处理**: Blueprint 不存在时列出可用蓝图供选择；格式无效时显示具体解析错误位置
 
-### Step 4: Generate Tests
-**目标**: 生成测试文件
-**操作**: 创建测试文件和夹具
-**输出**: tests/ 目录下的测试文件
-**错误处理**: 测试生成失败时记录警告并继续；缺少测试模板时创建基础测试框架
+**Step 2: 生成 SKILL.md**
+- 根据 Blueprint 工作流生成技能定义
+- 填充 frontmatter（name、model、tools、description）
+- 生成使用说明和示例章节
+- 创建参数文档和输出规范
+- **错误处理**: 模板缺失时使用默认模板并记录警告；生成失败时显示错误详情并跳过该文件
 
-### Step 5: Package Delivery
-**目标**: 创建交付物制品
-**操作**: 打包所有生成的文件
-**输出**: DLV 制品目录和构建报告
-**错误处理**: 文件打包失败时回滚已创建文件并报告错误；部分文件缺失时标记为部分成功并生成不完整报告
+**Step 3: 生成实现代码**
+- 根据 Blueprint 规范创建实现文件
+- 生成 implementation/ 目录结构
+- 创建代码骨架和注释
+- 实现核心逻辑（如适用）
+- **错误处理**: 代码生成失败时记录具体文件错误并继续其他文件；目录创建失败时显示权限错误
+
+**Step 4: 生成测试文件**
+- 创建 tests/ 目录和测试框架
+- 生成 evals.json 测试定义
+- 创建测试夹具（test-fixtures/）
+- 编写测试文档（tests/README.md）
+- **错误处理**: 测试生成失败时记录警告并继续；缺少测试模板时创建基础测试框架
+
+**Step 5: 打包交付物**
+- 创建 Delivery 制品目录
+- 生成 metadata.yaml 和 README.md
+- 复制或生成所有必需文件
+- 创建构建报告（build-report.md）
+- 验证交付物完整性
+- **错误处理**: 文件打包失败时回滚已创建文件并报告错误；部分文件缺失时标记为部分成功并生成不完整报告
+
+### 预期输出
+- **主要制品**: `docs/ccc/delivery/YYYY-MM-DD-<artifact-id>/`
+- **交付物结构**:
+  - SKILL.md（技能定义）
+  - implementation/（实现代码）
+  - tests/（测试文件和夹具）
+  - README.md（使用说明）
+  - metadata.yaml（元数据）
+  - build-report.md（构建报告）
+- **控制台输出**: Build Complete 摘要、生成文件列表、状态、报告路径
+
+### 错误处理
+- **Blueprint 不存在** → 列出可用 Blueprint 或建议先执行 `/ccc:design`
+- **Blueprint ID 无效** → 显示正确格式示例（如 BLP-001）
+- **文件生成失败** → 显示具体文件错误，继续生成其他文件
+- **目录创建失败** → 显示权限错误并检查文件系统权限
+- **通用错误** → 保存已生成的文件，提供清理或继续的命令
 
 ## Output Specification
 

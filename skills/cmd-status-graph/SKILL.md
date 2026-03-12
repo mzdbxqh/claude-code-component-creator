@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-status-graph
+name: cmd-status-graph
 model: sonnet
 context: fork
 disable-model-invocation: true

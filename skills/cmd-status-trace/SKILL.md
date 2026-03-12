@@ -1,5 +1,5 @@
 ---
-name: ccc:cmd-status-trace
+name: cmd-status-trace
 model: sonnet
 context: fork
 disable-model-invocation: true
