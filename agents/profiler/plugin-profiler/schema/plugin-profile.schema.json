@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plugin Profile Schema",
+  "description": "CCC 插件标准化画像数据结构",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["meta", "architecture", "usage", "requirements"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "插件元信息",
+      "required": ["name", "version", "positioning"],
+      "properties": {
+        "name": {"type": "string", "description": "插件名称（目录名）"},
+        "display_name": {"type": "string", "description": "显示名称"},
+        "version": {"type": "string", "description": "版本号（语义化版本）"},
+        "description": {"type": "string", "description": "简短描述"},
+        "positioning": {"type": "string", "description": "插件定位（一句话说明核心价值）"},
+        "base_framework": {
+          "type": "object",
+          "description": "基础框架信息（如基于 Superpowers）",
+          "properties": {
+            "name": {"type": "string"},
+            "version": {"type": "string"},
+            "relationship": {"enum": ["extends", "uses", "independent"]},
+            "inherited_skills": {"type": "array", "items": {"type": "string"}},
+            "added_value": {"type": "string"}
+          }
+        },
+        "repository": {"type": "string", "format": "uri"},
+        "license": {"type": "string"},
+        "author": {"type": "string"}
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "description": "架构信息",
+      "required": ["component_types", "classification_system"],
+      "properties": {
+        "component_types": {
+          "type": "object",
+          "description": "组件类型统计",
+          "properties": {
+            "skills": {
+              "type": "object",
+              "properties": {
+                "count": {"type": "integer"},
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "prefix": {"type": "string"},
+                      "count": {"type": "integer"},
+                      "description": {"type": "string"},
+                      "examples": {"type": "array", "items": {"type": "string"}}
+                    }
+                  }
+                }
+              }
+            },
+            "agents": {"type": "object"},
+            "commands": {"type": "object"},
+            "hooks": {"type": "object"}
+          }
+        },
+        "classification_system": {
+          "type": "object",
+          "description": "分类体系说明",
+          "properties": {
+            "primary": {"type": "string"},
+            "description": {"type": "string"},
+            "rationale": {"type": "string"}
+          }
+        },
+        "workflow_mechanism": {
+          "type": "object",
+          "description": "工作流运行机制",
+          "properties": {
+            "type": {"type": "string"},
+            "stages": {"type": "array"},
+            "activation": {"type": "object"}
+          }
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "description": "使用方式",
+      "properties": {
+        "slash_commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "command": {"type": "string"},
+              "skill": {"type": "string"},
+              "description": {"type": "string"},
+              "category": {"type": "string"}
+            }
+          }
+        },
+        "auto_activation_skills": {"type": "array"}
+      }
+    },
+    "philosophy": {
+      "type": "object",
+      "description": "核心设计理念",
+      "properties": {
+        "core_principles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "principle": {"type": "string"},
+              "description": {"type": "string"},
+              "rationale": {"type": "string"},
+              "implementation": {"type": "string"},
+              "benefit": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "description": "系统要求",
+      "required": ["system"],
+      "properties": {
+        "system": {
+          "type": "object",
+          "properties": {
+            "platform": {"type": "string"},
+            "min_version": {"type": "string"},
+            "os": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "runtime_dependencies": {"type": "object"},
+        "plugin_dependencies": {"type": "object"}
+      }
+    },
+    "quality_metrics": {
+      "type": "object",
+      "description": "质量指标",
+      "properties": {
+        "documentation_completeness": {
+          "type": "object",
+          "properties": {
+            "score": {"type": "integer", "minimum": 0, "maximum": 100},
+            "breakdown": {"type": "object"}
+          }
+        }
+      }
+    },
+    "extraction_metadata": {
+      "type": "object",
+      "description": "提取元数据（记录信息来源和置信度）",
+      "properties": {
+        "sources": {"type": "object"},
+        "inference_applied": {"type": "array"},
+        "warnings": {"type": "array"}
+      }
+    }
+  }
+}
