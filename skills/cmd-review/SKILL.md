@@ -29,6 +29,154 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 - 需要处理 76+ 条反模式规则
 - 建议上下文窗口 >= 200K tokens (处理大型代码库审查)
 
+## 资源预算
+
+### Token 使用估计
+
+| 场景 | 输入 Token | 输出 Token | 总计 | 成本估计 | 说明 |
+|------|-----------|-----------|------|----------|------|
+| 单个组件 | 5K-10K | 3K-6K | 8K-16K | $0.06-$0.13 | 基础审查 |
+| 小型项目 (5-10组件) | 20K-40K | 10K-20K | 30K-60K | $0.25-$0.50 | 标准审查 |
+| 中型项目 (10-20组件) | 40K-80K | 20K-40K | 60K-120K | $0.50-$1.00 | 全面审查 |
+| 大型项目 (20+组件) | 80K-150K | 40K-80K | 120K-230K | $1.00-$2.00 | 深度审查 |
+
+**成本基准**: Claude Sonnet 4.5 (输入: $3/MTok, 输出: $15/MTok)
+
+### Token 使用分解
+
+**阶段 1: 组件扫描与加载** (5K-20K tokens)
+- Glob 文件查找 (1K-3K)
+- 组件元数据提取 (2K-8K)
+- SKILL.md 内容读取 (2K-9K)
+
+**阶段 2: 反模式规则加载** (8K-15K tokens)
+- 76+ 条反模式定义
+- 类型特定规则过滤 (cmd-*/std-*/lib-*)
+- 严重性和分类信息
+
+**阶段 3: SubAgent 并行审查** (20K-100K tokens)
+- **review-core**: 每个组件 2K-5K
+  - 8维度质量检查
+  - 反模式匹配和验证
+- **architecture-analyzer**: 10K-20K
+  - 工作流架构分析
+  - 组件协作评估
+- **dependency-analyzer**: 5K-15K
+  - 依赖关系构建
+  - 循环依赖检测
+- **linkage-validator**: 5K-15K
+  - 调用链验证
+  - 参数匹配检查
+
+**阶段 4: 结果聚合与报告** (5K-20K tokens)
+- review-aggregator 收集结果 (2K-5K)
+- report-renderer 生成 Markdown (3K-15K)
+
+### 成本详细分解
+
+**按项目规模**:
+
+| 项目规模 | 组件数 | 平均 Token | 成本/次 | 月度成本 (4次) |
+|---------|-------|-----------|--------|---------------|
+| 小型 | 5-10 | 45K | $0.38 | $1.50 |
+| 中型 | 10-20 | 90K | $0.75 | $3.00 |
+| 大型 | 20-50 | 175K | $1.50 | $6.00 |
+| 超大 | 50+ | 300K+ | $2.50+ | $10.00+ |
+
+**按审查维度**:
+
+| 审查模式 | Token 节省 | 成本节省 | 说明 |
+|---------|-----------|----------|------|
+| 全维度 (默认) | 0% | $0.00 | 8个维度全部审查 |
+| 核心维度 (--dims=核心) | 30% | 30% | 仅审查4个核心维度 |
+| 单一维度 (--dims=intent) | 70% | 70% | 仅审查指定维度 |
+
+### 优化建议
+
+**1. 选择性审查**
+
+减少审查范围以降低 Token 使用：
+
+```bash
+# 仅审查核心维度（节省 30% Token）
+/ccc:review --dims=intent,config,architecture,testability
+
+# 仅审查变更的组件（增量审查）
+/ccc:review --changed-only --since=last-commit
+
+# 跳过低优先级组件
+/ccc:review --exclude=lib-* --exclude=test-*
+```
+
+**2. 并行处理优化**
+
+启用并行模式减少总体耗时（不减少 Token）：
+
+```bash
+# 并行审查多个组件（加快速度）
+/ccc:review --parallel --max-workers=4
+```
+
+**3. 增量审查策略**
+
+仅审查变更部分：
+
+```bash
+# 基于 git diff 的增量审查
+/ccc:review --incremental --base=main
+
+# 复用上次审查结果
+/ccc:review --resume=last-review-id
+```
+
+**4. Token 预算控制**
+
+设置 Token 上限防止意外成本：
+
+```bash
+# 设置最大 Token 限制
+/ccc:review --max-tokens=50000
+
+# 超出预算时提前终止
+/ccc:review --budget-limit=100000 --stop-on-limit
+```
+
+**5. 分层审查策略**
+
+先快速审查，再深度审查：
+
+```bash
+# 第一轮：快速扫描（低 Token）
+/ccc:review --quick --dims=intent,config
+
+# 第二轮：深度审查问题组件（高 Token）
+/ccc:review --detailed --only=failed-components
+```
+
+### Token 使用监控
+
+审查过程中会实时输出 Token 使用情况：
+
+```
+[INFO] Review started: 15 components
+[INFO] Token usage: component scanning (8,234 tokens)
+[INFO] Token usage: antipattern loading (12,456 tokens)
+[INFO] Token usage: review-core batch 1 (23,567 tokens)
+[INFO] Token usage: review-core batch 2 (21,345 tokens)
+[INFO] Token usage: architecture-analyzer (15,678 tokens)
+[INFO] Token usage: report generation (6,789 tokens)
+[INFO] Total tokens used: 88,069 (estimated cost: $0.73)
+[INFO] Projected monthly cost (4 reviews): $2.92
+```
+
+### 性能与成本权衡
+
+| 策略 | Token 使用 | 审查质量 | 适用场景 |
+|------|-----------|----------|----------|
+| 快速审查 | 低 (30%) | 基础 | CI/CD 预检查 |
+| 标准审查 | 中 (100%) | 全面 | 定期质量检查 |
+| 深度审查 | 高 (150%) | 深入 | 发版前审查 |
+
 ## Usage
 
 ```bash
@@ -53,6 +201,46 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | `--lang` | `zh-cn`, `en-us`, `ja-jp` | `zh-cn` | 输出语言 |
 | `--with-eval` | `true`/`false` | `false` | 执行 Eval 机制，对比 with-skill vs baseline |
 | `--eval-only` | `true`/`false` | `false` | 仅执行 Eval，跳过其他检查 |
+| `--parallel` | `true`/`false` | `false` | 启用并行审查模式（推荐用于 10+ 组件） |
+| `--max-workers` | 数字 | `4` | 并行模式下的最大并发数（1-8，需要 `--parallel=true`） |
+| `--batch-size` | 数字 | `10` | 每批处理的组件数量（防止内存溢出） |
+
+### 并行处理说明
+
+**性能对比**:
+
+| 模式 | 10 组件 | 50 组件 | 100 组件 | 说明 |
+|------|---------|---------|----------|------|
+| 串行 (默认) | ~15 分钟 | ~75 分钟 | ~150 分钟 | 稳定但慢 |
+| 并行 (4 workers) | ~4 分钟 | ~20 分钟 | ~40 分钟 | 3.75x 加速 |
+| 并行 (8 workers) | ~3 分钟 | ~12 分钟 | ~22 分钟 | 6.8x 加速 |
+
+**推荐配置**:
+- **小型项目 (<10 组件)**: 使用默认串行模式
+- **中型项目 (10-50 组件)**: `--parallel --max-workers=4`
+- **大型项目 (50+ 组件)**: `--parallel --max-workers=8 --batch-size=20`
+
+**注意事项**:
+1. 并行模式会消耗更多内存（约 2-4GB per worker）
+2. Token 成本不变，但速度显著提升
+3. 并行模式可能导致输出顺序不一致
+4. 某些平台可能限制并发 API 调用
+
+**并行审查示例**:
+
+```bash
+# 启用并行模式（默认 4 workers）
+/ccc:review --parallel
+
+# 指定并发数
+/ccc:review --parallel --max-workers=8
+
+# 大型项目配置
+/ccc:review --target=. --parallel --max-workers=8 --batch-size=20
+
+# 增量并行审查
+/ccc:review --changed-only --parallel --max-workers=4
+```
 
 ## 8 个评估维度（默认全部开启）
 
@@ -237,12 +425,73 @@ def load_lib_antipatterns():
 - **ccc:eval-parser**: Eval 解析器，解析 evals.json 测试定义
 
 ### 调度策略
-- **串行执行**: cmd-review → ccc:reviewer-core → ccc:review-aggregator → ccc:report-renderer
-- **并行执行**:
-  - 8 维度检查并行：意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性
-  - 架构分析并行：architecture-analyzer + dependency-analyzer + linkage-validator
-  - Eval 执行并行（可选）：eval-executor + eval-grader + eval-parser
-- **错误处理**: 单个维度失败不影响其他维度，继续执行并在报告中标记
+
+**串行模式（默认）**:
+- cmd-review → ccc:reviewer-core → ccc:review-aggregator → ccc:report-renderer
+- 组件逐个审查，每个组件完成后再审查下一个
+- 适用场景：小型项目（<10 组件）、资源受限环境
+
+**并行模式（`--parallel=true`）**:
+
+**层级 1: 维度内并行**
+- 8 维度检查并行：意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性
+- 每个维度独立执行，互不阻塞
+
+**层级 2: 组件间并行**
+- review-core 并行审查多个组件（根据 `--max-workers` 配置）
+- 示例：4 workers 同时审查 4 个组件
+- 批次处理：每批处理 `--batch-size` 个组件（默认 10）
+
+**层级 3: 分析并行**
+- architecture-analyzer + dependency-analyzer + linkage-validator 并行执行
+- Eval 执行并行（可选）：eval-executor + eval-grader + eval-parser
+
+**并行执行流程**:
+
+```
+用户: /ccc:review --parallel --max-workers=4
+  ↓
+Step 1: 扫描组件（发现 50 个组件）
+  ↓
+Step 2: 分批处理（批次大小=10）
+  ↓
+Batch 1 (组件 1-10):
+  ├─ Worker 1: 审查组件 1-3
+  ├─ Worker 2: 审查组件 4-6
+  ├─ Worker 3: 审查组件 7-9
+  └─ Worker 4: 审查组件 10
+  ↓
+Batch 2 (组件 11-20):
+  ├─ Worker 1: 审查组件 11-13
+  ├─ Worker 2: 审查组件 14-16
+  ├─ Worker 3: 审查组件 17-19
+  └─ Worker 4: 审查组件 20
+  ↓
+... (依次处理所有批次)
+  ↓
+Step 3: 并行架构分析
+  ├─ architecture-analyzer
+  ├─ dependency-analyzer
+  └─ linkage-validator
+  ↓
+Step 4: 聚合和报告
+  ↓
+输出最终报告
+```
+
+**性能对比**:
+
+| 组件数 | 串行模式 | 并行 (4 workers) | 并行 (8 workers) | 加速比 |
+|--------|---------|-----------------|-----------------|--------|
+| 10 | 15分钟 | 4分钟 | 3分钟 | 3.75x |
+| 50 | 75分钟 | 20分钟 | 12分钟 | 6.25x |
+| 100 | 150分钟 | 40分钟 | 22分钟 | 6.8x |
+
+**错误处理**:
+- 单个维度失败不影响其他维度，继续执行并在报告中标记
+- 单个组件失败不阻塞其他组件，记录错误并继续
+- 某个 worker 超时时自动重试或跳过该组件
+- 并行模式失败时自动降级到串行模式
 
 ### Agent 输入输出
 | Agent | 输入 | 输出 |

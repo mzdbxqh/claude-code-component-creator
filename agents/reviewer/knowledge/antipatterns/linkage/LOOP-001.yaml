@@ -1,22 +1,142 @@
 id: LOOP-001
-name: recursion-termination
+name: fix-review-feedback-loop
 severity: error
-component_type: all
+component_type: skill
+applies_to: fix-*
 category: linkage
 title:
-  zh: "递归缺少终止条件"
-  en: "Recursion lacks termination condition"
+  zh: "修复-审查反馈循环缺少终止条件"
+  en: "Fix-Review Feedback Loop Without Termination Condition"
 description:
-  zh: "递归调用缺少明确的终止条件，可能导致无限循环"
-  en: "Recursive call lacks clear termination condition, may cause infinite loop"
-detection:
-  method: custom
-  custom_function: check_recursion_termination
+  zh: |
+    修复组件在修复后自动重新调用审查组件进行验证，但缺少明确的迭代限制条件。
+    这会导致潜在的无限循环：修复→审查→发现问题→修复→...
+  en: |
+    Fix component automatically re-invokes review component after fixing, but lacks explicit iteration limit.
+    This may cause infinite loop: fix → review → find issues → fix → ...
+
 rationale:
-  zh: "确保所有递归调用都能正常终止"
-  en: "Ensure all recursive calls can terminate normally"
+  zh: |
+    反馈循环必须有明确的终止条件，防止无限迭代。
+    通过max_iterations参数限制迭代次数，通过auto_re_review开关控制是否自动重审。
+  en: |
+    Feedback loops must have explicit termination conditions to prevent infinite iteration.
+    Use max_iterations to limit iteration count and auto_re_review flag to control auto re-review.
+
+detection:
+  method: pattern-check
+  patterns:
+    - pattern: "auto.*re.*review.*true"
+      context: "参数|配置|Input"
+      requires_companion: "max.*iterations|迭代.*限制"
+      severity_if_missing: error
+    - pattern: "修复后.*调用.*review|fix.*call.*review"
+      context: "工作流|Workflow"
+      requires: "终止条件|termination|max.*iteration"
+      severity_if_missing: warning
+  file_pattern: '**/fix-*/SKILL.md'
+
 fix:
   automatic: false
   suggestion:
-    zh: "添加递归深度限制或终止条件检查"
-    en: "Add recursion depth limit or termination condition check"
+    zh: |
+      添加迭代控制机制：
+      1. 添加 max_iterations 参数（默认: 1，范围: 1-5）
+      2. 添加 auto_re_review 参数（默认: false）
+      3. 验证规则: auto_re_review=true 必须配合 max_iterations
+      4. 添加迭代历史跟踪，避免重复修复相同问题
+      5. 在工作流中添加迭代控制检查步骤
+
+      示例实现（参考 fix-orchestrator/SKILL.md）：
+      ```yaml
+      parameters:
+        --max-iterations=<n>    # 最大迭代次数（1-5）
+        --auto-re-review=<bool> # 修复后自动重审（默认false）
+
+      validation:
+        IF auto_re_review=true AND max_iterations未设置 THEN
+          拒绝执行，提示配合使用
+        END IF
+      ```
+    en: |
+      Add iteration control mechanism:
+      1. Add max_iterations parameter (default: 1, range: 1-5)
+      2. Add auto_re_review parameter (default: false)
+      3. Validation: auto_re_review=true requires max_iterations
+      4. Track iteration history to avoid fixing same issues repeatedly
+      5. Add iteration control check step in workflow
+
+examples:
+  bad:
+    zh: |
+      # ❌ 危险：自动重审但无迭代限制
+      ```yaml
+      Step 6: 聚合结果
+        ↓
+      自动调用 review-core 验证修复
+        ↓
+      如果还有问题，继续修复... # 无终止条件！
+      ```
+
+      # ❌ 参数配置错误
+      --auto-re-review=true  # 缺少 max_iterations
+    en: |
+      # ❌ Dangerous: auto re-review without iteration limit
+      ```yaml
+      Step 6: Aggregate results
+        ↓
+      Auto call review-core to verify
+        ↓
+      If issues remain, continue fixing... # No termination!
+      ```
+
+  good:
+    zh: |
+      # ✅ 安全：默认不自动重审
+      ```yaml
+      Step 6: 聚合结果
+        ↓
+      输出修复报告，提示用户手动运行 /ccc:review
+      ```
+
+      # ✅ 安全：自动重审但有限制
+      ```yaml
+      parameters:
+        --auto-re-review=true
+        --max-iterations=3
+
+      Step 6.5: 迭代控制检查
+        IF iteration_count >= max_iterations THEN
+          终止并报告
+        END IF
+      ```
+
+      # ✅ 安全的参数配置示例
+      --artifact-id=DLV-001  # 默认不重审
+      --artifact-id=DLV-001 --auto-re-review --max-iterations=3  # 有限制的重审
+    en: |
+      # ✅ Safe: no auto re-review by default
+      ```yaml
+      Step 6: Aggregate results
+        ↓
+      Output fix report, prompt user to manually run /ccc:review
+      ```
+
+      # ✅ Safe: auto re-review with limit
+      ```yaml
+      parameters:
+        --auto-re-review=true
+        --max-iterations=3
+
+      Step 6.5: Iteration control check
+        IF iteration_count >= max_iterations THEN
+          terminate and report
+        END IF
+      ```
+
+tags: ["linkage", "feedback-loop", "iteration", "termination", "fix-review"]
+related_rules: ["ARCH-012"]
+
+references:
+  implementation_example: "agents/fix-orchestrator/SKILL.md:97-120"
+  analysis_doc: "docs/loop-001-circular-dependency-analysis.md"

@@ -20,6 +20,8 @@ skills:
 
 Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解析识别的问题，并分派专门的 SubAgent 工厂执行批量修复。本组件遵循"用户参与"原则，提供从全自动到手动指导的多种修复策略。
 
+**重要**: 修复后不自动重新审查，需要用户手动运行 `/ccc:review` 验证，避免修复-审查反馈循环（参见反馈循环控制章节）。
+
 ## Workflow
 
 ### Step 1: 加载审查报告
@@ -92,12 +94,46 @@ Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解
 **输出**: 综合修复报告
 **错误处理**: 聚合失败时保存部分结果
 
+### Step 6.5: 迭代控制检查（新增-LOOP-001修复）
+**目标**: 防止修复-审查反馈循环
+
+**操作**:
+1. 检查当前迭代次数是否达到 max_iterations（默认: 1）
+2. 如果达到上限，终止并报告迭代历史
+3. 如果 auto_re_review=false（默认），提示用户手动决定是否重新审查
+4. 记录迭代历史，避免重复修复相同问题
+5. 禁止无限制的自动重审（auto_re_review=true 但无 max_iterations）
+
+**输出**: 迭代控制决策
+**错误处理**: 超过迭代次数时记录WARNING并终止
+
+**参数**:
+- `--max-iterations=<n>`: 最大修复-审查迭代次数（默认: 1，范围: 1-5）
+- `--auto-re-review=<bool>`: 修复后自动重新审查（默认: false，需配合 max_iterations）
+
+**安全检查**:
+```
+IF auto_re_review=true AND max_iterations未设置 THEN
+  拒绝执行，提示: "auto_re_review 必须配合 max_iterations 使用"
+END IF
+```
+
 ## Input Format
 
 ### Basic Input
 ```
---artifact-id=<id> [--auto] [--dry-run]
+--artifact-id=<id> [--auto] [--dry-run] [--max-iterations=<n>] [--auto-re-review]
 ```
+
+### Parameters
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `--artifact-id` | string | required | 审查报告的制品ID |
+| `--auto` | boolean | false | 全自动模式，无需用户交互 |
+| `--dry-run` | boolean | false | 预览模式，不实际修改文件 |
+| `--max-iterations` | number | 1 | 最大修复-审查迭代次数（1-5） |
+| `--auto-re-review` | boolean | false | 修复后自动重新审查（需配合max-iterations） |
 
 ### Input Examples
 ```
@@ -110,6 +146,16 @@ Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解
 
 ```
 --artifact-id=DLV-002 --dry-run
+```
+
+```
+# 安全：自动重审但有迭代限制
+--artifact-id=DLV-001 --auto-re-review --max-iterations=3
+```
+
+```
+# ❌ 危险：无限制的自动重审（将被拒绝）
+--artifact-id=DLV-001 --auto-re-review
 ```
 
 ### Structured Input (Optional)
@@ -307,7 +353,49 @@ Fix Orchestrator (this component) → Fix Plan
     ↓
 SubAgent Factories → Fixed Files
     ↓
-Re-review → Verify Fixes
+Re-review (手动触发) → Verify Fixes
+```
+
+**重要**: 修复后需要用户手动运行 `/ccc:review` 验证，不自动触发重审。
+
+### 反馈循环控制（LOOP-001修复）
+
+**问题**: fix-orchestrator 修复后，如果自动调用 review-core 验证，可能形成无限循环。
+
+**当前设计**: 修复后不自动重审，需要用户手动运行 `/ccc:review`。
+
+**如果需要自动重审**: 必须设置 `--max-iterations` 参数限制循环次数。
+
+**示例**:
+```bash
+# ✅ 安全：修复后不自动重审（默认）
+/ccc:fix --artifact-id=DLV-001
+
+# ❌ 危险：自动重审但无限制（将被拒绝）
+/ccc:fix --artifact-id=DLV-001 --auto-re-review
+
+# ✅ 安全：自动重审但有限制
+/ccc:fix --artifact-id=DLV-001 --auto-re-review --max-iterations=3
+```
+
+**参数验证规则**:
+- auto_re_review=true 必须配合 max_iterations 使用
+- max_iterations 范围: 1-5（防止过度迭代）
+- 默认 max_iterations=1（仅修复一次）
+- 超过 max_iterations 时终止并记录WARNING
+
+**迭代历史跟踪**:
+```json
+{
+  "iteration_history": [
+    {"round": 1, "fixed_issues": 12, "remaining_issues": 5},
+    {"round": 2, "fixed_issues": 5, "remaining_issues": 1},
+    {"round": 3, "fixed_issues": 1, "remaining_issues": 0}
+  ],
+  "total_iterations": 3,
+  "max_iterations": 3,
+  "termination_reason": "all_issues_resolved"
+}
 ```
 
 ### File References

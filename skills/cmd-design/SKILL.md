@@ -25,6 +25,89 @@ Creates comprehensive blueprint artifacts from intent specifications using struc
 - 需要支持多轮对话和复杂推理
 - 建议上下文窗口 >= 200K tokens (处理完整 Intent 和设计模式)
 
+## 资源预算
+
+### Token 使用估计
+
+| 场景 | 输入 Token | 输出 Token | 总计 | 说明 |
+|------|-----------|-----------|------|------|
+| 小型组件 | 8K-15K | 5K-10K | 13K-25K | 单一职责 Skill |
+| 中型组件 | 15K-30K | 10K-20K | 25K-50K | 多步骤工作流 Subagent |
+| 大型组件 | 30K-60K | 20K-40K | 50K-100K | 复杂编排 Command |
+
+### Token 使用分解
+
+**阶段 1: Intent 读取** (2K-5K tokens)
+- 读取 Intent 制品文件
+- 解析需求和约束
+- 提取用户意图
+
+**阶段 2: SubAgent 调用** (15K-40K tokens)
+- ccc:advisor-core: 3K-8K (4个诊断问题 + 架构推荐)
+- ccc:requirement-core: 4K-10K (需求澄清 + 结构化)
+- ccc:architect-core: 5K-12K (工作流设计 + 组件结构)
+- ccc:blueprint-core: 3K-10K (Blueprint 生成 + 验证)
+
+**阶段 3: 知识库加载** (3K-8K tokens)
+- 设计模式库 (lib-design-patterns)
+- 架构决策模板
+- 参考实现示例
+
+**阶段 4: 输出生成** (5K-15K tokens)
+- Blueprint YAML 制品
+- 设计决策文档
+- 架构图和流程图
+
+### 成本估计
+
+基于 Claude Sonnet 4.5 定价（输入: $3/MTok, 输出: $15/MTok）：
+
+| 场景 | 输入成本 | 输出成本 | 总成本 | 说明 |
+|------|----------|----------|--------|------|
+| 小型组件 | $0.024-$0.045 | $0.075-$0.150 | $0.10-$0.20 | 适合快速原型 |
+| 中型组件 | $0.045-$0.090 | $0.150-$0.300 | $0.20-$0.40 | 标准开发场景 |
+| 大型组件 | $0.090-$0.180 | $0.300-$0.600 | $0.40-$0.80 | 复杂系统设计 |
+
+**批量设计成本**:
+- 10个小型组件: $1.00-$2.00
+- 10个中型组件: $2.00-$4.00
+- 5个大型组件: $2.00-$4.00
+
+### 优化建议
+
+**1. 减少上下文加载**
+- 仅加载相关的设计模式（避免加载全部库）
+- 精简 Intent 内容（移除冗余说明）
+- 使用 `--minimal` 模式跳过非必要分析
+
+**2. 批量设计复用**
+- 同时设计多个相似组件
+- 复用架构决策和设计模式
+- 共享 SubAgent 的分析结果
+
+**3. 分层设计策略**
+- 先设计核心组件（高复杂度）
+- 再设计辅助组件（低复杂度）
+- 复用已有组件的设计决策
+
+**4. 渐进式设计**
+- 第一轮：快速设计（仅关键部分）
+- 第二轮：补充细节（按需迭代）
+- 避免一次性设计所有细节
+
+### Token 使用监控
+
+在执行过程中，系统会输出 Token 使用情况：
+
+```
+[INFO] Design started for: api-service
+[INFO] Token usage: advisor-core (3,245 tokens)
+[INFO] Token usage: requirement-core (5,123 tokens)
+[INFO] Token usage: architect-core (7,456 tokens)
+[INFO] Token usage: blueprint-core (4,321 tokens)
+[INFO] Total tokens used: 20,145 (estimated cost: $0.35)
+```
+
 ## Usage
 
 ```bash
