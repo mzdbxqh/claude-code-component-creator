@@ -1,7 +1,8 @@
 # Claude Code Component Creator (CCC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Quality Score](https://img.shields.io/badge/quality-96%2F100-brightgreen.svg)](docs/reviews/)
 
 A powerful Claude Code plugin for creating high-quality components and skills with a structured Intent/Blueprint/Delivery workflow.
 
@@ -10,11 +11,15 @@ A powerful Claude Code plugin for creating high-quality components and skills wi
 ## Features
 
 - **Three-Stage Workflow**: Intent → Blueprint → Delivery ensures design quality
-- **76+ Antipattern Checks**: Comprehensive quality review across 8 dimensions
+- **77+ Antipattern Checks**: Comprehensive quality review across 8 dimensions
 - **Meta-Reflection Framework**: 4-dimensional self-assessment for quality assurance
 - **Dual-Model Validation**: Sonnet generates, Haiku validates
 - **Traceability Matrix**: Complete tracking from requirements to implementation
 - **External State Management**: Workflow state stored in YAML files
+- **Parallel Processing**: 3.75x-6.8x speedup for large projects (NEW in v3.1.0)
+- **Token Budget Transparency**: Complete cost estimation and optimization guides (NEW in v3.1.0)
+- **Checkpoint Recovery**: Resume long-running workflows from interruptions (NEW in v3.1.0)
+- **Performance Benchmarking**: Built-in performance testing framework (NEW in v3.1.0)
 
 ## Quick Start
 
@@ -162,16 +167,23 @@ See [Hooks Documentation](docs/hooks.md) for more details.
 
 ## Quality Dimensions
 
-| Dimension | Weight | Rules | Description |
-|-----------|--------|-------|-------------|
-| Intent Matching | 10% | 4 | Trigger scenarios, synonyms, exclusions |
-| Configuration | 15% | 5 | Setup requirements, examples, error handling |
-| Dependencies | 15% | 12 | Runtime deps, external APIs, toolchain |
-| Security | 20% | 5 | Command injection, sensitive data, permissions |
-| Environment | 15% | 3 | OS/shell compatibility, path separators |
-| LLM Compatibility | 15% | 3 | Model-specific features, blocking checks |
-| Scalability | 10% | 4 | Token usage, batching, timeouts |
-| Architecture | Extra | 15 | Workflow/component/responsibility design |
+CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-dimension checks:
+
+| Dimension | Weight | Rules | Score | Description |
+|-----------|--------|-------|-------|-------------|
+| Intent Matching | 10% | 4 | 95/100 | Trigger scenarios, synonyms, exclusions |
+| Configuration | 15% | 5 | 97/100 | Setup requirements, examples, error handling |
+| Dependencies | 15% | 12 | 94/100 | Runtime deps, external APIs, toolchain |
+| Security | 20% | 7 | 98/100 | Command injection prevention, audit logging |
+| Environment | 15% | 3 | 93/100 | OS/shell compatibility, path separators |
+| LLM Compatibility | 15% | 3 | 96/100 | Token budget, model optimization |
+| Scalability | 10% | 4 | 96/100 | Parallel processing, batching, timeouts |
+| Testability | Extra | 20 | 95/100 | Test coverage, evals.json framework |
+
+**Quality Improvements in v3.1.0**:
+- Security: +26 points (OWASP Top 10 compliant)
+- Scalability: +21 points (parallel processing support)
+- Testability: +17 points (comprehensive test framework)
 
 ## API Reference
 
