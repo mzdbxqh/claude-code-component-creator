@@ -1,175 +1,180 @@
 {
-  "name": "cmd-fix-evals",
-  "version": "1.0.0",
-  "description": "测试用例：交互式修复审查发现的问题，支持策略选择和并行执行",
-  "test_cases": [
+  "version": "1.0",
+  "skill": "cmd-fix",
+  "description": "测试问题修复流程的准确性和效率",
+  "evals": [
     {
-      "id": "normal-001",
-      "name": "正常场景：交互式修复",
-      "description": "验证完整交互式修复流程",
+      "name": "single_issue_fix",
+      "description": "单一问题修复：修复审查报告中的单个问题",
       "input": {
-        "arguments": "--artifact-id=DLV-001",
-        "user_interactions": [
-          {"prompt": "修复策略", "selection": "交互式修复"},
-          {"prompt": "修复范围", "selection": "仅 P0 错误"},
-          {"prompt": "执行确认", "selection": "开始修复"}
-        ]
+        "review_report": "test-fixtures/review-report-single-issue.md",
+        "issue_id": "TEST-001",
+        "mode": "interactive"
       },
-      "expected_behavior": {
-        "loads_review_report": true,
-        "presents_strategies": true,
-        "executes_fixes": true,
-        "generates_fix_report": "docs/fixes/*-fix.md"
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "修复完成"
+      "expected_output": {
+        "modifications": {
+          "files_changed": 1,
+          "contains_fix": true
         },
-        {
-          "type": "contains",
-          "value": "修复摘要"
+        "validation": {
+          "issue_resolved": true,
+          "no_regression": true,
+          "fix_documented": true
+        }
+      },
+      "timeout": 120,
+      "priority": "critical",
+      "tags": ["fix", "single", "basic"]
+    },
+    {
+      "name": "batch_fix",
+      "description": "批量修复：同时修复多个相关问题",
+      "input": {
+        "review_report": "test-fixtures/review-report-multiple-issues.md",
+        "priority": "P0",
+        "mode": "batch"
+      },
+      "expected_output": {
+        "modifications": {
+          "files_changed": 3,
+          "issues_fixed": 5,
+          "fix_summary": true
         },
-        {
-          "type": "file_exists",
-          "value": "docs/fixes/"
+        "validation": {
+          "all_p0_resolved": true,
+          "no_conflicts": true,
+          "tests_pass": true
         }
-      ]
+      },
+      "timeout": 300,
+      "priority": "high",
+      "tags": ["fix", "batch", "p0"]
     },
     {
-      "id": "normal-002",
-      "name": "正常场景：自动修复 P0 问题",
-      "description": "验证全自动修复模式",
+      "name": "evals_creation_fix",
+      "description": "测试定义修复：为缺少evals.json的组件创建测试",
       "input": {
-        "arguments": "--artifact-id=DLV-001 --auto"
+        "review_report": "test-fixtures/review-report-missing-evals.md",
+        "issue_id": "TEST-001",
+        "component": "test-fixtures/skill-without-evals"
       },
-      "expected_behavior": {
-        "auto_fixes_p0_issues": true,
-        "no_user_interaction": true,
-        "generates_report": true
+      "expected_output": {
+        "new_files": [
+          {
+            "path": "evals/evals.json",
+            "valid_json": true,
+            "contains_fields": [
+              "version",
+              "skill",
+              "evals",
+              "success_criteria"
+            ]
+          }
+        ],
+        "validation": {
+          "test_cases_defined": true,
+          "fixtures_referenced": true,
+          "schema_valid": true
+        }
       },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "修复完成"
+      "timeout": 180,
+      "priority": "high",
+      "tags": ["fix", "testability", "evals"]
+    },
+    {
+      "name": "plugin_manifest_fix",
+      "description": "Plugin配置修复：修复plugin.json格式错误",
+      "input": {
+        "review_report": "test-fixtures/review-report-plugin-manifest.md",
+        "issue_id": "PLUGIN-001",
+        "target": "test-fixtures/plugin-with-invalid-manifest"
+      },
+      "expected_output": {
+        "modifications": {
+          "file": ".claude-plugin/plugin.json",
+          "unknown_fields_removed": true,
+          "types_corrected": true,
+          "whitelist_compliant": true
         },
-        {
-          "type": "contains",
-          "value": "修复文件数"
+        "validation": {
+          "valid_json": true,
+          "schema_compliant": true,
+          "no_unknown_fields": true
         }
-      ]
+      },
+      "timeout": 60,
+      "priority": "critical",
+      "tags": ["fix", "plugin", "manifest", "p0"]
     },
     {
-      "id": "normal-003",
-      "name": "正常场景：预览修复内容（dry-run）",
-      "description": "验证 dry-run 模式不实际写入",
+      "name": "circular_dependency_fix",
+      "description": "循环依赖修复：解除组件间的循环依赖",
       "input": {
-        "arguments": "--artifact-id=DLV-001 --dry-run"
+        "review_report": "test-fixtures/review-report-circular-dep.md",
+        "issue_id": "LOOP-001",
+        "components": ["fix-orchestrator", "review-core"]
       },
-      "expected_behavior": {
-        "shows_preview": true,
-        "no_file_changes": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "预览"
+      "expected_output": {
+        "refactoring": {
+          "dependencies_reorganized": true,
+          "circular_removed": true,
+          "one_way_flow": true
         },
-        {
-          "type": "contains",
-          "value": "dry-run"
+        "validation": {
+          "no_circular_deps": true,
+          "functionality_preserved": true,
+          "tests_pass": true
         }
-      ]
-    },
-    {
-      "id": "boundary-001",
-      "name": "边界情况：无可修复问题",
-      "description": "验证审查报告无问题时的处理",
-      "input": {
-        "arguments": "--artifact-id=DLV-CLEAN"
       },
-      "expected_behavior": {
-        "detects_no_issues": true,
-        "exits_gracefully": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["无需修复", "No issues", "已通过"]
-        }
-      ]
-    },
-    {
-      "id": "boundary-002",
-      "name": "边界情况：用户取消修复",
-      "description": "验证用户中途取消的处理",
-      "input": {
-        "arguments": "--artifact-id=DLV-001",
-        "user_interactions": [
-          {"prompt": "修复策略", "selection": "暂停"}
-        ]
-      },
-      "expected_behavior": {
-        "preserves_review_report": true,
-        "no_changes_made": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["已取消", "cancelled", "保留审查报告"]
-        }
-      ]
-    },
-    {
-      "id": "error-001",
-      "name": "错误处理：审查报告不存在",
-      "description": "验证缺少审查报告时的提示",
-      "input": {
-        "arguments": "--artifact-id=DLV-999"
-      },
-      "expected_behavior": {
-        "shows_error": true,
-        "suggests_running_review": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["审查报告不存在", "run /ccc:review", "请先执行"]
-        }
-      ]
-    },
-    {
-      "id": "error-002",
-      "name": "错误处理：文件写入失败",
-      "description": "验证写入失败时的回滚机制",
-      "input": {
-        "arguments": "--artifact-id=DLV-001 --auto",
-        "simulate_error": "write_permission_denied"
-      },
-      "expected_behavior": {
-        "rolls_back_changes": true,
-        "reports_error": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["回滚", "rollback", "写入失败"]
-        }
-      ]
+      "timeout": 240,
+      "priority": "high",
+      "tags": ["fix", "architecture", "refactoring"]
     }
   ],
   "test_fixtures": {
-    "required_directories": ["docs/reviews/", "docs/fixes/"],
-    "required_files": [
-      "docs/reviews/test-review.md",
-      "test-fixtures/artifacts/DLV-001.yaml"
+    "review_reports": [
+      {
+        "name": "single-issue",
+        "file": "test-fixtures/review-report-single-issue.md",
+        "issues": ["TEST-001"]
+      },
+      {
+        "name": "multiple-issues",
+        "file": "test-fixtures/review-report-multiple-issues.md",
+        "issues": ["TEST-001", "SEC-001", "SCALE-001", "CFG-001", "DOC-001"]
+      },
+      {
+        "name": "missing-evals",
+        "file": "test-fixtures/review-report-missing-evals.md",
+        "issues": ["TEST-001"]
+      },
+      {
+        "name": "plugin-manifest",
+        "file": "test-fixtures/review-report-plugin-manifest.md",
+        "issues": ["PLUGIN-001"]
+      },
+      {
+        "name": "circular-dep",
+        "file": "test-fixtures/review-report-circular-dep.md",
+        "issues": ["LOOP-001"]
+      }
     ],
-    "cleanup_after_test": true
+    "components": [
+      {
+        "name": "skill-without-evals",
+        "dir": "test-fixtures/skill-without-evals"
+      },
+      {
+        "name": "plugin-with-invalid-manifest",
+        "dir": "test-fixtures/plugin-with-invalid-manifest"
+      }
+    ]
   },
-  "coverage": {
-    "normal_scenarios": 3,
-    "boundary_scenarios": 2,
-    "error_scenarios": 2,
-    "total": 7
+  "success_criteria": {
+    "pass_rate": 0.8,
+    "critical_pass_rate": 1.0,
+    "max_avg_duration": 180,
+    "fix_accuracy": 0.95,
+    "no_regression_rate": 1.0
   }
 }

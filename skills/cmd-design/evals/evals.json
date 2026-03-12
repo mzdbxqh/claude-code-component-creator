@@ -1,144 +1,183 @@
 {
-  "name": "cmd-design-evals",
-  "version": "1.0.0",
-  "description": "测试用例：生成 Blueprint 制品，使用 5 阶段设计流程",
-  "test_cases": [
+  "version": "1.0",
+  "skill": "cmd-design",
+  "description": "测试Blueprint设计生成流程的正确性和完整性",
+  "evals": [
     {
-      "id": "normal-001",
-      "name": "正常场景：从 Intent 生成 Blueprint",
-      "description": "验证基本设计流程：读取 Intent → 生成 Blueprint",
+      "name": "basic_design_generation",
+      "description": "基础设计流程：从简单Intent生成Blueprint",
       "input": {
-        "arguments": "--name=deploy-skill"
+        "artifact_id": "INT-001",
+        "type": "simple-skill",
+        "requirements": {
+          "功能": "简单的代码格式化工具",
+          "输入": "未格式化的代码文件",
+          "输出": "格式化后的代码"
+        }
       },
-      "expected_behavior": {
-        "creates_files": [
-          "docs/designs/*.md",
-          "docs/ccc/blueprint/*.yaml"
+      "expected_output": {
+        "artifacts": [
+          {
+            "type": "design_doc",
+            "pattern": "docs/designs/.*-simple-skill-design\\.md",
+            "contains_sections": [
+              "工作流设计",
+              "组件结构",
+              "能力表",
+              "实施计划"
+            ]
+          },
+          {
+            "type": "blueprint",
+            "pattern": "docs/ccc/blueprint/.*-BLP-.*\\.yaml",
+            "contains_fields": [
+              "version",
+              "id",
+              "workflow",
+              "components"
+            ]
+          }
         ],
-        "contains_sections": ["workflow", "tools", "evidence_chain", "policies"]
+        "validation": {
+          "no_errors": true,
+          "all_sections_present": true,
+          "valid_yaml": true
+        }
       },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "Design Complete"
+      "timeout": 120,
+      "priority": "critical",
+      "tags": ["design", "basic", "workflow"]
+    },
+    {
+      "name": "complex_design_handling",
+      "description": "复杂设计流程：多组件系统设计",
+      "input": {
+        "artifact_id": "INT-002",
+        "type": "multi-agent-system",
+        "requirements": {
+          "功能": "分布式任务编排系统",
+          "架构": "多Agent协作",
+          "特性": ["异步处理", "负载均衡", "容错机制"]
+        }
+      },
+      "expected_output": {
+        "artifacts": [
+          {
+            "type": "design_doc",
+            "contains_keywords": [
+              "async",
+              "parallel",
+              "resilience",
+              "orchestration"
+            ],
+            "min_components": 5
+          },
+          {
+            "type": "blueprint",
+            "contains_agents": true,
+            "min_agents": 3
+          }
+        ],
+        "validation": {
+          "architecture_complete": true,
+          "dependencies_defined": true,
+          "error_handling_specified": true
+        }
+      },
+      "timeout": 180,
+      "priority": "high",
+      "tags": ["design", "complex", "multi-agent"]
+    },
+    {
+      "name": "design_with_constraints",
+      "description": "约束条件下的设计：性能要求和安全限制",
+      "input": {
+        "artifact_id": "INT-003",
+        "type": "secure-api",
+        "requirements": {
+          "功能": "安全API网关",
+          "性能": "响应时间<100ms",
+          "安全": "加密传输、访问控制"
         },
-        {
-          "type": "contains",
-          "value": "Blueprint Generated"
-        },
-        {
-          "type": "file_exists",
-          "value": "docs/designs/"
-        },
-        {
-          "type": "file_exists",
-          "value": "docs/ccc/blueprint/"
+        "constraints": {
+          "token_budget": 50000,
+          "security_level": "high"
         }
-      ]
+      },
+      "expected_output": {
+        "artifacts": [
+          {
+            "type": "design_doc",
+            "contains_sections": [
+              "安全设计",
+              "性能优化",
+              "Token预算管理"
+            ]
+          }
+        ],
+        "validation": {
+          "security_measures_defined": true,
+          "performance_targets_set": true,
+          "token_budget_respected": true
+        }
+      },
+      "timeout": 150,
+      "priority": "high",
+      "tags": ["design", "security", "performance"]
     },
     {
-      "id": "normal-002",
-      "name": "正常场景：指定 Intent ID 设计",
-      "description": "验证多 Intent 环境下的选择功能",
+      "name": "iterative_design",
+      "description": "迭代设计：基于现有组件优化",
       "input": {
-        "arguments": "--name=api-service --intent-id=INT-001"
+        "mode": "iterate",
+        "existing_component": "skills/existing-skill",
+        "improvements": [
+          "添加错误处理",
+          "优化Token使用",
+          "增强可测试性"
+        ]
       },
-      "expected_behavior": {
-        "uses_specific_intent": "INT-001",
-        "generates_blueprint": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "Design Complete"
-        },
-        {
-          "type": "contains",
-          "value": "api-service"
+      "expected_output": {
+        "artifacts": [
+          {
+            "type": "design_doc",
+            "contains_sections": [
+              "现状分析",
+              "改进方案",
+              "迁移计划"
+            ]
+          }
+        ],
+        "validation": {
+          "gap_analysis_done": true,
+          "migration_plan_provided": true,
+          "backward_compatible": true
         }
-      ]
-    },
-    {
-      "id": "normal-003",
-      "name": "正常场景：多语言支持（英文）",
-      "description": "验证英文输出功能",
-      "input": {
-        "arguments": "--name=test-skill --lang=en-us"
       },
-      "expected_behavior": {
-        "output_language": "en-us"
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "Design Complete"
-        }
-      ]
-    },
-    {
-      "id": "boundary-001",
-      "name": "边界情况：缺少 name 参数",
-      "description": "验证必填参数检查",
-      "input": {
-        "arguments": ""
-      },
-      "expected_behavior": {
-        "shows_error": true,
-        "suggests_usage": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["--name", "required", "必需"]
-        }
-      ]
-    },
-    {
-      "id": "error-001",
-      "name": "错误处理：Intent 不存在",
-      "description": "验证对不存在 Intent 的处理",
-      "input": {
-        "arguments": "--name=test --intent-id=INT-999"
-      },
-      "expected_behavior": {
-        "shows_error": true,
-        "lists_available_intents": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["not found", "不存在", "available"]
-        }
-      ]
-    },
-    {
-      "id": "error-002",
-      "name": "错误处理：Blueprint 生成失败",
-      "description": "验证生成失败时的错误提示",
-      "input": {
-        "arguments": "--name=invalid-design --intent-id=current"
-      },
-      "expected_behavior": {
-        "handles_failure": true,
-        "provides_guidance": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["error", "failed", "review"]
-        }
-      ]
+      "timeout": 120,
+      "priority": "medium",
+      "tags": ["design", "iterate", "optimization"]
     }
   ],
   "test_fixtures": {
-    "required_directories": ["docs/ccc/intent/", "docs/designs/", "docs/ccc/blueprint/"],
-    "required_files": ["docs/ccc/intent/test-intent.yaml"],
-    "cleanup_after_test": true
+    "intents": [
+      {
+        "id": "INT-001",
+        "file": "test-fixtures/int-001-simple-tool.yaml"
+      },
+      {
+        "id": "INT-002",
+        "file": "test-fixtures/int-002-multi-agent.yaml"
+      },
+      {
+        "id": "INT-003",
+        "file": "test-fixtures/int-003-secure-api.yaml"
+      }
+    ]
   },
-  "coverage": {
-    "normal_scenarios": 3,
-    "boundary_scenarios": 1,
-    "error_scenarios": 2,
-    "total": 6
+  "success_criteria": {
+    "pass_rate": 0.75,
+    "critical_pass_rate": 1.0,
+    "max_avg_duration": 150
   }
 }

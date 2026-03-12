@@ -203,14 +203,281 @@ Status: PASSED
 
 ### Report Structure
 
-| Section | Content |
-|---------|---------|
-| Overview | Artifact validated, validation date |
-| YAML Validation | Syntax check results |
-| Schema Compliance | Schema validation results |
-| Token Budget | Token count and limit |
-| Cross-References | Reference integrity check |
-| Summary | Overall status and issues |
+**Markdown报告完整结构**:
+
+```markdown
+# 验证报告：<Artifact-ID>
+
+**验证时间**: 2026-03-10T15:30:00Z
+**制品类型**: Blueprint
+**Schema版本**: 3.0
+**验证状态**: ✅ PASSED | ❌ FAILED | ⚠️ WARNING
+
+---
+
+## 1. YAML语法验证
+
+**状态**: ✅ 通过 / ❌ 失败
+
+- [x] YAML解析成功
+- [x] 缩进格式正确
+- [x] 特殊字符转义正确
+- [x] 无语法错误
+
+**错误详情**（如果有）:
+```yaml
+Line 45: unexpected indentation
+Line 67: unquoted special character '@'
+```
+
+---
+
+## 2. Schema合规性验证
+
+**状态**: ✅ 通过 / ❌ 失败
+
+**必需字段检查**:
+- [x] artifact.version: "3.0" ✓
+- [x] artifact.id: "BLP-001" ✓
+- [x] artifact.type: "blueprint" ✓
+- [x] metadata.name: "deploy-skill" ✓
+- [x] workflow.steps: 5 个步骤 ✓
+- [x] components: 3 个组件 ✓
+
+**可选字段检查**:
+- [x] metadata.description: 已提供 ✓
+- [x] constraints: 已定义 ✓
+- [ ] test_plan: 未提供 (建议补充)
+
+**字段类型验证**:
+- [x] version: string ✓
+- [x] created_at: ISO8601 datetime ✓
+- [x] quality.score: integer (0-100) ✓
+
+---
+
+## 3. Token预算验证
+
+**状态**: ✅ 通过 / ⚠️ 警告 / ❌ 超预算
+
+| 分类 | Token数 | 预算 | 使用率 |
+|------|---------|------|--------|
+| Skill内容 | 1,245 | 2,000 | 62% ✓ |
+| Agent提示词 | 856 | 1,500 | 57% ✓ |
+| 示例代码 | 355 | 500 | 71% ✓ |
+| **总计** | **2,456** | **4,000** | **61%** ✓ |
+
+**建议**:
+- ✓ Token使用合理
+- ⚠️ Agent提示词略长，建议优化
+- ✓ 预留空间充足（39%）
+
+---
+
+## 4. 交叉引用验证
+
+**状态**: ✅ 通过 / ❌ 失败
+
+**引用完整性检查**:
+- [x] intent_id: INT-001
+  - 文件: docs/ccc/intent/2026-03-07-INT-001.yaml
+  - 状态: ✅ 存在
+- [x] 依赖组件引用
+  - review-core: agents/reviewer/review-core/
+  - 状态: ✅ 存在
+- [x] 工具权限声明
+  - allowed-tools: [Bash, Read, Write]
+  - 状态: ✅ 合法
+
+**引用错误**（如果有）:
+```
+❌ intent_id: INT-999 - 文件不存在
+⚠️ component: missing-agent - 路径未找到
+```
+
+---
+
+## 5. 能力表验证
+
+**状态**: ✅ 通过 / ⚠️ 警告
+
+| 维度 | 检查项 | 状态 |
+|------|--------|------|
+| 功能完整性 | 所有需求覆盖 | ✅ 100% |
+| 工作流连贯性 | 步骤逻辑流畅 | ✅ 通过 |
+| 工具权限 | 最小权限原则 | ✅ 合规 |
+| 错误处理 | 异常场景覆盖 | ⚠️ 部分覆盖 |
+| 测试计划 | 测试用例定义 | ❌ 缺失 |
+
+**警告和建议**:
+- ⚠️ 错误处理: 建议补充边界情况处理
+- ❌ 测试计划: 强烈建议添加测试用例
+
+---
+
+## 6. 质量评分验证
+
+**综合评分**: 87/100 (良好 B+)
+
+| 维度 | 得分 | 说明 |
+|------|------|------|
+| 完整性 | 92/100 | 所有必需字段完整 |
+| 清晰度 | 88/100 | 描述清晰，易理解 |
+| 可行性 | 90/100 | 技术方案可行 |
+| 可测试性 | 75/100 | 缺少测试计划（扣分） |
+
+**质量建议**:
+1. 补充测试计划 → 可测试性可提升至 90+
+2. 优化Agent提示词 → Token使用更高效
+3. 增强错误处理 → 鲁棒性更好
+
+---
+
+## 7. 验证总结
+
+**总体状态**: ✅ 验证通过（允许build）
+
+**检查摘要**:
+- ✅ YAML语法: 通过
+- ✅ Schema合规: 通过
+- ✅ Token预算: 通过（61%使用率）
+- ✅ 交叉引用: 通过
+- ⚠️ 能力表: 通过（有警告）
+- ✅ 质量评分: 87/100（良好）
+
+**发现问题**:
+- ❌ 0 个ERROR（阻断性）
+- ⚠️ 2 个WARNING（建议修复）
+- ℹ️ 3 个INFO（可选优化）
+
+**下一步建议**:
+- ✅ 可以继续执行 `/ccc:build`
+- ⚠️ 建议先修复 WARNING 问题
+- ℹ️ 可选：补充测试计划后质量更高
+
+---
+
+**验证报告生成时间**: 2026-03-10T15:30:00Z
+**验证工具版本**: CCC v3.1.0
+```
+
+**YAML数据格式**（机器可读）:
+
+```yaml
+validation_report:
+  artifact_id: "BLP-001"
+  validated_at: "2026-03-10T15:30:00Z"
+  artifact_type: "blueprint"
+  schema_version: "3.0"
+  overall_status: "PASSED"  # PASSED | FAILED | WARNING
+
+  checks:
+    yaml_syntax:
+      status: "PASSED"
+      errors: []
+      warnings: []
+
+    schema_compliance:
+      status: "PASSED"
+      required_fields_present: true
+      required_fields:
+        - field: "artifact.id"
+          value: "BLP-001"
+          status: "PASSED"
+        - field: "metadata.name"
+          value: "deploy-skill"
+          status: "PASSED"
+      optional_fields:
+        - field: "test_plan"
+          provided: false
+          severity: "INFO"
+
+    token_budget:
+      status: "PASSED"
+      total_tokens: 2456
+      budget: 4000
+      usage_percent: 61.4
+      breakdown:
+        skills: 1245
+        agents: 856
+        examples: 355
+      warnings: []
+
+    cross_references:
+      status: "PASSED"
+      references:
+        - type: "intent"
+          id: "INT-001"
+          file: "docs/ccc/intent/2026-03-07-INT-001.yaml"
+          status: "FOUND"
+        - type: "component"
+          id: "review-core"
+          path: "agents/reviewer/review-core/"
+          status: "FOUND"
+      errors: []
+
+    capability_matrix:
+      status: "WARNING"
+      dimensions:
+        - name: "功能完整性"
+          score: 100
+          status: "PASSED"
+        - name: "错误处理"
+          score: 70
+          status: "WARNING"
+          message: "建议补充边界情况处理"
+        - name: "测试计划"
+          score: 0
+          status: "FAILED"
+          message: "缺少测试用例定义"
+
+    quality_score:
+      overall: 87
+      dimensions:
+        completeness: 92
+        clarity: 88
+        feasibility: 90
+        testability: 75
+
+  summary:
+    total_checks: 6
+    passed: 5
+    failed: 0
+    warnings: 1
+    errors: 0
+    warnings_list:
+      - code: "WARN-001"
+        severity: "WARNING"
+        message: "缺少测试计划"
+        suggestion: "添加 test_plan 字段"
+
+    next_steps:
+      can_build: true
+      recommendations:
+        - "可以执行 /ccc:build"
+        - "建议先补充测试计划"
+
+  metadata:
+    generated_at: "2026-03-10T15:30:00Z"
+    generator: "CCC v3.1.0"
+    report_file: "docs/validations/2026-03-10-BLP-001-validation.md"
+```
+
+**字段说明**:
+
+| Section | Field | Type | Description |
+|---------|-------|------|-------------|
+| validation_report | artifact_id | string | 被验证制品的ID |
+| validation_report | validated_at | datetime | 验证时间（ISO8601） |
+| validation_report | overall_status | enum | PASSED/FAILED/WARNING |
+| checks | yaml_syntax | object | YAML语法检查结果 |
+| checks | schema_compliance | object | Schema合规性检查 |
+| checks | token_budget | object | Token预算检查 |
+| checks | cross_references | object | 交叉引用验证 |
+| checks | capability_matrix | object | 能力表检查 |
+| checks | quality_score | object | 质量评分 |
+| summary | can_build | boolean | 是否允许继续build |
+| summary | recommendations | array | 改进建议列表 |
 
 ## Examples
 

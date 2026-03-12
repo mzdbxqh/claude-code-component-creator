@@ -1,192 +1,148 @@
 {
-  "name": "cmd-review-evals",
-  "version": "1.0.0",
-  "description": "测试用例：执行全面组件质量审查，覆盖 76+ 反模式规则和 8 个评估维度",
-  "test_cases": [
+  "version": "1.0",
+  "skill": "cmd-review",
+  "description": "测试组件质量审查流程的准确性和全面性",
+  "evals": [
     {
-      "id": "normal-001",
-      "name": "正常场景：审查整个项目目录",
-      "description": "验证全面项目审查功能",
+      "name": "basic_component_review",
+      "description": "基础审查：单个Skill组件质量检查",
       "input": {
-        "arguments": "--target=./test-fixtures/sample-plugin"
+        "target": "test-fixtures/sample-skill",
+        "mode": "full"
       },
-      "expected_behavior": {
-        "scans_all_components": true,
-        "applies_all_dimensions": 8,
-        "generates_report": true,
-        "creates_file": "docs/reviews/*-comprehensive-review.md"
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "审查报告"
+      "expected_output": {
+        "report": {
+          "file_pattern": "docs/reviews/.*-review\\.md",
+          "contains_sections": [
+            "执行摘要",
+            "评估维度评分",
+            "问题清单",
+            "改进建议"
+          ],
+          "contains_scores": [
+            "意图匹配",
+            "配置和使用方法",
+            "安全风险评估",
+            "可测试性"
+          ]
         },
-        {
-          "type": "contains",
-          "value": "综合评分"
+        "validation": {
+          "all_dimensions_checked": true,
+          "issues_categorized": true,
+          "fixes_suggested": true,
+          "综合评分_range": [0, 100]
+        }
+      },
+      "timeout": 180,
+      "priority": "critical",
+      "tags": ["review", "basic", "skill"]
+    },
+    {
+      "name": "multi_component_review",
+      "description": "全面审查：整个plugin项目质量检查",
+      "input": {
+        "target": "test-fixtures/sample-plugin",
+        "include_architecture": true,
+        "include_linkage": true
+      },
+      "expected_output": {
+        "report": {
+          "file_pattern": "docs/reviews/.*-comprehensive-review\\.md",
+          "contains_sections": [
+            "插件概述",
+            "8维度评分",
+            "架构分析",
+            "链路验证",
+            "问题清单"
+          ],
+          "min_components_reviewed": 5
         },
-        {
-          "type": "contains",
-          "value": "维度评分"
+        "validation": {
+          "architecture_analyzed": true,
+          "circular_dependencies_checked": true,
+          "linkage_validated": true
+        }
+      },
+      "timeout": 300,
+      "priority": "critical",
+      "tags": ["review", "comprehensive", "architecture"]
+    },
+    {
+      "name": "antipattern_detection",
+      "description": "反模式检测：识别常见质量问题",
+      "input": {
+        "target": "test-fixtures/problematic-skill",
+        "focus": ["security", "testability"]
+      },
+      "expected_output": {
+        "issues": {
+          "min_count": 3,
+          "contains_codes": [
+            "SEC-001",
+            "TEST-001",
+            "SCALE-001"
+          ],
+          "severity_levels": ["ERROR", "WARNING", "INFO"]
         },
-        {
-          "type": "file_exists",
-          "value": "docs/reviews/"
+        "validation": {
+          "all_antipatterns_loaded": true,
+          "detection_accurate": true,
+          "fix_suggestions_provided": true
         }
-      ]
+      },
+      "timeout": 120,
+      "priority": "high",
+      "tags": ["review", "antipattern", "detection"]
     },
     {
-      "id": "normal-002",
-      "name": "正常场景：审查 CCC 工件",
-      "description": "验证工件审查（向后兼容）",
+      "name": "plugin_manifest_validation",
+      "description": "Plugin配置验证：plugin.json白名单schema检查",
       "input": {
-        "arguments": "--artifact-id=DLV-001"
+        "target": "test-fixtures/plugin-with-invalid-manifest"
       },
-      "expected_behavior": {
-        "loads_artifact": true,
-        "generates_report": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "审查报告"
+      "expected_output": {
+        "issues": {
+          "contains_codes": ["PLUGIN-001"],
+          "severity": "ERROR",
+          "fix_provided": true
         },
-        {
-          "type": "contains",
-          "value": "DLV-001"
+        "validation": {
+          "schema_loaded": true,
+          "unknown_fields_detected": true,
+          "whitelist_enforced": true
         }
-      ]
-    },
-    {
-      "id": "normal-003",
-      "name": "正常场景：快速审查（跳过架构分析）",
-      "description": "验证 --no-arch 参数",
-      "input": {
-        "arguments": "--target=. --no-arch"
       },
-      "expected_behavior": {
-        "skips_architecture_check": true,
-        "runs_7_dimensions": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "审查报告"
-        },
-        {
-          "type": "not_contains",
-          "value": "架构分析"
-        }
-      ]
-    },
-    {
-      "id": "normal-004",
-      "name": "正常场景：仅架构分析",
-      "description": "验证 --arch-only 参数",
-      "input": {
-        "arguments": "--target=. --arch-only"
-      },
-      "expected_behavior": {
-        "runs_only_architecture": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "架构分析"
-        }
-      ]
-    },
-    {
-      "id": "boundary-001",
-      "name": "边界情况：空目录审查",
-      "description": "验证对空目录的处理",
-      "input": {
-        "arguments": "--target=./test-fixtures/empty-dir"
-      },
-      "expected_behavior": {
-        "handles_empty_directory": true,
-        "shows_message": "No components found"
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["No components", "未找到组件", "empty"]
-        }
-      ]
-    },
-    {
-      "id": "boundary-002",
-      "name": "边界情况：大型项目（100+ 文件）",
-      "description": "验证扩展性和性能",
-      "input": {
-        "arguments": "--target=./test-fixtures/large-plugin"
-      },
-      "expected_behavior": {
-        "handles_large_codebase": true,
-        "provides_progress_feedback": true,
-        "completes_in_reasonable_time": true
-      },
-      "assertions": [
-        {
-          "type": "contains",
-          "value": "审查报告"
-        },
-        {
-          "type": "execution_time",
-          "value": "< 300s"
-        }
-      ]
-    },
-    {
-      "id": "error-001",
-      "name": "错误处理：无效路径",
-      "description": "验证对不存在路径的处理",
-      "input": {
-        "arguments": "--target=/nonexistent/path"
-      },
-      "expected_behavior": {
-        "shows_error": true,
-        "suggests_valid_path": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["not found", "不存在", "invalid path"]
-        }
-      ]
-    },
-    {
-      "id": "error-002",
-      "name": "错误处理：artifact 不存在",
-      "description": "验证对不存在工件的处理",
-      "input": {
-        "arguments": "--artifact-id=INVALID-999"
-      },
-      "expected_behavior": {
-        "shows_error": true,
-        "lists_available_artifacts": true
-      },
-      "assertions": [
-        {
-          "type": "contains_any",
-          "values": ["not found", "available artifacts", "可用工件"]
-        }
-      ]
+      "timeout": 60,
+      "priority": "critical",
+      "tags": ["review", "plugin", "manifest", "validation"]
     }
   ],
   "test_fixtures": {
-    "required_directories": [
-      "test-fixtures/sample-plugin/skills/",
-      "test-fixtures/empty-dir/",
-      "test-fixtures/large-plugin/",
-      "docs/reviews/"
-    ],
-    "cleanup_after_test": true
+    "components": [
+      {
+        "name": "sample-skill",
+        "file": "test-fixtures/sample-skill/SKILL.md"
+      },
+      {
+        "name": "sample-plugin",
+        "dir": "test-fixtures/sample-plugin"
+      },
+      {
+        "name": "problematic-skill",
+        "file": "test-fixtures/problematic-skill/SKILL.md",
+        "expected_issues": ["SEC-001", "TEST-001", "SCALE-001"]
+      },
+      {
+        "name": "plugin-with-invalid-manifest",
+        "dir": "test-fixtures/invalid-plugin",
+        "expected_issues": ["PLUGIN-001"]
+      }
+    ]
   },
-  "coverage": {
-    "normal_scenarios": 4,
-    "boundary_scenarios": 2,
-    "error_scenarios": 2,
-    "total": 8
+  "success_criteria": {
+    "pass_rate": 0.75,
+    "critical_pass_rate": 1.0,
+    "max_avg_duration": 180,
+    "antipattern_detection_accuracy": 0.95
   }
 }

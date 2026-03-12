@@ -110,13 +110,152 @@ Next: Run /ccc:design to generate Blueprint
 
 ### Intent Structure
 
-| Section | Content |
-|---------|---------|
-| artifact | Artifact ID, type, version |
-| metadata | Name, description, creation date |
-| requirements | Functional and non-functional requirements |
-| constraints | Hard and soft constraints |
-| decisions | Key design decisions and rationale |
+**YAML文件结构**（完整示例）:
+
+```yaml
+# Intent制品完整结构
+version: "3.0"
+id: "INT-2026-03-07-001"
+type: "intent"
+created_at: "2026-03-07T14:30:00Z"
+
+# 元数据
+metadata:
+  name: "todo-finder"
+  description: "快速查找项目中的 TODO 注释"
+  component_type: "skill"  # skill | command | agent | hook
+  complexity: "simple"      # simple | medium | complex
+  priority: "high"          # low | medium | high | critical
+
+# 功能需求
+requirements:
+  functional:
+    - "扫描项目文件查找 TODO/FIXME/HACK 注释"
+    - "支持多种文件类型（.js, .py, .java, .md）"
+    - "按优先级和文件分组显示结果"
+    - "提供行号和代码上下文"
+
+  non_functional:
+    performance:
+      - "扫描速度: <3秒（1000文件）"
+      - "内存占用: <100MB"
+
+    security:
+      - "仅读取权限，不修改文件"
+      - "排除 .git 和 node_modules 目录"
+
+    usability:
+      - "输出格式友好，易于阅读"
+      - "支持颜色高亮"
+
+# 约束条件
+constraints:
+  hard:
+    - "必须使用 Bash 工具执行文件搜索"
+    - "必须处理空结果情况"
+    - "文件路径必须使用相对路径"
+
+  soft:
+    - "建议支持自定义关键词"
+    - "建议支持输出到文件"
+    - "建议显示统计摘要"
+
+# 设计决策
+decisions:
+  - id: "DEC-001"
+    decision: "选择 Skill 组件类型"
+    rationale: "单一工具功能，用户主动触发，不需要工作流编排"
+    alternatives: ["Command", "Subagent"]
+    selected: "Skill"
+
+  - id: "DEC-002"
+    decision: "使用 grep/rg 工具搜索"
+    rationale: "性能优异，正则表达式支持强"
+    alternatives: ["find + cat", "Node.js脚本"]
+    selected: "grep/rg"
+
+  - id: "DEC-003"
+    decision: "输出格式使用 Markdown"
+    rationale: "与 Claude Code 环境一致，易于阅读"
+    alternatives: ["JSON", "Plain text"]
+    selected: "Markdown"
+
+# 工作流模式
+workflow_pattern: "search-filter-sort"
+workflow_stages:
+  - name: "scan"
+    description: "扫描文件系统"
+  - name: "filter"
+    description: "过滤匹配项"
+  - name: "sort"
+    description: "按优先级排序"
+  - name: "display"
+    description: "格式化输出"
+
+# 质量指标
+quality:
+  score: 89
+  dimensions:
+    clarity: 95          # 需求清晰度
+    completeness: 85     # 完整性
+    feasibility: 92      # 可行性
+    testability: 88      # 可测试性
+
+# 下一步
+next_step: "design"
+recommended_tools:
+  - "Bash (Grep)"
+  - "Read"
+```
+
+**字段说明**:
+
+| Section | Field | Required | Description |
+|---------|-------|----------|-------------|
+| artifact | version | ✅ | Intent schema版本 |
+| artifact | id | ✅ | 唯一标识符 (INT-YYYY-MM-DD-NNN) |
+| artifact | type | ✅ | 制品类型 (固定值: intent) |
+| metadata | name | ✅ | 组件名称（小写字母+连字符） |
+| metadata | description | ✅ | 简短描述（一句话） |
+| metadata | component_type | ✅ | 组件类型 (skill/command/agent/hook) |
+| metadata | complexity | ❌ | 复杂度 (simple/medium/complex) |
+| requirements | functional | ✅ | 功能需求列表 |
+| requirements | non_functional | ❌ | 非功能需求（性能/安全/可用性） |
+| constraints | hard | ✅ | 硬约束（必须满足） |
+| constraints | soft | ❌ | 软约束（建议满足） |
+| decisions | - | ✅ | 关键设计决策记录 |
+| workflow_pattern | - | ❌ | 工作流模式名称 |
+| quality | score | ✅ | 质量评分 (0-100) |
+
+**最小必需字段示例**:
+
+```yaml
+version: "3.0"
+id: "INT-2026-03-07-001"
+type: "intent"
+
+metadata:
+  name: "simple-tool"
+  description: "A simple tool"
+  component_type: "skill"
+
+requirements:
+  functional:
+    - "核心功能描述"
+
+constraints:
+  hard:
+    - "必须满足的约束"
+
+decisions:
+  - id: "DEC-001"
+    decision: "组件类型选择"
+    rationale: "原因"
+    selected: "Skill"
+
+quality:
+  score: 75
+```
 
 ### File Access
 
