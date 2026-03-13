@@ -257,6 +257,8 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | 6. LLM 模型兼容性 | 15% | 3 | 特有功能声明、阻断功能检查、模型范围 |
 | 7. 扩展性 | 10% | 4 | Token 使用、分批处理、超时配置、进度反馈 |
 | 8. 可测试性 | 15% | 5 | 测试定义/测试框架/测试夹具/测试文档/功能可验证 |
+| **9. 组件规范 (新增)** | **额外** | **69** | **skill/subagent/hook/workflow 专用规则** |
+| **10. 遗留检测 (新增)** | **额外** | **23** | **Command 迁移、命名规范、特定场景检测** |
 | **架构分析 (L1+L2)** | **额外** | **15** | **默认开启，可用 `--no-arch` 禁用** |
 
 ### 禁用维度
@@ -342,8 +344,10 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 - **错误处理**: 目标不存在时提示检查路径；无可审查组件时报告并退出
 
 **Step 2: 加载反模式规则**
-- 从规则库加载 76+ 条反模式规则
-- 按维度分类（intent、config、dependency、security、environment、llm、scalability、testability）
+- 从规则库加载 161 条反模式规则（完整覆盖）
+- **基础 8 维度**（39 条）：intent、config、dependency、security、environment、llm、scalability、testability
+- **组件专用规则**（69 条）：skill、subagent、hook、workflow
+- **通用和特定规则**（23 条）：common、description、legacy、library、plugin、mcp 等
 - **新增：根据组件类型加载类型特定规则（三层防护体系-评审环节）**
   - cmd-* skills: 加载工作流规则（WORKFLOW-002），排除触发场景规则（INTENT-001,002,003）
   - std-* skills: 加载触发场景规则（INTENT-*），排除工作流规则（WORKFLOW-002）
