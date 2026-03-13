@@ -72,13 +72,13 @@ See [Troubleshooting](#troubleshooting) for more help.
 
 ```bash
 # Complete workflow in one command
-/ccc:quick
+/cmd-quick
 
 # Or step by step
-/ccc:init          # Create intent
-/ccc:design        # Generate blueprint
-/ccc:build         # Create deliverable
-/ccc:review        # Quality check
+/cmd-init          # Create intent
+/cmd-design        # Generate blueprint
+/cmd-build         # Create deliverable
+/cmd-review        # Quality check
 ```
 
 ## Core Workflow
@@ -97,17 +97,17 @@ Review (Quality assurance)
 
 | Command | Description |
 |---------|-------------|
-| `/ccc:init` | Create intent artifact using 4-question framework |
-| `/ccc:design` | Generate blueprint from intent |
-| `/ccc:build` | Create production-ready deliverable |
-| `/ccc:implement` | Implement iteration plans with validation |
-| `/ccc:review` | Comprehensive quality review (76+ checks) with automatic plugin profiling |
-| `/ccc:quick` | Execute complete workflow in one command |
-| `/ccc:iterate` | Iterate on existing blueprint |
-| `/ccc:design-iterate` | Iterate on existing components |
-| `/ccc:status` | Display project workflow state |
-| `/ccc:trace` | Generate traceability matrix |
-| `/ccc:validate` | Validate artifacts with external tools |
+| `/cmd-init` | Create intent artifact using 4-question framework |
+| `/cmd-design` | Generate blueprint from intent |
+| `/cmd-build` | Create production-ready deliverable |
+| `/cmd-implement` | Implement iteration plans with validation |
+| `/cmd-review` | Comprehensive quality review (76+ checks) with automatic plugin profiling |
+| `/cmd-quick` | Execute complete workflow in one command |
+| `/cmd-iterate` | Iterate on existing blueprint |
+| `/cmd-design-iterate` | Iterate on existing components |
+| `/cmd-status` | Display project workflow state |
+| `/cmd-trace` | Generate traceability matrix |
+| `/cmd-validate` | Validate artifacts with external tools |
 
 See [full command reference](commands/) for details.
 
@@ -172,7 +172,7 @@ CCC v3.1.0 introduces an automated plugin profiling system that enhances review 
 
 ### Overview
 
-When you run `/ccc:review` on a plugin, CCC now automatically:
+When you run `/cmd-review` on a plugin, CCC now automatically:
 1. Extracts plugin metadata (name, version, positioning, architecture)
 2. Analyzes component structure (skills, agents, commands, hooks)
 3. Identifies workflow mechanisms and activation patterns
@@ -211,16 +211,16 @@ The plugin profile includes:
 
 ```bash
 # Standard review (with profiling)
-/ccc:review
+/cmd-review
 
 # Profile-only mode (no quality review)
-/ccc:review --profile-only
+/cmd-review --profile-only
 
 # Review without profiling
-/ccc:review --skip-profiling
+/cmd-review --skip-profiling
 
 # Custom output directory
-/ccc:review --profile-output=custom/path/
+/cmd-review --profile-output=custom/path/
 ```
 
 ### Self-Explanation Validation
@@ -267,38 +267,38 @@ CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-d
 
 ### Core Commands
 
-#### `/ccc:init`
+#### `/cmd-init`
 **Purpose**: Create intent artifact using 4-question framework
 **Arguments**: None (interactive)
 **Output**: `intent-{id}.yaml` in artifacts directory
 **Example**:
 ```bash
-/ccc:init
+/cmd-init
 ```
 
-#### `/ccc:design`
+#### `/cmd-design`
 **Purpose**: Generate blueprint from intent
 **Arguments**:
 - `intent-id` (optional): Specific intent to design from
 **Output**: `blueprint-{id}.yaml`
 **Example**:
 ```bash
-/ccc:design
-/ccc:design intent-123
+/cmd-design
+/cmd-design intent-123
 ```
 
-#### `/ccc:build`
+#### `/cmd-build`
 **Purpose**: Create production-ready deliverable
 **Arguments**:
 - `blueprint-id` (optional): Specific blueprint to build from
 **Output**: Complete deliverable package with SKILL.md, code, tests, docs
 **Example**:
 ```bash
-/ccc:build
-/ccc:build blueprint-456
+/cmd-build
+/cmd-build blueprint-456
 ```
 
-#### `/ccc:review`
+#### `/cmd-review`
 **Purpose**: Comprehensive quality review (76+ checks)
 **Arguments**:
 - `component-path`: Path to component to review
@@ -306,17 +306,17 @@ CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-d
 **Output**: Review report with score and issues
 **Example**:
 ```bash
-/ccc:review skills/my-skill/
-/ccc:review agents/my-agent/ --type subagent
+/cmd-review skills/my-skill/
+/cmd-review agents/my-agent/ --type subagent
 ```
 
-#### `/ccc:quick`
+#### `/cmd-quick`
 **Purpose**: Execute complete workflow (init→design→build)
 **Arguments**: None (interactive)
 **Output**: Complete deliverable from start to finish
 **Example**:
 ```bash
-/ccc:quick
+/cmd-quick
 ```
 
 ### Artifact Structure
@@ -410,10 +410,10 @@ See [test-fixtures/](test-fixtures/) for example components.
 
 ```bash
 # Run tests
-/ccc:test-sandbox
+/cmd-test-sandbox
 
 # Review plugin quality
-/ccc:review
+/cmd-review
 ```
 
 ## Troubleshooting
@@ -422,7 +422,7 @@ See [test-fixtures/](test-fixtures/) for example components.
 
 #### Plugin Not Loading
 
-**Symptoms**: `/ccc:` commands not available
+**Symptoms**: `/cmd-*` commands not available
 
 **Solutions**:
 1. Verify plugin directory is in Claude Code's plugin path
@@ -445,15 +445,15 @@ See [test-fixtures/](test-fixtures/) for example components.
 
 #### Review Fails with Low Score
 
-**Symptoms**: `/ccc:review` shows many errors
+**Symptoms**: `/cmd-review` shows many errors
 
 **Solutions**:
 1. Read the review report carefully - it shows specific issues
 2. Focus on ERROR level issues first
 3. Check official documentation for violated standards
-4. Use `/ccc:fix` to auto-fix some issues:
+4. Use `/cmd-fix` to auto-fix some issues:
    ```bash
-   /ccc:fix --report review-report.md
+   /cmd-fix --report review-report.md
    ```
 
 #### Artifacts Not Found
@@ -463,7 +463,7 @@ See [test-fixtures/](test-fixtures/) for example components.
 **Solutions**:
 1. Check artifacts directory exists: `.ccc/artifacts/`
 2. Verify artifact files have correct format: `intent-*.yaml`
-3. Use `/ccc:status` to see all artifacts
+3. Use `/cmd-status` to see all artifacts
 4. Check file permissions (should be readable)
 
 #### Permission Errors
@@ -517,13 +517,13 @@ If you're still stuck:
 2. **Review Examples**: Look at [test-fixtures/](test-fixtures/) for working examples
 3. **Run Diagnostics**:
    ```bash
-   /ccc:validate  # Validate all artifacts
-   /ccc:trace     # Check traceability
+   /cmd-validate  # Validate all artifacts
+   /cmd-trace     # Check traceability
    ```
 4. **Report Issues**: File a bug report with:
    - Steps to reproduce
    - Error messages
-   - Output of `/ccc:status`
+   - Output of `/cmd-status`
    - Claude Code version
    - Operating system
 

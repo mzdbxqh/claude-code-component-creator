@@ -3,7 +3,7 @@
 ## 运行测试
 
 ```bash
-/ccc:test-sandbox --target=skills/cmd-fix --with-eval
+/cmd-test-sandbox --target=skills/cmd-fix --with-eval
 ```
 
 ## 测试用例

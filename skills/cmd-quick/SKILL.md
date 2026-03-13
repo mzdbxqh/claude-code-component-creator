@@ -8,7 +8,7 @@ description: "一键执行完整流程(init→design→build)。触发：快速/
 argument-hint: "<requirement-description> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /ccc:quick
+# /cmd-quick
 
 **等价流程**: **quick** ≈ `init` → `design` → `build`（自动化执行）
 
@@ -50,7 +50,7 @@ Executes complete workflow from intent to delivery in a single command with auto
 
 ### 调用示例
 ```
-用户: /ccc:quick "我要做一个自动部署工具"
+用户: /cmd-quick "我要做一个自动部署工具"
   ↓
 cmd-quick 启动端到端流程
   ↓
@@ -66,8 +66,8 @@ cmd-quick 输出完整制品路径和摘要
 ## Usage
 
 ```bash
-/ccc:quick "我要做一个自动部署工具，支持 Kubernetes"
-/ccc:quick "I want to create an auto-deployment tool with Kubernetes support" --lang=en-us
+/cmd-quick "我要做一个自动部署工具，支持 Kubernetes"
+/cmd-quick "I want to create an auto-deployment tool with Kubernetes support" --lang=en-us
 ```
 
 ## Global Parameter
@@ -78,7 +78,7 @@ cmd-quick 输出完整制品路径和摘要
 
 ## Workflow
 
-### Step 1: Run /ccc:init
+### Step 1: Run /cmd-init
 **目标**: 初始化 Intent 制品
 **操作**: 使用用户描述创建 Intent
 **输出**: Intent 制品（INT-xxx）
@@ -90,7 +90,7 @@ cmd-quick 输出完整制品路径和摘要
 **输出**: 已批准的 Intent
 **错误处理**: Intent 质量过低（<60分）时暂停并要求用户确认是否继续；验证失败时显示具体问题并提供修改建议
 
-### Step 3: Run /ccc:design
+### Step 3: Run /cmd-design
 **目标**: 生成 Blueprint 制品
 **操作**: 基于 Intent 创建 Blueprint
 **输出**: Blueprint 制品（BLP-xxx）
@@ -100,9 +100,9 @@ cmd-quick 输出完整制品路径和摘要
 **目标**: 自动批准 Blueprint（质量 > 85）
 **操作**: 检查 Blueprint 质量分数
 **输出**: 批准状态
-**错误处理**: 质量低于 85 分时暂停供手动审查并提供改进建议；质量极低（<70分）时建议使用 /ccc:iterate 重新设计
+**错误处理**: 质量低于 85 分时暂停供手动审查并提供改进建议；质量极低（<70分）时建议使用 /cmd-iterate 重新设计
 
-### Step 5: Run /ccc:build
+### Step 5: Run /cmd-build
 **目标**: 构建 Delivery 制品
 **操作**: 从 Blueprint 生成交付物
 **输出**: Delivery 制品（DLV-xxx）
@@ -189,8 +189,8 @@ cmd-quick 输出完整制品路径和摘要
 
 Next steps:
    1. 📖 Review the generated SKILL.md
-   2. 🔍 Run /ccc:review for detailed analysis
-   3. 🔄 Iterate if needed with /ccc:iterate
+   2. 🔍 Run /cmd-review for detailed analysis
+   3. 🔄 Iterate if needed with /cmd-iterate
 ```
 
 ### File Outputs
@@ -222,7 +222,7 @@ ls -la docs/ccc/delivery/YYYY-MM-DD-DLV-*/
 ### Example 1: 快速创建简单的搜索工具
 
 ```bash
-/ccc:quick "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
+/cmd-quick "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
 ```
 
 **场景**: 从需求到交付的一键完成
@@ -265,7 +265,7 @@ Status: ✅ Ready to use
 ### Example 2: 创建复杂工具（部分阶段需要人工审查）
 
 ```bash
-/ccc:quick "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要回滚功能"
+/cmd-quick "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要回滚功能"
 ```
 
 **场景**: 复杂需求，Blueprint 质量未达到自动批准阈值
@@ -293,7 +293,7 @@ Suggestions:
 Options:
 - Press Enter to continue anyway
 - Type 'stop' to pause and iterate
-- Run /ccc:iterate --artifact-id=BLP-002 to improve
+- Run /cmd-iterate --artifact-id=BLP-002 to improve
 
 > [User presses Enter]
 
@@ -307,7 +307,7 @@ Options:
 ### Example 3: 多语言支持（英文）
 
 ```bash
-/ccc:quick "I want to create a log analyzer that parses nginx logs" --lang=en-us
+/cmd-quick "I want to create a log analyzer that parses nginx logs" --lang=en-us
 ```
 
 **输出**:
@@ -327,13 +327,13 @@ Options:
 Next steps:
    1. 📖 Review the generated SKILL.md
    2. 🧪 Test with sample nginx logs
-   3. 🔄 Iterate if needed with /ccc:iterate
+   3. 🔄 Iterate if needed with /cmd-iterate
 ```
 
 ### Example 4: 处理 Intent 质量过低的情况
 
 ```bash
-/ccc:quick "做个工具"
+/cmd-quick "做个工具"
 ```
 
 **场景**: 需求描述过于模糊
@@ -357,13 +357,13 @@ Issues detected:
 2. What are the inputs and outputs?
 3. Any technical constraints?
 
-Try again with: /ccc:quick "更详细的描述"
+Try again with: /cmd-quick "更详细的描述"
 ```
 
 ### Example 5: 处理构建失败并保留中间制品
 
 ```bash
-/ccc:quick "创建一个数据迁移工具，支持 MySQL 和 PostgreSQL"
+/cmd-quick "创建一个数据迁移工具，支持 MySQL 和 PostgreSQL"
 ```
 
 **场景**: 前两个阶段成功，构建阶段失败
@@ -387,16 +387,16 @@ Partial completion:
 
 Recovery options:
   1. Review Blueprint: cat docs/ccc/blueprint/2026-03-07-BLP-005.yaml
-  2. Retry build: /ccc:build --artifact-id=BLP-005
-  3. Iterate design: /ccc:iterate --artifact-id=BLP-005
+  2. Retry build: /cmd-build --artifact-id=BLP-005
+  3. Iterate design: /cmd-iterate --artifact-id=BLP-005
 ```
 
 ## Options
 
 ```bash
-/ccc:quick "description" --auto-approve    # Auto-approve all stages
-/ccc:quick "description" --stop-at=blueprint  # Stop after Blueprint
-/ccc:quick "description" --lang=en-us     # English output
+/cmd-quick "description" --auto-approve    # Auto-approve all stages
+/cmd-quick "description" --stop-at=blueprint  # Stop after Blueprint
+/cmd-quick "description" --lang=en-us     # English output
 ```
 
 ## Error Handling
@@ -405,8 +405,8 @@ Recovery options:
 |----------------|-------------------|-------------|
 | Empty description | Prompt user for requirement description | "请提供您想要创建的技能描述。例如：'我想要一个技能来快速查找项目中的 TODO 注释'" |
 | Intent generation fails | Display error, suggest rephrasing | "Intent 生成失败：{error}。请尝试重新描述您的需求，或将其分解为更小的功能点" |
-| Blueprint quality below threshold | Pause for manual review before continuing | "Blueprint 质量 {score}/100 低于阈值 85。建议：1. 使用 /ccc:iterate 改进设计 2. 手动审查后继续" |
-| Build generation fails | Display error with artifact ID for manual iteration | "Delivery 生成失败：{error}。请使用 /ccc:build --artifact-id={id} 手动重试，或联系开发者" |
-| Stage timeout | Report timeout, provide command to resume from that stage | "阶段超时（>{timeout}）。已保存进度，使用 /ccc:design --intent-id={id} 从该阶段继续" |
+| Blueprint quality below threshold | Pause for manual review before continuing | "Blueprint 质量 {score}/100 低于阈值 85。建议：1. 使用 /cmd-iterate 改进设计 2. 手动审查后继续" |
+| Build generation fails | Display error with artifact ID for manual iteration | "Delivery 生成失败：{error}。请使用 /cmd-build --artifact-id={id} 手动重试，或联系开发者" |
+| Stage timeout | Report timeout, provide command to resume from that stage | "阶段超时（>{timeout}）。已保存进度，使用 /cmd-design --intent-id={id} 从该阶段继续" |
 | File write permission denied | Suggest checking directory permissions | "无法写入文件：{path}。请检查目录权限，或使用 --output-dir 指定其他输出目录" |
-| Invalid artifact ID | List available artifact IDs | "找不到工件：{id}。使用 /ccc:status 查看可用的工件列表" |
+| Invalid artifact ID | List available artifact IDs | "找不到工件：{id}。使用 /cmd-status 查看可用的工件列表" |

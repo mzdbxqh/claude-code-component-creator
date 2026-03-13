@@ -4,7 +4,7 @@ This directory is reserved for user-invocable skills that extend the Claude Code
 
 ## Purpose
 
-Skills in this directory can be invoked by users through the `/ccc:skill-name` command pattern.
+Skills in this directory can be invoked by users through the `/cmd-skill-name` or `/std-skill-name` pattern.
 
 ## Adding Skills
 

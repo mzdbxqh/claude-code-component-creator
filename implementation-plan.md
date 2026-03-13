@@ -626,11 +626,11 @@ git commit -m "[docs] 创建 skill 拆分迁移指南"
 **步骤 1: 验证每个新 skill**
 ```bash
 # 验证 review-report-renderer
-/ccc:review agents/reviewer/review-report-renderer/
+/cmd-review agents/reviewer/review-report-renderer/
 
 # 验证其他 renderers
 for dir in architecture dependency migration; do
-  /ccc:review agents/reviewer/${dir}-report-renderer/
+  /cmd-review agents/reviewer/${dir}-report-renderer/
 done
 ```
 

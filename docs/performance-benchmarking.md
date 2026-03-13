@@ -420,22 +420,22 @@ See: `benchmarks/artifacts/`
 
 ```bash
 # 运行所有基准测试
-/ccc:benchmark --all
+# /ccc:benchmark (计划中的功能) --all
 
 # 运行特定组件基准测试
-/ccc:benchmark --component=intent-core
+# /ccc:benchmark (计划中的功能) --component=intent-core
 
 # 运行特定工作流基准测试
-/ccc:benchmark --workflow=design
+# /ccc:benchmark (计划中的功能) --workflow=design
 
 # 对比两个版本
-/ccc:benchmark --compare v1.0.0 v1.1.0
+# /ccc:benchmark (计划中的功能) --compare v1.0.0 v1.1.0
 
 # 生成报告
-/ccc:benchmark --report --format=markdown
+# /ccc:benchmark (计划中的功能) --report --format=markdown
 
 # 导出数据
-/ccc:benchmark --export --output=benchmarks/results.json
+# /ccc:benchmark (计划中的功能) --export --output=benchmarks/results.json
 ```
 
 ## 持续监控
@@ -460,10 +460,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run Benchmarks
-        run: /ccc:benchmark --all --report
+        run: # /ccc:benchmark (计划中的功能) --all --report
 
       - name: Compare with Baseline
-        run: /ccc:benchmark --compare main HEAD
+        run: # /ccc:benchmark (计划中的功能) --compare main HEAD
 
       - name: Upload Results
         uses: actions/upload-artifact@v2
@@ -474,7 +474,7 @@ jobs:
       - name: Comment on PR
         if: github.event_name == 'pull_request'
         run: |
-          /ccc:benchmark --comment-pr
+          # /ccc:benchmark (计划中的功能) --comment-pr
 ```
 
 ### 性能回归检测

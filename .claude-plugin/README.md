@@ -13,32 +13,32 @@ CCC v3.0 introduces a three-stage workflow for creating high-quality Claude Code
 ## Quick Start
 
 ```bash
-/ccc:quick "我要做一个自动部署工具，支持Kubernetes"
+/cmd-quick "我要做一个自动部署工具，支持Kubernetes"
 ```
 
 ## Commands
 
 ### Core Workflow
-- `/ccc:init` - Create Intent artifact (4-question framework)
-- `/ccc:design` - Generate Blueprint from Intent
-- `/ccc:build` - Generate Delivery from Blueprint
+- `/cmd-init` - Create Intent artifact (4-question framework)
+- `/cmd-design` - Generate Blueprint from Intent
+- `/cmd-build` - Generate Delivery from Blueprint
 
 ### Status & Monitoring
-- `/ccc:status` - View project artifact status
-- `/ccc:status-graph` - Visual dependency graph
-- `/ccc:status-trace` - Traceability matrix
+- `/cmd-status` - View project artifact status
+- `/cmd-status-graph` - Visual dependency graph
+- `/cmd-status-trace` - Traceability matrix
 
 ### Iteration & Comparison
-- `/ccc:iterate` - Iterate on existing Blueprint
-- `/ccc:diff` - Compare artifact versions
+- `/cmd-iterate` - Iterate on existing Blueprint
+- `/cmd-diff` - Compare artifact versions
 
 ### Quality Assurance
-- `/ccc:validate` - Validate current artifact
-- `/ccc:review` - Deep review with dual-model validation
-- `/ccc:trace` - Generate traceability matrix
+- `/cmd-validate` - Validate current artifact
+- `/cmd-review` - Deep review with dual-model validation
+- `/cmd-trace` - Generate traceability matrix
 
 ### Quick Start
-- `/ccc:quick` - Full workflow in one command
+- `/cmd-quick` - Full workflow in one command
 
 ## Architecture
 
@@ -101,9 +101,9 @@ See [v3-migration-guide.md](../docs/v3-migration-guide.md) for details.
 
 | v2.0 Command    | v3.0 Equivalent |
 |-----------------|-----------------|
-| /design-new     | /ccc:init → /ccc:design |
-| /design-iterate | /ccc:iterate    |
-| /review         | /ccc:review     |
+| /design-new     | /cmd-init → /cmd-design |
+| /design-iterate | /cmd-iterate    |
+| /review         | /cmd-review     |
 
 ## License
 

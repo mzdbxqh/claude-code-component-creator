@@ -331,7 +331,7 @@ official_reference:
 根据问题类型生成验证步骤：
 ```json
 {
-  "verification_method": "1. 运行 /ccc:review <file> 确认问题消失\n2. 测试Claude不会自动调用此Skill\n3. 手动触发 /<skill-name> 确认功能正常"
+  "verification_method": "1. 运行 /cmd-review <file> 确认问题消失\n2. 测试Claude不会自动调用此Skill\n3. 手动触发 /<skill-name> 确认功能正常"
 }
 ```
 

@@ -78,22 +78,22 @@ Intent → Blueprint → Delivery
 
 详细说明:
 
-1. **Intent** (`/ccc:init`)
+1. **Intent** (`/cmd-init`)
    - 创建意图制品，使用 4 问题框架澄清需求
    - 输出: intent-*.yaml
 
-2. **Blueprint** (`/ccc:design`)
+2. **Blueprint** (`/cmd-design`)
    - 生成蓝图，5 阶段设计流程（需求→架构→设计→验证→规划）
    - 输出: blueprint-*.yaml
 
-3. **Delivery** (`/ccc:build`)
+3. **Delivery** (`/cmd-build`)
    - 构建交付物，生成 SKILL.md、代码、测试和文档
    - 输出: delivery-*.yaml + 完整组件包
 
 **激活方式**:
 
 - **手动调用**: 用户通过斜杠命令手动调用工作流各阶段
-  - 斜杠命令: /ccc:init, /ccc:design, /ccc:build, /ccc:review, /ccc:quick
+  - 斜杠命令: /cmd-init, /cmd-design, /cmd-build, /cmd-review, /cmd-quick
 
 - **自动激活**: SessionStart hook 自动加载
   - 触发条件: 检测到工作流状态文件（.ccc/artifacts/*.yaml）
@@ -108,17 +108,17 @@ Intent → Blueprint → Delivery
 
 | 命令 | 对应 Skill | 说明 | 分类 |
 |------|-----------|------|------|
-| `/ccc:init` | cmd-init | 创建意图制品 | workflow |
-| `/ccc:design` | cmd-design | 生成蓝图 | workflow |
-| `/ccc:build` | cmd-build | 构建交付物 | workflow |
-| `/ccc:implement` | cmd-implement | 实施迭代计划 | workflow |
-| `/ccc:review` | cmd-review | 质量审查（76+ 检查项） | quality |
-| `/ccc:quick` | cmd-quick | 快速完整工作流 | workflow |
-| `/ccc:iterate` | cmd-iterate | 迭代蓝图 | workflow |
-| `/ccc:design-iterate` | cmd-design-iterate | 迭代现有组件 | workflow |
-| `/ccc:status` | cmd-status | 显示项目状态 | utility |
-| `/ccc:trace` | cmd-trace | 生成追溯矩阵 | quality |
-| `/ccc:validate` | cmd-validate | 外部工具验证 | quality |
+| `/cmd-init` | cmd-init | 创建意图制品 | workflow |
+| `/cmd-design` | cmd-design | 生成蓝图 | workflow |
+| `/cmd-build` | cmd-build | 构建交付物 | workflow |
+| `/cmd-implement` | cmd-implement | 实施迭代计划 | workflow |
+| `/cmd-review` | cmd-review | 质量审查（76+ 检查项） | quality |
+| `/cmd-quick` | cmd-quick | 快速完整工作流 | workflow |
+| `/cmd-iterate` | cmd-iterate | 迭代蓝图 | workflow |
+| `/cmd-design-iterate` | cmd-design-iterate | 迭代现有组件 | workflow |
+| `/cmd-status` | cmd-status | 显示项目状态 | utility |
+| `/cmd-trace` | cmd-trace | 生成追溯矩阵 | quality |
+| `/cmd-validate` | cmd-validate | 外部工具验证 | quality |
 
 ### 4.2 自动激活的 Skills
 

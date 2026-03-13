@@ -36,13 +36,13 @@ git clone https://github.com/mzdbxqh/claude-code-component-creator.git
 
 ```bash
 # 一键完整工作流
-/ccc:quick
+/cmd-quick
 
 # 或分步执行
-/ccc:init          # 创建意图
-/ccc:design        # 生成蓝图
-/ccc:build         # 创建交付物
-/ccc:review        # 质量检查
+/cmd-init          # 创建意图
+/cmd-design        # 生成蓝图
+/cmd-build         # 创建交付物
+/cmd-review        # 质量检查
 ```
 
 ## 核心工作流
@@ -61,15 +61,15 @@ Review (质量保证)
 
 | 命令 | 描述 |
 |------|------|
-| `/ccc:init` | 使用 4 问框架创建意图制品 |
-| `/ccc:design` | 从意图生成蓝图 |
-| `/ccc:build` | 创建生产就绪的交付物 |
-| `/ccc:review` | 全面质量审查（76+ 检查项）|
-| `/ccc:quick` | 一键执行完整工作流 |
-| `/ccc:iterate` | 迭代现有蓝图 |
-| `/ccc:status` | 显示项目工作流状态 |
-| `/ccc:trace` | 生成可追溯性矩阵 |
-| `/ccc:validate` | 使用外部工具验证制品 |
+| `/cmd-init` | 使用 4 问框架创建意图制品 |
+| `/cmd-design` | 从意图生成蓝图 |
+| `/cmd-build` | 创建生产就绪的交付物 |
+| `/cmd-review` | 全面质量审查（76+ 检查项）|
+| `/cmd-quick` | 一键执行完整工作流 |
+| `/cmd-iterate` | 迭代现有蓝图 |
+| `/cmd-status` | 显示项目工作流状态 |
+| `/cmd-trace` | 生成可追溯性矩阵 |
+| `/cmd-validate` | 使用外部工具验证制品 |
 
 查看 [完整命令参考](commands/) 了解详情。
 
@@ -108,10 +108,10 @@ CCC v3.1.0 综合质量评分 **96/100 (A+)**，8 维度全面检查：
 
 ```bash
 # 运行测试
-/ccc:test-sandbox
+/cmd-test-sandbox
 
 # 审查插件质量
-/ccc:review
+/cmd-review
 ```
 
 ## 贡献

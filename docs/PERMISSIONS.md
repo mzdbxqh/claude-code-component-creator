@@ -238,7 +238,7 @@ permissionMode: prompt
 
 Use the review command to verify permissions:
 ```bash
-/ccc:review skills/my-skill/
+/cmd-review skills/my-skill/
 ```
 
 The review will check:
@@ -306,7 +306,7 @@ allowed-tools:
 Periodically review and minimize permissions:
 ```bash
 # Run CCC review on itself
-/ccc:review .
+/cmd-review .
 
 # Check for PERM-001 violations (unused tools)
 ```
@@ -418,7 +418,7 @@ When adding new components to CCC:
 3. **Set Permission Mode**: Choose appropriate mode for SubAgents
 4. **Document Reasoning**: Explain why each tool is needed
 5. **Test Permissions**: Verify component works with declared permissions
-6. **Review**: Run `/ccc:review` to check for permission issues
+6. **Review**: Run `/cmd-review` to check for permission issues
 
 ---
 

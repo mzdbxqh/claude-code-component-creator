@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Claude Code Component Creator (CC
 Run tests using the test suite:
 ```bash
 # Run integration tests
-/ccc:test-sandbox
+/cmd-test-sandbox
 
 # Run specific test cases
 See tests/ directory for examples

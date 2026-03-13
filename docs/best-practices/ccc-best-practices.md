@@ -14,21 +14,21 @@
 
 ```bash
 # 推荐工作流
-/ccc:review --artifact-id=DLV-001
-/ccc:fix --artifact-id=DLV-001
-/ccc:review --artifact-id=DLV-002  # 验证修复效果
+/cmd-review --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
+/cmd-review --artifact-id=DLV-002  # 验证修复效果
 ```
 
 ### 2. 首次使用交互式模式
 
-首次使用 `/ccc:fix` 时，建议使用交互式模式了解修复内容。
+首次使用 `/cmd-fix` 时，建议使用交互式模式了解修复内容。
 
 ```bash
 # 首次使用
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 
 # 熟悉后可使用自动模式
-/ccc:fix --artifact-id=DLV-002 --auto
+/cmd-fix --artifact-id=DLV-002 --auto
 ```
 
 ### 3. 使用 dry-run 预览
@@ -36,7 +36,7 @@
 在不确定修复内容时，先用 dry-run 模式预览。
 
 ```bash
-/ccc:fix --artifact-id=DLV-001 --dry-run
+/cmd-fix --artifact-id=DLV-001 --dry-run
 ```
 
 ---
@@ -49,7 +49,7 @@
 
 ```bash
 # 每周审查
-/ccc:review-workflow --artifact-id=latest
+/cmd-review-workflow --artifact-id=latest
 ```
 
 ### 2. 关注交接清晰度
@@ -112,14 +112,14 @@ ccc-review --target=. --parallel
 
 ```bash
 # 仅需基础合规性检查时跳过架构分析
-/ccc:review --target=. --no-arch
+/cmd-review --target=. --no-arch
 ```
 
 ### 3. 使用缓存
 
 ```bash
 # 复用已有审查结果
-/ccc:review --artifact-id=DLV-001 --use-cache
+/cmd-review --artifact-id=DLV-001 --use-cache
 ```
 
 ---
@@ -132,7 +132,7 @@ ccc-review --target=. --parallel
 
 **修复**:
 ```bash
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 # 或手动修复
 # 编辑 SKILL.md 添加缺失的 frontmatter 字段
 ```
@@ -143,7 +143,7 @@ ccc-review --target=. --parallel
 
 **修复**:
 ```bash
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 # 工具声明代理会自动分析实际使用的工具并添加声明
 ```
 
@@ -153,7 +153,7 @@ ccc-review --target=. --parallel
 
 **修复**:
 ```bash
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 # 文档完善代理会补充缺失章节
 ```
 

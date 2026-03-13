@@ -172,7 +172,7 @@ Configure security hooks in `hooks/hooks.json`:
 
 Run CCC review to check for security issues:
 ```bash
-/ccc:review .
+/cmd-review .
 ```
 
 Look for:
@@ -189,7 +189,7 @@ Look for:
 git pull origin main
 
 # Verify no security issues
-/ccc:review .
+/cmd-review .
 ```
 
 ## Known Security Considerations
@@ -275,7 +275,7 @@ If you discover a security vulnerability:
 - [ ] Error handling doesn't leak sensitive data
 - [ ] No hardcoded secrets
 - [ ] Security hooks configured (if using Bash/Write/Edit)
-- [ ] Reviewed with `/ccc:review`
+- [ ] Reviewed with `/cmd-review`
 - [ ] Tested with restricted permissions
 
 ### For Updates
@@ -299,7 +299,7 @@ CCC follows security standards from:
 - [Permissions Documentation](docs/PERMISSIONS.md)
 - [Hooks Configuration](hooks/README.md)
 - [Security Antipatterns](agents/reviewer/knowledge/antipatterns/security/)
-- [CCC Review Tool](/ccc:review)
+- [CCC Review Tool](/cmd-review)
 
 ## Updates
 

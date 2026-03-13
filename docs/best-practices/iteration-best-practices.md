@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档定义使用 `/ccc:design-iterate` 进行大规模项目重构的最佳实践。
+本文档定义使用 `/cmd-design-iterate` 进行大规模项目重构的最佳实践。
 
 ## 核心原则
 
@@ -64,7 +64,7 @@ description: "使用skill-a和skill-b完成任务"
 **工作流**:
 1. 生成方案 → `docs/refactor/01-plan.md`
 2. 人工审核
-3. 执行实施 → 使用 `/ccc:implement`
+3. 执行实施 → 使用 `/cmd-implement`
 
 ### 7. 增量变更
 
@@ -104,16 +104,16 @@ status: placeholder
 
 ### 大规模项目重构
 
-1. **盘点**: `/ccc:design-iterate` 自动执行Step 0
+1. **盘点**: `/cmd-design-iterate` 自动执行Step 0
 2. **审核**: 检查 `docs/refactor/00-inventory.md`
 3. **规划**: 继续执行生成迭代方案
 4. **审核**: 检查迭代方案文档
-5. **实施**: `/ccc:implement --plan=<方案路径>`
+5. **实施**: `/cmd-implement --plan=<方案路径>`
 6. **验证**: 运行测试，检查实施报告
 
 ### 单组件迭代
 
-1. **迭代**: `/ccc:design-iterate <component-path>`（跳过Step 0）
+1. **迭代**: `/cmd-design-iterate <component-path>`（跳过Step 0）
 2. **审核**: 检查迭代方案
-3. **实施**: `/ccc:implement --plan=<方案路径>`
+3. **实施**: `/cmd-implement --plan=<方案路径>`
 

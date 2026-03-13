@@ -6,7 +6,7 @@
 ## 测试方法
 
 1. 对每个规则类别，构造故意违反该规则的测试夹具
-2. 运行 /ccc:review 对测试夹具进行审查
+2. 运行 /cmd-review 对测试夹具进行审查
 3. 验证规则是否正确检出违规行为
 
 ## 测试矩阵
@@ -26,10 +26,10 @@
 
 ```bash
 # 运行单个类别测试
-/ccc:review --target=test-fixtures/intent-violations/
+/cmd-review --target=test-fixtures/intent-violations/
 
 # 运行全部测试
-/ccc:review --target=test-fixtures/review/
+/cmd-review --target=test-fixtures/review/
 ```
 
 ## 预期结果

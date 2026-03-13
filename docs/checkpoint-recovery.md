@@ -271,21 +271,21 @@ class ResumableWorkflow:
 
 ```bash
 # 正常执行
-/ccc:design --name=my-skill
+/cmd-design --name=my-skill
 
 # 执行被中断（Ctrl+C）...
 
 # 从上次中断处恢复
-/ccc:design --name=my-skill --resume
+/cmd-design --name=my-skill --resume
 
 # 从特定检查点恢复
-/ccc:design --name=my-skill --checkpoint-id=CHP-2026-03-12-001
+/cmd-design --name=my-skill --checkpoint-id=CHP-2026-03-12-001
 
 # 查看可用检查点
-/ccc:checkpoint --list --workflow=design
+# /ccc:checkpoint (计划中的功能) --list --workflow=design
 
 # 清理旧检查点
-/ccc:checkpoint --cleanup --workflow=design --keep=5
+# /ccc:checkpoint (计划中的功能) --cleanup --workflow=design --keep=5
 ```
 ```
 
@@ -428,22 +428,22 @@ def validate_checkpoint(checkpoint):
 
 ```bash
 # 列出检查点
-/ccc:checkpoint --list --workflow=design
+# /ccc:checkpoint (计划中的功能) --list --workflow=design
 
 # 查看检查点详情
-/ccc:checkpoint --show --id=CHP-2026-03-12-001
+# /ccc:checkpoint (计划中的功能) --show --id=CHP-2026-03-12-001
 
 # 删除检查点
-/ccc:checkpoint --delete --id=CHP-2026-03-12-001
+# /ccc:checkpoint (计划中的功能) --delete --id=CHP-2026-03-12-001
 
 # 清理旧检查点
-/ccc:checkpoint --cleanup --workflow=design --keep=5
+# /ccc:checkpoint (计划中的功能) --cleanup --workflow=design --keep=5
 
 # 导出检查点
-/ccc:checkpoint --export --id=CHP-2026-03-12-001 --output=/tmp/checkpoint.json
+# /ccc:checkpoint (计划中的功能) --export --id=CHP-2026-03-12-001 --output=/tmp/checkpoint.json
 
 # 导入检查点
-/ccc:checkpoint --import --file=/tmp/checkpoint.json
+# /ccc:checkpoint (计划中的功能) --import --file=/tmp/checkpoint.json
 ```
 
 ## 未来扩展

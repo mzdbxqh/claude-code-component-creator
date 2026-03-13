@@ -1,4 +1,4 @@
-# /ccc:fix 用户指南
+# /cmd-fix 用户指南
 
 **文档版本**: v1.0
 **最后更新**: 2026-03-06
@@ -8,9 +8,9 @@
 
 ## 快速入门
 
-### 什么是 /ccc:fix？
+### 什么是 /cmd-fix？
 
-`/ccc:fix` 是 CCC 插件的交互式修复命令，基于审查报告自动修复组件质量问题。它支持三种修复模式：
+`/cmd-fix` 是 CCC 插件的交互式修复命令，基于审查报告自动修复组件质量问题。它支持三种修复模式：
 
 | 模式 | 说明 | 适用场景 |
 |------|------|----------|
@@ -22,13 +22,13 @@
 
 ```bash
 # 启动交互式修复（推荐首次使用）
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 
 # 自动修复所有 P0 问题（Error 级别）
-/ccc:fix --artifact-id=DLV-001 --auto
+/cmd-fix --artifact-id=DLV-001 --auto
 
 # 预览修复内容（不实际修改文件）
-/ccc:fix --artifact-id=DLV-001 --dry-run
+/cmd-fix --artifact-id=DLV-001 --dry-run
 ```
 
 ---
@@ -56,10 +56,10 @@
 
 ```bash
 # 步骤 1: 先执行审查
-/ccc:review --artifact-id=DLV-001
+/cmd-review --artifact-id=DLV-001
 
 # 步骤 2: 执行修复
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 ```
 
 **交互流程**:
@@ -74,7 +74,7 @@
 ### 示例 2: 自动修复模式
 
 ```bash
-/ccc:fix --artifact-id=DLV-001 --auto
+/cmd-fix --artifact-id=DLV-001 --auto
 ```
 
 **适用场景**:
@@ -99,7 +99,7 @@
 ### 示例 3: 预览模式
 
 ```bash
-/ccc:fix --artifact-id=DLV-001 --dry-run
+/cmd-fix --artifact-id=DLV-001 --dry-run
 ```
 
 **输出示例**:
@@ -121,9 +121,9 @@
 
 ```bash
 # 完整工作流
-/ccc:review --artifact-id=DLV-001   # 审查
-/ccc:fix --artifact-id=DLV-001      # 修复
-/ccc:review --artifact-id=DLV-002   # 再审查验证修复效果
+/cmd-review --artifact-id=DLV-001   # 审查
+/cmd-fix --artifact-id=DLV-001      # 修复
+/cmd-review --artifact-id=DLV-002   # 再审查验证修复效果
 ```
 
 ---
@@ -239,7 +239,7 @@ chore: add tool declarations in reviewer skill
 
 ### Q3: 修复后需要重新审查吗？
 
-**A**: 强烈建议。执行 `/ccc:review --artifact-id=<新 ID>` 验证修复效果。
+**A**: 强烈建议。执行 `/cmd-review --artifact-id=<新 ID>` 验证修复效果。
 
 ### Q4: 自动修复的准确率如何？
 
@@ -256,25 +256,25 @@ chore: add tool declarations in reviewer skill
 ### 1. 审查后立即修复
 
 ```bash
-/ccc:review --artifact-id=DLV-001
-/ccc:fix --artifact-id=DLV-001    # 立即修复
+/cmd-review --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001    # 立即修复
 ```
 
 ### 2. 首次使用选择交互式模式
 
 ```bash
 # 首次使用，了解修复内容
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 
 # 熟悉后使用自动模式
-/ccc:fix --artifact-id=DLV-002 --auto
+/cmd-fix --artifact-id=DLV-002 --auto
 ```
 
 ### 3. 定期运行 dry-run 检查
 
 ```bash
 # 每周检查新增问题
-/ccc:fix --artifact-id=latest --dry-run
+/cmd-fix --artifact-id=latest --dry-run
 ```
 
 ### 4. 保留修复报告
@@ -295,9 +295,9 @@ cat docs/fixes/YYYY-MM-DD-<artifact-id>-fix.md
 **解决方案**:
 ```bash
 # 先执行审查
-/ccc:review --artifact-id=DLV-001
+/cmd-review --artifact-id=DLV-001
 # 再执行修复
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 ```
 
 ### 问题：文件已被修改
@@ -317,7 +317,7 @@ cat docs/fixes/YYYY-MM-DD-<artifact-id>-fix.md
 **解决方案**:
 ```bash
 # 执行完整审查查看新问题
-/ccc:review --artifact-id=<新 ID>
+/cmd-review --artifact-id=<新 ID>
 ```
 
 ---
@@ -326,10 +326,10 @@ cat docs/fixes/YYYY-MM-DD-<artifact-id>-fix.md
 
 | 命令 | 说明 |
 |------|------|
-| `/ccc:review` | 执行质量审查 |
-| `/ccc:review-workflow` | 工作流串联审查 |
-| `/ccc:status` | 查看项目状态 |
-| `/ccc:build` | 构建交付物 |
+| `/cmd-review` | 执行质量审查 |
+| `/cmd-review-workflow` | 工作流串联审查 |
+| `/cmd-status` | 查看项目状态 |
+| `/cmd-build` | 构建交付物 |
 
 ---
 

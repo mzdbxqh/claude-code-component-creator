@@ -80,7 +80,7 @@
 # Intent 文件不存在
 错误：找不到 Intent 文件
 恢复：提示检查路径
-消息："Intent 文件不存在：{path}。请先运行 /ccc:init"
+消息："Intent 文件不存在：{path}。请先运行 /cmd-init"
 
 # Intent 字段缺失
 错误：缺少必填字段
@@ -179,12 +179,12 @@
 # Blueprint 失败
 状态：Intent 完成，Blueprint 失败
 恢复：保留 Intent 制品
-消息："Blueprint 生成失败，可使用 /ccc:design --intent-id={id} 重试"
+消息："Blueprint 生成失败，可使用 /cmd-design --intent-id={id} 重试"
 
 # Delivery 失败
 状态：Blueprint 完成，Delivery 失败
 恢复：保留 Blueprint 制品
-消息："Delivery 生成失败，可使用 /ccc:build --artifact-id={id} 重试"
+消息："Delivery 生成失败，可使用 /cmd-build --artifact-id={id} 重试"
 
 # 阶段超时
 状态：阶段超时

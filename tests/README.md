@@ -16,23 +16,23 @@
 ### 运行所有测试
 
 ```bash
-/ccc:test-sandbox
+/cmd-test-sandbox
 ```
 
 ### 运行单个测试
 
 ```bash
 # 按测试用例 ID 运行
-/ccc:test-sandbox --test-case=TC-001
+/cmd-test-sandbox --test-case=TC-001
 
 # 按类别运行
-/ccc:test-sandbox --category=simple-skill
+/cmd-test-sandbox --category=simple-skill
 ```
 
 ### 干运行验证（不实际执行）
 
 ```bash
-/ccc:test-sandbox --dry-run
+/cmd-test-sandbox --dry-run
 ```
 
 ---
@@ -203,7 +203,7 @@ cat evals/evals.json
 ### 步骤 3: 运行测试验证
 
 ```bash
-/ccc:test-sandbox --test-case=TC-XXX
+/cmd-test-sandbox --test-case=TC-XXX
 ```
 
 ---
@@ -294,7 +294,7 @@ Summary:
 
 1. **查看失败详情**
    ```bash
-   /ccc:test-sandbox --test-case=TC-XXX --verbose
+   /cmd-test-sandbox --test-case=TC-XXX --verbose
    ```
 
 2. **检查是否是预期行为变更**
@@ -306,7 +306,7 @@ Summary:
    # 更新 evals.json
    # 修复代码
    # 重新运行测试
-   /ccc:test-sandbox --test-case=TC-XXX
+   /cmd-test-sandbox --test-case=TC-XXX
    ```
 
 ### Q: 如何添加新测试？
@@ -318,7 +318,7 @@ Summary:
 ### Q: 测试执行太慢怎么办？
 
 1. 使用 `--dry-run` 模式验证测试定义
-2. 只运行单个测试：`/ccc:test-sandbox --test-case=TC-XXX`
+2. 只运行单个测试：`/cmd-test-sandbox --test-case=TC-XXX`
 3. 批量测试时使用 `--parallel` 参数（如支持）
 
 ### Q: 如何贡献测试用例？
@@ -352,7 +352,7 @@ test-fixtures/
 
 ```bash
 # 使用示例组件进行测试
-/ccc:review --target=tests/examples/sample-components/good-skill
+/cmd-review --target=tests/examples/sample-components/good-skill
 ```
 
 ---

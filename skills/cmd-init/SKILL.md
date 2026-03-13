@@ -8,7 +8,7 @@ allowed-tools: [Read, Write, Edit, Glob, Grep]
 argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /ccc:init
+# /cmd-init
 
 **完整流程**: **init** → `design` → `review` → `fix` → `validate` → `build`
 
@@ -29,9 +29,9 @@ Create Intent artifact using 4-question framework. Analyzes user requirement and
 ## Usage
 
 ```bash
-/ccc:init "我要做一个自动部署工具，支持 Kubernetes"
-/ccc:init "I want to create an auto-deployment tool" --lang=en-us
-/ccc:init "Kubernetes をサポートする自動デプロイツールを作成したい" --lang=ja-jp
+/cmd-init "我要做一个自动部署工具，支持 Kubernetes"
+/cmd-init "I want to create an auto-deployment tool" --lang=en-us
+/cmd-init "Kubernetes をサポートする自動デプロイツールを作成したい" --lang=ja-jp
 ```
 
 ## Global Parameter
@@ -59,7 +59,7 @@ Create Intent artifact using 4-question framework. Analyzes user requirement and
 
 ### 调用示例
 ```
-用户: /ccc:init "我要做一个自动部署工具"
+用户: /cmd-init "我要做一个自动部署工具"
   ↓
 cmd-init 接收参数
   ↓
@@ -78,7 +78,7 @@ cmd-init 输出摘要和下一步建议
 2. **Call intent-core** - Pass requirement to subagent with lang parameter
 3. **Generate Intent** - Create artifact in `docs/ccc/intent/`
 4. **Display summary** - Show key decisions and quality score in specified language
-5. **Suggest next step** - Prompt to run `/ccc:design`
+5. **Suggest next step** - Prompt to run `/cmd-design`
 
 ## Output Specification
 
@@ -93,7 +93,7 @@ Key decisions:
 - Hard constraints: 3 defined
 
 Quality score: 87/100
-Next: Run /ccc:design to generate Blueprint
+Next: Run /cmd-design to generate Blueprint
 ```
 
 ### File Output
@@ -106,7 +106,7 @@ Next: Run /ccc:design to generate Blueprint
 | **Overwrite** | No (timestamp ensures uniqueness) |
 
 **Example:**
-- `/ccc:init "我要做一个自动部署工具"` → `docs/ccc/intent/2026-03-02-INT-001.yaml`
+- `/cmd-init "我要做一个自动部署工具"` → `docs/ccc/intent/2026-03-02-INT-001.yaml`
 
 ### Intent Structure
 
@@ -272,7 +272,7 @@ ls -la docs/ccc/intent/
 ### Example 1: 创建简单的工具类 Skill
 
 ```bash
-/ccc:init "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
+/cmd-init "我想创建一个 Skill 来快速查找项目中的 TODO 注释"
 ```
 
 **输入**: 简单明确的需求描述
@@ -294,7 +294,7 @@ Key decisions:
 - Complexity: simple
 
 Quality score: 89/100
-Next: Run /ccc:design to generate Blueprint
+Next: Run /cmd-design to generate Blueprint
 ```
 
 **生成文件**: `docs/ccc/intent/2026-03-07-INT-001.yaml`
@@ -302,7 +302,7 @@ Next: Run /ccc:design to generate Blueprint
 ### Example 2: 创建复杂的多阶段工具
 
 ```bash
-/ccc:init "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要配置验证和回滚功能"
+/cmd-init "我要做一个自动部署工具，支持 Kubernetes 和 Docker，需要配置验证和回滚功能"
 ```
 
 **场景**: 复杂需求包含多个子系统和约束
@@ -324,13 +324,13 @@ Key decisions:
 - Complexity: complex
 
 Quality score: 92/100
-Next: Run /ccc:design to generate Blueprint
+Next: Run /cmd-design to generate Blueprint
 ```
 
 ### Example 3: 多语言支持（英文输出）
 
 ```bash
-/ccc:init "I want to create a code review assistant that checks style and suggests improvements" --lang=en-us
+/cmd-init "I want to create a code review assistant that checks style and suggests improvements" --lang=en-us
 ```
 
 **用例**: 英文需求，指定英文输出
@@ -345,13 +345,13 @@ Key decisions:
 - Hard constraints: 4 defined
 
 Quality score: 85/100
-Next: Run /ccc:design to generate Blueprint
+Next: Run /cmd-design to generate Blueprint
 ```
 
 ### Example 4: 交互式输入（未提供描述）
 
 ```bash
-/ccc:init
+/cmd-init
 ```
 
 **场景**: 直接运行命令不带参数
@@ -370,7 +370,7 @@ Intent created: INT-2026-03-07-004
 ### Example 5: 处理质量分数过低的情况
 
 ```bash
-/ccc:init "做个东西"
+/cmd-init "做个东西"
 ```
 
 **场景**: 需求描述过于模糊
@@ -392,7 +392,7 @@ Suggestion: Please provide more details:
 2. What are the expected inputs and outputs?
 3. Are there any technical constraints?
 
-You can run /ccc:init again with a clearer description.
+You can run /cmd-init again with a clearer description.
 ```
 
 ## Error Handling
@@ -415,5 +415,5 @@ Key decisions:
 - Hard constraints: 3 defined
 
 Quality score: 87/100
-Next: Run /ccc:design to generate Blueprint
+Next: Run /cmd-design to generate Blueprint
 ```

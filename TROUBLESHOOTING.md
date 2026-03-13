@@ -25,7 +25,7 @@ Comprehensive troubleshooting guide for Claude Code Component Creator (CCC).
 ## Plugin Not Loading
 
 ### Symptoms
-- `/ccc:` commands not available
+- `/cmd-*` commands not available
 - Claude Code doesn't recognize the plugin
 - No skills appear in `/help`
 
@@ -160,7 +160,7 @@ export CCC_ENABLE_HOOKS=1
 ### Review Fails with Low Score
 
 #### Symptoms
-- `/ccc:review` shows many errors
+- `/cmd-review` shows many errors
 - Score below threshold (default 80)
 - Unexpected warnings
 
@@ -168,7 +168,7 @@ export CCC_ENABLE_HOOKS=1
 
 ```bash
 # Run review with verbose output
-/ccc:review . --verbose
+/cmd-review . --verbose
 
 # Check specific rule
 grep -A20 "RULE-ID" docs/reviews/latest-review.md
@@ -190,10 +190,10 @@ Focus on:
 ##### Solution 2: Use Fix Command
 ```bash
 # Auto-fix some issues
-/ccc:fix --report docs/reviews/latest-review.md
+/cmd-fix --report docs/reviews/latest-review.md
 
 # For interactive fixes
-/ccc:fix --interactive
+/cmd-fix --interactive
 ```
 
 ##### Solution 3: Check Rule Accuracy
@@ -209,16 +209,16 @@ grep -A10 "official_reference" agents/reviewer/knowledge/antipatterns/{category}
 ##### Solution 1: Reduce Scope
 ```bash
 # Review specific component instead of entire project
-/ccc:review skills/cmd-review/
+/cmd-review skills/cmd-review/
 
 # Review specific type
-/ccc:review agents/ --type subagent
+/cmd-review agents/ --type subagent
 ```
 
 ##### Solution 2: Disable Expensive Checks
 ```bash
 # Skip architecture analysis
-/ccc:review . --no-arch
+/cmd-review . --no-arch
 
 # Reduce parallel agents
 export CCC_MAX_PARALLEL_AGENTS=1
@@ -236,7 +236,7 @@ rm -rf .ccc/cache/
 
 ### Symptoms
 - "Intent/Blueprint not found" errors
-- `/ccc:status` shows no artifacts
+- `/cmd-status` shows no artifacts
 - Workflow commands fail
 
 ### Diagnosis
@@ -274,19 +274,19 @@ type: intent
 #### Solution 3: Use Status Command
 ```bash
 # Check all artifacts
-/ccc:status
+/cmd-status
 
 # Check specific artifact
-/ccc:status --artifact-id intent-001
+/cmd-status --artifact-id intent-001
 ```
 
 #### Solution 4: Regenerate Missing Artifacts
 ```bash
 # If intent is missing
-/ccc:init
+/cmd-init
 
 # If blueprint is missing
-/ccc:design
+/cmd-design
 ```
 
 ---
@@ -497,7 +497,7 @@ export CCC_DEBUG=1
 export CCC_LOG_LEVEL=debug
 
 # Run command and check logs
-/ccc:review .
+/cmd-review .
 tail -f ~/.ccc/logs/debug.log
 ```
 
@@ -506,7 +506,7 @@ tail -f ~/.ccc/logs/debug.log
 ##### Solution 1: Reduce Review Scope
 ```bash
 # Review specific paths
-/ccc:review skills/cmd-review/ --no-arch
+/cmd-review skills/cmd-review/ --no-arch
 ```
 
 ##### Solution 2: Limit Parallel Execution
@@ -650,9 +650,9 @@ tail -100 ~/.ccc/logs/debug.log
 1. **Check this guide** for similar issues
 2. **Run diagnostics**:
    ```bash
-   /ccc:review .
-   /ccc:status
-   /ccc:validate
+   /cmd-review .
+   /cmd-status
+   /cmd-validate
    ```
 3. **Collect information**:
    - CCC version
@@ -686,7 +686,7 @@ Paste error messages here
 
 ## Diagnostic Output
 ```bash
-$ /ccc:status
+$ /cmd-status
 ... output ...
 ```
 
@@ -704,13 +704,13 @@ cat .claude-plugin/config.json | jq .version
 cat .claude-plugin/config.json | jq .
 
 # Check artifacts
-/ccc:status
+/cmd-status
 
 # Validate setup
-/ccc:validate
+/cmd-validate
 
 # Run review
-/ccc:review .
+/cmd-review .
 
 # Check hooks
 cat hooks/hooks.json | jq .
@@ -727,7 +727,7 @@ env | grep CCC_
 |-------|-------|----------|
 | "Tool not allowed" | Tool not in allowed-tools | Add tool to frontmatter |
 | "Permission denied" | File/script not executable | `chmod +x` the file |
-| "Artifact not found" | Missing/invalid artifact | Run `/ccc:status`, regenerate if needed |
+| "Artifact not found" | Missing/invalid artifact | Run `/cmd-status`, regenerate if needed |
 | "Context too long" | Token limit exceeded | Use haiku model, reduce description length |
 | "Hook timed out" | Hook script too slow | Increase timeout or optimize script |
 | "Invalid YAML" | Syntax error in frontmatter | Check YAML syntax, indentation |
@@ -742,13 +742,13 @@ env | grep CCC_
 
 ```bash
 # Weekly: Run self-review
-/ccc:review .
+/cmd-review .
 
 # Monthly: Clear old cache
 rm -rf .ccc/cache/
 
 # After updates: Validate configuration
-/ccc:validate
+/cmd-validate
 ```
 
 ### Best Practices
@@ -756,7 +756,7 @@ rm -rf .ccc/cache/
 1. **Keep CCC updated**: `git pull origin main`
 2. **Backup artifacts**: Commit `.ccc/artifacts/` to git
 3. **Document customizations**: Comment configuration changes
-4. **Test after changes**: Run `/ccc:review .` after modifying components
+4. **Test after changes**: Run `/cmd-review .` after modifying components
 5. **Use version control**: Track all configuration files
 
 ---

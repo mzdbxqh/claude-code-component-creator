@@ -3,7 +3,7 @@
 ## 运行测试
 
 ```bash
-/ccc:test-sandbox --target=agents/reviewer/review-core
+/cmd-test-sandbox --target=agents/reviewer/review-core
 ```
 
 ## 测试范围

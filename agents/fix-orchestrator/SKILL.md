@@ -20,7 +20,7 @@ skills:
 
 Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解析识别的问题，并分派专门的 SubAgent 工厂执行批量修复。本组件遵循"用户参与"原则，提供从全自动到手动指导的多种修复策略。
 
-**重要**: 修复后不自动重新审查，需要用户手动运行 `/ccc:review` 验证，避免修复-审查反馈循环（参见反馈循环控制章节）。
+**重要**: 修复后不自动重新审查，需要用户手动运行 `/cmd-review` 验证，避免修复-审查反馈循环（参见反馈循环控制章节）。
 
 ## Workflow
 
@@ -32,7 +32,7 @@ Fix Orchestrator 是交互式修复协调组件，负责加载审查报告，解
 3. 按受影响文件分组问题
 4. 生成带严重程度计数的问题摘要
 **输出**: 按文件组织的解析问题摘要
-**错误处理**: 如果报告不存在，提示用户运行 /ccc:review
+**错误处理**: 如果报告不存在，提示用户运行 /cmd-review
 
 ### Step 1.5: 自动模式检测
 **目标**: 检测是否应该自动触发修复
@@ -227,7 +227,7 @@ fix: Add tool declarations to yyy component
 
 | Error Scenario | Handling Strategy | Example |
 |----------------|-------------------|---------|
-| Review report not found | Prompt user to run /ccc:review first | "Report not found. Please run: /ccc:review --artifact-id=DLV-001" |
+| Review report not found | Prompt user to run /cmd-review first | "Report not found. Please run: /cmd-review --artifact-id=DLV-001" |
 | SubAgent execution failed | Retry once, record partial success | "metadata-fix-agent failed, retrying..." |
 | File write conflict | Rollback conflicting files, report error | "Conflict on file X, rolled back" |
 | User interrupt | Save progress, support resume | "Progress saved. Resume with --resume" |
@@ -356,26 +356,26 @@ SubAgent Factories → Fixed Files
 Re-review (手动触发) → Verify Fixes
 ```
 
-**重要**: 修复后需要用户手动运行 `/ccc:review` 验证，不自动触发重审。
+**重要**: 修复后需要用户手动运行 `/cmd-review` 验证，不自动触发重审。
 
 ### 反馈循环控制（LOOP-001修复）
 
 **问题**: fix-orchestrator 修复后，如果自动调用 review-core 验证，可能形成无限循环。
 
-**当前设计**: 修复后不自动重审，需要用户手动运行 `/ccc:review`。
+**当前设计**: 修复后不自动重审，需要用户手动运行 `/cmd-review`。
 
 **如果需要自动重审**: 必须设置 `--max-iterations` 参数限制循环次数。
 
 **示例**:
 ```bash
 # ✅ 安全：修复后不自动重审（默认）
-/ccc:fix --artifact-id=DLV-001
+/cmd-fix --artifact-id=DLV-001
 
 # ❌ 危险：自动重审但无限制（将被拒绝）
-/ccc:fix --artifact-id=DLV-001 --auto-re-review
+/cmd-fix --artifact-id=DLV-001 --auto-re-review
 
 # ✅ 安全：自动重审但有限制
-/ccc:fix --artifact-id=DLV-001 --auto-re-review --max-iterations=3
+/cmd-fix --artifact-id=DLV-001 --auto-re-review --max-iterations=3
 ```
 
 **参数验证规则**:

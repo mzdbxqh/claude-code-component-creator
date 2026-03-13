@@ -23,17 +23,17 @@ tests/
 cd skills/cmd-design
 
 # 运行所有测试
-/ccc:test-sandbox --target=. --with-eval
+/cmd-test-sandbox --target=. --with-eval
 
 # 运行特定测试
-/ccc:test-sandbox --target=. --eval-name=basic_design_generation
+/cmd-test-sandbox --target=. --eval-name=basic_design_generation
 ```
 
 ### 方式2: 手动测试
 
 ```bash
 # 测试基础设计生成
-/ccc:design --artifact-id=INT-001
+/cmd-design --artifact-id=INT-001
 
 # 验证输出
 ls docs/designs/

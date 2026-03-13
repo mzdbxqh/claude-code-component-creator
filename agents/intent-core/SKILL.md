@@ -77,7 +77,7 @@ Intent Core 是 CCC 工作流的 Stage 1 需求澄清核心组件，负责使用
 **目标**: 传递给下一阶段
 **操作**:
 1. 显示 Intent 创建成功消息
-2. 提供下一步建议 (`/ccc:design`)
+2. 提供下一步建议 (`/cmd-design`)
 3. 保存上下文供后续阶段使用
 **输出**: Stage 1 完成状态
 **错误处理**: 上下文丢失时提示重新执行
@@ -178,7 +178,7 @@ decisions:
     answer: "simple"
     reasoning: "单步骤查询操作"
 
-nextStage: "/ccc:design"
+nextStage: "/cmd-design"
 ```
 
 ## Error Handling

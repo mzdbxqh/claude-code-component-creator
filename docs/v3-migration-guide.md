@@ -8,10 +8,10 @@ CCC v3.0 introduces a new Intent/Blueprint/Delivery workflow that replaces the v
 
 | v2.0 Command | v3.0 Equivalent |
 |--------------|-----------------|
-| `/design-new` | `/ccc:init` → `/ccc:design` |
-| `/design-iterate` | `/ccc:iterate` |
-| `/review` | `/ccc:review` |
-| `/review-migration` | `/ccc:review --type=migration` |
+| `/design-new` | `/cmd-init` → `/cmd-design` |
+| `/design-iterate` | `/cmd-iterate` |
+| `/review` | `/cmd-review` |
+| `/review-migration` | `/cmd-review --type=migration` |
 
 ## Key Changes
 
@@ -47,7 +47,7 @@ All artifacts include self-assessment against 4 dimensions:
 ## Migration Steps
 
 1. Update plugin to v3.0
-2. Use `/ccc:quick` for new components
+2. Use `/cmd-quick` for new components
 3. Existing v2.0 designs remain compatible
 4. Gradually migrate to new workflow
 
@@ -55,6 +55,6 @@ All artifacts include self-assessment against 4 dimensions:
 
 v2.0 commands remain available during transition period:
 
-- `/design-new` → redirects to `/ccc:init`
-- `/design-iterate` → redirects to `/ccc:iterate`
-- `/review` → redirects to `/ccc:review`
+- `/design-new` → redirects to `/cmd-init`
+- `/design-iterate` → redirects to `/cmd-iterate`
+- `/review` → redirects to `/cmd-review`

@@ -40,13 +40,13 @@ Plugin Profiler Framework 是 CCC v3.1.0 引入的新功能，旨在解决审查
 
 ```bash
 # 标准审查（自动包含插件画像）
-/ccc:review
+/cmd-review
 
 # 仅生成画像（不进行质量审查）
-/ccc:review --profile-only
+/cmd-review --profile-only
 
 # 审查但跳过画像生成
-/ccc:review --skip-profiling
+/cmd-review --skip-profiling
 ```
 
 ### 输出文件
@@ -165,12 +165,12 @@ Plugin Profiler Framework 是 CCC v3.1.0 引入的新功能，旨在解决审查
 
 ```bash
 # 1. 先生成画像，快速了解插件
-/ccc:review --profile-only
+/cmd-review --profile-only
 
 # 2. 阅读 plugin-profile.md（5 分钟内理解插件全貌）
 
 # 3. 然后进行完整审查
-/ccc:review
+/cmd-review
 ```
 
 **收益**: 在深入质量审查前，先对插件有全面了解
@@ -183,7 +183,7 @@ Plugin Profiler Framework 是 CCC v3.1.0 引入的新功能，旨在解决审查
 # 1. 编辑 README.md、CLAUDE.md 等文档
 
 # 2. 强制重新生成画像（忽略缓存）
-/ccc:review --profile-only --cache=false
+/cmd-review --profile-only --cache=false
 
 # 3. 检查文档完整性评分
 # 如果 < 80，根据建议完善文档
@@ -199,8 +199,8 @@ Plugin Profiler Framework 是 CCC v3.1.0 引入的新功能，旨在解决审查
 
 ```bash
 # 1. 为两个插件分别生成画像
-cd plugin-a && /ccc:review --profile-only
-cd plugin-b && /ccc:review --profile-only
+cd plugin-a && /cmd-review --profile-only
+cd plugin-b && /cmd-review --profile-only
 
 # 2. 对比 plugin-profile.json
 diff plugin-a/docs/profile/plugin-profile.json \
@@ -226,7 +226,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Generate Plugin Profile
-        run: /ccc:review --profile-only
+        run: /cmd-review --profile-only
 
       - name: Check Documentation Score
         run: |
@@ -247,7 +247,7 @@ jobs:
 
 ```bash
 # 输出到自定义路径
-/ccc:review --profile-output=custom/output/
+/cmd-review --profile-output=custom/output/
 
 # 输出:
 # custom/output/plugin-profile.json
@@ -275,7 +275,7 @@ Plugin Profiler 使用文件修改时间判断缓存有效性：
 rm docs/profile/plugin-profile.json
 
 # 方式2: 使用 --cache=false（如果实现）
-/ccc:review --profile-only --cache=false
+/cmd-review --profile-only --cache=false
 ```
 
 ### 编程式调用（SubAgent）
@@ -487,7 +487,7 @@ plugin-profiler 会自动提取 `1.2.3` 作为版本号。
 
 ```bash
 # 在 CHANGELOG.md 中添加版本记录后
-/ccc:review --profile-only
+/cmd-review --profile-only
 
 # 检查文档完整性评分是否下降
 # 如果下降，完善文档后重新生成

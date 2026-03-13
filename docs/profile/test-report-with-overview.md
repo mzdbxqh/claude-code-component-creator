@@ -59,21 +59,21 @@ Intent → Blueprint → Delivery
 ```
 
 详细说明:
-1. **Intent** (`/ccc:init`)
+1. **Intent** (`/cmd-init`)
    - 创建意图制品
    - 输出: intent-*.yaml
 
-2. **Blueprint** (`/ccc:design`)
+2. **Blueprint** (`/cmd-design`)
    - 生成蓝图
    - 输出: blueprint-*.yaml
 
-3. **Delivery** (`/ccc:build`)
+3. **Delivery** (`/cmd-build`)
    - 构建交付物
    - 输出: delivery-*.yaml + 完整组件包
 
 **激活方式**:
 - **手动调用**: 用户通过斜杠命令调用
-  - 斜杠命令: /ccc:init, /ccc:design, /ccc:build
+  - 斜杠命令: /cmd-init, /cmd-design, /cmd-build
 - **自动激活**: SessionStart hook
   - 触发条件: 检测到工作流状态文件
   - 行为: 自动加载相关 Skills
@@ -84,10 +84,10 @@ Intent → Blueprint → Delivery
 
 | 命令 | 对应 Skill | 说明 | 分类 |
 |------|-----------|------|------|
-| `/ccc:init` | cmd-init | 创建意图制品 | workflow |
-| `/ccc:design` | cmd-design | 生成蓝图 | workflow |
-| `/ccc:build` | cmd-build | 构建交付物 | workflow |
-| `/ccc:review` | cmd-review | 质量审查 | quality |
+| `/cmd-init` | cmd-init | 创建意图制品 | workflow |
+| `/cmd-design` | cmd-design | 生成蓝图 | workflow |
+| `/cmd-build` | cmd-build | 构建交付物 | workflow |
+| `/cmd-review` | cmd-review | 质量审查 | quality |
 
 ### 1.5 核心设计理念
 

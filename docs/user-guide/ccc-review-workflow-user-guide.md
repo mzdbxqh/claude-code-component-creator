@@ -1,4 +1,4 @@
-# /ccc:review-workflow 用户指南
+# /cmd-review-workflow 用户指南
 
 **文档版本**: v1.0
 **最后更新**: 2026-03-06
@@ -8,18 +8,18 @@
 
 ## 快速入门
 
-### 什么是 /ccc:review-workflow？
+### 什么是 /cmd-review-workflow？
 
-`/ccc:review-workflow` 是 CCC 插件的工作流串联审查命令，按工作流顺序审查多个关联组件，生成工作流健康度报告。
+`/cmd-review-workflow` 是 CCC 插件的工作流串联审查命令，按工作流顺序审查多个关联组件，生成工作流健康度报告。
 
 ### 基本用法
 
 ```bash
 # 审查整个工作流
-/ccc:review-workflow --artifact-id=BLP-001
+/cmd-review-workflow --artifact-id=BLP-001
 
 # 指定审查深度
-/ccc:review-workflow --artifact-id=BLP-001 --depth=full
+/cmd-review-workflow --artifact-id=BLP-001 --depth=full
 ```
 
 ---
@@ -38,7 +38,7 @@
 ### 示例 1: 标准工作流审查
 
 ```bash
-/ccc:review-workflow --artifact-id=BLP-001
+/cmd-review-workflow --artifact-id=BLP-001
 ```
 
 **输出**:
@@ -72,9 +72,9 @@
 
 | 命令 | 说明 |
 |------|------|
-| `/ccc:review` | 单组件质量审查 |
-| `/ccc:fix` | 交互式修复 |
-| `/ccc:status` | 查看项目状态 |
+| `/cmd-review` | 单组件质量审查 |
+| `/cmd-fix` | 交互式修复 |
+| `/cmd-status` | 查看项目状态 |
 
 ---
 

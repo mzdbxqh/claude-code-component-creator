@@ -167,7 +167,7 @@ ELSE THEN
 
 2. 提取工作流阶段:
    - 阶段名称（Intent, Blueprint, Delivery）
-   - 对应命令（/ccc:init, /ccc:design, /ccc:build）
+   - 对应命令（/cmd-init, /cmd-design, /cmd-build）
    - 阶段描述
 
 3. 提取激活方式:
@@ -177,11 +177,11 @@ ELSE THEN
      - "slash commands"
 
    示例:
-     "Commands can be triggered via slash commands like /ccc:init or automatically via SessionStart hook"
+     "Commands can be triggered via slash commands like /cmd-init or automatically via SessionStart hook"
 
    提取:
      activation = {
-       manual: {type: "slash_commands", commands: ["/ccc:init", ...]},
+       manual: {type: "slash_commands", commands: ["/cmd-init", ...]},
        automatic: {type: "SessionStart hook", trigger: "检测到工作流状态文件"}
      }
 ```
@@ -209,18 +209,18 @@ ELSE
    正则: r'/[a-z0-9:-]+'
 
    示例:
-     "Use `/ccc:init` to create intent"
+     "Use `/cmd-init` to create intent"
      "Run `/glaf4:brainstorm` for planning"
 
    提取:
      slash_commands = [
-       {command: "/ccc:init", skill: "cmd-init", description: "create intent"},
+       {command: "/cmd-init", skill: "cmd-init", description: "create intent"},
        {command: "/glaf4:brainstorm", skill: "brainstorm", description: "for planning"}
      ]
 
 2. 从 skills/ 目录验证命令存在性:
    FOR EACH extracted_command:
-     skill_name = extract_skill_name(command)  # /ccc:init → cmd-init
+     skill_name = extract_skill_name(command)  # /cmd-init → cmd-init
      IF skill 文件存在:
        确认命令有效
      ELSE:

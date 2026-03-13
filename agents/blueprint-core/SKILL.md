@@ -399,7 +399,7 @@ testPlan:
 ```
 
 ## 下一步
-运行 `/ccc:build --artifact-id=BLP-2026-03-03-001` 生成交付物
+运行 `/cmd-build --artifact-id=BLP-2026-03-03-001` 生成交付物
 ```
 
 ## Error Handling

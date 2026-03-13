@@ -184,13 +184,13 @@ CCC（Claude Code Component Creator）测试框架提供全面的质量保证机
 
 ```bash
 # 执行单个组件测试
-/ccc:eval-executor --component=intent-core
+# /ccc:eval-executor (SubAgent - 通过 /cmd-test-sandbox 调用) --component=intent-core
 
 # 执行所有测试
-/ccc:eval-executor --all
+# /ccc:eval-executor (SubAgent - 通过 /cmd-test-sandbox 调用) --all
 
 # 执行特定类别测试
-/ccc:eval-executor --category=security
+# /ccc:eval-executor (SubAgent - 通过 /cmd-test-sandbox 调用) --category=security
 ```
 
 ### 自动执行（CI/CD）
@@ -207,7 +207,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run CCC Tests
         run: |
-          /ccc:eval-executor --all --report=junit
+          # /ccc:eval-executor (SubAgent - 通过 /cmd-test-sandbox 调用) --all --report=junit
       - name: Upload Results
         uses: actions/upload-artifact@v2
         with:

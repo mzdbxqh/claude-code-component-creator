@@ -153,7 +153,7 @@ workflow:
 | stage3 (Delivery) | PENDING | - |
 
 ## 下一步建议
-运行 `/ccc:design` 完成 Blueprint 阶段
+运行 `/cmd-design` 完成 Blueprint 阶段
 ```
 
 ## Error Handling
@@ -187,7 +187,7 @@ init --project=my-project
     "currentStage": null,
     "progress": 0
   },
-  "nextAction": "运行 /ccc:init 开始 Stage 1"
+  "nextAction": "运行 /cmd-init 开始 Stage 1"
 }
 ```
 
@@ -273,7 +273,7 @@ status --project=my-project
   → stage2 (Blueprint) - IN_PROGRESS
   ○ stage3 (Delivery) - PENDING
 
-下一步建议：运行 /ccc:design 完成 Blueprint 阶段
+下一步建议：运行 /cmd-design 完成 Blueprint 阶段
 ```
 
 ## Notes
@@ -324,7 +324,7 @@ INIT → IN_PROGRESS → COMPLETED
     ↓
 Workflow Engine (本组件) → 状态管理
     ↓
-CCC Commands (/ccc:init, /ccc:design, etc.)
+CCC Commands (/cmd-init, /cmd-design, etc.)
     ↓
 状态更新 → 工作流推进
 ```

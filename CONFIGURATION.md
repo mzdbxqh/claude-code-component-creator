@@ -548,7 +548,7 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more help.
 1. **Start with Defaults**: Use default configuration, customize only when needed
 2. **Document Changes**: Comment why you changed settings
 3. **Version Control**: Commit `.claude-plugin/config.json` and `hooks/hooks.json`
-4. **Test After Changes**: Run `/ccc:review .` after configuration changes
+4. **Test After Changes**: Run `/cmd-review .` after configuration changes
 5. **Security First**: Review security implications of configuration changes
 6. **Use Environment Variables**: For machine-specific or sensitive settings
 

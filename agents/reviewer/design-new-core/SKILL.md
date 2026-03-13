@@ -158,7 +158,7 @@ allowed-tools: [Read, Grep, Bash]
 **说明**:
 - ✅ description说明了工作流位置（第2步）
 - ✅ description说明了输入（init的项目路径）和输出（分析报告给review）
-- ❌ description没有包含触发词（用户直接调用/ccc:analyze，不需要）
+- ❌ description没有包含触发词（用户直接调用# /ccc:analyze (示例命令)，不需要）
 
 **如果改为std-* skill**（供参考）:
 ```yaml

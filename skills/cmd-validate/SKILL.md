@@ -8,7 +8,7 @@ description: "验证制品语法、Schema和Token预算。触发：验证/检查
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
-# /ccc:validate
+# /cmd-validate
 
 **完整流程**: `init` → `design` → `review` → `fix` → **validate** → `build`
 
@@ -47,7 +47,7 @@ Validates artifacts using external tools including YAML lint, schema validation,
 
 ### 调用示例
 ```
-用户: /ccc:validate --artifact-id=BLP-001
+用户: /cmd-validate --artifact-id=BLP-001
   ↓
 cmd-validate 定位制品文件
   ↓
@@ -93,8 +93,8 @@ validator-core 内部工作流:
 ## Usage
 
 ```bash
-/ccc:validate --artifact-id=BLP-001
-/ccc:validate --artifact-id=BLP-001 --lang=en-us
+/cmd-validate --artifact-id=BLP-001
+/cmd-validate --artifact-id=BLP-001 --lang=en-us
 ```
 
 ## Global Parameter
@@ -166,10 +166,10 @@ validator-core 内部工作流:
 - **控制台输出**: 简化的验证摘要，显示通过/失败状态和关键指标
 
 ### 错误处理
-- **制品不存在** → 列出可用制品并提示使用 `/ccc:status` 查看所有制品
+- **制品不存在** → 列出可用制品并提示使用 `/cmd-status` 查看所有制品
 - **YAML 语法错误** → 显示错误行号、列号和具体问题，提供修复建议
 - **Schema 验证失败** → 列出所有不符合项，标注优先级（P0 错误、P1 警告）
-- **Token 超限** → 提供详细 Token 分布，建议使用 `/ccc:iterate` 优化
+- **Token 超限** → 提供详细 Token 分布，建议使用 `/cmd-iterate` 优化
 - **外部工具不可用** → 跳过该检查，标记为"部分验证"，建议安装缺失工具
 - **通用错误** → 显示已完成的检查结果，标记未完成项，保存部分报告
 
@@ -199,7 +199,7 @@ Status: PASSED
 | **Overwrite** | No (timestamp ensures uniqueness) |
 
 **Example:**
-- `/ccc:validate --artifact-id=BLP-001` → `docs/validations/2026-03-02-BLP-001-validation.md`
+- `/cmd-validate --artifact-id=BLP-001` → `docs/validations/2026-03-02-BLP-001-validation.md`
 
 ### Report Structure
 
@@ -351,7 +351,7 @@ Line 67: unquoted special character '@'
 - ℹ️ 3 个INFO（可选优化）
 
 **下一步建议**:
-- ✅ 可以继续执行 `/ccc:build`
+- ✅ 可以继续执行 `/cmd-build`
 - ⚠️ 建议先修复 WARNING 问题
 - ℹ️ 可选：补充测试计划后质量更高
 
@@ -454,7 +454,7 @@ validation_report:
     next_steps:
       can_build: true
       recommendations:
-        - "可以执行 /ccc:build"
+        - "可以执行 /cmd-build"
         - "建议先补充测试计划"
 
   metadata:
@@ -484,7 +484,7 @@ validation_report:
 ### Example 1: 验证 Blueprint 制品
 
 ```bash
-/ccc:validate --artifact-id=BLP-001
+/cmd-validate --artifact-id=BLP-001
 ```
 
 **场景**: 验证新创建的 Blueprint 是否符合所有规范
@@ -520,7 +520,7 @@ Validation report: docs/validations/2026-03-10-BLP-001-validation.md
 ### Example 2: 验证失败（YAML 语法错误）
 
 ```bash
-/ccc:validate --artifact-id=BLP-005
+/cmd-validate --artifact-id=BLP-005
 ```
 
 **场景**: YAML 文件包含语法错误
@@ -553,7 +553,7 @@ Fix the YAML syntax and run validation again.
 ### Example 3: Token 预算超限警告
 
 ```bash
-/ccc:validate --artifact-id=BLP-008
+/cmd-validate --artifact-id=BLP-008
 ```
 
 **场景**: 制品过于复杂，超出 Token 限制
@@ -582,13 +582,13 @@ Recommendation:
   2. Consider splitting into multiple skills
   3. Reduce tool configuration verbosity
 
-Run /ccc:iterate --artifact-id=BLP-008 to optimize
+Run /cmd-iterate --artifact-id=BLP-008 to optimize
 ```
 
 ### Example 4: Schema 不符合（缺少必填字段）
 
 ```bash
-/ccc:validate --artifact-id=BLP-010
+/cmd-validate --artifact-id=BLP-010
 ```
 
 **场景**: 制品缺少必填字段
@@ -625,7 +625,7 @@ Fix schema violations:
 ### Example 5: 验证 Intent 制品（多语言）
 
 ```bash
-/ccc:validate --artifact-id=INT-003 --lang=en-us
+/cmd-validate --artifact-id=INT-003 --lang=en-us
 ```
 
 **场景**: 验证英文输出的 Intent 制品
@@ -657,7 +657,7 @@ Validation report: docs/validations/2026-03-10-INT-003-validation.md
 ### Example 6: 外部工具不可用
 
 ```bash
-/ccc:validate --artifact-id=BLP-012
+/cmd-validate --artifact-id=BLP-012
 ```
 
 **场景**: YAML 验证工具未安装
@@ -682,7 +682,7 @@ Note: Install missing tools for complete validation
 ### Example 7: 验证 Delivery 制品（检查文件完整性）
 
 ```bash
-/ccc:validate --artifact-id=DLV-001
+/cmd-validate --artifact-id=DLV-001
 ```
 
 **输出**:

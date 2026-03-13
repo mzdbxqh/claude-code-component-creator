@@ -126,7 +126,7 @@ description: "生成Blueprint | 场景: 主工作流的第2步"
 
 ```markdown
 # 错误示例
-# /ccc:status
+# /cmd-status
 
 **完整流程**: 项目目录 → **status** → 状态报告
 
@@ -137,7 +137,7 @@ description: "生成Blueprint | 场景: 主工作流的第2步"
 
 **正确做法**:
 ```markdown
-# /ccc:status
+# /cmd-status
 
 Displays current project workflow state and artifact status.
 ```
@@ -148,7 +148,7 @@ Displays current project workflow state and artifact status.
 
 ```markdown
 # 错误示例
-# /ccc:implement
+# /cmd-implement
 
 Implements iteration plans from design-iterate.
 
@@ -159,7 +159,7 @@ Implements iteration plans from design-iterate.
 
 **正确做法**:
 ```markdown
-# /ccc:implement
+# /cmd-implement
 
 **完整流程**: `design-iterate` → **implement** → `review` → `fix`
 
@@ -222,7 +222,7 @@ name: ccc:cmd-init
 description: "创建Intent制品 | 场景: 主工作流的起点"
 ---
 
-# /ccc:init
+# /cmd-init
 
 **完整流程**: **init** → `design` → `review` → `fix` → `validate` → `build`
 
@@ -237,7 +237,7 @@ name: ccc:cmd-design
 description: "生成Blueprint | 场景: 主工作流的第2步"
 ---
 
-# /ccc:design
+# /cmd-design
 
 **完整流程**: `init` → **design** → `review` → `fix` → `validate` → `build`
 
@@ -252,7 +252,7 @@ name: ccc:cmd-review
 description: "质量审查 | 场景: 多流程的检查点"
 ---
 
-# /ccc:review
+# /cmd-review
 
 **适用流程**:
 - **主工作流**: `design` → **review** → `fix` → `validate` → `build`
@@ -276,7 +276,7 @@ name: cmd-design-iterate
 description: "生成迭代方案 | 场景: 代码迭代流程的起点"
 ---
 
-# /ccc:design-iterate
+# /cmd-design-iterate
 
 **完整流程**: 现有代码 → **design-iterate** → `implement` → `review` → `fix`
 
@@ -291,7 +291,7 @@ name: cmd-implement
 description: "执行迭代计划 | 场景: 代码迭代流程的第2步"
 ---
 
-# /ccc:implement
+# /cmd-implement
 
 **完整流程**: `design-iterate` → **implement** → `review` → `fix`
 
@@ -312,7 +312,7 @@ name: ccc:cmd-iterate
 description: "迭代Blueprint | 场景: 制品迭代流程的核心"
 ---
 
-# /ccc:iterate
+# /cmd-iterate
 
 **完整流程**: Blueprint-v1 → **iterate** → Blueprint-v2 → `review` → `fix` → `build`
 
@@ -331,7 +331,7 @@ name: cmd-status
 description: "查询项目状态 | 场景: 独立工具"
 ---
 
-# /ccc:status
+# /cmd-status
 
 Displays current project workflow state and artifact status.
 ```
@@ -344,7 +344,7 @@ name: cmd-diff
 description: "对比制品差异 | 场景: 独立工具"
 ---
 
-# /ccc:diff
+# /cmd-diff
 
 Compares differences between two artifact versions.
 ```
@@ -357,7 +357,7 @@ name: cmd-quick
 description: "快速完整流程 | 场景: 快捷工具（集成多个流程）"
 ---
 
-# /ccc:quick
+# /cmd-quick
 
 **等价流程**: **quick** ≈ `init` → `design` → `build`（自动化执行）
 

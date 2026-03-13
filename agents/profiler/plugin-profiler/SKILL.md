@@ -224,11 +224,11 @@ argument-hint: "--target=<plugin_root> [--output=json|markdown|both] [--cache=tr
 
    示例:
      README.md:
-       "Use `/ccc:init` to create intent"
+       "Use `/cmd-init` to create intent"
 
      提取结果:
        slash_commands = [
-         {command: "/ccc:init", skill: "cmd-init", ...}
+         {command: "/cmd-init", skill: "cmd-init", ...}
        ]
    ```
 
