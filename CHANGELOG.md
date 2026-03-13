@@ -17,6 +17,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.1] - 2026-03-13
+
+### Changed - Command Deprecation and Migration
+
+**背景**: 官方Claude Code已将Command概念废弃并合并到Skill，commands/目录将不再被加载。
+
+#### 废弃的Command规则（12个）
+- 删除 `agents/reviewer/knowledge/antipatterns/command/` 目录
+- 备份至 `backups/command-rules-backup-20260313/`
+- 规则总数：84 → 72 (-12)
+- ERROR问题：24 → 19 (-5)
+- WARNING问题：44 → 38 (-6)
+- INFO问题：16 → 15 (-1)
+
+#### 新增Skill规则（2个）
+
+**SKILL-025: parameter-validation-documentation-missing** (warning)
+- 继承自已废弃的CMD-005 (parameter-validation-missing)
+- 检查有argument-hint的Skill是否包含参数验证文档
+- 验证说明：参数格式、有效值、错误处理
+- 完整的中英文示例和修复建议
+
+**SKILL-026: subagent-invocation-undocumented** (warning)
+- 继承自已废弃的CMD-011 (subagent-call-undocumented)
+- 检查使用Task tool的Skill是否文档化SubAgent调用
+- 验证说明：调用流程、SubAgent作用、资源消耗
+- 包含调用关系图和性能估算示例
+
+#### 新增Legacy规则（1个）
+
+**LEGACY-001: command-to-skill-migration-needed** (info)
+- 新目录：`agents/reviewer/knowledge/antipatterns/legacy/`
+- 智能检测commands/目录存在
+- 自动分类Command模式：
+  * **Alias Pattern**: 简单快捷方式 → 删除Command，在README中说明
+  * **Workflow Pattern**: 独立工作流 → 迁移到skills/cmd-* 格式
+- 模式检测算法：
+  * Alias评分：文件大小<100行、单一Skill引用、无复杂逻辑、Description简短、无条件语句 (5项指标)
+  * Workflow评分：编号步骤、条件分支、多SubAgent调用、详细工作流说明、文件大小>200行 (5项指标)
+  * 分类决策：alias_score ≥ 3 → alias, workflow_score ≥ 2 → workflow
+- 迁移状态跟踪：completed/pending/partial
+- 生成详细迁移报告（中英文）
+- 包含4种真实场景示例
+
+### Added - Implementation
+
+**pattern_detector.py** (331行)
+- `CommandPatternDetector` 类
+- `detect()` 方法：返回 'alias' | 'workflow' | 'unknown'
+- `get_detailed_analysis()` 方法：返回完整分析信息
+- CLI测试接口：`python pattern_detector.py <command_file>`
+
+**migration_analyzer.py** (547行)
+- `MigrationAnalyzer` 类
+- `analyze()` 方法：扫描commands/目录，返回完整迁移状态
+- `generate_migration_report()` 方法：生成Markdown报告（中英文）
+- 迁移状态判断：
+  * completed: skills/cmd-{name}/存在且有SKILL.md
+  * partial: 目录存在但SKILL.md缺失
+  * pending: 未迁移
+- CLI测试接口：`python migration_analyzer.py <plugin_root> [zh|en]`
+
+**detectors/__init__.py**
+- 便利函数导出：`detect_command_pattern`, `analyze_migration`, `generate_migration_report`
+
+### Migration Guide
+详见 `docs/command-to-skill-migration-guide.md`
+
+### Coverage Analysis
+- CMD-005 → SKILL-025 (参数验证文档) ✅
+- CMD-011 → SKILL-026 (SubAgent调用文档) ✅
+- CMD-001/002/003/006/007/008/009/010/012 → 已由现有Skill规则覆盖 ✅
+- CMD-004 (slash-command-invalid) → 不适用于Skill ✅
+
+### Impact
+- 符合官方最新标准（Command已废弃）
+- 为用户提供智能迁移指南
+- 简化反模式规则体系
+- 保持质量检查覆盖率
+
+---
+
 ## [3.1.0] - 2026-03-12
 
 ### 🎉 Major Quality Improvements - Production Ready (96/100)
