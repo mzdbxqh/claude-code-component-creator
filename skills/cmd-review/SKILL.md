@@ -348,6 +348,9 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 - **基础 8 维度**（39 条）：intent、config、dependency、security、environment、llm、scalability、testability
 - **组件专用规则**（69 条）：skill、subagent、hook、workflow
 - **通用和特定规则**（23 条）：common、description、legacy、library、plugin、mcp 等
+- **架构和链路规则**（30 条）：通过专门 SubAgent 加载
+  - architecture/ (21 rules) - 通过 architecture-analyzer 加载
+  - linkage/ (9 rules) - 通过 linkage-validator 加载
 - **新增：根据组件类型加载类型特定规则（三层防护体系-评审环节）**
   - cmd-* skills: 加载工作流规则（WORKFLOW-002），排除触发场景规则（INTENT-001,002,003）
   - std-* skills: 加载触发场景规则（INTENT-*），排除工作流规则（WORKFLOW-002）
