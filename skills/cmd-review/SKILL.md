@@ -2,7 +2,7 @@
 name: cmd-review
 model: sonnet
 context: fork
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/]"
