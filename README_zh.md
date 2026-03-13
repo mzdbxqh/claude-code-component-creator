@@ -1,7 +1,7 @@
 # Claude Code Component Creator (CCC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
 [![Quality Score](https://img.shields.io/badge/质量评分-96%2F100-brightgreen.svg)](docs/reviews/)
 
 一个强大的 Claude Code 插件，用于创建高质量的组件和技能，采用结构化的 Intent/Blueprint/Delivery 工作流。
