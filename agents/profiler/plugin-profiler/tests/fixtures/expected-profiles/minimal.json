@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "name": "minimal-test-plugin",
+    "display_name": "Minimal Test Plugin",
+    "version": "0.0.0",
+    "description": "A minimal plugin for testing plugin-profiler extraction logic.",
+    "positioning": "A minimal plugin for testing plugin-profiler extraction logic.",
+    "base_framework": null
+  },
+
+  "architecture": {
+    "component_types": {
+      "skills": {
+        "count": 1,
+        "categories": [
+          {
+            "prefix": "未分类",
+            "count": 1,
+            "description": "未使用标准命名前缀的 skills",
+            "examples": ["hello-world"]
+          }
+        ]
+      },
+      "agents": {
+        "count": 0,
+        "categories": []
+      },
+      "commands": {
+        "count": 0
+      },
+      "hooks": {
+        "count": 0
+      }
+    },
+
+    "classification_system": {
+      "primary": "flat",
+      "description": "扁平化组织，无明显分类",
+      "rationale": "未发现明确的分类模式"
+    },
+
+    "workflow_mechanism": null
+  },
+
+  "usage": {
+    "slash_commands": [
+      {
+        "command": "/minimal:hello",
+        "skill": "hello-world",
+        "description": "Simple hello world skill",
+        "category": "utility"
+      }
+    ],
+    "auto_activation_skills": []
+  },
+
+  "philosophy": {
+    "core_principles": []
+  },
+
+  "requirements": {
+    "system": {
+      "platform": "Claude Code",
+      "min_version": "0.1.0",
+      "os": ["macOS", "Linux", "Windows"]
+    },
+    "runtime_dependencies": {
+      "required": [],
+      "optional": []
+    },
+    "plugin_dependencies": {
+      "extends": [],
+      "requires": [],
+      "conflicts": []
+    }
+  },
+
+  "quality_metrics": {
+    "documentation_completeness": {
+      "score": 40,
+      "breakdown": {
+        "README.md": {
+          "exists": true,
+          "completeness": 60,
+          "sections": ["Installation", "Usage", "Features"],
+          "recommendation": "建议添加 Requirements 章节"
+        },
+        "CLAUDE.md": {
+          "exists": false,
+          "completeness": 0,
+          "recommendation": "建议添加"
+        },
+        "ARCHITECTURE.md": {
+          "exists": false,
+          "completeness": 0,
+          "recommendation": "建议添加"
+        },
+        "CHANGELOG.md": {
+          "exists": false,
+          "completeness": 0,
+          "recommendation": "建议添加"
+        }
+      }
+    }
+  },
+
+  "extraction_metadata": {
+    "generated_at": "2026-03-13T14:20:00Z",
+    "sources": {
+      "README.md": {"read": true, "confidence": 0.95},
+      "CLAUDE.md": {"read": false},
+      "code_scan": {"completed": true, "confidence": 1.0}
+    },
+    "inference_applied": [
+      {
+        "field": "meta.name",
+        "method": "从 README.md 标题提取",
+        "confidence": 0.90
+      },
+      {
+        "field": "meta.version",
+        "method": "默认值（无 git tag）",
+        "confidence": 0.30
+      },
+      {
+        "field": "architecture.classification_system",
+        "method": "基于命名模式推断",
+        "confidence": 0.80
+      },
+      {
+        "field": "usage.slash_commands",
+        "method": "从 README.md 提取",
+        "confidence": 0.85
+      }
+    ],
+    "warnings": [
+      {
+        "level": "warning",
+        "message": "README.md 章节不完整，缺少 Requirements"
+      },
+      {
+        "level": "warning",
+        "message": "CLAUDE.md 缺失（推荐添加）"
+      },
+      {
+        "level": "warning",
+        "message": "ARCHITECTURE.md 缺失"
+      },
+      {
+        "level": "info",
+        "message": "文档完整性评分较低: 40/100"
+      }
+    ]
+  }
+}

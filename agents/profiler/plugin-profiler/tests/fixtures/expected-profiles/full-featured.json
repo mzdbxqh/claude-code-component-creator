@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "name": "full-featured-test-plugin",
+    "display_name": "Full Featured Test Plugin",
+    "version": "1.2.3",
+    "description": "A full-featured plugin for comprehensive plugin-profiler testing.",
+    "positioning": "A full-featured plugin for comprehensive plugin-profiler testing. This plugin is based on Superpowers 5.0.2.",
+    "base_framework": {
+      "name": "Superpowers",
+      "version": "5.0.2",
+      "relationship": "extends",
+      "inherited_skills": [],
+      "added_value": "Adds comprehensive testing capabilities with three-stage workflow"
+    },
+    "repository": "https://github.com/example/full-plugin",
+    "license": "MIT",
+    "author": null
+  },
+
+  "architecture": {
+    "component_types": {
+      "skills": {
+        "count": 3,
+        "categories": [
+          {
+            "prefix": "cmd-",
+            "count": 3,
+            "description": "工作流命令",
+            "examples": ["cmd-plan", "cmd-execute", "cmd-review"]
+          }
+        ]
+      },
+      "agents": {
+        "count": 1,
+        "categories": [
+          {
+            "category": "executor",
+            "count": 1,
+            "description": "执行类 SubAgent"
+          }
+        ]
+      },
+      "commands": {
+        "count": 0
+      },
+      "hooks": {
+        "count": 0
+      }
+    },
+
+    "classification_system": {
+      "primary": "role-based",
+      "description": "基于组件角色分类：cmd-(用户命令)",
+      "rationale": "cmd-* 占比 100%"
+    },
+
+    "workflow_mechanism": {
+      "type": "three-stage",
+      "stages": [
+        {
+          "name": "Plan",
+          "command": "/full:plan",
+          "description": "Create execution plan",
+          "output": "plan.yaml"
+        },
+        {
+          "name": "Execute",
+          "command": "/full:execute",
+          "description": "Execute plan",
+          "output": "results.yaml"
+        },
+        {
+          "name": "Review",
+          "command": "/full:review",
+          "description": "Review results",
+          "output": "review-report.md"
+        }
+      ],
+      "activation": {
+        "manual": {
+          "type": "slash_commands",
+          "commands": ["/full:plan", "/full:execute", "/full:review"],
+          "description": "Manual workflow invocation via slash commands"
+        },
+        "automatic": {
+          "type": "SessionStart hook",
+          "trigger": "State files detected",
+          "behavior": "Auto-load relevant skills",
+          "enforcement": false
+        }
+      }
+    }
+  },
+
+  "usage": {
+    "slash_commands": [
+      {"command": "/full:plan", "skill": "cmd-plan", "description": "Create execution plan", "category": "workflow"},
+      {"command": "/full:execute", "skill": "cmd-execute", "description": "Execute plan", "category": "workflow"},
+      {"command": "/full:review", "skill": "cmd-review", "description": "Review results", "category": "quality"}
+    ],
+    "auto_activation_skills": []
+  },
+
+  "philosophy": {
+    "core_principles": [
+      {
+        "principle": "External State Management",
+        "description": "Store workflow state in YAML files for recoverability and auditability.",
+        "rationale": null,
+        "implementation": null,
+        "benefit": null
+      },
+      {
+        "principle": "Complete Traceability",
+        "description": "Every requirement is traceable to implementation through artifact chain.",
+        "rationale": null,
+        "implementation": null,
+        "benefit": null
+      },
+      {
+        "principle": "Test-Driven Development",
+        "description": "Tests must be written before implementation code.",
+        "rationale": null,
+        "implementation": null,
+        "benefit": null
+      }
+    ]
+  },
+
+  "requirements": {
+    "system": {
+      "platform": "Claude Code",
+      "min_version": "0.1.0",
+      "os": ["macOS", "Linux", "Windows (via WSL)"]
+    },
+    "runtime_dependencies": {
+      "required": [
+        {"name": "git", "version": "any", "purpose": "cloning and version control"}
+      ],
+      "optional": [
+        {"name": "node.js", "version": "any", "purpose": "advanced features"}
+      ]
+    },
+    "plugin_dependencies": {
+      "extends": ["Superpowers"],
+      "requires": [],
+      "conflicts": []
+    }
+  },
+
+  "quality_metrics": {
+    "documentation_completeness": {
+      "score": 80,
+      "breakdown": {
+        "README.md": {
+          "exists": true,
+          "completeness": 100,
+          "sections": ["Features", "Installation", "Usage", "Requirements", "License"],
+          "recommendation": "优秀"
+        },
+        "CLAUDE.md": {
+          "exists": true,
+          "completeness": 100,
+          "sections": ["Design Philosophy", "Architecture", "Quality Standards"],
+          "recommendation": "优秀"
+        },
+        "ARCHITECTURE.md": {
+          "exists": false,
+          "completeness": 0,
+          "recommendation": "建议添加"
+        },
+        "CHANGELOG.md": {
+          "exists": false,
+          "completeness": 0,
+          "recommendation": "建议添加"
+        }
+      }
+    }
+  },
+
+  "extraction_metadata": {
+    "generated_at": "2026-03-13T14:25:00Z",
+    "sources": {
+      "README.md": {"read": true, "confidence": 0.95},
+      "CLAUDE.md": {"read": true, "confidence": 0.90},
+      "code_scan": {"completed": true, "confidence": 1.0}
+    },
+    "inference_applied": [
+      {
+        "field": "meta.base_framework",
+        "method": "从 README.md 提取关键词 'based on Superpowers 5.0.2'",
+        "confidence": 0.95
+      },
+      {
+        "field": "architecture.workflow_mechanism",
+        "method": "从 README.md 提取工作流箭头图 'Plan → Execute → Review'",
+        "confidence": 0.90
+      },
+      {
+        "field": "philosophy.core_principles",
+        "method": "从 README.md '## Core Principles' 章节提取",
+        "confidence": 0.85
+      }
+    ],
+    "warnings": [
+      {
+        "level": "info",
+        "message": "ARCHITECTURE.md 缺失，建议添加说明工作流机制的详细文档"
+      },
+      {
+        "level": "info",
+        "message": "CHANGELOG.md 缺失，建议添加版本历史"
+      }
+    ]
+  }
+}
