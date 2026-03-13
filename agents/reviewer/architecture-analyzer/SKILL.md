@@ -13,6 +13,7 @@ skills:
   - ccc:std-component-selection
   - ccc:lib-design-patterns
   - ccc:std-workflow-attribution
+  - ccc:lib-antipatterns
 ---
 
 # Architecture Analyzer
