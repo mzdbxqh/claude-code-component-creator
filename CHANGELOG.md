@@ -17,6 +17,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.0] - 2026-03-14 - 🔧 Critical Fix: Antipattern Rules Loading
+
+### 🔧 修复
+
+**[CRITICAL] 修复 review-core 反模式规则加载路径错误**
+- **问题**: review-core 尝试从不存在的 `docs/antipatterns/` 加载规则
+- **影响**: 导致 92 条规则（57%）无法被加载和使用
+- **修复**: 更新加载路径为实际的 `agents/reviewer/knowledge/antipatterns/`
+- **结果**: 修复规则加载机制的根本问题
+
+### ✨ 新增
+
+**cmd-review: 新增 92 条反模式规则加载**
+- **组件专用规则（69 条）**: skill、subagent、hook、workflow
+  - skill/ (30 rules) - 包含命名规范检测（skill-017）
+  - subagent/ (16 rules) - SubAgent 专用规则
+  - hook/ (14 rules) - Hook 专用规则
+  - workflow/ (9 rules) - 包含 cmd-skill 描述格式检查
+- **遗留和特定规则（23 条）**:
+  - legacy/ (1 rule) - **Command 迁移检测（LEGACY-001）** ⭐
+  - common/ (3 rules) - 通用质量规则
+  - description/ (2 rules) - 描述格式规范
+  - library/ (1 rule) - lib-* skills 描述格式
+  - plugin/ (1 rule) - 插件清单格式
+  - mcp/ (9 rules) - MCP 配置
+  - quality-gate/ (5 rules) - 质量门禁
+  - interaction/ (1 rule) - 交互策略
+
+### 📈 改进
+
+**审查覆盖率显著提升**
+- 规则总数: 39 条 → 131 条（+236%）
+- 审查覆盖率: 24% → 81%
+- 解决用户报告的检测缺失问题:
+  - ✅ Command 迁移检测（LEGACY-001）
+  - ✅ Skill 命名规范检测（skill-017）
+
+**质量保证体系完善**
+- 实现真正的"设计→审查→修复"三层防护
+- 消除设计与实现脱节问题
+- 提供更全面的质量检查
+
+### 🔧 技术债务清理
+
+- 修复 review-core 规则加载路径错误
+- 消除 92 条遗漏规则
+- 统一规则加载机制
+
+### ⚠️ 注意事项
+
+**审查报告可能包含更多问题**
+- 由于检测更全面，现有项目可能会发现更多问题
+- 建议优先修复 P0 问题，P1/P2 可选择性修复
+- 审查时间可能略有增加（< 20%），但质量显著提升
+
+---
+
 ## [3.1.3] - 2026-03-13 - 🔴 Breaking Change: Namespace Removal
 
 ### 💥 BREAKING CHANGES
