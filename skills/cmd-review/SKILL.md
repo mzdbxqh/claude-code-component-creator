@@ -5,7 +5,7 @@ context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
-argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp]"
+argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/]"
 ---
 
 # /ccc:review
@@ -204,6 +204,9 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | `--parallel` | `true`/`false` | `false` | 启用并行审查模式（推荐用于 10+ 组件） |
 | `--max-workers` | 数字 | `4` | 并行模式下的最大并发数（1-8，需要 `--parallel=true`） |
 | `--batch-size` | 数字 | `10` | 每批处理的组件数量（防止内存溢出） |
+| `--skip-profiling` | `true`/`false` | `false` | 跳过插件画像生成（高级用户） |
+| `--profile-only` | `true`/`false` | `false` | 仅生成插件画像，不进行质量审查 |
+| `--profile-output` | 路径 | `docs/profile/` | 插件画像输出目录 |
 
 ### 并行处理说明
 
@@ -281,6 +284,56 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
   - 或指定的 CCC 工件存在
 
 ### 执行步骤
+
+**Step 0: 生成插件画像**
+- **条件**: 如果 `--skip-profiling=false`（默认开启）
+- **目标**: 提取插件完整画像，确保报告自解释性
+
+**执行流程**:
+
+1. **检查缓存**
+   - 检查缓存文件是否存在: `$profile_output/plugin-profile.json`
+   - 验证缓存有效性（基于 README.md 和 CLAUDE.md 修改时间）
+   - 如果缓存有效，加载缓存的画像并跳到 Step 1
+
+2. **调用 plugin-profiler SubAgent**
+   ```
+   result = dispatch_subagent(
+     agent="plugin-profiler",
+     args={
+       "target": target_dir,
+       "output": "both"  # JSON + Markdown
+     }
+   )
+
+   profile = result.profile  # JSON 对象
+   doc_score = result.quality_metrics.documentation_completeness.score
+   ```
+
+3. **验证画像完整性**
+   - 检查必需字段: `meta.name`, `meta.positioning`, `architecture.component_types`, `usage.slash_commands`, `requirements.system`
+   - 如果缺失必需字段，记录警告但继续流程
+
+4. **输出画像文件**
+   - 保存 JSON: `$profile_output/plugin-profile.json`
+   - 保存 Markdown: `$profile_output/plugin-profile.md`
+   - 记录到审查上下文: `review_context["plugin_profile"] = profile`
+   - 记录文档完整性评分: `review_context["doc_completeness_score"] = doc_score`
+
+5. **提前终止选项**
+   - 如果 `--profile-only=true`，输出画像路径和评分后退出
+   - 否则继续到 Step 1
+
+**输出**:
+- `plugin-profile.json`: 结构化画像数据
+- `plugin-profile.md`: 可读性画像报告
+- `review_context["plugin_profile"]`: 供后续 Step 使用
+
+**错误处理**:
+- 画像生成失败时记录警告，继续执行常规审查流程
+- 缓存检查失败时，重新生成画像
+
+---
 
 **Step 1: 扫描目标**
 - 扫描目标目录或加载指定工件
