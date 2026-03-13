@@ -59,9 +59,60 @@
                 }
               }
             },
-            "agents": {"type": "object"},
-            "commands": {"type": "object"},
-            "hooks": {"type": "object"}
+            "agents": {
+              "type": "object",
+              "properties": {
+                "count": {"type": "integer"},
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "prefix": {"type": "string"},
+                      "count": {"type": "integer"},
+                      "description": {"type": "string"},
+                      "examples": {"type": "array", "items": {"type": "string"}}
+                    }
+                  }
+                }
+              }
+            },
+            "commands": {
+              "type": "object",
+              "properties": {
+                "count": {"type": "integer"},
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "prefix": {"type": "string"},
+                      "count": {"type": "integer"},
+                      "description": {"type": "string"},
+                      "examples": {"type": "array", "items": {"type": "string"}}
+                    }
+                  }
+                }
+              }
+            },
+            "hooks": {
+              "type": "object",
+              "properties": {
+                "count": {"type": "integer"},
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "prefix": {"type": "string"},
+                      "count": {"type": "integer"},
+                      "description": {"type": "string"},
+                      "examples": {"type": "array", "items": {"type": "string"}}
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "classification_system": {
@@ -78,8 +129,40 @@
           "description": "工作流运行机制",
           "properties": {
             "type": {"type": "string"},
-            "stages": {"type": "array"},
-            "activation": {"type": "object"}
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "command": {"type": "string"},
+                  "description": {"type": "string"},
+                  "output": {"type": "string"}
+                }
+              }
+            },
+            "activation": {
+              "type": "object",
+              "properties": {
+                "manual": {
+                  "type": "object",
+                  "properties": {
+                    "type": {"type": "string"},
+                    "commands": {"type": "array", "items": {"type": "string"}},
+                    "description": {"type": "string"}
+                  }
+                },
+                "automatic": {
+                  "type": "object",
+                  "properties": {
+                    "type": {"type": "string"},
+                    "trigger": {"type": "string"},
+                    "behavior": {"type": "string"},
+                    "enforcement": {"type": "boolean"}
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -100,7 +183,17 @@
             }
           }
         },
-        "auto_activation_skills": {"type": "array"}
+        "auto_activation_skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skill": {"type": "string"},
+              "trigger": {"type": "string"},
+              "loaded_by": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
       }
     },
     "philosophy": {
@@ -135,8 +228,43 @@
             "os": {"type": "array", "items": {"type": "string"}}
           }
         },
-        "runtime_dependencies": {"type": "object"},
-        "plugin_dependencies": {"type": "object"}
+        "runtime_dependencies": {
+          "type": "object",
+          "description": "运行时依赖",
+          "properties": {
+            "required": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "必需的运行时依赖"
+            },
+            "optional": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "可选的运行时依赖"
+            }
+          }
+        },
+        "plugin_dependencies": {
+          "type": "object",
+          "description": "插件依赖关系",
+          "properties": {
+            "extends": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "扩展的插件"
+            },
+            "requires": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "依赖的插件"
+            },
+            "conflicts": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "冲突的插件"
+            }
+          }
+        }
       }
     },
     "quality_metrics": {
