@@ -27,6 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **修复**: 更新加载路径为实际的 `agents/reviewer/knowledge/antipatterns/`
 - **结果**: 修复规则加载机制的根本问题
 
+**修复 architecture-analyzer 孤儿规则问题**
+- **问题**: architecture-analyzer 未加载 lib-antipatterns
+- **影响**: 导致 21 条 architecture/ 规则无法被使用
+- **修复**: 在 skills 字段添加 ccc:lib-antipatterns
+- **结果**: 架构分析现使用完整的 21 条规则
+
+**补充架构和链路规则加载说明**
+- 明确 architecture/ (21 rules) 通过 architecture-analyzer 加载
+- 明确 linkage/ (9 rules) 通过 linkage-validator 加载
+- 消除规则引用的歧义
+
 ### ✨ 新增
 
 **cmd-review: 新增 92 条反模式规则加载**
@@ -48,11 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 📈 改进
 
 **审查覆盖率显著提升**
-- 规则总数: 39 条 → 131 条（+236%）
-- 审查覆盖率: 24% → 81%
+- 规则总数: 39 条 → 161 条（+415%）
+- 审查覆盖率: 24% → 100%（完整覆盖）
 - 解决用户报告的检测缺失问题:
   - ✅ Command 迁移检测（LEGACY-001）
   - ✅ Skill 命名规范检测（skill-017）
+- 解决孤儿规则问题:
+  - ✅ architecture/ 规则（21 条）现已被使用
+  - ✅ linkage/ 规则（9 条）现已被使用
 
 **质量保证体系完善**
 - 实现真正的"设计→审查→修复"三层防护
@@ -62,8 +76,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🔧 技术债务清理
 
 - 修复 review-core 规则加载路径错误
+- 修复 architecture-analyzer 孤儿规则问题
 - 消除 92 条遗漏规则
+- 消除 30 条孤儿规则（architecture/ + linkage/）
 - 统一规则加载机制
+- 实现 100% 规则覆盖
 
 ### ⚠️ 注意事项
 
