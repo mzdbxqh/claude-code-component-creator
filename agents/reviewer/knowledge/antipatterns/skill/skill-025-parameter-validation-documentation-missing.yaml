@@ -1,0 +1,199 @@
+id: SKILL-025
+name: parameter-validation-documentation-missing
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "缺少参数验证文档"
+  en: "Missing parameter validation documentation"
+
+description:
+  zh: |
+    Skill 声明了 argument-hint 但缺少参数验证说明。
+    应该说明如何验证参数、支持的格式、错误处理等。
+
+    这是原 CMD-005 (parameter-validation-missing) 规则的 Skill 版本，
+    因为官方已将 Command 合并到 Skill。
+  en: |
+    Skill declares argument-hint but lacks parameter validation documentation.
+    Should explain how to validate parameters, supported formats, error handling, etc.
+
+    This is the Skill version of the deprecated CMD-005 (parameter-validation-missing) rule,
+    as official Claude Code has merged Command into Skill.
+
+rationale:
+  zh: |
+    参数验证文档帮助用户理解：
+    - 参数的有效格式和范围
+    - 无效参数时的行为
+    - 如何处理参数错误
+
+    这对于接受用户输入的 Skill 尤其重要。
+  en: |
+    Parameter validation documentation helps users understand:
+    - Valid parameter formats and ranges
+    - Behavior with invalid parameters
+    - How parameter errors are handled
+
+    This is especially important for Skills accepting user input.
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Best Practices"
+  note: "继承自 Command 规范，Command 已废弃并合并到 Skill"
+
+detection:
+  method: custom
+  custom_function: "check_parameter_validation_docs"
+  file_pattern: '*.md'
+  indicators:
+    - has_argument_hint: true
+    - missing_validation_docs: true
+  check_for:
+    - argument_hint_exists: true
+    - validation_keywords: ["validate", "验证", "valid", "invalid", "format", "格式", "error", "错误", "check", "检查"]
+    - validation_section_exists: false
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 Skill 内容中添加参数验证说明，例如：
+
+      ## 参数验证
+      - 支持的格式: <file-path> [--option value]
+      - file-path: 必须是有效的文件路径
+      - option: 可选，支持的值: option1, option2
+      - 无效参数时返回错误提示
+    en: |
+      Add parameter validation documentation in Skill content, e.g.:
+
+      ## Parameter Validation
+      - Supported format: <file-path> [--option value]
+      - file-path: Must be a valid file path
+      - option: Optional, supported values: option1, option2
+      - Returns error message for invalid parameters
+
+examples:
+  bad:
+    zh: |
+      错误：只有 argument-hint，无验证说明
+      ```yaml
+      ---
+      name: deploy-service
+      description: 部署服务到指定环境
+      argument-hint: "<service-name> <environment>"
+      ---
+
+      # Deploy Service
+
+      部署服务到生产或测试环境。
+      ```
+      ❌ 没有说明 service-name 的格式
+      ❌ 没有说明 environment 的有效值
+      ❌ 没有说明参数验证逻辑
+    en: |
+      Bad: Only argument-hint, no validation docs
+      ```yaml
+      ---
+      name: deploy-service
+      description: Deploy service to environment
+      argument-hint: "<service-name> <environment>"
+      ---
+
+      # Deploy Service
+
+      Deploy service to production or test environment.
+      ```
+      ❌ No explanation of service-name format
+      ❌ No explanation of valid environment values
+      ❌ No explanation of parameter validation logic
+  good:
+    zh: |
+      正确：完整的参数验证文档
+      ```yaml
+      ---
+      name: deploy-service
+      description: 部署服务到指定环境
+      argument-hint: "<service-name> <environment>"
+      ---
+
+      # Deploy Service
+
+      部署服务到生产或测试环境。
+
+      ## 参数说明
+
+      ### service-name (必需)
+      - 格式: 字母、数字、连字符，3-50字符
+      - 示例: `api-gateway`, `user-service`
+      - 验证: 必须在已注册的服务列表中
+
+      ### environment (必需)
+      - 有效值: `production`, `staging`, `test`
+      - 默认值: 无（必须明确指定）
+
+      ## 错误处理
+      - 无效的 service-name: 返回错误并列出可用服务
+      - 无效的 environment: 返回错误并说明有效值
+      - 权限不足: 提示需要的权限
+      ```
+      ✅ 完整的参数格式说明
+      ✅ 有效值和示例
+      ✅ 验证规则明确
+      ✅ 错误处理说明
+    en: |
+      Good: Complete parameter validation docs
+      ```yaml
+      ---
+      name: deploy-service
+      description: Deploy service to environment
+      argument-hint: "<service-name> <environment>"
+      ---
+
+      # Deploy Service
+
+      Deploy service to production or test environment.
+
+      ## Parameters
+
+      ### service-name (Required)
+      - Format: Letters, numbers, hyphens, 3-50 chars
+      - Example: `api-gateway`, `user-service`
+      - Validation: Must be in registered services list
+
+      ### environment (Required)
+      - Valid values: `production`, `staging`, `test`
+      - Default: None (must be explicitly specified)
+
+      ## Error Handling
+      - Invalid service-name: Returns error with available services
+      - Invalid environment: Returns error with valid values
+      - Insufficient permissions: Prompts for required permissions
+      ```
+      ✅ Complete parameter format explanation
+      ✅ Valid values and examples
+      ✅ Clear validation rules
+      ✅ Error handling documentation
+
+migration_note:
+  zh: |
+    本规则继承自已废弃的 CMD-005 (parameter-validation-missing)。
+
+    Command 概念已被官方废弃并合并到 Skill：
+    - Alias pattern commands → 删除，在 README 中说明
+    - Workflow pattern commands → 迁移到 skills/cmd-* 格式
+
+    本规则适用于所有声明了 argument-hint 的 Skill。
+  en: |
+    This rule inherits from deprecated CMD-005 (parameter-validation-missing).
+
+    Command concept has been officially deprecated and merged into Skill:
+    - Alias pattern commands → Delete, document in README
+    - Workflow pattern commands → Migrate to skills/cmd-* format
+
+    This rule applies to all Skills declaring argument-hint.
+
+tags: ["metadata", "arguments", "validation", "skill", "migrated-from-command"]
+related_rules: ["SKILL-011", "LEGACY-001"]

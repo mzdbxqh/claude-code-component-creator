@@ -19,11 +19,6 @@ antipatterns/
 │   ├── skill-002-name-format.yaml
 │   └── ...
 │
-├── command/                     # Command 组件反模式 (12 个)
-│   ├── cmd-001-description-missing.yaml
-│   ├── cmd-002-argument-hint-missing.yaml
-│   └── ...
-│
 ├── hook/                        # Hook 组件反模式 (10 个)
 │   ├── hook-001-event-type-invalid.yaml
 │   └── ...
@@ -70,7 +65,6 @@ antipatterns/
 | 组件类型 | 规则数量 | Error | Warning | Info | 覆盖率 |
 |----------|----------|-------|---------|------|--------|
 | Skill | 19 | 6 | 8 | 6 | Chapter 4 100% + skill-creator |
-| Command | 12 | 5 | 6 | 1 | Chapter 5 100% |
 | Hook | 10 | 3 | 7 | 0 | Chapter 6 100% |
 | Subagent | 12 | 4 | 8 | 0 | Chapter 7 100% |
 | MCP | 8 | 4 | 4 | 0 | Chapter 8 100% |
@@ -85,7 +79,7 @@ antipatterns/
 | **评估测试 (skill-creator)** | **2** | **0** | **1** | **1** | **skill-creator** |
 | **脚本 Bundling (skill-creator)** | **0** | **0** | **0** | **0** | **skill-creator** |
 | **通用规则** | **3** | **1** | **1** | **1** |
-| **总计** | **84** | **24** | **44** | **16** | - |
+| **总计** | **72** | **19** | **38** | **15** | - |
 
 ---
 
@@ -221,25 +215,6 @@ antipatterns/
 
 ---
 
-### Command 反模式 (12 个)
-
-| ID | 名称 | 严重程度 | 说明 |
-|----|------|----------|------|
-| CMD-001 | description-missing | error | 缺少描述 |
-| CMD-002 | argument-hint-missing | error | 缺少 argument-hint |
-| CMD-003 | no-examples | warning | 缺少使用示例 |
-| CMD-004 | slash-command-invalid | error | 无效的斜杠命令格式 |
-| CMD-005 | parameter-validation-missing | warning | 缺少参数验证 |
-| CMD-006 | help-text-unclear | warning | 帮助文本不清晰 |
-| CMD-007 | output-format-unspecified | info | 未指定输出格式 |
-| CMD-008 | error-handling-missing | error | 缺少错误处理说明 |
-| CMD-009 | permission-check-missing | error | 缺少权限检查 |
-| CMD-010 | no-usage-examples | warning | 缺少详细使用示例 |
-| CMD-011 | subagent-call-undocumented | warning | Subagent 调用未记录 |
-| CMD-012 | context-mode-invalid | error | 无效的 context 模式 |
-
----
-
 ### Hook 反模式 (10 个)
 
 | ID | 名称 | 严重程度 | 说明 |
@@ -368,13 +343,12 @@ antipatterns/
 | 手册章节 | 反模式目录 | 规则数量 | 覆盖范围 |
 |----------|-----------|----------|----------|
 | Chapter 4: Skill 规范 | `skill/` | 15 | metadata, structure, workflow |
-| Chapter 5: Command 规范 | `command/` | 12 | metadata, arguments, validation |
 | Chapter 6: Hook 规范 | `hook/` | 10 | event, handler, lifecycle |
 | Chapter 7: Subagent 规范 | `subagent/` | 12 | tools, model, boundaries |
 | Chapter 8: MCP 规范 | `mcp/` | 8 | config, auth, schema |
 | **Plugin 规范 [新增]** | `plugin/` | **1** | **manifest, schema, validation** |
 | **扩展规范** | `intent/`, `llm/`, `security/`, `environment/`, `scalability/` | **19** | intent, llm, security, env, scalability |
-| **总计** | | **77** | |
+| **总计** | | **65** | |
 
 ---
 
@@ -386,8 +360,6 @@ antipatterns/
 # 根据组件类型加载基础规则
 if component_type == "skill":
     load_antipatterns("skill/*.yaml")
-elif component_type == "command":
-    load_antipatterns("command/*.yaml")
 # ...
 
 # 加载扩展维度规则 (始终加载)

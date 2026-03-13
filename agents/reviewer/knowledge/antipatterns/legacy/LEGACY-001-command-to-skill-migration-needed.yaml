@@ -1,0 +1,819 @@
+id: LEGACY-001
+name: command-to-skill-migration-needed
+severity: info
+component_type: plugin
+category: legacy
+
+title:
+  zh: "Command 到 Skill 迁移建议"
+  en: "Command to Skill migration recommended"
+
+description:
+  zh: |
+    检测到插件包含 commands/ 目录。
+
+    官方 Claude Code 已将 Command 概念废弃并合并到 Skill。
+    本规则提供智能迁移指南，区分两种 Command 模式：
+
+    1. **Alias Pattern** (快捷方式模式)
+       - Command 仅作为 Skill 的快捷入口
+       - 无独立工作流逻辑
+       - 建议: 删除 Command，在 README 中说明斜杠命令
+
+    2. **Workflow Pattern** (工作流模式)
+       - Command 包含独立的工作流逻辑
+       - 有复杂的步骤和 SubAgent 调用
+       - 建议: 迁移到 skills/cmd-* 格式
+
+    本规则自动分类并生成分步迁移指南。
+  en: |
+    Detected plugin contains commands/ directory.
+
+    Official Claude Code has deprecated Command concept and merged it into Skill.
+    This rule provides intelligent migration guide, distinguishing two Command patterns:
+
+    1. **Alias Pattern** (Shortcut mode)
+       - Command is just a shortcut to a Skill
+       - No independent workflow logic
+       - Recommendation: Delete Command, document slash command in README
+
+    2. **Workflow Pattern** (Workflow mode)
+       - Command contains independent workflow logic
+       - Has complex steps and SubAgent invocations
+       - Recommendation: Migrate to skills/cmd-* format
+
+    This rule automatically classifies and generates step-by-step migration guide.
+
+rationale:
+  zh: |
+    **官方变更背景**:
+    - Claude Code 官方在最近版本中废弃了 Command 概念
+    - Command 的所有功能已合并到 Skill
+    - commands/ 目录将不再被加载
+    - 现有 Command 需要迁移到 Skill
+
+    **迁移原则**:
+    - 尽量"平迁": 保持原有功能和结构
+    - 避免过早优化: 不合并、不拆分（除非有设计原因）
+    - 保持向后兼容: 用户体验不受影响
+
+    **迁移收益**:
+    - 符合官方最新标准
+    - 简化插件结构（单一组件类型）
+    - 更好的维护性和可扩展性
+  en: |
+    **Official change background**:
+    - Claude Code officially deprecated Command concept in recent versions
+    - All Command functionality merged into Skill
+    - commands/ directory will no longer be loaded
+    - Existing Commands need migration to Skill
+
+    **Migration principles**:
+    - Migrate as-is: Preserve original functionality and structure
+    - Avoid premature optimization: Don't merge or split (unless design requires)
+    - Maintain backward compatibility: No impact on user experience
+
+    **Migration benefits**:
+    - Comply with latest official standards
+    - Simplify plugin structure (single component type)
+    - Better maintainability and extensibility
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Command deprecation"
+  note: "Command 已完全废弃，所有功能合并到 Skill"
+
+detection:
+  method: custom
+  custom_function: "detect_command_migration_needed"
+  file_pattern: 'commands/*.md'
+  detection_logic: |
+    1. 检查 commands/ 目录是否存在
+    2. 扫描所有 commands/*.md 文件
+    3. 对每个 Command 调用 CommandPatternDetector.detect()
+    4. 分类为 alias 或 workflow 模式
+    5. 检查是否已存在对应的 skills/cmd-* 目录
+    6. 生成迁移状态报告
+
+pattern_classification:
+  alias_indicators:
+    - file_size: "<100 lines"
+    - single_skill_reference: true
+    - minimal_logic: true
+    - simple_description: true
+    - no_conditionals: true
+
+  workflow_indicators:
+    - numbered_steps: true
+    - conditional_branches: true
+    - multiple_agent_calls: true
+    - detailed_workflow_docs: true
+    - file_size: ">200 lines"
+
+  algorithm: |
+    alias_score = 0
+    workflow_score = 0
+
+    # Alias 评分 (每项 +1)
+    if lines < 100: alias_score += 1
+    if single_skill_ref: alias_score += 1
+    if no_complex_logic: alias_score += 1
+    if description_short: alias_score += 1
+    if no_conditionals: alias_score += 1
+
+    # Workflow 评分 (每项 +1)
+    if has_numbered_steps: workflow_score += 1
+    if has_conditionals: workflow_score += 1
+    if multiple_agents: workflow_score += 1
+    if detailed_docs: workflow_score += 1
+    if lines > 200: workflow_score += 1
+
+    # 分类决策
+    if alias_score >= 3: return "alias"
+    if workflow_score >= 2: return "workflow"
+    return "unknown"
+
+migration_status_tracking:
+  states:
+    - completed: "对应的 skills/cmd-* 目录已存在"
+    - pending: "尚未迁移"
+    - partial: "部分迁移（目录存在但不完整）"
+
+  progress_calculation: |
+    total_commands = len(commands_list)
+    completed = count(command for command in commands_list if migration_status == "completed")
+    progress = f"{completed}/{total_commands} migrated"
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      根据 Command 模式选择对应的迁移策略：
+
+      ## Alias Pattern 迁移步骤
+
+      1. **确认 Command 是纯快捷方式**
+         - 检查 COMMAND.md 是否只包含简单的 Skill 引用
+         - 确认无独立工作流逻辑
+
+      2. **删除 Command 文件**
+         ```bash
+         rm commands/your-command.md
+         ```
+
+      3. **在 README.md 中说明斜杠命令**
+         ```markdown
+         ## Available Commands
+
+         - `/your-command` - Shortcut for the-underlying-skill
+           - Equivalent to invoking `the-underlying-skill` directly
+         ```
+
+      4. **清理引用**
+         - 搜索并移除代码中对该 Command 的引用
+         - 更新文档中的使用说明
+
+      ## Workflow Pattern 迁移步骤
+
+      1. **创建新的 Skill 目录**
+         ```bash
+         mkdir -p skills/cmd-your-command
+         ```
+
+      2. **迁移 COMMAND.md 到 SKILL.md**
+         ```bash
+         cp commands/your-command.md skills/cmd-your-command/SKILL.md
+         ```
+
+      3. **更新 frontmatter**
+         ```yaml
+         ---
+         name: cmd-your-command
+         description: [保持原有描述]
+         argument-hint: [保持原有参数提示]
+         tools: [保持原有工具列表]
+         context: none  # 或根据需要调整
+         ---
+         ```
+
+      4. **更新内容引用**
+         - 全局替换 "Command" → "Skill"
+         - 更新工作流说明（如有）
+         - 保持原有逻辑不变
+
+      5. **迁移相关文件**
+         ```bash
+         # 如果有测试文件
+         cp commands/your-command/evals/ skills/cmd-your-command/evals/
+
+         # 如果有配置文件
+         cp commands/your-command/config/ skills/cmd-your-command/config/
+         ```
+
+      6. **验证迁移结果**
+         - 测试 Skill 是否正常工作
+         - 确认参数传递正确
+         - 验证输出格式一致
+
+      7. **删除原 Command**
+         ```bash
+         rm -rf commands/your-command.md
+         ```
+
+      8. **更新文档**
+         - 在 README 中说明从 Command 迁移到 Skill
+         - 更新使用示例
+         - 更新 CHANGELOG
+
+      ## 混合场景处理
+
+      如果一个 Command 包含多个 Skill 调用，需要判断：
+
+      - **场景 A**: 多个 Skill 是顺序执行的完整工作流
+        → 迁移为单个 cmd-* Skill
+
+      - **场景 B**: 多个 Skill 是独立的功能选项
+        → 考虑拆分为多个 cmd-* Skill
+        → 或提供一个统一的入口 Skill
+
+      选择原则: 优先"平迁"，除非有明确的设计原因需要重构。
+    en: |
+      Choose migration strategy based on Command pattern:
+
+      ## Alias Pattern Migration Steps
+
+      1. **Confirm Command is pure shortcut**
+         - Check if COMMAND.md only contains simple Skill reference
+         - Confirm no independent workflow logic
+
+      2. **Delete Command file**
+         ```bash
+         rm commands/your-command.md
+         ```
+
+      3. **Document slash command in README.md**
+         ```markdown
+         ## Available Commands
+
+         - `/your-command` - Shortcut for the-underlying-skill
+           - Equivalent to invoking `the-underlying-skill` directly
+         ```
+
+      4. **Clean up references**
+         - Search and remove code references to this Command
+         - Update usage documentation
+
+      ## Workflow Pattern Migration Steps
+
+      1. **Create new Skill directory**
+         ```bash
+         mkdir -p skills/cmd-your-command
+         ```
+
+      2. **Migrate COMMAND.md to SKILL.md**
+         ```bash
+         cp commands/your-command.md skills/cmd-your-command/SKILL.md
+         ```
+
+      3. **Update frontmatter**
+         ```yaml
+         ---
+         name: cmd-your-command
+         description: [Keep original description]
+         argument-hint: [Keep original argument hint]
+         tools: [Keep original tools list]
+         context: none  # Or adjust as needed
+         ---
+         ```
+
+      4. **Update content references**
+         - Global replace "Command" → "Skill"
+         - Update workflow documentation (if any)
+         - Keep original logic unchanged
+
+      5. **Migrate related files**
+         ```bash
+         # If test files exist
+         cp commands/your-command/evals/ skills/cmd-your-command/evals/
+
+         # If config files exist
+         cp commands/your-command/config/ skills/cmd-your-command/config/
+         ```
+
+      6. **Verify migration result**
+         - Test if Skill works correctly
+         - Confirm parameter passing
+         - Validate output format consistency
+
+      7. **Delete original Command**
+         ```bash
+         rm -rf commands/your-command.md
+         ```
+
+      8. **Update documentation**
+         - Document Command to Skill migration in README
+         - Update usage examples
+         - Update CHANGELOG
+
+      ## Mixed Scenario Handling
+
+      If a Command invokes multiple Skills, need to decide:
+
+      - **Scenario A**: Multiple Skills form a complete sequential workflow
+        → Migrate as single cmd-* Skill
+
+      - **Scenario B**: Multiple Skills are independent feature options
+        → Consider splitting into multiple cmd-* Skills
+        → Or provide unified entry Skill
+
+      Selection principle: Prefer migrate-as-is, unless clear design reason requires refactoring.
+
+output_template:
+  zh: |
+    # Command 迁移分析报告
+
+    ## 概览
+
+    - 检测到 Command 数量: {total_count}
+    - Alias Pattern: {alias_count}
+    - Workflow Pattern: {workflow_count}
+    - 已迁移: {completed_count}
+    - 待迁移: {pending_count}
+    - 迁移进度: {progress}
+
+    ---
+
+    ## Alias Pattern Commands ({alias_count} 个)
+
+    {for command in alias_commands}
+    ### {command.name}
+
+    - **路径**: `{command.path}`
+    - **模式**: Alias (快捷方式)
+    - **目标 Skill**: {command.target_skill}
+    - **迁移状态**: {command.migration_status}
+
+    **建议操作**:
+    1. 删除 `{command.path}`
+    2. 在 README.md 中添加说明:
+       ```markdown
+       - `/{command.name}` - {command.target_skill} 的快捷命令
+       ```
+
+    ---
+    {end for}
+
+    ## Workflow Pattern Commands ({workflow_count} 个)
+
+    {for command in workflow_commands}
+    ### {command.name}
+
+    - **路径**: `{command.path}`
+    - **模式**: Workflow (工作流)
+    - **文件大小**: {command.file_size} 行
+    - **SubAgent 调用**: {command.subagent_count} 个
+    - **迁移状态**: {command.migration_status}
+    - **目标路径**: `skills/cmd-{command.name}/`
+
+    **建议操作**:
+    1. 创建目录: `mkdir -p skills/cmd-{command.name}`
+    2. 迁移文件: `cp {command.path} skills/cmd-{command.name}/SKILL.md`
+    3. 更新 frontmatter (name, context 等)
+    4. 迁移测试文件 (如有)
+    5. 删除原 Command: `rm {command.path}`
+    6. 更新 README 和 CHANGELOG
+
+    ---
+    {end for}
+
+    ## 迁移优先级建议
+
+    **P0 (立即迁移)**:
+    - {list high_priority_commands}
+
+    **P1 (1-2周内迁移)**:
+    - {list medium_priority_commands}
+
+    **P2 (可选)**:
+    - {list low_priority_commands}
+
+    ## 注意事项
+
+    1. **向后兼容性**: 确保迁移后用户体验不变
+    2. **测试覆盖**: 每个迁移后的 Skill 都应通过测试
+    3. **文档更新**: 同步更新 README 和用户文档
+    4. **渐进迁移**: 可以逐个迁移，不必一次性完成
+
+    ## 自动化脚本
+
+    可以使用以下脚本辅助迁移:
+
+    ```bash
+    #!/bin/bash
+    # migrate-command-to-skill.sh
+
+    COMMAND_NAME=$1
+
+    # 创建目录
+    mkdir -p "skills/cmd-$COMMAND_NAME"
+
+    # 迁移文件
+    cp "commands/$COMMAND_NAME.md" "skills/cmd-$COMMAND_NAME/SKILL.md"
+
+    # 更新 frontmatter (需要手动调整)
+    echo "Please manually update frontmatter in skills/cmd-$COMMAND_NAME/SKILL.md"
+
+    # 迁移测试 (如有)
+    if [ -d "commands/$COMMAND_NAME/evals" ]; then
+      cp -r "commands/$COMMAND_NAME/evals" "skills/cmd-$COMMAND_NAME/"
+    fi
+
+    echo "Migration setup complete. Please review and test before deleting original Command."
+    ```
+  en: |
+    # Command Migration Analysis Report
+
+    ## Overview
+
+    - Total Commands detected: {total_count}
+    - Alias Pattern: {alias_count}
+    - Workflow Pattern: {workflow_count}
+    - Migrated: {completed_count}
+    - Pending: {pending_count}
+    - Migration progress: {progress}
+
+    ---
+
+    ## Alias Pattern Commands ({alias_count})
+
+    {for command in alias_commands}
+    ### {command.name}
+
+    - **Path**: `{command.path}`
+    - **Pattern**: Alias (Shortcut)
+    - **Target Skill**: {command.target_skill}
+    - **Migration status**: {command.migration_status}
+
+    **Recommended actions**:
+    1. Delete `{command.path}`
+    2. Add to README.md:
+       ```markdown
+       - `/{command.name}` - Shortcut for {command.target_skill}
+       ```
+
+    ---
+    {end for}
+
+    ## Workflow Pattern Commands ({workflow_count})
+
+    {for command in workflow_commands}
+    ### {command.name}
+
+    - **Path**: `{command.path}`
+    - **Pattern**: Workflow
+    - **File size**: {command.file_size} lines
+    - **SubAgent calls**: {command.subagent_count}
+    - **Migration status**: {command.migration_status}
+    - **Target path**: `skills/cmd-{command.name}/`
+
+    **Recommended actions**:
+    1. Create directory: `mkdir -p skills/cmd-{command.name}`
+    2. Migrate file: `cp {command.path} skills/cmd-{command.name}/SKILL.md`
+    3. Update frontmatter (name, context, etc.)
+    4. Migrate test files (if any)
+    5. Delete original Command: `rm {command.path}`
+    6. Update README and CHANGELOG
+
+    ---
+    {end for}
+
+    ## Migration Priority Recommendations
+
+    **P0 (Immediate)**:
+    - {list high_priority_commands}
+
+    **P1 (Within 1-2 weeks)**:
+    - {list medium_priority_commands}
+
+    **P2 (Optional)**:
+    - {list low_priority_commands}
+
+    ## Important Notes
+
+    1. **Backward compatibility**: Ensure no change in user experience
+    2. **Test coverage**: Each migrated Skill should pass tests
+    3. **Documentation update**: Sync update README and user docs
+    4. **Gradual migration**: Can migrate one by one, no need all at once
+
+    ## Automation Script
+
+    Use this script to assist migration:
+
+    ```bash
+    #!/bin/bash
+    # migrate-command-to-skill.sh
+
+    COMMAND_NAME=$1
+
+    # Create directory
+    mkdir -p "skills/cmd-$COMMAND_NAME"
+
+    # Migrate file
+    cp "commands/$COMMAND_NAME.md" "skills/cmd-$COMMAND_NAME/SKILL.md"
+
+    # Update frontmatter (manual adjustment needed)
+    echo "Please manually update frontmatter in skills/cmd-$COMMAND_NAME/SKILL.md"
+
+    # Migrate tests (if any)
+    if [ -d "commands/$COMMAND_NAME/evals" ]; then
+      cp -r "commands/$COMMAND_NAME/evals" "skills/cmd-$COMMAND_NAME/"
+    fi
+
+    echo "Migration setup complete. Please review and test before deleting original Command."
+    ```
+
+examples:
+  scenario_1_pure_alias:
+    zh: |
+      **场景 1: 纯 Alias Pattern**
+
+      原 Command:
+      ```yaml
+      ---
+      # commands/brainstorm.md
+      name: brainstorm
+      description: Brainstorming 的快捷命令
+      ---
+      调用 brainstorming Skill。
+      ```
+
+      检测结果:
+      - 模式: Alias
+      - 文件大小: 8 行
+      - 单一 Skill 引用: brainstorming
+      - 无独立逻辑
+
+      迁移建议:
+      1. 删除 `commands/brainstorm.md`
+      2. 在 README.md 添加:
+         ```markdown
+         - `/brainstorm` - Shortcut for brainstorming skill
+         ```
+    en: |
+      **Scenario 1: Pure Alias Pattern**
+
+      Original Command:
+      ```yaml
+      ---
+      # commands/brainstorm.md
+      name: brainstorm
+      description: Shortcut for brainstorming
+      ---
+      Invokes brainstorming Skill.
+      ```
+
+      Detection result:
+      - Pattern: Alias
+      - File size: 8 lines
+      - Single Skill reference: brainstorming
+      - No independent logic
+
+      Migration recommendation:
+      1. Delete `commands/brainstorm.md`
+      2. Add to README.md:
+         ```markdown
+         - `/brainstorm` - Shortcut for brainstorming skill
+         ```
+
+  scenario_2_pure_workflow:
+    zh: |
+      **场景 2: 纯 Workflow Pattern**
+
+      原 Command:
+      ```yaml
+      ---
+      # commands/code-review.md
+      name: code-review
+      description: 完整的代码审查工作流
+      tools: [Task, Read, Write, Bash]
+      ---
+
+      # Code Review Workflow
+
+      ## 工作流程
+
+      1. 扫描代码库
+      2. 调用 review-core 执行检测
+      3. 调用 architecture-analyzer 分析架构
+      4. 生成审查报告
+      5. 输出改进建议
+
+      调用 SubAgent:
+      - review-core
+      - architecture-analyzer
+      - report-renderer
+      ```
+
+      检测结果:
+      - 模式: Workflow
+      - 文件大小: 45 行
+      - SubAgent 调用: 3 个
+      - 编号步骤: 是
+      - 详细工作流: 是
+
+      迁移建议:
+      1. 创建 `skills/cmd-code-review/`
+      2. 迁移为 `skills/cmd-code-review/SKILL.md`
+      3. 更新 frontmatter: `name: cmd-code-review`
+      4. 保持工作流逻辑不变
+      5. 删除原 Command
+    en: |
+      **Scenario 2: Pure Workflow Pattern**
+
+      Original Command:
+      ```yaml
+      ---
+      # commands/code-review.md
+      name: code-review
+      description: Complete code review workflow
+      tools: [Task, Read, Write, Bash]
+      ---
+
+      # Code Review Workflow
+
+      ## Workflow
+
+      1. Scan codebase
+      2. Invoke review-core for detection
+      3. Invoke architecture-analyzer for analysis
+      4. Generate review report
+      5. Output improvement suggestions
+
+      SubAgent invocations:
+      - review-core
+      - architecture-analyzer
+      - report-renderer
+      ```
+
+      Detection result:
+      - Pattern: Workflow
+      - File size: 45 lines
+      - SubAgent calls: 3
+      - Numbered steps: Yes
+      - Detailed workflow: Yes
+
+      Migration recommendation:
+      1. Create `skills/cmd-code-review/`
+      2. Migrate to `skills/cmd-code-review/SKILL.md`
+      3. Update frontmatter: `name: cmd-code-review`
+      4. Keep workflow logic unchanged
+      5. Delete original Command
+
+  scenario_3_mixed:
+    zh: |
+      **场景 3: 混合场景**
+
+      原 Command:
+      ```yaml
+      ---
+      # commands/deploy.md
+      name: deploy
+      description: 部署到不同环境
+      argument-hint: "<environment> [--skip-tests]"
+      tools: [Bash, Read]
+      ---
+
+      # Deploy Command
+
+      根据环境参数选择部署策略:
+
+      - production: 调用 deploy-production Skill
+      - staging: 调用 deploy-staging Skill
+      - test: 调用 deploy-test Skill
+
+      如果 --skip-tests 标志存在，跳过测试步骤。
+      ```
+
+      检测结果:
+      - 模式: Workflow (条件分支)
+      - 文件大小: 25 行
+      - 多个 Skill 调用: 3 个
+      - 包含条件逻辑
+
+      迁移建议:
+      选项 A (推荐 - 平迁):
+      1. 迁移为单个 `skills/cmd-deploy/` Skill
+      2. 保持条件分支逻辑
+      3. 统一入口，内部路由到不同 Skill
+
+      选项 B (重构):
+      1. 拆分为 3 个独立 Skill:
+         - cmd-deploy-production
+         - cmd-deploy-staging
+         - cmd-deploy-test
+      2. 提供一个路由 Skill: cmd-deploy
+
+      **选择原则**: 优先选项 A (平迁)，除非有明确的用户需求需要拆分。
+    en: |
+      **Scenario 3: Mixed Scenario**
+
+      Original Command:
+      ```yaml
+      ---
+      # commands/deploy.md
+      name: deploy
+      description: Deploy to different environments
+      argument-hint: "<environment> [--skip-tests]"
+      tools: [Bash, Read]
+      ---
+
+      # Deploy Command
+
+      Choose deployment strategy based on environment parameter:
+
+      - production: Invoke deploy-production Skill
+      - staging: Invoke deploy-staging Skill
+      - test: Invoke deploy-test Skill
+
+      If --skip-tests flag exists, skip test steps.
+      ```
+
+      Detection result:
+      - Pattern: Workflow (conditional branching)
+      - File size: 25 lines
+      - Multiple Skill calls: 3
+      - Contains conditional logic
+
+      Migration recommendation:
+      Option A (Recommended - migrate-as-is):
+      1. Migrate as single `skills/cmd-deploy/` Skill
+      2. Keep conditional branching logic
+      3. Unified entry, internal routing to different Skills
+
+      Option B (Refactor):
+      1. Split into 3 independent Skills:
+         - cmd-deploy-production
+         - cmd-deploy-staging
+         - cmd-deploy-test
+      2. Provide routing Skill: cmd-deploy
+
+      **Selection principle**: Prefer Option A (migrate-as-is), unless clear user requirement for splitting.
+
+  scenario_4_partial_migration:
+    zh: |
+      **场景 4: 部分迁移**
+
+      检测结果:
+      ```
+      Total Commands: 5
+      - brainstorm (Alias) → 已迁移 ✅
+      - code-review (Workflow) → 已迁移 ✅
+      - deploy (Workflow) → 待迁移 ⏳
+      - test (Alias) → 待迁移 ⏳
+      - build (Workflow) → 待迁移 ⏳
+
+      迁移进度: 2/5 migrated (40%)
+      ```
+
+      建议:
+      1. 优先迁移剩余的 Workflow Pattern (deploy, build)
+      2. 然后处理 Alias Pattern (test)
+      3. 所有迁移完成后删除 commands/ 目录
+      4. 更新 README 说明所有变更
+    en: |
+      **Scenario 4: Partial Migration**
+
+      Detection result:
+      ```
+      Total Commands: 5
+      - brainstorm (Alias) → Migrated ✅
+      - code-review (Workflow) → Migrated ✅
+      - deploy (Workflow) → Pending ⏳
+      - test (Alias) → Pending ⏳
+      - build (Workflow) → Pending ⏳
+
+      Migration progress: 2/5 migrated (40%)
+      ```
+
+      Recommendation:
+      1. Prioritize migrating remaining Workflow Pattern (deploy, build)
+      2. Then handle Alias Pattern (test)
+      3. Delete commands/ directory after all migrations complete
+      4. Update README documenting all changes
+
+tags: ["legacy", "command", "migration", "skill", "workflow", "deprecation"]
+related_rules: ["SKILL-025", "SKILL-026", "PLUGIN-001"]
+
+dependencies:
+  detectors:
+    - agents/reviewer/review-core/detectors/pattern_detector.py
+    - agents/reviewer/review-core/detectors/migration_analyzer.py
+
+  data_flow: |
+    LEGACY-001 detection
+      → MigrationAnalyzer.analyze(plugin_root)
+        → 扫描 commands/ 目录
+        → 对每个 Command 调用 CommandPatternDetector.detect()
+        → 检查迁移状态 (skills/cmd-* 是否存在)
+        → 返回完整分析结果
+      → 生成迁移报告 (使用 output_template)

@@ -1,0 +1,275 @@
+id: SKILL-026
+name: subagent-invocation-undocumented
+severity: warning
+component_type: skill
+category: structure
+
+title:
+  zh: "SubAgent 调用未文档化"
+  en: "SubAgent invocation undocumented"
+
+description:
+  zh: |
+    Skill 使用了 Task tool 但未文档化 SubAgent 调用。
+    应该说明调用的 SubAgent 名称、目的、输入输出等。
+
+    这是原 CMD-011 (subagent-call-undocumented) 规则的 Skill 版本，
+    因为官方已将 Command 合并到 Skill。
+  en: |
+    Skill uses Task tool but doesn't document SubAgent invocations.
+    Should explain which SubAgents are called, their purpose, input/output, etc.
+
+    This is the Skill version of the deprecated CMD-011 (subagent-call-undocumented) rule,
+    as official Claude Code has merged Command into Skill.
+
+rationale:
+  zh: |
+    文档化 SubAgent 调用帮助用户理解：
+    - Skill 的完整工作流程
+    - SubAgent 之间的调用关系
+    - 每个 SubAgent 的作用
+    - 预期的执行时间和资源消耗
+
+    这对于复杂的多 SubAgent 协作尤其重要。
+  en: |
+    Documenting SubAgent invocations helps users understand:
+    - Complete workflow of the Skill
+    - Calling relationships between SubAgents
+    - Purpose of each SubAgent
+    - Expected execution time and resource consumption
+
+    This is especially important for complex multi-SubAgent collaboration.
+
+official_reference:
+  document: "markdown_docs/skills.md"
+  section: "Best Practices - SubAgent Usage"
+  note: "继承自 Command 规范，Command 已废弃并合并到 Skill"
+
+detection:
+  method: custom
+  custom_function: "check_subagent_invocation_docs"
+  file_pattern: '*.md'
+  indicators:
+    - uses_task_tool: true
+    - missing_subagent_docs: true
+  check_for:
+    - task_tool_usage: ["Task", "Agent", "subagent", "SubAgent"]
+    - documentation_keywords: ["调用", "invoke", "call", "使用", "use", "SubAgent", "子代理"]
+    - workflow_diagram: false  # 可选，但推荐
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 Skill 内容中添加 SubAgent 调用说明，例如：
+
+      ## 工作流程
+
+      本 Skill 调用以下 SubAgent：
+
+      1. **review-core**: 执行反模式检测
+         - 输入: 组件路径、组件类型
+         - 输出: 检测结果 JSON
+         - 预计时间: 30-60秒
+
+      2. **report-renderer**: 生成审查报告
+         - 输入: 检测结果 JSON
+         - 输出: Markdown 报告
+         - 预计时间: 5-10秒
+
+      调用流程图：
+      ```
+      cmd-review
+        → review-aggregator
+          → review-core (并行)
+          → architecture-analyzer (并行)
+        → report-renderer
+      ```
+    en: |
+      Add SubAgent invocation documentation in Skill content, e.g.:
+
+      ## Workflow
+
+      This Skill invokes the following SubAgents:
+
+      1. **review-core**: Executes antipattern detection
+         - Input: Component path, component type
+         - Output: Detection result JSON
+         - Estimated time: 30-60 seconds
+
+      2. **report-renderer**: Generates review report
+         - Input: Detection result JSON
+         - Output: Markdown report
+         - Estimated time: 5-10 seconds
+
+      Call flow diagram:
+      ```
+      cmd-review
+        → review-aggregator
+          → review-core (parallel)
+          → architecture-analyzer (parallel)
+        → report-renderer
+      ```
+
+examples:
+  bad:
+    zh: |
+      错误：使用 Task tool 但未文档化
+      ```yaml
+      ---
+      name: cmd-review
+      description: 执行质量审查
+      tools: [Task, Read, Write]
+      ---
+
+      # Code Review
+
+      执行代码质量审查。
+      ```
+      ❌ 没有说明调用哪些 SubAgent
+      ❌ 没有说明工作流程
+      ❌ 没有说明预期时间
+    en: |
+      Bad: Uses Task tool but no documentation
+      ```yaml
+      ---
+      name: cmd-review
+      description: Execute quality review
+      tools: [Task, Read, Write]
+      ---
+
+      # Code Review
+
+      Execute code quality review.
+      ```
+      ❌ No explanation of which SubAgents are called
+      ❌ No explanation of workflow
+      ❌ No explanation of expected time
+  good:
+    zh: |
+      正确：完整的 SubAgent 调用文档
+      ```yaml
+      ---
+      name: cmd-review
+      description: 执行质量审查
+      tools: [Task, Read, Write]
+      ---
+
+      # Code Review
+
+      执行代码质量审查，包含 8 维度评估。
+
+      ## 工作流程
+
+      ### 阶段 1: 反模式检测 (30-60秒)
+      调用 **review-core** SubAgent：
+      - 加载对应组件类型的反模式规则
+      - 执行深度质量检查
+      - 生成结构化检测结果
+
+      ### 阶段 2: 架构分析 (并行, 20-40秒)
+      调用 **architecture-analyzer** SubAgent：
+      - L1: 组件级架构分析
+      - L2: 系统级架构分析
+      - 生成架构评分
+
+      ### 阶段 3: 报告生成 (5-10秒)
+      调用 **report-renderer** SubAgent：
+      - 整合检测结果和架构评分
+      - 生成 Markdown 格式报告
+      - 输出到 docs/reviews/
+
+      ## SubAgent 依赖关系
+
+      ```
+      cmd-review (用户入口)
+        ├─→ review-aggregator (结果聚合)
+        │   ├─→ review-core (反模式检测, 并行)
+        │   └─→ architecture-analyzer (架构分析, 并行)
+        └─→ report-renderer (报告渲染)
+      ```
+
+      ## 资源消耗
+
+      - Token 使用: ~15,000 tokens (medium 项目)
+      - 执行时间: 1-2 分钟
+      - 并行度: 最多 2 个 SubAgent 并行
+      ```
+      ✅ 完整的工作流程说明
+      ✅ 每个 SubAgent 的作用
+      ✅ 预期时间和资源消耗
+      ✅ 调用关系图
+    en: |
+      Good: Complete SubAgent invocation docs
+      ```yaml
+      ---
+      name: cmd-review
+      description: Execute quality review
+      tools: [Task, Read, Write]
+      ---
+
+      # Code Review
+
+      Execute code quality review with 8-dimension evaluation.
+
+      ## Workflow
+
+      ### Phase 1: Antipattern Detection (30-60s)
+      Invokes **review-core** SubAgent:
+      - Loads antipattern rules for component type
+      - Executes deep quality checks
+      - Generates structured detection results
+
+      ### Phase 2: Architecture Analysis (parallel, 20-40s)
+      Invokes **architecture-analyzer** SubAgent:
+      - L1: Component-level architecture analysis
+      - L2: System-level architecture analysis
+      - Generates architecture score
+
+      ### Phase 3: Report Generation (5-10s)
+      Invokes **report-renderer** SubAgent:
+      - Integrates detection results and architecture score
+      - Generates Markdown format report
+      - Outputs to docs/reviews/
+
+      ## SubAgent Dependencies
+
+      ```
+      cmd-review (user entry)
+        ├─→ review-aggregator (result aggregation)
+        │   ├─→ review-core (antipattern detection, parallel)
+        │   └─→ architecture-analyzer (architecture analysis, parallel)
+        └─→ report-renderer (report rendering)
+      ```
+
+      ## Resource Consumption
+
+      - Token usage: ~15,000 tokens (medium project)
+      - Execution time: 1-2 minutes
+      - Parallelism: Up to 2 SubAgents in parallel
+      ```
+      ✅ Complete workflow explanation
+      ✅ Purpose of each SubAgent
+      ✅ Expected time and resource consumption
+      ✅ Call relationship diagram
+
+migration_note:
+  zh: |
+    本规则继承自已废弃的 CMD-011 (subagent-call-undocumented)。
+
+    Command 概念已被官方废弃并合并到 Skill：
+    - Alias pattern commands → 删除，在 README 中说明
+    - Workflow pattern commands → 迁移到 skills/cmd-* 格式
+
+    本规则适用于所有使用 Task tool 的 Skill。
+  en: |
+    This rule inherits from deprecated CMD-011 (subagent-call-undocumented).
+
+    Command concept has been officially deprecated and merged into Skill:
+    - Alias pattern commands → Delete, document in README
+    - Workflow pattern commands → Migrate to skills/cmd-* format
+
+    This rule applies to all Skills using Task tool.
+
+tags: ["structure", "subagent", "documentation", "workflow", "skill", "migrated-from-command"]
+related_rules: ["SUB-001", "SUB-006", "LEGACY-001"]
