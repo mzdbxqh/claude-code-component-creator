@@ -17,6 +17,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.1.3] - 2026-03-13 - 🔴 Breaking Change: Namespace Removal
+
+### 💥 BREAKING CHANGES
+
+**命名空间已完全移除，所有命令格式更新**
+
+根据Claude Code官方标准，命名空间（namespace）功能已废弃。所有插件命令必须使用直接的skill名称调用。
+
+#### 命令格式变更
+
+**旧格式** (已废弃):
+```bash
+/ccc:init
+/ccc:design
+/ccc:review
+/ccc:quick
+# 等18个命令
+```
+
+**新格式** (正确):
+```bash
+/cmd-init
+/cmd-design
+/cmd-review
+/cmd-quick
+# 等18个命令
+```
+
+#### 完整映射表
+
+| 旧命令 | 新命令 | 状态 |
+|--------|--------|------|
+| `/ccc:quick` | `/cmd-quick` | ✅ 已更新 |
+| `/ccc:init` | `/cmd-init` | ✅ 已更新 |
+| `/ccc:design` | `/cmd-design` | ✅ 已更新 |
+| `/ccc:design-new` | `/cmd-design-new` | ✅ 已更新 |
+| `/ccc:design-iterate` | `/cmd-design-iterate` | ✅ 已更新 |
+| `/ccc:build` | `/cmd-build` | ✅ 已更新 |
+| `/ccc:implement` | `/cmd-implement` | ✅ 已更新 |
+| `/ccc:iterate` | `/cmd-iterate` | ✅ 已更新 |
+| `/ccc:review` | `/cmd-review` | ✅ 已更新 |
+| `/ccc:review-workflow` | `/cmd-review-workflow` | ✅ 已更新 |
+| `/ccc:review-migration-plan` | `/cmd-review-migration-plan` | ✅ 已更新 |
+| `/ccc:fix` | `/cmd-fix` | ✅ 已更新 |
+| `/ccc:validate` | `/cmd-validate` | ✅ 已更新 |
+| `/ccc:status` | `/cmd-status` | ✅ 已更新 |
+| `/ccc:status-graph` | `/cmd-status-graph` | ✅ 已更新 |
+| `/ccc:status-trace` | `/cmd-status-trace` | ✅ 已更新 |
+| `/ccc:trace` | `/cmd-trace` | ✅ 已更新 |
+| `/ccc:diff` | `/cmd-diff` | ✅ 已更新 |
+| `/ccc:test-sandbox` | `/cmd-test-sandbox` | ✅ 已更新 |
+
+### Changed - Documentation Updates
+
+**修复范围**:
+- ✅ README.md - 43处命令引用
+- ✅ README_zh.md - 16处命令引用
+- ✅ CONTRIBUTING.md
+- ✅ TROUBLESHOOTING.md
+- ✅ CONFIGURATION.md
+- ✅ SECURITY.md
+- ✅ 所有19个Skill定义文件 - 200+处引用
+- ✅ 所有文档文件 (docs/) - 100+处引用
+- ✅ 所有测试文档 (tests/) - 50+处引用
+
+**总计**: 60+个文件，500+处命令引用已更新
+
+### Removed - Non-existent Commands
+
+以下命令引用已删除或标注为"计划中"（这些命令从未实现）:
+- `/ccc:eval-executor` → 标注为 SubAgent（通过/cmd-test-sandbox调用）
+- `/ccc:checkpoint` → 标注为计划中功能
+- `/ccc:benchmark` → 标注为计划中功能
+- `/ccc:clean` → 替换为 `/cmd-status --clean`
+- `/ccc:projects` → 替换为 `/cmd-status`
+- `/ccc:link` → 标注为手动操作或计划中功能
+- `/ccc:list` → 替换为 `/cmd-status`
+- `/ccc:show` → 替换为 `/cmd-status --show-details`
+- `/ccc:import` → 替换为 `/cmd-init --from-template`
+
+### Migration Guide
+
+**立即行动**:
+1. 更新所有脚本中的 `/ccc:` 命令为 `/cmd-` 格式
+2. 更新自动化工具和CI/CD配置
+3. 通知团队成员使用新的命令格式
+
+**向后兼容性**: ❌ **无**
+- 旧的 `/ccc:` 格式将不再工作
+- 用户必须更新所有调用
+
+**官方参考**: https://docs.claude.ai/plugins (命名空间功能已废弃)
+
+### Impact
+
+- **用户影响**: 高 - 所有用户必须更新命令调用
+- **文档影响**: 高 - 所有文档已更新
+- **代码影响**: 无 - 仅文档变更
+- **配置影响**: 无 - Skill定义未变更（仅description说明更新）
+
+---
+
 ## [3.1.0] - 2026-03-13 - Production Release
 
 ### 🎉 Quality Review Completion - A+ Grade (96/100)
