@@ -20,6 +20,7 @@ A powerful Claude Code plugin for creating high-quality components and skills wi
 - **Token Budget Transparency**: Complete cost estimation and optimization guides (NEW in v3.1.0)
 - **Checkpoint Recovery**: Resume long-running workflows from interruptions (NEW in v3.1.0)
 - **Performance Benchmarking**: Built-in performance testing framework (NEW in v3.1.0)
+- **Plugin Profiler Framework**: Automatic plugin profiling with standardized metadata extraction (NEW in v3.1.0)
 
 ## Quick Start
 
@@ -100,7 +101,7 @@ Review (Quality assurance)
 | `/ccc:design` | Generate blueprint from intent |
 | `/ccc:build` | Create production-ready deliverable |
 | `/ccc:implement` | Implement iteration plans with validation |
-| `/ccc:review` | Comprehensive quality review (76+ checks) |
+| `/ccc:review` | Comprehensive quality review (76+ checks) with automatic plugin profiling |
 | `/ccc:quick` | Execute complete workflow in one command |
 | `/ccc:iterate` | Iterate on existing blueprint |
 | `/ccc:design-iterate` | Iterate on existing components |
@@ -164,6 +165,83 @@ Configure hooks in `hooks/config.json`:
 ```
 
 See [Hooks Documentation](docs/hooks.md) for more details.
+
+## Plugin Profiler Framework
+
+CCC v3.1.0 introduces an automated plugin profiling system that enhances review reports with comprehensive plugin metadata.
+
+### Overview
+
+When you run `/ccc:review` on a plugin, CCC now automatically:
+1. Extracts plugin metadata (name, version, positioning, architecture)
+2. Analyzes component structure (skills, agents, commands, hooks)
+3. Identifies workflow mechanisms and activation patterns
+4. Evaluates documentation completeness (0-100 score)
+5. Generates standardized plugin profile (JSON + Markdown)
+6. Embeds "Plugin Overview" chapter in review reports
+
+### Plugin Profile Output
+
+```
+docs/profile/
+├── plugin-profile.json       # Structured metadata (JSON Schema validated)
+└── plugin-profile.md          # Human-readable report
+```
+
+### Profile Contents
+
+The plugin profile includes:
+
+- **Meta Information**: Name, version, positioning, base framework
+- **Architecture Design**: Component statistics, classification system, workflow mechanism
+- **Usage Methods**: Slash commands, auto-activation skills
+- **Core Philosophy**: Design principles and rationale
+- **System Requirements**: Platform, dependencies, compatibility
+- **Quality Metrics**: Documentation completeness score and recommendations
+
+### New Review Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--skip-profiling` | boolean | false | Skip plugin profiling (advanced users) |
+| `--profile-only` | boolean | false | Only generate profile, skip quality review |
+| `--profile-output` | path | docs/profile/ | Profile output directory |
+
+### Example Usage
+
+```bash
+# Standard review (with profiling)
+/ccc:review
+
+# Profile-only mode (no quality review)
+/ccc:review --profile-only
+
+# Review without profiling
+/ccc:review --skip-profiling
+
+# Custom output directory
+/ccc:review --profile-output=custom/path/
+```
+
+### Self-Explanation Validation
+
+Review reports now include automatic self-explanation validation:
+
+- **Completeness Check** (40%): All required sections present
+- **Self-Containment Check** (30%): No external references
+- **Structure Clarity** (20%): Clear heading hierarchy
+- **Information Accuracy** (10%): Consistent data across sections
+
+Reports are scored 0-100, with recommendations for improvement.
+
+### Benefits
+
+- **Improved Report Clarity**: Reports are now self-explanatory and can be read independently
+- **Better Plugin Understanding**: Comprehensive overview before diving into details
+- **Quality Transparency**: Documentation completeness scored objectively
+- **Standardized Metadata**: Consistent plugin profiling across all plugins
+
+See [Plugin Profiler Documentation](agents/profiler/plugin-profiler/SKILL.md) for implementation details.
 
 ## Quality Dimensions
 
