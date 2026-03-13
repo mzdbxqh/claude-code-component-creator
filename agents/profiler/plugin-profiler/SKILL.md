@@ -3,7 +3,14 @@ name: plugin-profiler
 description: "生成插件标准化画像，提取元信息、架构、使用方式和核心理念。触发：插件画像/plugin profile/profiler"
 model: sonnet
 context: fork
-allowed-tools: [Read, Glob, Grep]
+tools:
+  - Read
+  - Glob
+  - Grep
+permissionMode: prompt
+skills:
+  - ccc:std-component-selection
+  - ccc:std-naming-rules
 argument-hint: "--target=<plugin_root> [--output=json|markdown|both] [--cache=true|false]"
 ---
 
@@ -96,41 +103,25 @@ argument-hint: "--target=<plugin_root> [--output=json|markdown|both] [--cache=tr
 
 **操作**:
 1. 扫描 skills/ 目录
-   ```bash
-   # Glob 查找所有 SKILL.md
-   glob_result = Glob("skills/**/SKILL.md")
-
-   # 统计数量
-   skills_count = len(glob_result)
-
-   # 识别命名模式
-   cmd_skills = [s for s in glob_result if "/cmd-" in s]
-   std_skills = [s for s in glob_result if "/std-" in s]
-   lib_skills = [s for s in glob_result if "/lib-" in s]
-   other_skills = skills_count - len(cmd_skills) - len(std_skills) - len(lib_skills)
-   ```
+   - 使用 Glob("skills/**/SKILL.md") 查找所有 SKILL.md 文件
+   - 统计总数
+   - 按命名前缀分类:
+     - cmd-*: 工作流命令 skills
+     - std-*: 标准规范 skills
+     - lib-*: 知识库 skills
+     - 其他: 未分类 skills
 
 2. 扫描 agents/ 目录
-   ```bash
-   # Glob 查找所有 SubAgent SKILL.md
-   agents_result = Glob("agents/**/SKILL.md")
-   agents_count = len(agents_result)
-
-   # 识别分类(基于目录名)
-   # 例如: agents/reviewer/review-core/ → category: reviewer
-   categories = defaultdict(list)
-   for agent in agents_result:
-       parts = agent.split('/')
-       if len(parts) >= 3:
-           category = parts[1]  # agents/<category>/<name>/
-           categories[category].append(parts[2])
-   ```
+   - 使用 Glob("agents/**/SKILL.md") 查找所有 SubAgent SKILL.md 文件
+   - 统计数量
+   - 识别分类(基于目录名):
+     - 例如: agents/reviewer/review-core/ → category: reviewer
+     - 提取目录层级: agents/<category>/<name>/
+     - 按 category 分组统计
 
 3. 扫描 commands/ 和 hooks/ 目录(可选)
-   ```bash
-   commands_count = len(Glob("commands/**/*"))
-   hooks_count = len(Glob("hooks/**/*.md"))
-   ```
+   - 使用 Glob("commands/**/*") 统计 commands 数量
+   - 使用 Glob("hooks/**/*.md") 统计 hooks 数量
 
 **输出**:
 - component_types 字典(skills, agents, commands, hooks 的统计)
@@ -475,6 +466,24 @@ argument-hint: "--target=<plugin_root> [--output=json|markdown|both] [--cache=tr
 **输出**:
 - `{target}/docs/profile/plugin-profile.json`
 - `{target}/docs/profile/plugin-profile.md` (如果 --output=markdown 或 both)
+
+---
+
+### Step 7.5: Schema 验证（可选）
+
+**目标**: 验证生成的 JSON 符合 plugin-profile.schema.json
+
+**操作**:
+1. 加载 schema/plugin-profile.schema.json
+2. 使用 JSON Schema 验证器验证 profile_json
+3. 如果验证失败:
+   - 记录警告到 warnings
+   - 标记为"降级模式"
+   - 继续生成输出(不中断流程)
+
+**输出**: 验证结果(通过/警告/降级模式)
+
+**错误处理**: 验证失败不影响输出,仅记录警告
 
 ---
 
