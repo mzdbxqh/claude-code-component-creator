@@ -125,9 +125,51 @@
 详细迁移步骤...
 ```
 
-#### 2.2 更新 README.md (英文)
+#### 2.2 自动生成 README（推荐）
 
-**必须更新**:
+**使用自动生成脚本**（避免手动遗漏和中英文不同步）:
+
+```bash
+# 运行 README 生成脚本
+python3 scripts/generate-readme.py
+
+# 脚本会自动：
+# 1. 从 plugin.json 提取版本号
+# 2. 从 CHANGELOG.md 提取质量评分
+# 3. 从 skills/cmd-* 扫描命令列表
+# 4. 从 CHANGELOG.md 提取最新特性
+# 5. 生成 README.md（英文）
+# 6. 生成 README_zh.md（中文，自动同步）
+
+# 验证生成结果
+git diff README.md README_zh.md
+```
+
+**生成脚本的优势**:
+- ✅ 版本号一致性：自动从 plugin.json 提取，避免手动错误
+- ✅ 中英文同步：基于同一数据源，确保两个版本完全一致
+- ✅ 命令列表完整：自动扫描 skills/ 目录，不会遗漏新命令
+- ✅ 质量评分准确：从 CHANGELOG 最新版本提取，避免过时数据
+- ✅ 减少人工错误：模板化生成，避免格式不一致
+
+**数据来源**:
+- 版本号：`.claude-plugin/plugin.json`
+- 质量评分：`CHANGELOG.md` 最新版本
+- 命令列表：扫描 `skills/cmd-*/SKILL.md`
+- 功能特性：`CHANGELOG.md` 最新版本的 Added 部分
+- 其他元数据：`plugin.json` 和 `marketplace.json`
+
+**如果需要自定义内容**:
+1. 编辑模板文件：
+   - `docs/templates/README-template.md`（英文模板）
+   - `docs/templates/README-template-zh.md`（中文模板）
+2. 重新运行生成脚本
+
+#### 2.3 或手动更新 README（不推荐）
+
+**仅当自动生成脚本不可用时使用**
+
+手动更新 README.md (英文):
 1. 版本徽章
    ```markdown
    [![Version](https://img.shields.io/badge/version-X.Y.Z-blue.svg)]
@@ -152,12 +194,20 @@
    | Security  | 98/100| +26    |
    ```
 
-#### 2.3 更新 README_zh.md (中文)
+5. Commands 表格（如有新命令）
 
-**重要**: 保持与英文版本完全同步
+手动更新 README_zh.md (中文):
+**重要**: 必须保持与英文版本完全同步
 - 同步更新所有版本号
 - 同步更新所有功能描述
 - 同步更新所有徽章
+- 同步更新命令列表
+
+**⚠️ 手动更新风险**:
+- 容易遗漏版本号更新
+- 中英文容易不同步
+- 命令列表可能过时
+- 质量评分可能不准确
 
 #### 2.4 更新 .claude-plugin/plugin.json
 
@@ -656,9 +706,11 @@ git tag -d vX.Y.Z
 
 ### 文档更新
 - [ ] CHANGELOG.md 新版本条目添加
-- [ ] README.md 版本号更新
+- [ ] **运行 README 生成脚本** (`python3 scripts/generate-readme.py`)
+- [ ] README.md 版本号正确
 - [ ] README.md 新功能说明（如有）
-- [ ] README_zh.md 同步更新
+- [ ] README_zh.md 与英文版同步
+- [ ] README.md 和 README_zh.md 命令列表完整
 - [ ] API 文档更新（如有变更）
 
 ### 配置文件更新
