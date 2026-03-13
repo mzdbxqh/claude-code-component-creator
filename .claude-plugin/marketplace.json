@@ -7,8 +7,8 @@
     {
       "name": "ccc",
       "source": "./",
-      "description": "Claude Code Component Creator v3.0 - Intent/Blueprint/Delivery workflow with meta-reflection",
-      "version": "3.0.0",
+      "description": "Claude Code Component Creator v3.1.3 - Breaking Change: Namespace removed, use /cmd-* commands",
+      "version": "3.1.3",
       "author": {
         "name": "mzdbxqh"
       },
