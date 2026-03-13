@@ -432,21 +432,62 @@ def load_lib_antipatterns():
 **Step 6: 生成审查报告**
 - 创建详细审查报告文件
 - 包含执行摘要、维度评分、问题清单、改进建议
+- **新增（v3.1.0）**: 如果 Step 0 生成了插件画像，在报告开头自动添加"插件概述"章节
 - 输出控制台摘要
 - 保存报告到 docs/reviews/
 - **错误处理**: 报告生成失败时输出到控制台；目录不存在时自动创建
 
+**Step 7: 验证报告自解释性（可选）**
+- 调用 self-explanation-validator SubAgent 验证报告质量
+- 检查 4 个维度：完整性（40%）、自包含性（30%）、结构清晰度（20%）、信息准确性（10%）
+- 评分范围：0-100
+- 如果评分 < 80，输出改进建议
+- **错误处理**: 验证失败不影响主流程，仅记录警告
+
+**验证执行逻辑**:
+
+```python
+# Step 6 完成后
+report_md = read_file(report_path)
+
+# 调用 validator（如果画像存在）
+if review_context.get("plugin_profile"):
+    validation = dispatch_subagent(
+        agent="self-explanation-validator",
+        args={
+            "report": report_path,
+            "profile": review_context["plugin_profile"]
+        }
+    )
+
+    if validation.score < 80:
+        print(f"⚠️ 报告自解释性评分较低: {validation.score}/100")
+        print("改进建议:")
+        for rec in validation.recommendations:
+            print(f"  - {rec}")
+    else:
+        print(f"✓ 报告自解释性评分: {validation.score}/100 (优秀)")
+
+# 在报告末尾附加验证评分
+report_md += f"\n\n---\n\n**报告自解释性评分**: {validation.score}/100\n"
+write_file(report_path, report_md)
+```
+
 ### 预期输出
 - **主要制品**: `docs/reviews/YYYY-MM-DD-<project>-comprehensive-review.md`
 - **审查报告结构**:
+  - **插件概述（如有画像）**: 基本信息、核心功能、架构设计、使用方式、核心设计理念、系统要求、文档完整性评估（v3.1.0 新增）
   - 执行摘要（综合评分、问题统计、评级）
   - 评估维度评分（8 个维度详细得分和问题）
   - 架构分析结果（工作流图、组件关系、循环依赖）
   - 问题清单（按优先级和文件分组）
   - 改进建议（修复优先级、行动计划）
   - 历史对比（如有历史审查记录）
-- **控制台输出**: 综合评分、关键问题摘要、报告路径
-- **可选输出**: Eval 结果（benchmark.json、benchmark.md）
+  - **报告自解释性评分（如有画像）**: 0-100 评分和改进建议（v3.1.0 新增）
+- **控制台输出**: 综合评分、关键问题摘要、报告路径、报告自解释性评分
+- **可选输出**:
+  - Eval 结果（benchmark.json、benchmark.md）
+  - 插件画像（docs/profile/plugin-profile.json, plugin-profile.md）
 
 ### 错误处理
 - **目标不存在** → 提示检查路径或使用 `/ccc:status` 查看可用工件
