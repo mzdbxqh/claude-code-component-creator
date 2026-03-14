@@ -5,7 +5,7 @@ context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
-argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/]"
+argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/] [--no-reference-check=false] [--reference-only=false]"
 ---
 
 # /cmd-review
@@ -207,6 +207,8 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | `--skip-profiling` | `true`/`false` | `false` | 跳过插件画像生成（高级用户） |
 | `--profile-only` | `true`/`false` | `false` | 仅生成插件画像，不进行质量审查 |
 | `--profile-output` | 路径 | `docs/profile/` | 插件画像输出目录 |
+| `--no-reference-check` | `true`/`false` | `false` | 跳过引用完整性扫描 |
+| `--reference-only` | `true`/`false` | `false` | 仅执行引用扫描，跳过其他检查 |
 
 ### 并行处理说明
 
@@ -422,6 +424,35 @@ def load_lib_antipatterns():
 - 标记问题所在文件和行号
 - **错误处理**: 单个维度检测失败时记录并继续其他维度；检测超时时使用已收集结果
 
+**Step 3.5: 执行引用完整性扫描（新增 v3.2.0）**
+- 调用 reference-integrity-scanner SubAgent 扫描插件引用关系
+- 检测断开引用、孤儿文件、循环依赖
+- 生成引用完整性报告
+- 将扫描结果合并到最终审查报告
+- **错误处理**: 扫描失败时记录警告并继续；检测到 P0 问题时在报告中高亮标注
+
+**执行流程**:
+```
+IF --no-reference-check 参数未设置 THEN
+  CALL reference-integrity-scanner
+    args: plugin_dir
+
+  IF 扫描成功 THEN
+    MERGE 扫描结果到 review_context
+    IF 发现断开引用或循环依赖 THEN
+      标记为 P0 问题
+    END IF
+  ELSE
+    记录警告：引用扫描失败
+  END IF
+END IF
+```
+
+**输出**:
+- reference_integrity_report.json
+- reference_integrity_report.md
+- review_context["reference_issues"] 更新
+
 **Step 4: 执行架构分析（可选）**
 - 分析工作流结构（L1）
 - 分析组件关系和职责（L2）
@@ -516,6 +547,7 @@ write_file(report_path, report_md)
 - **ccc:architecture-analyzer**: 架构分析器，执行 L1+L2 架构分析（工作流/组件/职责/协作/命令）
 - **ccc:dependency-analyzer**: 依赖分析器，检查链路验证（调用图/循环依赖/隐式调用）
 - **ccc:linkage-validator**: 链路验证器，验证 skills 字段引用完整性
+- **ccc:reference-integrity-scanner**: 引用完整性扫描器，检测断开引用、孤儿文件和循环依赖（v3.2.0新增）
 - **ccc:review-aggregator**: 审查结果聚合器，汇总多维度审查结果
 - **ccc:report-renderer**: 报告渲染器，生成最终的审查报告
 
@@ -859,6 +891,29 @@ eval-grader 评分和对比
 ```
 
 **适用场景**: 只需要检查架构问题，不需要检查文档合规性。
+
+### 示例 4: 引用完整性检查（v3.2.0 新增）
+
+```bash
+# 完整审查（包含引用扫描）
+/cmd-review --target=.
+
+# 仅执行引用扫描
+/cmd-review --target=. --reference-only
+
+# 跳过引用扫描
+/cmd-review --target=. --no-reference-check
+```
+
+**适用场景**:
+- **完整审查**: 全面审查，包含引用完整性扫描
+- **仅引用扫描**: 快速检测断开引用、孤儿文件、循环依赖
+- **跳过引用扫描**: 仅执行其他维度检查，节省时间
+
+**输出**:
+- reference_integrity_report.json
+- reference_integrity_report.md
+- 合并到综合审查报告
 
 ### 模式 4: 执行 Eval 机制
 
