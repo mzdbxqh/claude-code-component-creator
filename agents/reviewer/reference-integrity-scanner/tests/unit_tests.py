@@ -64,13 +64,59 @@ class TestYAMLParsing(unittest.TestCase):
 
     def test_parse_valid_frontmatter(self):
         """测试解析有效的 YAML frontmatter"""
-        # TODO: 实现测试
-        pass
+        valid_content = """---
+name: test-skill
+description: "Test skill"
+model: sonnet
+tools: [Read, Write]
+skills:
+  - ccc:lib-antipatterns
+  - ccc:std-component-selection
+---
+
+# Test Skill
+
+Content here...
+"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(valid_content)
+            f.flush()
+
+            from reference_scanner import parse_skill_frontmatter
+            result = parse_skill_frontmatter(f.name)
+
+            # 验证解析成功
+            self.assertTrue(result['success'])
+            self.assertEqual(result['metadata']['name'], 'test-skill')
+            self.assertEqual(len(result['metadata']['skills']), 2)
+            self.assertIn('ccc:lib-antipatterns', result['metadata']['skills'])
+
+        os.unlink(f.name)
 
     def test_parse_invalid_frontmatter(self):
         """测试解析无效的 YAML frontmatter"""
-        # TODO: 实现测试
-        pass
+        invalid_content = """---
+name: test-skill
+description: "Missing closing quote
+tools: [Read, Write]
+---
+"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            f.write(invalid_content)
+            f.flush()
+
+            from reference_scanner import parse_skill_frontmatter
+            result = parse_skill_frontmatter(f.name)
+
+            # 验证返回错误
+            self.assertFalse(result.get('success', False))
+            self.assertEqual(result['error'], 'YAML_PARSE_ERROR')
+            self.assertIn('severity', result)
+            self.assertEqual(result['severity'], 'error')
+
+        os.unlink(f.name)
 
 
 class TestReferenceValidation(unittest.TestCase):

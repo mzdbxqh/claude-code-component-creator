@@ -242,6 +242,136 @@ def enumerate_all_files(plugin_dir):
 - frontmatter 缺失 → 记录 P1 警告，使用默认值
 - skills 字段格式错误 → 记录 P0 错误
 
+**Python 实现示例**:
+
+```python
+import re
+import yaml
+
+
+def parse_skill_frontmatter(file_path):
+    """
+    解析 SKILL.md 的 YAML frontmatter
+
+    参数:
+        file_path: SKILL.md 文件路径
+
+    返回:
+        dict: 解析结果或错误信息
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # 提取 YAML frontmatter
+        yaml_match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+
+        if not yaml_match:
+            return {
+                "success": False,
+                "error": "NO_FRONTMATTER",
+                "severity": "error",
+                "message": f"文件缺少 YAML frontmatter: {file_path}",
+                "fix": "添加 YAML frontmatter 定义元数据"
+            }
+
+        yaml_content = yaml_match.group(1)
+        metadata = yaml.safe_load(yaml_content)
+
+        return {
+            "success": True,
+            "metadata": metadata
+        }
+
+    except yaml.YAMLError as e:
+        return {
+            "success": False,
+            "error": "YAML_PARSE_ERROR",
+            "severity": "error",
+            "message": f"YAML 解析失败: {file_path}",
+            "detail": str(e),
+            "line": e.problem_mark.line if hasattr(e, 'problem_mark') else None,
+            "fix": "检查 YAML 语法，确保缩进正确"
+        }
+
+    except FileNotFoundError:
+        return {
+            "success": False,
+            "error": "FILE_NOT_FOUND",
+            "severity": "error",
+            "message": f"文件不存在: {file_path}",
+            "fix": "检查文件路径或移除对该文件的引用"
+        }
+
+    except PermissionError:
+        return {
+            "success": False,
+            "error": "PERMISSION_DENIED",
+            "severity": "error",
+            "message": f"无权限读取: {file_path}",
+            "fix": f"检查文件权限设置: chmod 644 {file_path}"
+        }
+
+
+def extract_skill_references(metadata):
+    """
+    从元数据中提取 skills 字段引用
+
+    参数:
+        metadata: 解析后的 YAML 元数据
+
+    返回:
+        list: skills 引用列表
+    """
+    if not metadata or 'skills' not in metadata:
+        return []
+
+    skills = metadata['skills']
+    if not isinstance(skills, list):
+        return []
+
+    return skills
+
+
+def parse_all_skill_files(plugin_dir, file_list):
+    """
+    解析所有 SKILL.md 文件
+
+    参数:
+        plugin_dir: 插件根目录
+        file_list: 文件列表
+
+    返回:
+        dict: 组件名 → 引用声明
+    """
+    result = {}
+
+    for file_path in file_list:
+        full_path = os.path.join(plugin_dir, file_path)
+        parse_result = parse_skill_frontmatter(full_path)
+
+        if parse_result.get('success'):
+            metadata = parse_result['metadata']
+            component_name = metadata.get('name', 'unknown')
+
+            result[component_name] = {
+                'type': 'skill' if 'skills/' in file_path else 'subagent',
+                'file_path': file_path,
+                'skills_references': extract_skill_references(metadata),
+                'path_references': [],  # TODO: 从内容中提取
+                'implicit_references': []
+            }
+        else:
+            # 记录解析失败
+            result[file_path] = {
+                'type': 'error',
+                'file_path': file_path,
+                'error': parse_result
+            }
+
+    return result
+```
+
 ### Step 3: 验证引用存在性
 
 **目标**: 检查声明的引用是否存在
