@@ -1,0 +1,43 @@
+id: PY-SEC-005
+name: "不安全的反序列化检测"
+category: python
+severity: ERROR
+description: |
+  检测 pickle.load 处理不可信数据，可能导致任意代码执行。
+
+rationale: |
+  pickle 反序列化可以执行任意 Python 代码，处理不可信数据极度危险。
+
+detection:
+  type: ast-pattern
+  patterns:
+    - type: function-call
+      module: pickle
+      function: [load, loads]
+
+examples:
+  bad:
+    - code: |
+        import pickle
+        user_data = request.body
+        obj = pickle.load(user_data)  # 危险！
+      reason: "pickle 可以执行任意代码"
+
+  good:
+    - code: |
+        import json
+        user_data = request.body
+        obj = json.loads(user_data)  # 安全
+      reason: "使用 JSON 等安全格式"
+
+remediation: |
+  使用安全的序列化格式:
+  ✅ json.loads(data)
+  ✅ yaml.safe_load(data)
+
+  如果必须使用 pickle，只处理可信数据:
+  ⚠️  确保数据来源可信（内部系统）
+
+references:
+  - "OWASP: Deserialization"
+  - "CWE-502: Deserialization of Untrusted Data"

@@ -1,0 +1,42 @@
+id: PY-SEC-002
+name: "路径遍历检测"
+category: python
+severity: ERROR
+description: |
+  检测未验证的用户输入用于文件路径访问，可能导致路径遍历攻击。
+
+rationale: |
+  用户可以通过 ../ 等路径操作符访问系统任意文件。
+
+detection:
+  type: ast-pattern
+  patterns:
+    - type: function-call
+      function: [open, Path]
+      arg_from_user_input: true
+
+examples:
+  bad:
+    - code: |
+        file_path = request.GET['file']
+        with open(file_path) as f:  # 危险！
+            content = f.read()
+      reason: "用户可以输入 ../../etc/passwd 访问系统文件"
+
+  good:
+    - code: |
+        from pathlib import Path
+        base_dir = Path('/var/app/files')
+        file_path = (base_dir / user_input).resolve()
+        if not file_path.is_relative_to(base_dir):
+            raise ValueError("Invalid path")
+      reason: "验证路径在允许的目录内"
+
+remediation: |
+  1. 使用白名单验证
+  2. 使用 Path.resolve() 和 is_relative_to()
+  3. 禁止 .. 符号
+
+references:
+  - "OWASP: Path Traversal"
+  - "CWE-22: Improper Limitation of a Pathname"

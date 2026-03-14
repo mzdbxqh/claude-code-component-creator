@@ -1,0 +1,19 @@
+id: PY-SEC-009
+name: "不安全的临时文件"
+category: python
+severity: ERROR
+description: "检测使用固定路径 /tmp/ 而非 tempfile 模块"
+detection:
+  type: regex
+  patterns:
+    - "open\\([\"']/tmp/[^\"']+[\"']"
+examples:
+  bad:
+    - code: "open('/tmp/data', 'w')"
+      reason: "竞争条件、可预测路径"
+  good:
+    - code: "import tempfile; f = tempfile.NamedTemporaryFile()"
+      reason: "安全创建临时文件"
+remediation: "使用 tempfile.NamedTemporaryFile()"
+references:
+  - "CWE-377: Insecure Temporary File"

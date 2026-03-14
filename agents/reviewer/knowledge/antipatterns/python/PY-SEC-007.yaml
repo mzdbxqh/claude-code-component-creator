@@ -1,0 +1,21 @@
+id: PY-SEC-007
+name: "文件权限不当"
+category: python
+severity: ERROR
+description: "检测创建文件时权限过宽（如 0o777）"
+detection:
+  type: ast-pattern
+  patterns:
+    - type: function-call
+      function: chmod
+      arg_value: "0o777"
+examples:
+  bad:
+    - code: "os.chmod(file, 0o777)"
+      reason: "任何用户都可读写执行"
+  good:
+    - code: "os.chmod(file, 0o600)"
+      reason: "仅所有者可读写"
+remediation: "使用最小权限原则，如 0o600 或 0o644"
+references:
+  - "CWE-732: Incorrect Permission Assignment"

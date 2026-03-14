@@ -1,0 +1,40 @@
+id: PY-SEC-006
+name: "正则表达式 ReDoS 检测"
+category: python
+severity: ERROR
+description: |
+  检测可能导致 ReDoS (Regular Expression Denial of Service) 的复杂正则表达式。
+
+rationale: |
+  某些正则表达式在处理特定输入时会导致指数级回溯，造成 CPU 耗尽。
+
+detection:
+  type: regex
+  patterns:
+    - '\(\.\*\)\+'      # (.*)+
+    - '\(\.\*\)\*'      # (.*)*
+    - '\([^)]+\)\{[^}]+,[^}]*\}[+*]'  # (x){n,m}+
+
+examples:
+  bad:
+    - code: |
+        import re
+        pattern = re.compile(r'(.*)*')  # 危险！
+        pattern.match(user_input)
+      reason: "输入 'aaaaaaaaaaaaaaaaaaaaaaa!' 会导致长时间计算"
+
+  good:
+    - code: |
+        import re
+        pattern = re.compile(r'.*')  # 安全
+        pattern.match(user_input)
+      reason: "非嵌套量词不会导致 ReDoS"
+
+remediation: |
+  1. 避免嵌套量词
+  2. 使用原子分组
+  3. 设置超时: re.match(pattern, text, timeout=1)
+
+references:
+  - "OWASP: Regular expression Denial of Service"
+  - "CWE-1333: Inefficient Regular Expression Complexity"

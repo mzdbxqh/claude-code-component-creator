@@ -1,0 +1,20 @@
+id: PY-SEC-008
+name: "异常信息泄露"
+category: python
+severity: WARNING
+description: "检测完整堆栈输出到日志或用户界面"
+detection:
+  type: regex
+  patterns:
+    - 'traceback\.format_exc\(\)'
+    - 'traceback\.print_exc\(\)'
+examples:
+  bad:
+    - code: "print(traceback.format_exc())"
+      reason: "泄露内部路径和代码结构"
+  good:
+    - code: "logger.debug(traceback.format_exc())"
+      reason: "仅在调试模式记录详细信息"
+remediation: "生产环境使用通用错误消息"
+references:
+  - "OWASP: Information Exposure"

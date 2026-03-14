@@ -1,0 +1,40 @@
+id: PY-SEC-004
+name: "敏感数据硬编码检测"
+category: python
+severity: ERROR
+description: |
+  检测硬编码的密码、token、API key 等敏感数据。
+
+rationale: |
+  硬编码的敏感数据会被提交到代码仓库，造成泄露风险。
+
+detection:
+  type: regex
+  patterns:
+    - "password\\s*=\\s*[\"'][^\"\\']{3,}[\"']"
+    - "token\\s*=\\s*[\"'][^\"\\']{10,}[\"']"
+    - "api_key\\s*=\\s*[\"'][^\"\\']{10,}[\"']"
+    - "secret\\s*=\\s*[\"'][^\"\\']{10,}[\"']"
+
+examples:
+  bad:
+    - code: |
+        password = "admin123"  # 危险！
+        api_key = "sk-1234567890abcdef"  # 危险！
+      reason: "敏感数据硬编码在源代码中"
+
+  good:
+    - code: |
+        import os
+        password = os.environ['DB_PASSWORD']
+        api_key = os.environ['API_KEY']
+      reason: "从环境变量读取敏感数据"
+
+remediation: |
+  使用环境变量或密钥管理服务:
+  ✅ password = os.getenv('PASSWORD')
+  ✅ from vault import get_secret; api_key = get_secret('api_key')
+
+references:
+  - "OWASP: Sensitive Data Exposure"
+  - "CWE-798: Use of Hard-coded Credentials"

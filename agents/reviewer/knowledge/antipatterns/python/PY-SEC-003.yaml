@@ -1,0 +1,38 @@
+id: PY-SEC-003
+name: "SQL注入检测"
+category: python
+severity: ERROR
+description: |
+  检测字符串拼接构建 SQL 查询，可能导致 SQL 注入攻击。
+
+rationale: |
+  SQL 注入可导致数据泄露、篡改或删除。
+
+detection:
+  type: regex
+  patterns:
+    - '"SELECT .* \+ '
+    - 'f"SELECT .* \{.+\}"'
+    - '%.format\(\).* WHERE'
+
+examples:
+  bad:
+    - code: |
+        query = "SELECT * FROM users WHERE id = " + user_id
+        cursor.execute(query)  # 危险！
+      reason: "user_id 可以是 '1 OR 1=1'"
+
+  good:
+    - code: |
+        query = "SELECT * FROM users WHERE id = %s"
+        cursor.execute(query, (user_id,))  # 安全：参数化查询
+      reason: "使用参数化查询"
+
+remediation: |
+  使用参数化查询或 ORM:
+  ✅ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+  ✅ User.objects.get(id=user_id)  # Django ORM
+
+references:
+  - "OWASP: SQL Injection"
+  - "CWE-89: SQL Injection"

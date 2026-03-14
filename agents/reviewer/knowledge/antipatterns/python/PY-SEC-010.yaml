@@ -1,0 +1,22 @@
+id: PY-SEC-010
+name: "导入路径注入"
+category: python
+severity: ERROR
+description: "检测 sys.path 动态修改"
+detection:
+  type: ast-pattern
+  patterns:
+    - type: attribute-access
+      object: sys
+      attribute: path
+      followed_by: [insert, append]
+examples:
+  bad:
+    - code: "sys.path.insert(0, user_dir)"
+      reason: "可能加载恶意模块"
+  good:
+    - code: "从固定的虚拟环境导入"
+      reason: "不修改 sys.path"
+remediation: "避免动态修改 sys.path，使用虚拟环境"
+references:
+  - "CWE-94: Improper Control of Generation of Code"
