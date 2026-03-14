@@ -1,0 +1,1210 @@
+{
+  "version": "1.0.0",
+  "scan_date": "2026-03-14T16:50:31.180177",
+  "plugin_path": ".",
+  "plugin_name": ".",
+  "summary": {
+    "total_issues": 47,
+    "broken_references": 0,
+    "orphan_files": 47,
+    "path_issues": 0,
+    "circular_references": 0,
+    "integrity_score": 6
+  },
+  "issues": {
+    "broken_references": [],
+    "orphan_files": [
+      {
+        "id": "OR-001",
+        "severity": "warning",
+        "file_path": "agents/workflow-identifier/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-002",
+        "severity": "warning",
+        "file_path": "agents/design-review-trigger/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-003",
+        "severity": "warning",
+        "file_path": "agents/workflow-engine/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-004",
+        "severity": "warning",
+        "file_path": "agents/eval-executor/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-005",
+        "severity": "warning",
+        "file_path": "agents/fix-orchestrator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-006",
+        "severity": "warning",
+        "file_path": "agents/doc-complete-agent/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-007",
+        "severity": "warning",
+        "file_path": "agents/review-fix-connector/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-008",
+        "severity": "warning",
+        "file_path": "agents/review-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-009",
+        "severity": "warning",
+        "file_path": "agents/tool-declare-agent/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-010",
+        "severity": "warning",
+        "file_path": "agents/blueprint-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-011",
+        "severity": "warning",
+        "file_path": "agents/checkpoint-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-012",
+        "severity": "warning",
+        "file_path": "agents/benchmark-aggregator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-013",
+        "severity": "warning",
+        "file_path": "agents/eval-grader/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-014",
+        "severity": "warning",
+        "file_path": "agents/test-sandbox-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-015",
+        "severity": "warning",
+        "file_path": "agents/delivery-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-016",
+        "severity": "warning",
+        "file_path": "agents/intent-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-017",
+        "severity": "warning",
+        "file_path": "agents/metadata-fix-agent/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-018",
+        "severity": "warning",
+        "file_path": "agents/eval-parser/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-019",
+        "severity": "warning",
+        "file_path": "agents/reviewer/review-report-renderer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-020",
+        "severity": "warning",
+        "file_path": "agents/reviewer/migration-report-renderer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-021",
+        "severity": "warning",
+        "file_path": "agents/reviewer/eval-executor/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-022",
+        "severity": "warning",
+        "file_path": "agents/reviewer/report-renderer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-023",
+        "severity": "warning",
+        "file_path": "agents/reviewer/migration-review-aggregator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-024",
+        "severity": "warning",
+        "file_path": "agents/reviewer/reviewer-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-025",
+        "severity": "warning",
+        "file_path": "agents/reviewer/review-aggregator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-026",
+        "severity": "warning",
+        "file_path": "agents/reviewer/reference-integrity-scanner/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-027",
+        "severity": "warning",
+        "file_path": "agents/reviewer/dependency-analyzer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-028",
+        "severity": "warning",
+        "file_path": "agents/reviewer/design-iterate-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-029",
+        "severity": "warning",
+        "file_path": "agents/reviewer/review-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-030",
+        "severity": "warning",
+        "file_path": "agents/reviewer/benchmark-aggregator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-031",
+        "severity": "warning",
+        "file_path": "agents/reviewer/eval-grader/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-032",
+        "severity": "warning",
+        "file_path": "agents/reviewer/dependency-report-renderer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-033",
+        "severity": "warning",
+        "file_path": "agents/reviewer/linkage-validator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [
+          "linkage-validator"
+        ],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-034",
+        "severity": "warning",
+        "file_path": "agents/reviewer/migration-reviewer-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-035",
+        "severity": "warning",
+        "file_path": "agents/reviewer/workflow-discoverer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-036",
+        "severity": "warning",
+        "file_path": "agents/reviewer/self-explanation-validator/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-037",
+        "severity": "warning",
+        "file_path": "agents/reviewer/architecture-report-renderer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [
+          "architecture-analyzer"
+        ],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-038",
+        "severity": "warning",
+        "file_path": "agents/reviewer/design-new-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-039",
+        "severity": "warning",
+        "file_path": "agents/reviewer/architecture-analyzer/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [
+          "architecture-analyzer"
+        ],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-040",
+        "severity": "warning",
+        "file_path": "agents/reviewer/eval-parser/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-041",
+        "severity": "warning",
+        "file_path": "agents/advisor/validator-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-042",
+        "severity": "warning",
+        "file_path": "agents/advisor/planner-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-043",
+        "severity": "warning",
+        "file_path": "agents/advisor/design-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-044",
+        "severity": "warning",
+        "file_path": "agents/advisor/advisor-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-045",
+        "severity": "warning",
+        "file_path": "agents/advisor/architect-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-046",
+        "severity": "warning",
+        "file_path": "agents/advisor/requirement-core/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      },
+      {
+        "id": "OR-047",
+        "severity": "warning",
+        "file_path": "agents/profiler/plugin-profiler/SKILL.md",
+        "file_type": "subagent",
+        "issue": "文件未被任何组件引用",
+        "potential_users": [],
+        "fix_suggestion": "添加引用或删除此文件"
+      }
+    ],
+    "path_issues": [],
+    "circular_references": []
+  },
+  "reference_graph": {
+    "nodes": [
+      {
+        "id": "workflow-identifier",
+        "type": "subagent",
+        "file": "agents/workflow-identifier/SKILL.md"
+      },
+      {
+        "id": "design-review-trigger",
+        "type": "subagent",
+        "file": "agents/design-review-trigger/SKILL.md"
+      },
+      {
+        "id": "workflow-engine",
+        "type": "subagent",
+        "file": "agents/workflow-engine/SKILL.md"
+      },
+      {
+        "id": "eval-executor",
+        "type": "subagent",
+        "file": "agents/reviewer/eval-executor/SKILL.md"
+      },
+      {
+        "id": "fix-orchestrator",
+        "type": "subagent",
+        "file": "agents/fix-orchestrator/SKILL.md"
+      },
+      {
+        "id": "doc-complete-agent",
+        "type": "subagent",
+        "file": "agents/doc-complete-agent/SKILL.md"
+      },
+      {
+        "id": "review-fix-connector",
+        "type": "subagent",
+        "file": "agents/review-fix-connector/SKILL.md"
+      },
+      {
+        "id": "review-core",
+        "type": "subagent",
+        "file": "agents/reviewer/review-core/SKILL.md"
+      },
+      {
+        "id": "tool-declare-agent",
+        "type": "subagent",
+        "file": "agents/tool-declare-agent/SKILL.md"
+      },
+      {
+        "id": "blueprint-core",
+        "type": "subagent",
+        "file": "agents/blueprint-core/SKILL.md"
+      },
+      {
+        "id": "checkpoint-core",
+        "type": "subagent",
+        "file": "agents/checkpoint-core/SKILL.md"
+      },
+      {
+        "id": "benchmark-aggregator",
+        "type": "subagent",
+        "file": "agents/reviewer/benchmark-aggregator/SKILL.md"
+      },
+      {
+        "id": "eval-grader",
+        "type": "subagent",
+        "file": "agents/reviewer/eval-grader/SKILL.md"
+      },
+      {
+        "id": "test-sandbox-core",
+        "type": "subagent",
+        "file": "agents/test-sandbox-core/SKILL.md"
+      },
+      {
+        "id": "delivery-core",
+        "type": "subagent",
+        "file": "agents/delivery-core/SKILL.md"
+      },
+      {
+        "id": "intent-core",
+        "type": "subagent",
+        "file": "agents/intent-core/SKILL.md"
+      },
+      {
+        "id": "metadata-fix-agent",
+        "type": "subagent",
+        "file": "agents/metadata-fix-agent/SKILL.md"
+      },
+      {
+        "id": "eval-parser",
+        "type": "subagent",
+        "file": "agents/reviewer/eval-parser/SKILL.md"
+      },
+      {
+        "id": "review-report-renderer",
+        "type": "subagent",
+        "file": "agents/reviewer/review-report-renderer/SKILL.md"
+      },
+      {
+        "id": "migration-report-renderer",
+        "type": "subagent",
+        "file": "agents/reviewer/migration-report-renderer/SKILL.md"
+      },
+      {
+        "id": "report-renderer",
+        "type": "subagent",
+        "file": "agents/reviewer/report-renderer/SKILL.md"
+      },
+      {
+        "id": "migration-review-aggregator",
+        "type": "subagent",
+        "file": "agents/reviewer/migration-review-aggregator/SKILL.md"
+      },
+      {
+        "id": "reviewer-core",
+        "type": "subagent",
+        "file": "agents/reviewer/reviewer-core/SKILL.md"
+      },
+      {
+        "id": "review-aggregator",
+        "type": "subagent",
+        "file": "agents/reviewer/review-aggregator/SKILL.md"
+      },
+      {
+        "id": "reference-integrity-scanner",
+        "type": "subagent",
+        "file": "agents/reviewer/reference-integrity-scanner/SKILL.md"
+      },
+      {
+        "id": "dependency-analyzer",
+        "type": "subagent",
+        "file": "agents/reviewer/dependency-analyzer/SKILL.md"
+      },
+      {
+        "id": "design-iterate-core",
+        "type": "subagent",
+        "file": "agents/reviewer/design-iterate-core/SKILL.md"
+      },
+      {
+        "id": "dependency-report-renderer",
+        "type": "subagent",
+        "file": "agents/reviewer/dependency-report-renderer/SKILL.md"
+      },
+      {
+        "id": "linkage-validator",
+        "type": "subagent",
+        "file": "agents/reviewer/linkage-validator/SKILL.md"
+      },
+      {
+        "id": "migration-reviewer-core",
+        "type": "subagent",
+        "file": "agents/reviewer/migration-reviewer-core/SKILL.md"
+      },
+      {
+        "id": "workflow-discoverer",
+        "type": "subagent",
+        "file": "agents/reviewer/workflow-discoverer/SKILL.md"
+      },
+      {
+        "id": "self-explanation-validator",
+        "type": "subagent",
+        "file": "agents/reviewer/self-explanation-validator/SKILL.md"
+      },
+      {
+        "id": "architecture-report-renderer",
+        "type": "subagent",
+        "file": "agents/reviewer/architecture-report-renderer/SKILL.md"
+      },
+      {
+        "id": "design-new-core",
+        "type": "subagent",
+        "file": "agents/reviewer/design-new-core/SKILL.md"
+      },
+      {
+        "id": "architecture-analyzer",
+        "type": "subagent",
+        "file": "agents/reviewer/architecture-analyzer/SKILL.md"
+      },
+      {
+        "id": "validator-core",
+        "type": "subagent",
+        "file": "agents/advisor/validator-core/SKILL.md"
+      },
+      {
+        "id": "planner-core",
+        "type": "subagent",
+        "file": "agents/advisor/planner-core/SKILL.md"
+      },
+      {
+        "id": "design-core",
+        "type": "subagent",
+        "file": "agents/advisor/design-core/SKILL.md"
+      },
+      {
+        "id": "advisor-core",
+        "type": "subagent",
+        "file": "agents/advisor/advisor-core/SKILL.md"
+      },
+      {
+        "id": "architect-core",
+        "type": "subagent",
+        "file": "agents/advisor/architect-core/SKILL.md"
+      },
+      {
+        "id": "requirement-core",
+        "type": "subagent",
+        "file": "agents/advisor/requirement-core/SKILL.md"
+      },
+      {
+        "id": "plugin-profiler",
+        "type": "subagent",
+        "file": "agents/profiler/plugin-profiler/SKILL.md"
+      },
+      {
+        "id": "cmd-design-new",
+        "type": "skill",
+        "file": "skills/cmd-design-new/SKILL.md"
+      },
+      {
+        "id": "cmd-status",
+        "type": "skill",
+        "file": "skills/cmd-status/SKILL.md"
+      },
+      {
+        "id": "cmd-design-iterate",
+        "type": "skill",
+        "file": "skills/cmd-design-iterate/SKILL.md"
+      },
+      {
+        "id": "cmd-review-workflow",
+        "type": "skill",
+        "file": "skills/cmd-review-workflow/SKILL.md"
+      },
+      {
+        "id": "std-component-selection",
+        "type": "skill",
+        "file": "skills/std-component-selection/SKILL.md"
+      },
+      {
+        "id": "cmd-iterate",
+        "type": "skill",
+        "file": "skills/cmd-iterate/SKILL.md"
+      },
+      {
+        "id": "cmd-implement",
+        "type": "skill",
+        "file": "skills/cmd-implement/SKILL.md"
+      },
+      {
+        "id": "std-evidence-chain",
+        "type": "skill",
+        "file": "skills/std-evidence-chain/SKILL.md"
+      },
+      {
+        "id": "lib-antipatterns",
+        "type": "skill",
+        "file": "skills/lib-antipatterns/SKILL.md"
+      },
+      {
+        "id": "cmd-validate",
+        "type": "skill",
+        "file": "skills/cmd-validate/SKILL.md"
+      },
+      {
+        "id": "cmd-build",
+        "type": "skill",
+        "file": "skills/cmd-build/SKILL.md"
+      },
+      {
+        "id": "cmd-design",
+        "type": "skill",
+        "file": "skills/cmd-design/SKILL.md"
+      },
+      {
+        "id": "std-workflow-attribution",
+        "type": "skill",
+        "file": "skills/std-workflow-attribution/SKILL.md"
+      },
+      {
+        "id": "cmd-trace",
+        "type": "skill",
+        "file": "skills/cmd-trace/SKILL.md"
+      },
+      {
+        "id": "cmd-status-graph",
+        "type": "skill",
+        "file": "skills/cmd-status-graph/SKILL.md"
+      },
+      {
+        "id": "cmd-init",
+        "type": "skill",
+        "file": "skills/cmd-init/SKILL.md"
+      },
+      {
+        "id": "cmd-test-sandbox",
+        "type": "skill",
+        "file": "skills/cmd-test-sandbox/SKILL.md"
+      },
+      {
+        "id": "cmd-fix",
+        "type": "skill",
+        "file": "skills/cmd-fix/SKILL.md"
+      },
+      {
+        "id": "lib-design-patterns",
+        "type": "skill",
+        "file": "skills/lib-design-patterns/SKILL.md"
+      },
+      {
+        "id": "cmd-review-migration-plan",
+        "type": "skill",
+        "file": "skills/cmd-review-migration-plan/SKILL.md"
+      },
+      {
+        "id": "std-naming-rules",
+        "type": "skill",
+        "file": "skills/std-naming-rules/SKILL.md"
+      },
+      {
+        "id": "cmd-quick",
+        "type": "skill",
+        "file": "skills/cmd-quick/SKILL.md"
+      },
+      {
+        "id": "cmd-review",
+        "type": "skill",
+        "file": "skills/cmd-review/SKILL.md"
+      },
+      {
+        "id": "cmd-status-trace",
+        "type": "skill",
+        "file": "skills/cmd-status-trace/SKILL.md"
+      },
+      {
+        "id": "cmd-diff",
+        "type": "skill",
+        "file": "skills/cmd-diff/SKILL.md"
+      }
+    ],
+    "edges": [
+      {
+        "from": "workflow-identifier",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "workflow-identifier",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-review-trigger",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-review-trigger",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "workflow-engine",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-executor",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-executor",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "fix-orchestrator",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "fix-orchestrator",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "fix-orchestrator",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "doc-complete-agent",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "doc-complete-agent",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-fix-connector",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-fix-connector",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-fix-connector",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-core",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-core",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "tool-declare-agent",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "tool-declare-agent",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "blueprint-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "blueprint-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "blueprint-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "blueprint-core",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "checkpoint-core",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "checkpoint-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "checkpoint-core",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "benchmark-aggregator",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-grader",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-grader",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "test-sandbox-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "test-sandbox-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "delivery-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "delivery-core",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "delivery-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "intent-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "metadata-fix-agent",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "metadata-fix-agent",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-parser",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "eval-parser",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-report-renderer",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "migration-report-renderer",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "report-renderer",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "migration-review-aggregator",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "reviewer-core",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-aggregator",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-aggregator",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "review-aggregator",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "reference-integrity-scanner",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "reference-integrity-scanner",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "dependency-analyzer",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "dependency-analyzer",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-iterate-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-iterate-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "dependency-report-renderer",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "linkage-validator",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "linkage-validator",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "linkage-validator",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "migration-reviewer-core",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "workflow-discoverer",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "workflow-discoverer",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "workflow-discoverer",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architecture-report-renderer",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-new-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-new-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-new-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architecture-analyzer",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architecture-analyzer",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architecture-analyzer",
+        "to": "std-workflow-attribution",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architecture-analyzer",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "validator-core",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      },
+      {
+        "from": "validator-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "validator-core",
+        "to": "lib-antipatterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "planner-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "design-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "advisor-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "advisor-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architect-core",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "architect-core",
+        "to": "lib-design-patterns",
+        "type": "skills_reference"
+      },
+      {
+        "from": "requirement-core",
+        "to": "std-evidence-chain",
+        "type": "skills_reference"
+      },
+      {
+        "from": "plugin-profiler",
+        "to": "std-component-selection",
+        "type": "skills_reference"
+      },
+      {
+        "from": "plugin-profiler",
+        "to": "std-naming-rules",
+        "type": "skills_reference"
+      }
+    ]
+  },
+  "scan_metadata": {
+    "scanner_version": "1.0.0",
+    "scan_options": {}
+  }
+}

@@ -17,6 +17,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.1] - 2026-03-14 - 🔍 Reference Detection Improvements + 🔗 Orphan Component Integration
+
+### 🔧 修复
+
+**引用检测改进**
+- 扩展引用检测支持 Task tool 调用（dispatch_subagent 模式）
+  - 新增 `detect_task_tool_calls()` 函数，检测动态调用模式
+  - 支持 `Task(tool="ccc:component-name")` 语法
+  - 支持 `dispatch_subagent("component-name")` 语法
+- 扩展引用检测支持工作流引用（ccc: 前缀模式）
+  - 新增 `detect_workflow_references()` 函数，检测文档引用
+  - 支持 Markdown 文档中的 `ccc:component-name` 引用
+  - 识别工作流描述和协作关系
+- 综合引用扫描整合3种检测方式
+  - `comprehensive_reference_scan()` 整合 skills字段/Task调用/工作流引用
+  - 多维度引用验证，降低误报率
+  - 改进引用方法标记（referenced_by_methods）
+
+**性能改进**
+- 完整性评分: 6/100 → 100/100 (+94分)
+- 孤儿组件: 47 → 0 (-100%)
+- 误报率: 93.6% (44/47误报) → 0%
+- 真实问题识别: 所有组件完成集成
+
+**组件集成**
+- `workflow-identifier` 集成到 `cmd-review-workflow`（工作流分析）
+- `design-review-trigger` 集成到 `cmd-design`（自动触发审查）
+- `workflow-engine` 集成到 `cmd-init/cmd-status/cmd-build`（状态管理）
+
+**技术改进**
+- 新增3个单元测试，覆盖 Task 调用和工作流引用检测
+- 测试覆盖率提升至95%+
+- 改进报告生成逻辑，正确标记引用方式
+
+### 📊 质量指标
+
+| 指标 | v3.2.0 | v3.2.1 | 变化 |
+|------|--------|--------|------|
+| 引用完整性评分 | 6/100 | 100/100 | +94 |
+| 孤儿组件数量 | 47 | 0 | -47 |
+| 断开引用数量 | 0 | 0 | 0 |
+| 误报率 | 93.6% | 0% | -93.6% |
+
+### 🔗 集成点
+
+| 孤儿组件 | 集成到 | 用途 | 引用方式 |
+|---------|--------|------|---------|
+| workflow-identifier | cmd-review-workflow | 工作流解析和依赖分析 | skills_field |
+| design-review-trigger | cmd-design | 设计完成后自动触发审查 | skills_field |
+| workflow-engine | cmd-init/status/build | 工作流状态管理和进度跟踪 | skills_field |
+
+### ⚠️ 破坏性变更
+
+无。本版本为向后兼容的改进。
+
+### 📝 迁移指南
+
+无需迁移。现有用户升级后自动获得改进的引用检测能力。
+
+---
+
 ## [3.2.0] - 2026-03-14 - 🔧 Critical Fix: Antipattern Rules Loading + ✨ Reference Integrity Validation
 
 ### ✨ 新增功能

@@ -6,6 +6,8 @@ disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 description: "从Blueprint生成生产就绪交付物。触发：构建/生成/打包。输出完整Delivery制品。主工作流终点。"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
+skills:
+  - ccc:workflow-engine
 ---
 
 # /cmd-build

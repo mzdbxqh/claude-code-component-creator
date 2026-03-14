@@ -6,6 +6,8 @@ disable-model-invocation: true
 allowed-tools: [Read, Glob, Grep]
 description: "显示工作流状态和制品进度。触发：状态/进度/查询。输出制品列表和推荐下一步。"
 argument-hint: "[--project-id=current] [--lang=zh-cn|en-us|ja-jp]"
+skills:
+  - ccc:workflow-engine
 ---
 
 # /cmd-status

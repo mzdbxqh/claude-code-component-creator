@@ -6,6 +6,8 @@ context: fork
 disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 argument-hint: "[requirement-description] [--lang=zh-cn|en-us|ja-jp]"
+skills:
+  - ccc:workflow-engine
 ---
 
 # /cmd-init
