@@ -309,8 +309,43 @@ class TestReportGeneration(unittest.TestCase):
 
     def test_generate_markdown_report(self):
         """测试生成 Markdown 报告"""
-        # TODO: 实现测试
-        pass
+        scan_results = {
+            'broken_references': [
+                {
+                    'id': 'BR-001',
+                    'severity': 'error',
+                    'source_file': 'agents/test/SKILL.md',
+                    'source_line': 12,
+                    'declared_reference': 'ccc:missing',
+                    'issue': '目标文件不存在',
+                    'fix_suggestion': '创建文件或移除引用'
+                }
+            ],
+            'orphan_files': [],
+            'path_issues': [],
+            'cycles': []
+        }
+
+        from reference_scanner import generate_markdown_report
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+            report_path = f.name
+
+        generate_markdown_report(scan_results, '/test/plugin', report_path)
+
+        # 验证报告生成
+        self.assertTrue(os.path.exists(report_path))
+
+        with open(report_path, 'r') as f:
+            content = f.read()
+
+        # 验证报告内容
+        self.assertIn('# 引用完整性扫描报告', content)
+        self.assertIn('完整性评分', content)
+        self.assertIn('BR-001', content)
+        self.assertIn('agents/test/SKILL.md:12', content)
+
+        os.unlink(report_path)
 
 
 if __name__ == '__main__':

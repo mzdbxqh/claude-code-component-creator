@@ -611,3 +611,117 @@ def generate_json_report(scan_results, plugin_path, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 
+
+def generate_markdown_report(scan_results, plugin_path, output_path):
+    """
+    生成 Markdown 报告
+
+    Args:
+        scan_results: 扫描结果
+        plugin_path: 插件路径
+        output_path: 输出文件路径
+    """
+    broken_refs = scan_results.get('broken_references', [])
+    orphan_files = scan_results.get('orphan_files', [])
+    path_issues = scan_results.get('path_issues', [])
+    cycles = scan_results.get('cycles', [])
+
+    integrity_score = calculate_integrity_score(scan_results)
+    score_grade = 'A' if integrity_score >= 90 else 'B' if integrity_score >= 80 else 'C'
+
+    # 构建 Markdown 内容
+    lines = [
+        '# 引用完整性扫描报告',
+        '',
+        f'**扫描日期**: {datetime.now().strftime("%Y-%m-%d")}',
+        f'**插件路径**: {plugin_path}',
+        f'**完整性评分**: {integrity_score}/100 ({score_grade})',
+        '',
+        '---',
+        '',
+        '## 执行摘要',
+        '',
+        '### 问题统计',
+        '',
+        '| 严重性 | 数量 | 说明 |',
+        '|--------|------|------|',
+        f'| **Error** | {len(broken_refs) + len(cycles)} | 必须修复 |',
+        f'| **Warning** | {len(orphan_files)} | 建议修复 |',
+        f'| **Info** | {len(path_issues)} | 可选优化 |',
+        '',
+        '---',
+        ''
+    ]
+
+    # 断开引用章节
+    if broken_refs:
+        lines.extend([
+            '## 🔴 断开的引用 ({} 个)'.format(len(broken_refs)),
+            '',
+        ])
+
+        for ref in broken_refs:
+            source_file = ref.get('source_file', 'unknown')
+            source_line = ref.get('source_line', '')
+            location = f"{source_file}:{source_line}" if source_line else source_file
+
+            lines.extend([
+                f"### {ref['id']}: {ref.get('declared_reference', 'unknown')}",
+                '',
+                f"**文件**: `{location}`",
+                '',
+                f"**问题**: {ref.get('issue', '')}",
+                '',
+                '**修复建议**:',
+                ref.get('fix_suggestion', ''),
+                '',
+                '---',
+                ''
+            ])
+
+    # 孤儿文件章节
+    if orphan_files:
+        lines.extend([
+            '## ⚠️ 孤儿文件 ({} 个)'.format(len(orphan_files)),
+            '',
+        ])
+
+        for orphan in orphan_files:
+            lines.extend([
+                f"### {orphan['id']}: {orphan.get('file_path', 'unknown')}",
+                '',
+                f"**问题**: {orphan.get('issue', '')}",
+                '',
+                f"**潜在使用者**: {', '.join(orphan.get('potential_users', []))}",
+                '',
+                f"**修复建议**: {orphan.get('fix_suggestion', '')}",
+                '',
+                '---',
+                ''
+            ])
+
+    # 循环引用章节
+    if cycles:
+        lines.extend([
+            '## 🔴 循环引用 ({} 个)'.format(len(cycles)),
+            '',
+        ])
+
+        for cycle in cycles:
+            cycle_path = cycle.get('cycle_path', [])
+            path_str = ' → '.join(cycle_path)
+
+            lines.extend([
+                f"### 循环路径: {path_str}",
+                '',
+                f"**修复建议**: {cycle.get('fix_suggestion', '')}",
+                '',
+                '---',
+                ''
+            ])
+
+    # 写入文件
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(lines))
+
