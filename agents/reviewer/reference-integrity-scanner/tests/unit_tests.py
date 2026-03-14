@@ -203,13 +203,55 @@ class TestCircularReferenceDetection(unittest.TestCase):
 
     def test_detect_simple_cycle(self):
         """测试检测简单循环（A→B→A）"""
-        # TODO: 实现测试
-        pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.makedirs(f"{tmpdir}/agents/agent-a")
+            os.makedirs(f"{tmpdir}/agents/agent-b")
+
+            # A 引用 B
+            with open(f"{tmpdir}/agents/agent-a/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-a\nskills:\n  - ccc:agent-b\n---\n")
+
+            # B 引用 A（形成循环）
+            with open(f"{tmpdir}/agents/agent-b/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-b\nskills:\n  - ccc:agent-a\n---\n")
+
+            from reference_scanner import build_dependency_graph, detect_cycles
+            graph = build_dependency_graph(tmpdir)
+            cycles = detect_cycles(graph)
+
+            # 验证检测到循环
+            self.assertEqual(len(cycles), 1)
+            self.assertIn('agent-a', cycles[0]['cycle_path'])
+            self.assertIn('agent-b', cycles[0]['cycle_path'])
+            self.assertEqual(cycles[0]['severity'], 'error')
 
     def test_detect_complex_cycle(self):
         """测试检测复杂循环（A→B→C→A）"""
-        # TODO: 实现测试
-        pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.makedirs(f"{tmpdir}/agents/agent-a")
+            os.makedirs(f"{tmpdir}/agents/agent-b")
+            os.makedirs(f"{tmpdir}/agents/agent-c")
+
+            # A → B
+            with open(f"{tmpdir}/agents/agent-a/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-a\nskills:\n  - ccc:agent-b\n---\n")
+
+            # B → C
+            with open(f"{tmpdir}/agents/agent-b/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-b\nskills:\n  - ccc:agent-c\n---\n")
+
+            # C → A（形成循环）
+            with open(f"{tmpdir}/agents/agent-c/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-c\nskills:\n  - ccc:agent-a\n---\n")
+
+            from reference_scanner import build_dependency_graph, detect_cycles
+            graph = build_dependency_graph(tmpdir)
+            cycles = detect_cycles(graph)
+
+            # 验证检测到循环
+            self.assertEqual(len(cycles), 1)
+            cycle_path = cycles[0]['cycle_path']
+            self.assertEqual(len([c for c in cycle_path if c in ['agent-a', 'agent-b', 'agent-c']]), 4)  # A→B→C→A
 
 
 class TestReportGeneration(unittest.TestCase):

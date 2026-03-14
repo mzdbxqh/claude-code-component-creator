@@ -414,3 +414,124 @@ def validate_references(plugin_dir):
         'orphan_files': orphan_files,
         'path_issues': []
     }
+
+
+def build_dependency_graph(plugin_dir):
+    """
+    构建引用依赖图
+
+    参数:
+        plugin_dir: 插件根目录
+
+    返回:
+        dict: {'nodes': [...], 'edges': [...]}
+    """
+    file_manifest = enumerate_all_files(plugin_dir)
+    all_skills = file_manifest['components']['agents'] + file_manifest['components']['skills']
+    parsed_components = parse_all_skill_files(plugin_dir, all_skills)
+
+    graph = {
+        'nodes': [],
+        'edges': []
+    }
+
+    # 添加节点
+    for component_name, component_data in parsed_components.items():
+        if component_data.get('type') == 'error':
+            continue
+
+        graph['nodes'].append({
+            'id': component_name,
+            'type': component_data.get('type'),
+            'file': component_data.get('file_path')
+        })
+
+    # 添加边（引用关系）
+    for component_name, component_data in parsed_components.items():
+        if component_data.get('type') == 'error':
+            continue
+
+        skills_refs = component_data.get('skills_references', [])
+
+        for ref in skills_refs:
+            # 提取目标组件名
+            target_name = ref.split(':')[-1] if ':' in ref else ref
+
+            graph['edges'].append({
+                'from': component_name,
+                'to': target_name,
+                'type': 'skills_reference'
+            })
+
+    return graph
+
+
+def detect_cycles(graph):
+    """
+    检测引用图中的循环依赖
+
+    参数:
+        graph: 依赖图 {'nodes': [...], 'edges': [...]}
+
+    返回:
+        list: 检测到的循环列表
+    """
+    # 构建邻接表
+    adj = {}
+    for node in graph['nodes']:
+        adj[node['id']] = []
+
+    for edge in graph['edges']:
+        from_node = edge['from']
+        to_node = edge['to']
+        if from_node in adj and to_node in adj:
+            adj[from_node].append(to_node)
+
+    # DFS 检测循环
+    visited = set()
+    stack = []
+    cycles = []
+
+    def dfs(node, path):
+        if len(path) > 20:
+            # 深度过大
+            return [{
+                'code': 'EXCESSIVE_DEPTH',
+                'severity': 'warning',
+                'message': f"引用深度过大: {len(path)} 层",
+                'cycle_path': path
+            }]
+
+        if node in stack:
+            # 检测到循环
+            cycle_start = stack.index(node)
+            cycle = stack[cycle_start:] + [node]
+            return [{
+                'code': 'CIRCULAR_REFERENCE',
+                'severity': 'error',
+                'message': "检测到循环引用",
+                'cycle_path': cycle,
+                'cycle_length': len(cycle) - 1,
+                'affected_components': cycle[:-1],
+                'fix_suggestion': f"打破循环：移除 {cycle[-2]} → {cycle[-1]} 的引用"
+            }]
+
+        if node in visited:
+            return []
+
+        visited.add(node)
+        stack.append(node)
+
+        node_cycles = []
+        for child in adj.get(node, []):
+            node_cycles.extend(dfs(child, path + [node]))
+
+        stack.pop()
+        return node_cycles
+
+    for node in adj.keys():
+        if node not in visited:
+            cycles.extend(dfs(node, []))
+
+    return cycles
+
