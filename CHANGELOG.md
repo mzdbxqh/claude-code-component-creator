@@ -9,6 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🚀 新增
+
+**代码审查规则扩展 (+53条规则, 163→216)**
+- **Python 脚本分析** (20条规则)
+  - 安全规则 (10条): PY-SEC-001~010
+    - 命令注入检测 (subprocess shell=True)
+    - SQL注入检测 (字符串拼接)
+    - 硬编码敏感数据 (password/api_key/token)
+    - 不安全反序列化 (pickle/yaml.load)
+    - 路径遍历、ReDoS、文件权限、异常泄露、临时文件、导入注入
+  - 质量规则 (10条): PY-QUAL-001~010
+    - 文档字符串、函数长度、复杂度、参数数量
+    - 未使用导入、裸except、全局变量、魔法数字、类型提示、调试print
+
+- **Shell 脚本分析** (15条规则)
+  - 安全规则 (8条): SH-SEC-001~008
+    - eval命令注入、路径遍历、未引用变量、缺少set -e
+    - 不安全临时文件、sudo滥用、危险rm -rf、source不可信脚本
+  - 质量规则 (7条): SH-QUAL-001~007
+    - shebang、错误处理、脚本长度、未使用函数、注释、硬编码路径、shellcheck建议
+
+- **测试定义分析** (10条规则): TEST-001~010
+  - 测试完整性: 缺少用例、断言不完整、覆盖率低、缺少负面测试
+  - 测试质量: 命名清晰度、描述完整性、断言多样性、超时设置、前置条件、JSON格式
+
+- **文档引用分析** (8条规则): DOC-REF-001~008
+  - 链接完整性: Markdown链接、图片引用、@references、章节锚点、外部链接
+  - 内容准确性: 代码示例过时、文档版本一致性、示例语法错误
+
+**分析器基础设施**
+- PythonScriptAnalyzer: AST解析Python代码,检测安全和质量问题
+- ShellScriptAnalyzer: 正则匹配Shell脚本,检测安全和质量问题
+- TestDefinitionAnalyzer: JSON解析测试定义,检测测试质量问题
+- FileTypeDetector: 智能文件类型检测和分析器路由 (支持扩展名、shebang、特殊文件)
+
+**测试覆盖**
+- 40个单元测试 (10 Python + 11 Shell + 10 Test + 9 FileDetector)
+- 4个集成测试 (完整工作流验证)
+- 3个测试夹具 (vulnerable_script.py, bad_deploy.sh, poor_tests.json)
+- **总计: 44个测试全部通过**
+
 ### Planned
 - MCP Server integration for quality checks
 - Performance optimization for large projects
