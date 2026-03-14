@@ -147,8 +147,55 @@ skills:
 
     def test_detect_orphan_file(self):
         """测试检测孤儿文件"""
-        # TODO: 实现测试
-        pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建三个 skill：
+            # - used-skill: 被 test-agent 引用
+            # - orphan-skill: 未被引用（孤儿）
+            # - cmd-entry: 命令入口（跳过）
+            os.makedirs(f"{tmpdir}/skills/used-skill")
+            os.makedirs(f"{tmpdir}/skills/orphan-skill")
+            os.makedirs(f"{tmpdir}/skills/cmd-entry")
+            os.makedirs(f"{tmpdir}/agents/test-agent")
+
+            # 被引用的 skill
+            with open(f"{tmpdir}/skills/used-skill/SKILL.md", 'w') as f:
+                f.write("---\nname: used-skill\n---\n")
+
+            # 孤儿 skill
+            with open(f"{tmpdir}/skills/orphan-skill/SKILL.md", 'w') as f:
+                f.write("---\nname: orphan-skill\n---\n")
+
+            # cmd 入口（应该被跳过）
+            with open(f"{tmpdir}/skills/cmd-entry/SKILL.md", 'w') as f:
+                f.write("---\nname: cmd-entry\n---\n")
+
+            # 引用 used-skill 的 agent（自身也被 cmd-entry 引用，避免成为孤儿）
+            agent_content = """---
+name: test-agent
+skills:
+  - ccc:used-skill
+---
+"""
+            with open(f"{tmpdir}/agents/test-agent/SKILL.md", 'w') as f:
+                f.write(agent_content)
+
+            from reference_scanner import validate_references
+            result = validate_references(tmpdir)
+
+            # 验证检测到孤儿文件
+            # 应该只有 orphan-skill（cmd-entry 被跳过，test-agent 未被引用但也算孤儿）
+            # 实际上有两个孤儿：orphan-skill 和 test-agent
+            orphan_paths = [o['file_path'] for o in result['orphan_files']]
+
+            # orphan-skill 应该在孤儿列表中
+            self.assertTrue(any('orphan-skill' in path for path in orphan_paths))
+
+            # cmd-entry 不应该在孤儿列表中
+            self.assertFalse(any('cmd-entry' in path for path in orphan_paths))
+
+            # 检查 orphan-skill 的详细信息
+            orphan_skill = next(o for o in result['orphan_files'] if 'orphan-skill' in o['file_path'])
+            self.assertEqual(orphan_skill['severity'], 'warning')
 
 
 class TestCircularReferenceDetection(unittest.TestCase):

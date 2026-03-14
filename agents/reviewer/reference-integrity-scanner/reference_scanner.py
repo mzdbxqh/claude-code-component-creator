@@ -305,9 +305,33 @@ def resolve_skill_reference(reference, plugin_dir):
     return None
 
 
+def identify_potential_users(orphan_file):
+    """
+    识别孤儿文件的潜在使用者
+
+    参数:
+        orphan_file: 孤儿文件路径
+
+    返回:
+        list: 潜在使用者列表
+    """
+    # 简单启发式规则
+    potential = []
+
+    # 根据文件名推断
+    if 'architecture' in orphan_file:
+        potential.append('architecture-analyzer')
+    elif 'linkage' in orphan_file:
+        potential.append('linkage-validator')
+    elif 'antipatterns' in orphan_file:
+        potential.append('review-core')
+
+    return potential
+
+
 def validate_references(plugin_dir):
     """
-    验证所有引用的有效性
+    验证所有引用的有效性（扩展版）
 
     参数:
         plugin_dir: 插件根目录
@@ -347,8 +371,46 @@ def validate_references(plugin_dir):
                 })
                 issue_id += 1
 
+    # 反向验证：检测孤儿文件
+    orphan_files = []
+    orphan_id = 1
+
+    # 建立引用者映射
+    referenced_files = set()
+
+    for component_name, component_data in parsed_components.items():
+        if component_data.get('type') == 'error':
+            continue
+
+        skills_refs = component_data.get('skills_references', [])
+
+        for ref in skills_refs:
+            target_path = resolve_skill_reference(ref, plugin_dir)
+            if target_path:
+                # 转换为相对路径
+                rel_path = os.path.relpath(target_path, plugin_dir)
+                referenced_files.add(rel_path)
+
+    # 检查每个文件是否被引用
+    for skill_file in all_skills:
+        if skill_file not in referenced_files:
+            # 跳过顶层入口（通常不被其他组件引用）
+            if 'cmd-' in skill_file:
+                continue
+
+            orphan_files.append({
+                'id': f"OR-{orphan_id:03d}",
+                'severity': 'warning',
+                'file_path': skill_file,
+                'file_type': 'skill' if 'skills/' in skill_file else 'subagent',
+                'issue': '文件未被任何组件引用',
+                'potential_users': identify_potential_users(skill_file),
+                'fix_suggestion': '添加引用或删除此文件'
+            })
+            orphan_id += 1
+
     return {
         'broken_references': broken_references,
-        'orphan_files': [],  # TODO: 在下一个任务中实现
+        'orphan_files': orphan_files,
         'path_issues': []
     }
