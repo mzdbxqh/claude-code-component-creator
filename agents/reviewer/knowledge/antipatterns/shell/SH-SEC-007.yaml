@@ -1,0 +1,8 @@
+id: SH-SEC-007
+name: "危险 rm -rf"
+category: shell
+severity: ERROR
+description: "检测 rm -rf 使用变量路径"
+detection:
+  pattern: 'rm\s+-[a-z]*r[a-z]*f\s+.*\$'
+remediation: "验证路径变量或添加安全检查"

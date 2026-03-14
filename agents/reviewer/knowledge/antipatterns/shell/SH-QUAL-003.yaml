@@ -1,0 +1,9 @@
+id: SH-QUAL-003
+name: "脚本过长"
+category: shell
+severity: WARNING
+description: "脚本超过 200 行"
+detection:
+  type: line-count
+  threshold: 200
+remediation: "拆分为多个函数或独立脚本"

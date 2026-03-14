@@ -1,0 +1,9 @@
+id: SH-SEC-002
+name: "路径遍历检测"
+category: shell
+severity: ERROR
+description: "检测 cd 到用户输入路径"
+detection:
+  type: regex
+  pattern: '\bcd\s+\$'
+remediation: "验证路径或使用绝对路径"

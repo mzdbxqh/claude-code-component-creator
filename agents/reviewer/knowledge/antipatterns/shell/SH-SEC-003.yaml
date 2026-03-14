@@ -1,0 +1,17 @@
+id: SH-SEC-003
+name: "未引用变量"
+category: shell
+severity: ERROR
+description: '检测 $VAR 而非 "$VAR"'
+rationale: "未引用变量可能导致词分割和路径展开"
+detection:
+  type: regex
+  pattern: '\$[A-Z_][A-Z0-9_]*(?!["\}])'
+examples:
+  bad:
+    - code: "rm -rf $DIR"
+      reason: "DIR 包含空格时会被分割"
+  good:
+    - code: 'rm -rf "$DIR"'
+      reason: "引号保护变量"
+remediation: '始终使用 "$VAR" 而非 $VAR'

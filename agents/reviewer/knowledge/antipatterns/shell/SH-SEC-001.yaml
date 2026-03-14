@@ -1,0 +1,21 @@
+id: SH-SEC-001
+name: "Shell 命令注入检测"
+category: shell
+severity: ERROR
+description: "检测 eval 使用变量，可能导致命令注入"
+rationale: "eval 会执行字符串中的任意命令"
+detection:
+  type: regex
+  patterns:
+    - '\beval\s+\$'
+    - '\beval\s+"[^"]*\$'
+examples:
+  bad:
+    - code: "eval $USER_CMD"
+      reason: "USER_CMD 可以是任意命令"
+  good:
+    - code: '直接执行命令，不使用 eval'
+      reason: "避免使用 eval"
+remediation: "避免使用 eval，直接执行命令"
+references:
+  - "OWASP: Command Injection"

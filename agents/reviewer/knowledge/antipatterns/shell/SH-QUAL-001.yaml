@@ -1,0 +1,9 @@
+id: SH-QUAL-001
+name: "缺少 shebang"
+category: shell
+severity: WARNING
+description: "检测文件开头缺少 #!/bin/bash"
+detection:
+  type: first-line
+  pattern: '^#!'
+remediation: "添加 #!/bin/bash 或 #!/usr/bin/env bash"

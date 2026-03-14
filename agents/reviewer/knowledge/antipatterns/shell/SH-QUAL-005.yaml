@@ -1,0 +1,9 @@
+id: SH-QUAL-005
+name: "缺少注释"
+category: shell
+severity: INFO
+description: "复杂逻辑缺少说明"
+detection:
+  type: comment-density
+  threshold: 0.1
+remediation: "添加注释说明复杂逻辑"

@@ -1,0 +1,9 @@
+id: SH-QUAL-004
+name: "未使用的函数"
+category: shell
+severity: INFO
+description: "定义但未调用的函数"
+detection:
+  type: ast-analysis
+  check: unused_functions
+remediation: "删除未使用的函数"

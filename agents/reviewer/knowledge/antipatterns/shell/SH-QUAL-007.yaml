@@ -1,0 +1,9 @@
+id: SH-QUAL-007
+name: "shellcheck 建议"
+category: shell
+severity: INFO
+description: "集成 shellcheck 工具建议"
+detection:
+  type: external-tool
+  tool: shellcheck
+remediation: "安装并运行 shellcheck"

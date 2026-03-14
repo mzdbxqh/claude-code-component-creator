@@ -1,0 +1,11 @@
+id: SH-QUAL-006
+name: "硬编码路径"
+category: shell
+severity: WARNING
+description: "检测绝对路径硬编码"
+detection:
+  patterns:
+    - '/usr/local/'
+    - '/opt/'
+    - '/home/[^$]'
+remediation: "使用相对路径或环境变量"

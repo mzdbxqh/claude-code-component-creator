@@ -1,0 +1,9 @@
+id: SH-QUAL-002
+name: "缺少错误处理"
+category: shell
+severity: WARNING
+description: "关键命令缺少错误处理"
+detection:
+  type: missing-error-handling
+  commands: [cp, mv, rm, git, curl, wget]
+remediation: "添加 || exit 1 或检查 $?"

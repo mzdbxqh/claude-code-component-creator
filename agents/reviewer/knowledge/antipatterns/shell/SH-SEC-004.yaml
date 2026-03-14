@@ -1,0 +1,10 @@
+id: SH-SEC-004
+name: "缺少 set -e"
+category: shell
+severity: ERROR
+description: "检测脚本缺少错误退出设置"
+detection:
+  type: absence
+  pattern: 'set\s+-[a-z]*e'
+  within_lines: 20
+remediation: "在脚本开头添加 set -e 或 set -euo pipefail"

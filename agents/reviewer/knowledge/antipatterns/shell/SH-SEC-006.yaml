@@ -1,0 +1,8 @@
+id: SH-SEC-006
+name: "sudo 滥用"
+category: shell
+severity: WARNING
+description: "检测不必要的 sudo"
+detection:
+  pattern: 'sudo\s+(echo|cat|ls|pwd)'
+remediation: "移除不必要的 sudo"

@@ -1,0 +1,8 @@
+id: SH-SEC-008
+name: "source 不可信脚本"
+category: shell
+severity: ERROR
+description: "检测 source 外部文件"
+detection:
+  pattern: 'source\s+\$'
+remediation: "仅 source 可信文件"

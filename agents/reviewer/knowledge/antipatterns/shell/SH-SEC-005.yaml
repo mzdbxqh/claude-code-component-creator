@@ -1,0 +1,8 @@
+id: SH-SEC-005
+name: "不安全的临时文件"
+category: shell
+severity: ERROR
+description: "检测使用固定临时文件名"
+detection:
+  pattern: '/tmp/[^$]+'
+remediation: "使用 mktemp 创建临时文件"
