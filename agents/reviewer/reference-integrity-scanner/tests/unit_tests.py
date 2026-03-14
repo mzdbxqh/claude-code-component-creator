@@ -11,9 +11,13 @@ reference-integrity-scanner 单元测试
 
 import unittest
 import os
+import sys
 import tempfile
 import json
 from pathlib import Path
+
+# 添加父目录到路径以便导入 reference_scanner
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestFileEnumeration(unittest.TestCase):
@@ -21,13 +25,38 @@ class TestFileEnumeration(unittest.TestCase):
 
     def test_enumerate_skill_files(self):
         """测试枚举 SKILL.md 文件"""
-        # TODO: 实现测试
-        pass
+        # 创建临时测试目录
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建测试文件结构
+            os.makedirs(f"{tmpdir}/agents/test-agent")
+            os.makedirs(f"{tmpdir}/skills/test-skill")
+
+            # 创建 SKILL.md 文件
+            Path(f"{tmpdir}/agents/test-agent/SKILL.md").touch()
+            Path(f"{tmpdir}/skills/test-skill/SKILL.md").touch()
+
+            # 执行枚举（需要实现的函数）
+            from reference_scanner import enumerate_skill_files
+            result = enumerate_skill_files(tmpdir)
+
+            # 验证结果
+            self.assertEqual(len(result['agents']), 1)
+            self.assertEqual(len(result['skills']), 1)
+            self.assertIn('agents/test-agent/SKILL.md', result['agents'])
+            self.assertIn('skills/test-skill/SKILL.md', result['skills'])
 
     def test_enumerate_knowledge_files(self):
         """测试枚举知识库文件"""
-        # TODO: 实现测试
-        pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建知识库文件
+            os.makedirs(f"{tmpdir}/knowledge/antipatterns/intent")
+            Path(f"{tmpdir}/knowledge/antipatterns/intent/INTENT-001.yaml").touch()
+
+            from reference_scanner import enumerate_knowledge_files
+            result = enumerate_knowledge_files(tmpdir)
+
+            self.assertEqual(len(result), 1)
+            self.assertIn('knowledge/antipatterns/intent/INTENT-001.yaml', result)
 
 
 class TestYAMLParsing(unittest.TestCase):
