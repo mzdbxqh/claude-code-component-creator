@@ -331,9 +331,250 @@ def identify_potential_users(orphan_file):
     return potential
 
 
+def detect_task_tool_calls(plugin_dir):
+    """
+    检测 Task tool 调用
+
+    搜索模式:
+    - dispatch_subagent(agent="component-name")
+    - Task.*subagent.*"component-name"
+    - 调用 ccc:component-name
+
+    参数:
+        plugin_dir: 插件根目录
+
+    返回:
+        dict: 组件名 → 引用信息
+    """
+    task_calls = {}
+
+    # 枚举所有 markdown 文件
+    for root, dirs, files in os.walk(plugin_dir):
+        for file in files:
+            if file.endswith('.md'):
+                file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(file_path, plugin_dir)
+
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    # 搜索模式1: dispatch_subagent(agent="component-name")
+                    pattern1 = r'dispatch_subagent\s*\(\s*agent\s*=\s*["\'](\w+[-\w]*)["\']'
+                    for match in re.finditer(pattern1, content):
+                        component = match.group(1)
+                        if component not in task_calls:
+                            task_calls[component] = {
+                                'component': component,
+                                'reference_type': 'task_call',
+                                'referenced_by': []
+                            }
+                        task_calls[component]['referenced_by'].append({
+                            'file': rel_path,
+                            'pattern': 'dispatch_subagent'
+                        })
+
+                    # 搜索模式2: ccc:component-name (调用、使用等)
+                    pattern2 = r'ccc:(\w+[-\w]*)'
+                    for match in re.finditer(pattern2, content):
+                        component = match.group(1)
+                        if component not in task_calls:
+                            task_calls[component] = {
+                                'component': component,
+                                'reference_type': 'workflow_ref',
+                                'referenced_by': []
+                            }
+                        task_calls[component]['referenced_by'].append({
+                            'file': rel_path,
+                            'pattern': 'ccc: prefix'
+                        })
+
+                except Exception as e:
+                    # 忽略读取错误
+                    pass
+
+    return task_calls
+
+
+def detect_workflow_references(plugin_dir):
+    """
+    检测工作流引用
+
+    搜索工作流文档中提到的组件（ccc:component-name 模式）
+
+    参数:
+        plugin_dir: 插件根目录
+
+    返回:
+        list: 工作流引用列表
+    """
+    workflow_refs = []
+
+    for root, dirs, files in os.walk(plugin_dir):
+        for file in files:
+            if file.endswith('.md'):
+                file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(file_path, plugin_dir)
+
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    # 搜索 ccc: 引用
+                    pattern = r'ccc:(\w+[-\w]*)'
+                    for match in re.finditer(pattern, content):
+                        component = match.group(1)
+                        workflow_refs.append({
+                            'component': component,
+                            'referenced_in': rel_path,
+                            'reference_type': 'workflow'
+                        })
+                except Exception:
+                    pass
+
+    return workflow_refs
+
+
+def comprehensive_reference_scan(plugin_dir):
+    """
+    综合引用扫描
+
+    整合多种检测方式:
+    1. skills: 字段静态声明
+    2. Task tool 调用
+    3. 工作流引用
+
+    参数:
+        plugin_dir: 插件根目录
+
+    返回:
+        dict: 综合扫描结果
+    """
+    # 1. 传统 skills 字段检测
+    file_manifest = enumerate_all_files(plugin_dir)
+    all_skills = file_manifest['components']['agents'] + file_manifest['components']['skills']
+
+    # 2. Task 调用检测
+    task_calls = detect_task_tool_calls(plugin_dir)
+
+    # 3. 工作流引用检测
+    workflow_refs = detect_workflow_references(plugin_dir)
+
+    # 构建引用关系映射
+    referenced_components = {}
+
+    # 枚举所有组件并初始化
+    for skill_file in all_skills:
+        full_path = os.path.join(plugin_dir, skill_file)
+        parse_result = parse_skill_frontmatter(full_path)
+
+        if parse_result.get('success'):
+            metadata = parse_result['metadata']
+            component_name = metadata.get('name', 'unknown')
+
+            if component_name not in referenced_components:
+                referenced_components[component_name] = {
+                    'file_path': skill_file,
+                    'referenced_by_methods': [],
+                    'referenced_by_files': []
+                }
+
+    # 标记 skills 字段引用
+    for skill_file in all_skills:
+        full_path = os.path.join(plugin_dir, skill_file)
+        parse_result = parse_skill_frontmatter(full_path)
+
+        if parse_result.get('success'):
+            metadata = parse_result['metadata']
+            skills_refs = extract_skill_references(metadata)
+
+            for ref in skills_refs:
+                # 提取组件名
+                target_name = ref.split(':')[-1] if ':' in ref else ref
+
+                if target_name in referenced_components:
+                    if 'skills_field' not in referenced_components[target_name]['referenced_by_methods']:
+                        referenced_components[target_name]['referenced_by_methods'].append('skills_field')
+                    referenced_components[target_name]['referenced_by_files'].append(skill_file)
+
+    # 添加 Task 调用引用
+    for component_name, call_info in task_calls.items():
+        if component_name in referenced_components:
+            if 'task_call' not in referenced_components[component_name]['referenced_by_methods']:
+                referenced_components[component_name]['referenced_by_methods'].append('task_call')
+            for ref_by in call_info['referenced_by']:
+                if ref_by['file'] not in referenced_components[component_name]['referenced_by_files']:
+                    referenced_components[component_name]['referenced_by_files'].append(ref_by['file'])
+
+    # 添加工作流引用
+    for ref in workflow_refs:
+        component_name = ref['component']
+        if component_name in referenced_components:
+            if 'workflow_ref' not in referenced_components[component_name]['referenced_by_methods']:
+                referenced_components[component_name]['referenced_by_methods'].append('workflow_ref')
+            if ref['referenced_in'] not in referenced_components[component_name]['referenced_by_files']:
+                referenced_components[component_name]['referenced_by_files'].append(ref['referenced_in'])
+
+    # 识别孤儿组件（未被任何方式引用）
+    orphan_files = []
+    orphan_id = 1
+
+    for component_name, component_info in referenced_components.items():
+        # 跳过顶层入口（cmd-* 命令）
+        if component_info['file_path'].startswith('skills/cmd-'):
+            continue
+
+        # 检查是否被引用
+        if len(component_info['referenced_by_methods']) == 0:
+            orphan_files.append({
+                'id': f"OR-{orphan_id:03d}",
+                'severity': 'warning',
+                'file_path': component_info['file_path'],
+                'file_type': 'skill' if 'skills/' in component_info['file_path'] else 'subagent',
+                'issue': '文件未被任何组件引用',
+                'potential_users': identify_potential_users(component_info['file_path']),
+                'fix_suggestion': '添加引用或删除此文件'
+            })
+            orphan_id += 1
+
+    # 检测断开引用
+    broken_references = []
+    issue_id = 1
+
+    for skill_file in all_skills:
+        full_path = os.path.join(plugin_dir, skill_file)
+        parse_result = parse_skill_frontmatter(full_path)
+
+        if parse_result.get('success'):
+            metadata = parse_result['metadata']
+            skills_refs = extract_skill_references(metadata)
+
+            for ref in skills_refs:
+                target_path = resolve_skill_reference(ref, plugin_dir)
+
+                if target_path is None:
+                    broken_references.append({
+                        'id': f"BR-{issue_id:03d}",
+                        'severity': 'error',
+                        'source_file': skill_file,
+                        'reference_type': 'skills',
+                        'declared_reference': ref,
+                        'issue': '目标文件不存在',
+                        'fix_suggestion': f"选项 A: 创建 {ref}\n选项 B: 从 skills 字段移除此引用\n选项 C: 修正引用名称"
+                    })
+                    issue_id += 1
+
+    return {
+        'referenced_components': referenced_components,
+        'orphan_files': orphan_files,
+        'broken_references': broken_references,
+        'path_issues': []
+    }
+
+
 def validate_references(plugin_dir):
     """
-    验证所有引用的有效性（扩展版）
+    验证所有引用的有效性（使用综合扫描）
 
     参数:
         plugin_dir: 插件根目录
@@ -341,84 +582,18 @@ def validate_references(plugin_dir):
     返回:
         dict: 验证结果
     """
-    # 枚举所有文件
-    file_manifest = enumerate_all_files(plugin_dir)
-    all_skills = file_manifest['components']['agents'] + file_manifest['components']['skills']
-
-    # 解析所有组件
-    parsed_components = parse_all_skill_files(plugin_dir, all_skills)
-
-    broken_references = []
-    issue_id = 1
-
-    # 正向验证：检查每个组件的引用
-    for component_name, component_data in parsed_components.items():
-        if component_data.get('type') == 'error':
-            continue
-
-        skills_refs = component_data.get('skills_references', [])
-
-        for ref in skills_refs:
-            target_path = resolve_skill_reference(ref, plugin_dir)
-
-            if target_path is None:
-                broken_references.append({
-                    'id': f"BR-{issue_id:03d}",
-                    'severity': 'error',
-                    'source_file': component_data['file_path'],
-                    'reference_type': 'skills',
-                    'declared_reference': ref,
-                    'issue': '目标文件不存在',
-                    'fix_suggestion': f"选项 A: 创建 {ref}\n选项 B: 从 skills 字段移除此引用\n选项 C: 修正引用名称"
-                })
-                issue_id += 1
-
-    # 反向验证：检测孤儿文件
-    orphan_files = []
-    orphan_id = 1
-
-    # 建立引用者映射
-    referenced_files = set()
-
-    for component_name, component_data in parsed_components.items():
-        if component_data.get('type') == 'error':
-            continue
-
-        skills_refs = component_data.get('skills_references', [])
-
-        for ref in skills_refs:
-            target_path = resolve_skill_reference(ref, plugin_dir)
-            if target_path:
-                # 转换为相对路径
-                rel_path = os.path.relpath(target_path, plugin_dir)
-                referenced_files.add(rel_path)
-
-    # 检查每个文件是否被引用
-    for skill_file in all_skills:
-        if skill_file not in referenced_files:
-            # 跳过顶层入口（通常不被其他组件引用）
-            if 'cmd-' in skill_file:
-                continue
-
-            orphan_files.append({
-                'id': f"OR-{orphan_id:03d}",
-                'severity': 'warning',
-                'file_path': skill_file,
-                'file_type': 'skill' if 'skills/' in skill_file else 'subagent',
-                'issue': '文件未被任何组件引用',
-                'potential_users': identify_potential_users(skill_file),
-                'fix_suggestion': '添加引用或删除此文件'
-            })
-            orphan_id += 1
+    # 使用综合扫描
+    comp_results = comprehensive_reference_scan(plugin_dir)
 
     # 循环引用检测
     graph = build_dependency_graph(plugin_dir)
     cycles = detect_cycles(graph)
 
     return {
-        'broken_references': broken_references,
-        'orphan_files': orphan_files,
-        'path_issues': [],
+        'broken_references': comp_results['broken_references'],
+        'orphan_files': comp_results['orphan_files'],
+        'path_issues': comp_results.get('path_issues', []),
+        'referenced_components': comp_results.get('referenced_components', {}),
         'cycles': cycles,
         'graph': graph
     }
@@ -548,11 +723,15 @@ def calculate_integrity_score(issues):
     """
     计算完整性评分（0-100）
 
-    扣分规则：
-    - 断开引用：-10 分/个
-    - 孤儿文件：-2 分/个
-    - 路径问题：-1 分/个
-    - 循环引用：-20 分/个
+    扣分规则（优化后 v3.2.1）:
+    - 断开引用: -10 分/个（高优先级问题）
+    - 真正的孤儿文件: -2 分/个（通过综合检测后仍未引用）
+    - 路径问题: -1 分/个
+    - 循环引用: -20 分/个（严重问题）
+
+    改进说明:
+    v3.2.0: 仅检测 skills 字段，误报率高
+    v3.2.1: 综合检测（skills + task_call + workflow_ref），误报率低
     """
     score = 100
     score -= len(issues.get('broken_references', [])) * 10

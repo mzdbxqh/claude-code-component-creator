@@ -348,5 +348,104 @@ class TestReportGeneration(unittest.TestCase):
         os.unlink(report_path)
 
 
+class TestTaskCallDetection(unittest.TestCase):
+    """测试 Task 调用检测功能"""
+
+    def test_detect_task_tool_calls(self):
+        """测试检测 Task tool 调用"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建包含 Task 调用的文档
+            os.makedirs(f"{tmpdir}/skills/cmd-test")
+            content = """---
+name: cmd-test
+---
+
+# Test Command
+
+调用 review-core:
+```
+dispatch_subagent(agent="review-core", args={...})
+```
+
+调用 blueprint-core:
+- ccc:blueprint-core: Blueprint 解析器
+"""
+            with open(f"{tmpdir}/skills/cmd-test/SKILL.md", 'w') as f:
+                f.write(content)
+
+            from reference_scanner import detect_task_tool_calls
+            result = detect_task_tool_calls(tmpdir)
+
+            # 验证检测结果
+            self.assertIn('review-core', result)
+            self.assertIn('blueprint-core', result)
+            self.assertEqual(result['review-core']['reference_type'], 'task_call')
+
+    def test_detect_workflow_references(self):
+        """测试检测工作流引用"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.makedirs(f"{tmpdir}/skills/cmd-design")
+            content = """---
+name: cmd-design
+---
+
+# Design Command
+
+工作流:
+1. 调用 ccc:advisor-core (诊断)
+2. 调用 ccc:architect-core (架构设计)
+3. 调用 ccc:blueprint-core (生成蓝图)
+"""
+            with open(f"{tmpdir}/skills/cmd-design/SKILL.md", 'w') as f:
+                f.write(content)
+
+            from reference_scanner import detect_workflow_references
+            result = detect_workflow_references(tmpdir)
+
+            # 验证检测结果
+            self.assertGreaterEqual(len(result), 3)
+            component_names = [r['component'] for r in result]
+            self.assertIn('advisor-core', component_names)
+            self.assertIn('architect-core', component_names)
+            self.assertIn('blueprint-core', component_names)
+
+    def test_comprehensive_reference_scan(self):
+        """测试综合引用扫描"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建包含多种引用方式的插件
+            os.makedirs(f"{tmpdir}/skills/skill-a")
+            os.makedirs(f"{tmpdir}/skills/skill-b")
+            os.makedirs(f"{tmpdir}/agents/agent-a")
+
+            # skill-a: 使用 skills 字段引用
+            with open(f"{tmpdir}/skills/skill-a/SKILL.md", 'w') as f:
+                f.write("---\nname: skill-a\nskills:\n  - ccc:skill-b\n---\n")
+
+            # skill-b: 被引用
+            with open(f"{tmpdir}/skills/skill-b/SKILL.md", 'w') as f:
+                f.write("---\nname: skill-b\n---\n")
+
+            # agent-a: 通过 Task 调用 skill-b
+            with open(f"{tmpdir}/agents/agent-a/SKILL.md", 'w') as f:
+                f.write("---\nname: agent-a\n---\n调用 ccc:skill-b")
+
+            from reference_scanner import comprehensive_reference_scan
+            result = comprehensive_reference_scan(tmpdir)
+
+            # 验证综合检测结果
+            referenced_components = result.get('referenced_components', {})
+
+            # skill-b 应该被两种方式检测到
+            skill_b_refs = referenced_components.get('skill-b', {})
+            self.assertIn('skills_field', skill_b_refs.get('referenced_by_methods', []))
+            self.assertIn('workflow_ref', skill_b_refs.get('referenced_by_methods', []))
+
+            # agent-a 应该不是孤儿（因为没有 cmd- 引用它，所以会成为孤儿）
+            # 调整：agent-a 实际上是孤儿，因为没有其他组件引用它
+            orphan_files = result.get('orphan_files', [])
+            agent_a_orphaned = any('agent-a' in o['file_path'] for o in orphan_files)
+            self.assertTrue(agent_a_orphaned)  # agent-a 应该是孤儿
+
+
 if __name__ == '__main__':
     unittest.main()
