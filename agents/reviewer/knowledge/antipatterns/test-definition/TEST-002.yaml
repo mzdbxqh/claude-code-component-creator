@@ -1,0 +1,6 @@
+id: TEST-002
+name: "断言不完整"
+category: test-definition
+severity: WARNING
+description: "检测测试用例的 assertions 为空"
+remediation: "添加至少一个断言验证输出"

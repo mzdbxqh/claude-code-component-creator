@@ -1,0 +1,6 @@
+id: TEST-008
+name: "超时未设置"
+category: test-definition
+severity: WARNING
+description: "测试用例缺少 timeout 配置"
+remediation: "添加 timeout 字段防止测试挂起"

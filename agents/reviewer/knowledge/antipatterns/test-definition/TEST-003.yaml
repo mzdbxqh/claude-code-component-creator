@@ -1,0 +1,6 @@
+id: TEST-003
+name: "测试覆盖率低"
+category: test-definition
+severity: INFO
+description: "检测少于 3 个测试用例"
+remediation: "增加测试用例覆盖边界情况"

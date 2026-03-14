@@ -1,0 +1,6 @@
+id: TEST-007
+name: "断言类型单一"
+category: test-definition
+severity: INFO
+description: "只使用一种断言类型"
+remediation: "使用多种断言类型提高测试覆盖"

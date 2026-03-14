@@ -1,0 +1,6 @@
+id: TEST-004
+name: "缺少负面测试"
+category: test-definition
+severity: INFO
+description: "只有正向测试，缺少错误场景测试"
+remediation: "添加错误输入、异常场景的测试"

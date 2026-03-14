@@ -1,0 +1,6 @@
+id: TEST-009
+name: "前置条件缺失"
+category: test-definition
+severity: WARNING
+description: "缺少 setup 步骤"
+remediation: "添加必要的前置条件"

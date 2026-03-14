@@ -1,0 +1,6 @@
+id: TEST-001
+name: "缺少测试用例"
+category: test-definition
+severity: WARNING
+description: "检测 evals.json 为空或缺失"
+remediation: "至少添加 3 个测试用例"

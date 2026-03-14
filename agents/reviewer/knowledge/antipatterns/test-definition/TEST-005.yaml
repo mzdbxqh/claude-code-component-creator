@@ -1,0 +1,6 @@
+id: TEST-005
+name: "测试名称不清晰"
+category: test-definition
+severity: WARNING
+description: "使用 test1, test2 等不描述性的命名"
+remediation: "使用描述性名称，如 test_invalid_input_returns_error"

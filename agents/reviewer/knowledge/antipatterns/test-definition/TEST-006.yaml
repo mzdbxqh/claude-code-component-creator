@@ -1,0 +1,6 @@
+id: TEST-006
+name: "缺少测试说明"
+category: test-definition
+severity: INFO
+description: "测试用例的 description 字段为空"
+remediation: "添加 description 字段说明测试目的"
