@@ -259,8 +259,53 @@ class TestReportGeneration(unittest.TestCase):
 
     def test_generate_json_report(self):
         """测试生成 JSON 报告"""
-        # TODO: 实现测试
-        pass
+        # 创建测试数据
+        scan_results = {
+            'broken_references': [
+                {
+                    'id': 'BR-001',
+                    'severity': 'error',
+                    'source_file': 'agents/test/SKILL.md',
+                    'declared_reference': 'ccc:missing',
+                    'issue': '目标文件不存在'
+                }
+            ],
+            'orphan_files': [
+                {
+                    'id': 'OR-001',
+                    'severity': 'warning',
+                    'file_path': 'skills/orphan/SKILL.md',
+                    'issue': '未被引用'
+                }
+            ],
+            'cycles': []
+        }
+
+        from reference_scanner import generate_json_report
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            report_path = f.name
+
+        generate_json_report(scan_results, '/test/plugin', report_path)
+
+        # 验证报告生成
+        self.assertTrue(os.path.exists(report_path))
+
+        with open(report_path, 'r') as f:
+            report = json.load(f)
+
+        # 验证报告结构
+        self.assertIn('version', report)
+        self.assertIn('summary', report)
+        self.assertIn('issues', report)
+        self.assertEqual(len(report['issues']['broken_references']), 1)
+        self.assertEqual(len(report['issues']['orphan_files']), 1)
+
+        # 验证完整性评分计算
+        self.assertIn('integrity_score', report['summary'])
+        self.assertLess(report['summary']['integrity_score'], 100)
+
+        os.unlink(report_path)
 
     def test_generate_markdown_report(self):
         """测试生成 Markdown 报告"""

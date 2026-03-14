@@ -11,6 +11,8 @@ import glob
 import os
 import re
 import yaml
+import json
+from datetime import datetime
 
 
 def enumerate_skill_files(plugin_dir):
@@ -534,4 +536,78 @@ def detect_cycles(graph):
             cycles.extend(dfs(node, []))
 
     return cycles
+
+
+def calculate_integrity_score(issues):
+    """
+    计算完整性评分（0-100）
+
+    扣分规则：
+    - 断开引用：-10 分/个
+    - 孤儿文件：-2 分/个
+    - 路径问题：-1 分/个
+    - 循环引用：-20 分/个
+    """
+    score = 100
+    score -= len(issues.get('broken_references', [])) * 10
+    score -= len(issues.get('orphan_files', [])) * 2
+    score -= len(issues.get('path_issues', [])) * 1
+    score -= len(issues.get('cycles', [])) * 20
+
+    return max(0, score)
+
+
+def generate_json_report(scan_results, plugin_path, output_path):
+    """
+    生成 JSON 报告
+
+    Args:
+        scan_results: 扫描结果
+        plugin_path: 插件路径
+        output_path: 输出文件路径
+    """
+    # 统计
+    broken_refs = scan_results.get('broken_references', [])
+    orphan_files = scan_results.get('orphan_files', [])
+    path_issues = scan_results.get('path_issues', [])
+    cycles = scan_results.get('cycles', [])
+
+    total_issues = len(broken_refs) + len(orphan_files) + len(path_issues) + len(cycles)
+    integrity_score = calculate_integrity_score(scan_results)
+
+    # 构建报告
+    report = {
+        'version': '1.0.0',
+        'scan_date': datetime.now().isoformat(),
+        'plugin_path': plugin_path,
+        'plugin_name': os.path.basename(plugin_path),
+
+        'summary': {
+            'total_issues': total_issues,
+            'broken_references': len(broken_refs),
+            'orphan_files': len(orphan_files),
+            'path_issues': len(path_issues),
+            'circular_references': len(cycles),
+            'integrity_score': integrity_score
+        },
+
+        'issues': {
+            'broken_references': broken_refs,
+            'orphan_files': orphan_files,
+            'path_issues': path_issues,
+            'circular_references': cycles
+        },
+
+        'reference_graph': scan_results.get('graph', {}),
+
+        'scan_metadata': {
+            'scanner_version': '1.0.0',
+            'scan_options': {}
+        }
+    }
+
+    # 写入文件
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(report, f, indent=2, ensure_ascii=False)
 
