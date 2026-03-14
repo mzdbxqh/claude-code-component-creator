@@ -1,0 +1,6 @@
+id: DOC-REF-003
+name: "代码引用过时"
+category: documentation-reference
+severity: WARNING
+description: "引用的代码示例与实际不符"
+remediation: "更新代码示例"

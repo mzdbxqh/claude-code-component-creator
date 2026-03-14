@@ -1,0 +1,8 @@
+id: DOC-REF-002
+name: "图片引用缺失"
+category: documentation-reference
+severity: WARNING
+description: "![alt](image) 文件不存在"
+detection:
+  type: markdown-image-check
+remediation: "修复图片路径或删除引用"

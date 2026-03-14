@@ -1,0 +1,9 @@
+id: DOC-REF-001
+name: "Markdown 链接断开"
+category: documentation-reference
+severity: ERROR
+description: "检测 [text](path) 指向不存在文件"
+detection:
+  type: markdown-link-check
+  pattern: '\[.+\]\((.+)\)'
+remediation: "修复链接路径或删除断开的链接"

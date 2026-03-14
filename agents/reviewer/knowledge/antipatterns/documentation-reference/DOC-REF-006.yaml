@@ -1,0 +1,6 @@
+id: DOC-REF-006
+name: "外部链接检查"
+category: documentation-reference
+severity: INFO
+description: "http:// 链接可达性检查（可选）"
+remediation: "修复或删除失效链接"

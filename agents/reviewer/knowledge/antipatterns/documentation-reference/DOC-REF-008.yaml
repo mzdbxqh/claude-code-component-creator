@@ -1,0 +1,6 @@
+id: DOC-REF-008
+name: "示例代码语法错误"
+category: documentation-reference
+severity: ERROR
+description: "代码块语法错误"
+remediation: "修复示例代码语法"

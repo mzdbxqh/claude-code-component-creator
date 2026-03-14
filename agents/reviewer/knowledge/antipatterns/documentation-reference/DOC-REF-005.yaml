@@ -1,0 +1,6 @@
+id: DOC-REF-005
+name: "章节引用错误"
+category: documentation-reference
+severity: WARNING
+description: "[text](#section) 章节不存在"
+remediation: "修复章节锚点"

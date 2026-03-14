@@ -1,0 +1,6 @@
+id: DOC-REF-004
+name: "@references 断开"
+category: documentation-reference
+severity: ERROR
+description: "@references/file.md 不存在"
+remediation: "修复 @references 路径"

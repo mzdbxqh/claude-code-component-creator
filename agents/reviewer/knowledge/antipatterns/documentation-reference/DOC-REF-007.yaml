@@ -1,0 +1,6 @@
+id: DOC-REF-007
+name: "文档版本不一致"
+category: documentation-reference
+severity: WARNING
+description: "多语言文档版本号不同"
+remediation: "同步多语言文档版本"
