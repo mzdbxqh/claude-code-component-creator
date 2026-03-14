@@ -8,5 +8,11 @@ Author: mzdbxqh
 from .python_script_analyzer import PythonScriptAnalyzer
 from .shell_script_analyzer import ShellScriptAnalyzer
 from .test_definition_analyzer import TestDefinitionAnalyzer
+from .file_type_detector import FileTypeDetector
 
-__all__ = ['PythonScriptAnalyzer', 'ShellScriptAnalyzer', 'TestDefinitionAnalyzer']
+__all__ = [
+    'PythonScriptAnalyzer',
+    'ShellScriptAnalyzer',
+    'TestDefinitionAnalyzer',
+    'FileTypeDetector'
+]
