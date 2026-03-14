@@ -123,5 +123,159 @@
       "prompt": "### 无效格式 ### 这不是一个有效的需求描述",
       "reason": "异常格式输入应该被识别并引导用户提供规范输入，返回格式说明和正确示例"
     }
-  ]
+  ],
+  "referenceIntegrityTests": {
+    "description": "引用完整性验证测试套件",
+    "version": "1.0.0",
+    "testCases": [
+      {
+        "id": "REF-INT-001",
+        "name": "正常插件扫描",
+        "description": "扫描正常插件，期望完整性评分=100",
+        "testType": "功能测试",
+        "input": {
+          "pluginPath": "../test-fixtures/reference-integrity/valid-plugin",
+          "command": "reference-integrity-scanner"
+        },
+        "assertions": [
+          {
+            "type": "equals",
+            "field": "summary.broken_references",
+            "expected": 0,
+            "description": "断开引用数量应为 0"
+          },
+          {
+            "type": "equals",
+            "field": "summary.orphan_files",
+            "expected": 0,
+            "description": "孤儿文件数量应为 0"
+          },
+          {
+            "type": "equals",
+            "field": "summary.circular_references",
+            "expected": 0,
+            "description": "循环引用数量应为 0"
+          },
+          {
+            "type": "equals",
+            "field": "summary.integrity_score",
+            "expected": 100,
+            "description": "完整性评分应为 100"
+          }
+        ],
+        "expectedOutput": {
+          "status": "success",
+          "reportGenerated": true
+        }
+      },
+      {
+        "id": "REF-INT-002",
+        "name": "断开引用检测",
+        "description": "检测断开引用，期望发现2个错误",
+        "testType": "功能测试",
+        "input": {
+          "pluginPath": "../test-fixtures/reference-integrity/broken-refs",
+          "command": "reference-integrity-scanner"
+        },
+        "assertions": [
+          {
+            "type": "equals",
+            "field": "summary.broken_references",
+            "expected": 2,
+            "description": "应检测到 2 个断开引用"
+          },
+          {
+            "type": "lessThan",
+            "field": "summary.integrity_score",
+            "expected": 80,
+            "description": "完整性评分应低于 80"
+          },
+          {
+            "type": "arrayContains",
+            "field": "issues.broken_references[*].declared_reference",
+            "expected": ["ccc:non-existent-skill", "ccc:another-missing-skill"],
+            "description": "应包含两个断开的引用"
+          }
+        ],
+        "expectedOutput": {
+          "status": "success",
+          "reportGenerated": true
+        }
+      },
+      {
+        "id": "REF-INT-003",
+        "name": "孤儿文件检测",
+        "description": "检测孤儿文件，期望发现1个警告",
+        "testType": "功能测试",
+        "input": {
+          "pluginPath": "../test-fixtures/reference-integrity/orphans",
+          "command": "reference-integrity-scanner"
+        },
+        "assertions": [
+          {
+            "type": "equals",
+            "field": "summary.orphan_files",
+            "expected": 1,
+            "description": "应检测到 1 个孤儿文件"
+          },
+          {
+            "type": "arrayContains",
+            "field": "issues.orphan_files[*].file_path",
+            "expected": ["skills/orphan-skill/SKILL.md"],
+            "description": "应包含 orphan-skill"
+          },
+          {
+            "type": "equals",
+            "field": "issues.orphan_files[0].severity",
+            "expected": "warning",
+            "description": "孤儿文件严重性应为 warning"
+          }
+        ],
+        "expectedOutput": {
+          "status": "success",
+          "reportGenerated": true
+        }
+      },
+      {
+        "id": "REF-INT-004",
+        "name": "循环引用检测",
+        "description": "检测循环引用，期望发现1个循环（A→B→C→A）",
+        "testType": "功能测试",
+        "input": {
+          "pluginPath": "../test-fixtures/reference-integrity/circular",
+          "command": "reference-integrity-scanner"
+        },
+        "assertions": [
+          {
+            "type": "equals",
+            "field": "summary.circular_references",
+            "expected": 1,
+            "description": "应检测到 1 个循环引用"
+          },
+          {
+            "type": "lessThan",
+            "field": "summary.integrity_score",
+            "expected": 81,
+            "description": "完整性评分应低于 81（100 - 20 = 80）"
+          },
+          {
+            "type": "arrayContains",
+            "field": "issues.circular_references[0].cycle_path",
+            "expected": ["agent-a", "agent-b", "agent-c"],
+            "description": "循环路径应包含 agent-a, agent-b, agent-c"
+          },
+          {
+            "type": "equals",
+            "field": "issues.circular_references[0].severity",
+            "expected": "error",
+            "description": "循环引用严重性应为 error"
+          }
+        ],
+        "expectedOutput": {
+          "status": "success",
+          "reportGenerated": true
+        }
+      }
+    ]
+  }
 }
