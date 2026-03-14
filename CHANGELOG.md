@@ -30,8 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **修复 architecture-analyzer 孤儿规则问题**
 - **问题**: architecture-analyzer 未加载 lib-antipatterns
 - **影响**: 导致 21 条 architecture/ 规则无法被使用
-- **修复**: 在 skills 字段添加 ccc:lib-antipatterns
-- **结果**: 架构分析现使用完整的 21 条规则
+- **第一次修复**: 在 skills 字段添加 ccc:lib-antipatterns（不足够）
+- **第二次修复**: 在工作流 Step 1.5 添加明确的规则加载步骤
+- **结果**: 架构分析现真正加载并使用完整的 21 条规则
+
+**修复 linkage-validator 孤儿规则问题**
+- **问题**: linkage-validator 虽然引用了 lib-antipatterns，但未在工作流中明确加载规则
+- **影响**: 导致 9 条 linkage/ 规则可能未被实际使用
+- **修复**: 在工作流 Step 3.5 添加明确的规则加载步骤
+- **结果**: 链路验证现明确加载并使用完整的 9 条规则（LOOP-001, LINK-*, IO-*, BRANCH-*）
 
 **补充架构和链路规则加载说明**
 - 明确 architecture/ (21 rules) 通过 architecture-analyzer 加载
