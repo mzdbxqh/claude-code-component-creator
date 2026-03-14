@@ -1,0 +1,9 @@
+id: PY-QUAL-004
+name: "过多参数"
+category: python
+severity: WARNING
+description: "检测函数参数 > 5 个"
+detection:
+  type: parameter-count
+  threshold: 5
+remediation: "使用数据类或配置对象"

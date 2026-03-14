@@ -1,0 +1,9 @@
+id: PY-QUAL-009
+name: "缺少类型提示"
+category: python
+severity: INFO
+description: "检测 Python 3.5+ 缺少类型注解"
+detection:
+  type: ast-check
+  check: has_type_annotations
+remediation: "添加类型提示: def func(x: int) -> str:"

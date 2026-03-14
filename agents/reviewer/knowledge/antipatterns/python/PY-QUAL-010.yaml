@@ -1,0 +1,9 @@
+id: PY-QUAL-010
+name: "print() 调试代码"
+category: python
+severity: WARNING
+description: "检测残留的 print() 语句"
+detection:
+  type: ast-pattern
+  pattern: Call to print
+remediation: "使用 logger.debug() 代替 print()"

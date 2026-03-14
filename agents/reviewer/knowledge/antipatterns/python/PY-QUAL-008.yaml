@@ -1,0 +1,9 @@
+id: PY-QUAL-008
+name: "魔法数字"
+category: python
+severity: INFO
+description: "检测未命名的常量"
+detection:
+  type: ast-pattern
+  pattern: Constant not in [0, 1, -1, True, False, None]
+remediation: "定义为命名常量: MAX_RETRIES = 3"

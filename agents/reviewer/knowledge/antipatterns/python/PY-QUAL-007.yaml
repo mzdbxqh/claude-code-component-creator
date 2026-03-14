@@ -1,0 +1,10 @@
+id: PY-QUAL-007
+name: "全局变量滥用"
+category: python
+severity: WARNING
+description: "检测过多全局变量修改"
+detection:
+  type: ast-count
+  target: global_statements
+  threshold: 3
+remediation: "使用类封装状态"

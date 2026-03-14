@@ -1,0 +1,23 @@
+id: PY-QUAL-001
+name: "缺少文档字符串"
+category: python
+severity: WARNING
+description: "检测函数/类缺少 docstring"
+detection:
+  type: ast-check
+  check: has_docstring
+examples:
+  bad:
+    - code: |
+        def my_function(x, y):
+            return x + y
+      reason: "缺少说明函数用途的文档"
+  good:
+    - code: |
+        def my_function(x, y):
+            """Add two numbers and return the result."""
+            return x + y
+      reason: "有清晰的文档字符串"
+remediation: "为所有公开函数/类添加 docstring"
+references:
+  - "PEP 257: Docstring Conventions"

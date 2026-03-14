@@ -1,0 +1,9 @@
+id: PY-QUAL-002
+name: "过长函数"
+category: python
+severity: WARNING
+description: "检测函数超过 50 行"
+detection:
+  type: line-count
+  threshold: 50
+remediation: "拆分为多个小函数，每个函数专注单一职责"

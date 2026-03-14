@@ -1,0 +1,24 @@
+id: PY-QUAL-006
+name: "裸 except"
+category: python
+severity: WARNING
+description: "检测使用 except: 而非 except Exception:"
+detection:
+  type: ast-pattern
+  pattern: ExceptHandler with type=None
+examples:
+  bad:
+    - code: |
+        try:
+            risky_operation()
+        except:  # 危险
+            pass
+      reason: "捕获所有异常包括 KeyboardInterrupt"
+  good:
+    - code: |
+        try:
+            risky_operation()
+        except Exception as e:
+            logger.error(f"Error: {e}")
+      reason: "明确异常类型"
+remediation: "使用 except Exception: 或具体异常类型"

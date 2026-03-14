@@ -1,0 +1,9 @@
+id: PY-QUAL-005
+name: "未使用的导入"
+category: python
+severity: INFO
+description: "检测 import 但未引用的模块"
+detection:
+  type: ast-analysis
+  check: unused_imports
+remediation: "删除未使用的导入"

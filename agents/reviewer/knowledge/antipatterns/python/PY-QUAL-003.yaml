@@ -1,0 +1,11 @@
+id: PY-QUAL-003
+name: "过高圈复杂度"
+category: python
+severity: WARNING
+description: "检测 McCabe 复杂度 > 10"
+detection:
+  type: complexity
+  threshold: 10
+remediation: "简化逻辑，提取子函数"
+references:
+  - "McCabe Cyclomatic Complexity"
