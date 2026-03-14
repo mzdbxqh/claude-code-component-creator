@@ -411,10 +411,16 @@ def validate_references(plugin_dir):
             })
             orphan_id += 1
 
+    # 循环引用检测
+    graph = build_dependency_graph(plugin_dir)
+    cycles = detect_cycles(graph)
+
     return {
         'broken_references': broken_references,
         'orphan_files': orphan_files,
-        'path_issues': []
+        'path_issues': [],
+        'cycles': cycles,
+        'graph': graph
     }
 
 

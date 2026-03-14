@@ -21,6 +21,7 @@ A powerful Claude Code plugin for creating high-quality components and skills wi
 - **Checkpoint Recovery**: Resume long-running workflows from interruptions (NEW in v3.1.0)
 - **Performance Benchmarking**: Built-in performance testing framework (NEW in v3.1.0)
 - **Plugin Profiler Framework**: Automatic plugin profiling with standardized metadata extraction (NEW in v3.1.0)
+- **Reference Integrity Validation**: Automatic detection of broken references, orphan files, and circular dependencies (NEW in v3.2.0)
 
 ## Quick Start
 
@@ -242,6 +243,95 @@ Reports are scored 0-100, with recommendations for improvement.
 - **Standardized Metadata**: Consistent plugin profiling across all plugins
 
 See [Plugin Profiler Documentation](agents/profiler/plugin-profiler/SKILL.md) for implementation details.
+
+## Reference Integrity Validation
+
+**NEW in v3.2.0**: CCC now automatically detects and reports reference integrity issues in plugins.
+
+### What It Detects
+
+- **Broken References**: Skills field references pointing to non-existent files
+- **Orphan Files**: Components that are never referenced by other components
+- **Circular Dependencies**: A → B → C → A reference cycles
+- **Path Issues**: Absolute paths and path normalization problems
+
+### Usage
+
+```bash
+# Full review with reference checking (default)
+/cmd-review --target=.
+
+# Reference check only
+/cmd-review --target=. --reference-only
+
+# Skip reference check
+/cmd-review --target=. --no-reference-check
+```
+
+### Interactive Mode
+
+```bash
+/cmd-review --target=. --interactive
+```
+
+This displays a multi-select menu where you can choose which checks to run:
+- Reference Integrity Scan
+- 8-Dimension Quality Assessment
+- Architecture Analysis
+- Dependency Analysis
+- Linkage Validation
+
+### Output Reports
+
+Reference integrity scan generates two reports:
+
+```
+docs/reviews/
+├── YYYY-MM-DD-reference-integrity-report.json    # Structured data
+└── YYYY-MM-DD-reference-integrity-report.md      # Human-readable report
+```
+
+### Integrity Score
+
+The scan calculates an integrity score (0-100) based on:
+- Broken references: -10 points each
+- Orphan files: -2 points each
+- Circular dependencies: -20 points each
+- Path issues: -1 point each
+
+### Example Report
+
+```markdown
+# Reference Integrity Report
+
+**Integrity Score**: 80/100 (B)
+
+## 🔴 Broken References (2)
+
+### BR-001: ccc:non-existent-skill
+**File**: `skills/my-skill/SKILL.md`
+**Fix**: Create the missing skill or remove the reference
+
+## ⚠️ Orphan Files (1)
+
+### OR-001: skills/unused-skill/SKILL.md
+**Issue**: File never referenced by any component
+**Fix**: Add reference or delete this file
+
+## 🔴 Circular Dependencies (1)
+
+### Cycle: agent-a → agent-b → agent-c → agent-a
+**Fix**: Break the cycle by removing one reference
+```
+
+### Benefits
+
+- **Early Detection**: Catch broken references before deployment
+- **Maintenance Aid**: Identify unused components for cleanup
+- **Architecture Validation**: Prevent circular dependency issues
+- **Quality Assurance**: Ensure plugin integrity score ≥ 90
+
+See [Reference Integrity Scanner Documentation](agents/reviewer/reference-integrity-scanner/SKILL.md) for implementation details.
 
 ## Quality Dimensions
 
