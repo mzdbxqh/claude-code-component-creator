@@ -124,8 +124,26 @@ class TestReferenceValidation(unittest.TestCase):
 
     def test_detect_broken_reference(self):
         """测试检测断开的引用"""
-        # TODO: 实现测试
-        pass
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 创建一个组件引用不存在的 skill
+            os.makedirs(f"{tmpdir}/agents/test-agent")
+            skill_content = """---
+name: test-agent
+skills:
+  - ccc:non-existent-skill
+---
+"""
+            with open(f"{tmpdir}/agents/test-agent/SKILL.md", 'w') as f:
+                f.write(skill_content)
+
+            from reference_scanner import validate_references
+            result = validate_references(tmpdir)
+
+            # 验证检测到断开引用
+            self.assertEqual(len(result['broken_references']), 1)
+            self.assertEqual(result['broken_references'][0]['declared_reference'],
+                            'ccc:non-existent-skill')
+            self.assertEqual(result['broken_references'][0]['severity'], 'error')
 
     def test_detect_orphan_file(self):
         """测试检测孤儿文件"""

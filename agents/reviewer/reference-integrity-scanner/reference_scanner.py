@@ -266,3 +266,89 @@ def parse_all_skill_files(plugin_dir, file_list):
             }
 
     return result
+
+
+def resolve_skill_reference(reference, plugin_dir):
+    """
+    解析 skill 引用到文件路径
+
+    参数:
+        reference: 引用字符串（如 "ccc:lib-antipatterns"）
+        plugin_dir: 插件根目录
+
+    返回:
+        str: 文件路径，或 None 如果不存在
+    """
+    # 解析引用格式：ccc:skill-name 或 plugin:skill-name
+    if ':' in reference:
+        parts = reference.split(':', 1)
+        skill_name = parts[1]
+    else:
+        skill_name = reference
+
+    # 构建可能的路径
+    possible_paths = [
+        os.path.join(plugin_dir, 'skills', skill_name, 'SKILL.md'),
+        os.path.join(plugin_dir, 'agents', skill_name, 'SKILL.md'),
+        # 嵌套路径
+        os.path.join(plugin_dir, 'agents', '*', skill_name, 'SKILL.md'),
+    ]
+
+    for path_pattern in possible_paths:
+        if '*' in path_pattern:
+            matches = glob.glob(path_pattern)
+            if matches:
+                return matches[0]
+        elif os.path.exists(path_pattern):
+            return path_pattern
+
+    return None
+
+
+def validate_references(plugin_dir):
+    """
+    验证所有引用的有效性
+
+    参数:
+        plugin_dir: 插件根目录
+
+    返回:
+        dict: 验证结果
+    """
+    # 枚举所有文件
+    file_manifest = enumerate_all_files(plugin_dir)
+    all_skills = file_manifest['components']['agents'] + file_manifest['components']['skills']
+
+    # 解析所有组件
+    parsed_components = parse_all_skill_files(plugin_dir, all_skills)
+
+    broken_references = []
+    issue_id = 1
+
+    # 正向验证：检查每个组件的引用
+    for component_name, component_data in parsed_components.items():
+        if component_data.get('type') == 'error':
+            continue
+
+        skills_refs = component_data.get('skills_references', [])
+
+        for ref in skills_refs:
+            target_path = resolve_skill_reference(ref, plugin_dir)
+
+            if target_path is None:
+                broken_references.append({
+                    'id': f"BR-{issue_id:03d}",
+                    'severity': 'error',
+                    'source_file': component_data['file_path'],
+                    'reference_type': 'skills',
+                    'declared_reference': ref,
+                    'issue': '目标文件不存在',
+                    'fix_suggestion': f"选项 A: 创建 {ref}\n选项 B: 从 skills 字段移除此引用\n选项 C: 修正引用名称"
+                })
+                issue_id += 1
+
+    return {
+        'broken_references': broken_references,
+        'orphan_files': [],  # TODO: 在下一个任务中实现
+        'path_issues': []
+    }
