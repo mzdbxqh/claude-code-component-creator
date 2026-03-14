@@ -5,7 +5,7 @@ context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
-argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/] [--no-reference-check=false] [--reference-only=false]"
+argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/] [--no-reference-check=false] [--reference-only=false] [--interactive=false]"
 ---
 
 # /cmd-review
@@ -209,6 +209,7 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 | `--profile-output` | 路径 | `docs/profile/` | 插件画像输出目录 |
 | `--no-reference-check` | `true`/`false` | `false` | 跳过引用完整性扫描 |
 | `--reference-only` | `true`/`false` | `false` | 仅执行引用扫描，跳过其他检查 |
+| `--interactive` | `true`/`false` | `false` | 启用交互模式，通过多选菜单选择要执行的检查项 |
 
 ### 并行处理说明
 
@@ -339,6 +340,53 @@ Performs comprehensive component quality review using 76+ antipatterns across 8 
 
 ---
 
+**Step 0.5: 交互模式选择（可选，v3.2.0）**
+- **条件**: 如果 `--interactive=true` 参数设置
+- **目标**: 让用户通过多选菜单选择要执行的检查项
+- **操作**:
+  1. 使用 AskUserQuestion 工具显示多选菜单
+  2. 用户选择要执行的检查项（可多选）
+  3. 根据用户选择设置执行标志
+  4. 继续执行选中的检查项
+
+**选项清单**:
+```yaml
+questions:
+  - question: "请选择要执行的质量检查项（可多选）："
+    header: "检查项选择"
+    multiSelect: true
+    options:
+      - label: "引用完整性扫描"
+        description: "检测断开引用、孤儿文件、循环依赖（推荐）"
+      - label: "8 维度质量评估"
+        description: "意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性"
+      - label: "架构分析 (L1+L2)"
+        description: "工作流结构、组件关系、职责分析"
+      - label: "依赖分析"
+        description: "依赖关系图、循环依赖检测"
+      - label: "链路验证"
+        description: "调用链验证、参数匹配检查"
+```
+
+**执行标志设置**:
+```python
+# 根据用户选择设置标志
+enable_reference_check = "引用完整性扫描" in user_selections
+enable_8_dimensions = "8 维度质量评估" in user_selections
+enable_architecture = "架构分析 (L1+L2)" in user_selections
+enable_dependency = "依赖分析" in user_selections
+enable_linkage = "链路验证" in user_selections
+
+# 如果用户未选择任何项，默认执行所有检查
+if not user_selections:
+    enable_all = True
+```
+
+**输出**: 执行标志配置
+**错误处理**: 用户取消选择时提示确认或使用默认配置
+
+---
+
 **Step 1: 扫描目标**
 - 扫描目标目录或加载指定工件
 - 识别所有可审查组件（Skill、Command、Agent、Hook）
@@ -425,6 +473,7 @@ def load_lib_antipatterns():
 - **错误处理**: 单个维度检测失败时记录并继续其他维度；检测超时时使用已收集结果
 
 **Step 3.5: 执行引用完整性扫描（新增 v3.2.0）**
+- **条件**: 如果 `enable_reference_check=true` 或 `--reference-only=true`（默认启用，除非 `--no-reference-check=true`）
 - 调用 reference-integrity-scanner SubAgent 扫描插件引用关系
 - 检测断开引用、孤儿文件、循环依赖
 - 生成引用完整性报告
@@ -708,6 +757,22 @@ eval-grader 评分和对比
 
 ## 使用方式
 
+**默认行为**（不带参数运行时）:
+- 执行最全面的审查（所有检查项）
+- 包含：引用完整性扫描 + 8 维度评估 + 架构分析 + 依赖分析 + 链路验证
+- 生成完整审查报告
+
+**交互模式**（`--interactive` 参数）:
+- 显示多选菜单
+- 用户选择要执行的检查项
+- 仅执行选中的检查项
+
+**快捷模式**（特定参数）:
+- `--reference-only`: 仅执行引用扫描
+- `--arch-only`: 仅执行架构分析
+- `--no-arch`: 跳过架构分析
+- `--no-reference-check`: 跳过引用扫描
+
 ### 模式 1: 审查整个项目目录（推荐）
 
 ```bash
@@ -914,6 +979,40 @@ eval-grader 评分和对比
 - reference_integrity_report.json
 - reference_integrity_report.md
 - 合并到综合审查报告
+
+### 示例 5: 交互模式（v3.2.0 新增）
+
+```bash
+# 启用交互模式，手动选择检查项
+/cmd-review --target=. --interactive
+
+# 示例输出：
+# ┌─────────────────────────────────────────────────────┐
+# │ 请选择要执行的质量检查项（可多选）:                   │
+# ├─────────────────────────────────────────────────────┤
+# │ □ 引用完整性扫描                                      │
+# │   检测断开引用、孤儿文件、循环依赖（推荐）             │
+# │                                                       │
+# │ ☑ 8 维度质量评估                                      │
+# │   意图匹配、配置、依赖、安全、环境、LLM、扩展性、可测试性 │
+# │                                                       │
+# │ ☑ 架构分析 (L1+L2)                                    │
+# │   工作流结构、组件关系、职责分析                       │
+# │                                                       │
+# │ □ 依赖分析                                            │
+# │   依赖关系图、循环依赖检测                             │
+# │                                                       │
+# │ □ 链路验证                                            │
+# │   调用链验证、参数匹配检查                             │
+# └─────────────────────────────────────────────────────┘
+
+# 根据选择执行对应的检查项
+```
+
+**使用场景**:
+- **快速检查**: 只选择 "引用完整性扫描" + "8 维度质量评估"
+- **深度审查**: 选择所有检查项
+- **针对性检查**: 根据已知问题选择特定检查项
 
 ### 模式 4: 执行 Eval 机制
 
