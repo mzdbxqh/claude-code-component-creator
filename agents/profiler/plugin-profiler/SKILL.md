@@ -523,6 +523,309 @@ argument-hint: "--target=<plugin_root> [--output=json|markdown|both] [--cache=tr
 
 ---
 
+## 高级场景示例
+
+### 场景1: 多层级插件分析
+
+**使用场景**: 分析包含嵌套插件或子模块的复杂项目
+
+**示例**:
+```bash
+# 项目结构
+complex-plugin/
+├── core/                    # 核心插件
+│   ├── skills/
+│   ├── agents/
+│   └── .claude-plugin/
+├── extensions/              # 扩展插件
+│   ├── ui-extension/
+│   │   ├── skills/
+│   │   └── .claude-plugin/
+│   └── api-extension/
+│       ├── skills/
+│       └── .claude-plugin/
+└── shared/                  # 共享库
+    └── lib-*/ skills
+
+# 分析主插件
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "complex-plugin/core",
+    "output": "both"
+  }
+)
+
+# 分析扩展插件
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "complex-plugin/extensions/ui-extension",
+    "output": "both"
+  }
+)
+
+# 关键点
+- 主插件的 base_framework 为 null (独立)
+- 扩展插件的 base_framework 指向主插件
+- 共享库会被多个插件的 plugin_dependencies.requires 引用
+```
+
+**预期输出**:
+```json
+{
+  "meta": {
+    "name": "ui-extension",
+    "base_framework": {
+      "name": "complex-plugin-core",
+      "version": "2.1.0",
+      "relationship": "extends"
+    }
+  },
+  "requirements": {
+    "plugin_dependencies": {
+      "extends": ["complex-plugin-core"],
+      "requires": ["shared-lib-common"],
+      "conflicts": []
+    }
+  }
+}
+```
+
+---
+
+### 场景2: 大型项目性能优化
+
+**使用场景**: 1000+ 文件的大型插件项目，初次扫描耗时长
+
+**示例**:
+```bash
+# 第一次扫描（完整扫描）
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "large-plugin",
+    "output": "both",
+    "cache": true
+  }
+)
+# 预计耗时: 2-3 分钟
+
+# 后续增量扫描（使用缓存）
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "large-plugin",
+    "output": "both",
+    "cache": true
+  }
+)
+# 预计耗时: <5 秒（缓存命中）
+
+# 关键点
+- 缓存基于文件修改时间判断有效性
+- 只有 README.md、CLAUDE.md 修改时才失效
+- 代码结构变更不影响缓存（需要手动 --cache=false 刷新）
+
+# 强制刷新
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "large-plugin",
+    "cache": false
+  }
+)
+```
+
+**优化建议**:
+- 对于大型项目，初次扫描后保持缓存开启
+- 仅在添加/删除组件后手动刷新缓存
+- 使用 --output=json 减少 Markdown 生成开销
+
+---
+
+### 场景3: CI/CD 集成
+
+**使用场景**: 在持续集成流程中自动生成插件画像
+
+**示例**:
+```yaml
+# .github/workflows/profile-update.yml
+name: Update Plugin Profile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'agents/**'
+      - 'README.md'
+      - 'CLAUDE.md'
+
+jobs:
+  update-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate Plugin Profile
+        run: |
+          claude-code execute plugin-profiler \
+            --target=. \
+            --output=both \
+            --cache=false
+
+      - name: Commit Profile
+        run: |
+          git add docs/profile/
+          git commit -m "[ci]自动更新插件画像"
+          git push
+```
+
+**关键点**:
+- CI 环境中始终使用 --cache=false 确保最新数据
+- 画像文件提交到仓库，便于历史对比
+- 可结合 PR 审查流程，要求画像完整性评分 ≥90
+
+---
+
+### 场景4: 插件迁移兼容性分析
+
+**使用场景**: 评估从其他框架（如 Superpowers）迁移到 CCC 的工作量
+
+**示例**:
+```bash
+# 分析原插件
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": "old-superpowers-plugin",
+    "output": "both"
+  }
+)
+
+# 预期输出
+{
+  "meta": {
+    "base_framework": {
+      "name": "superpowers",
+      "version": "5.0.2",
+      "relationship": "extends"
+    }
+  },
+  "architecture": {
+    "component_types": {
+      "skills": {
+        "count": 15,
+        "categories": [
+          {"prefix": "cmd-", "count": 12},
+          {"prefix": "lib-", "count": 3}
+        ]
+      }
+    }
+  }
+}
+
+# 迁移评估
+# 1. Skills 命名已符合 CCC 规范（cmd-/lib- 前缀）
+# 2. 需要添加 std- Skills（如 std-component-selection）
+# 3. base_framework 可保留，表明继承关系
+# 4. 预计迁移工作量：低（主要是补充规范类 Skills）
+```
+
+**迁移检查清单**:
+- Skills 命名是否符合 cmd-/std-/lib- 规范
+- 是否存在 CLAUDE.md（迁移后强烈推荐）
+- 是否使用了 CCC 的三阶段工作流
+- plugin_dependencies 是否声明正确
+
+---
+
+### 场景5: 多版本对比分析
+
+**使用场景**: 比较插件不同版本的架构演变
+
+**示例**:
+```bash
+# 分析 v1.0.0
+git checkout v1.0.0
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": ".",
+    "output": "json",
+    "output-dir": "docs/profile/v1.0.0/"
+  }
+)
+
+# 分析 v2.0.0
+git checkout v2.0.0
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": ".",
+    "output": "json",
+    "output-dir": "docs/profile/v2.0.0/"
+  }
+)
+
+# 分析 v3.0.0 (当前)
+git checkout main
+Task(
+  agent="plugin-profiler",
+  args={
+    "target": ".",
+    "output": "json",
+    "output-dir": "docs/profile/v3.0.0/"
+  }
+)
+
+# 对比分析脚本（使用 jq）
+jq -s '
+  {
+    "version_evolution": [
+      {
+        "version": "v1.0.0",
+        "skills_count": .[0].architecture.component_types.skills.count,
+        "agents_count": .[0].architecture.component_types.agents.count,
+        "doc_score": .[0].quality_metrics.documentation_completeness.score
+      },
+      {
+        "version": "v2.0.0",
+        "skills_count": .[1].architecture.component_types.skills.count,
+        "agents_count": .[1].architecture.component_types.agents.count,
+        "doc_score": .[1].quality_metrics.documentation_completeness.score
+      },
+      {
+        "version": "v3.0.0",
+        "skills_count": .[2].architecture.component_types.skills.count,
+        "agents_count": .[2].architecture.component_types.agents.count,
+        "doc_score": .[2].quality_metrics.documentation_completeness.score
+      }
+    ]
+  }
+' docs/profile/v*/plugin-profile.json
+```
+
+**预期输出**:
+```json
+{
+  "version_evolution": [
+    {"version": "v1.0.0", "skills_count": 5, "agents_count": 10, "doc_score": 60},
+    {"version": "v2.0.0", "skills_count": 15, "agents_count": 30, "doc_score": 85},
+    {"version": "v3.0.0", "skills_count": 25, "agents_count": 51, "doc_score": 98}
+  ]
+}
+```
+
+**关键指标**:
+- Skills/Agents 增长趋势
+- 文档完整性改进
+- 分类体系演变（从扁平到角色分类）
+- 核心理念的变化
+
+---
+
 ## 示例调用
 
 ```bash

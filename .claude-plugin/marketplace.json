@@ -7,7 +7,7 @@
     {
       "name": "ccc",
       "source": "./",
-      "description": "Claude Code Component Creator v3.1.3 - Breaking Change: Namespace removed, use /cmd-* commands",
+      "description": "Claude Code Component Creator v3.1.3 - Structured Intent/Blueprint/Delivery workflow for creating high-quality components with 161 antipattern rules, parallel processing, and comprehensive quality assurance.",
       "version": "3.1.3",
       "author": {
         "name": "mzdbxqh"
@@ -15,7 +15,39 @@
       "homepage": "https://github.com/mzdbxqh/claude-code-component-creator",
       "repository": "https://github.com/mzdbxqh/claude-code-component-creator",
       "license": "MIT",
-      "keywords": ["component", "design", "workflow", "reflection", "intent", "blueprint", "delivery"]
+      "keywords": [
+        "component-creator",
+        "design-workflow",
+        "quality-assurance",
+        "meta-programming",
+        "blueprint",
+        "intent-driven",
+        "reflection",
+        "antipattern-detection",
+        "architecture-analysis",
+        "code-generation",
+        "test-driven",
+        "documentation-generator",
+        "ci-cd-integration",
+        "parallel-processing",
+        "skill-development",
+        "subagent-orchestration"
+      ],
+      "categories": [
+        "development-tools",
+        "code-quality",
+        "automation",
+        "productivity",
+        "testing"
+      ],
+      "tags": [
+        "workflow-automation",
+        "design-patterns",
+        "best-practices",
+        "code-review",
+        "documentation",
+        "quality-metrics"
+      ]
     }
   ]
 }
