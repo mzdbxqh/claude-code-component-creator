@@ -1,7 +1,7 @@
 # Claude Code Component Creator (CCC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-3.1.3-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
 [![Quality Score](https://img.shields.io/badge/quality-96%2F100-brightgreen.svg)](docs/reviews/)
 
 A powerful Claude Code plugin for creating high-quality components and skills with a structured Intent/Blueprint/Delivery workflow.
@@ -16,12 +16,11 @@ A powerful Claude Code plugin for creating high-quality components and skills wi
 - **Dual-Model Validation**: Sonnet generates, Haiku validates
 - **Traceability Matrix**: Complete tracking from requirements to implementation
 - **External State Management**: Workflow state stored in YAML files
-- **Parallel Processing**: 3.75x-6.8x speedup for large projects (NEW in v3.1.0)
-- **Token Budget Transparency**: Complete cost estimation and optimization guides (NEW in v3.1.0)
-- **Checkpoint Recovery**: Resume long-running workflows from interruptions (NEW in v3.1.0)
-- **Performance Benchmarking**: Built-in performance testing framework (NEW in v3.1.0)
-- **Plugin Profiler Framework**: Automatic plugin profiling with standardized metadata extraction (NEW in v3.1.0)
-- **Reference Integrity Validation**: Automatic detection of broken references, orphan files, and circular dependencies (NEW in v3.2.0)
+- **Parallel Processing**: 3.75x-6.8x speedup for large projects
+- **Token Budget Transparency**: Complete cost estimation and optimization guides
+- **Checkpoint Recovery**: Resume long-running workflows from interruptions
+- **Performance Benchmarking**: Built-in performance testing framework
+- **Plugin Profiler Framework**: Automatic plugin profiling with standardized metadata extraction
 
 ## Quick Start
 
@@ -46,7 +45,6 @@ git clone https://github.com/mzdbxqh/claude-code-component-creator.git
 ```
 claude-code-component-creator/
 ├── agents/          # SubAgent definitions
-├── commands/        # Command definitions
 ├── skills/          # Skill definitions
 ├── hooks/           # Hook configurations
 ├── docs/            # Documentation
@@ -59,7 +57,7 @@ After installation, verify the plugin is loaded:
 # List all available commands
 /help
 
-# You should see ccc: commands in the list
+# You should see /cmd-* commands in the list
 ```
 
 #### Common Installation Issues
@@ -72,12 +70,14 @@ See [Troubleshooting](#troubleshooting) for more help.
 ### Create Your First Component
 
 ```bash
-# Step by step
+# Complete workflow in one command
+/cmd-quick
+
+# Or step by step
 /cmd-init          # Create intent
 /cmd-design        # Generate blueprint
-/cmd-implement     # Implement code
-/cmd-review        # Quality check
 /cmd-build         # Create deliverable
+/cmd-review        # Quality check
 ```
 
 ## Core Workflow
@@ -94,19 +94,7 @@ Review (Quality assurance)
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `/cmd-init` | Create intent artifact using 4-question framework |
-| `/cmd-design` | Generate blueprint from intent |
-| `/cmd-implement` | Implement code from blueprint or iteration plan |
-| `/cmd-review` | Comprehensive quality review (161+ checks) with automatic plugin profiling |
-| `/cmd-fix` | Interactive problem fixing with auto/manual modes |
-| `/cmd-validate` | Validate artifacts with external tools |
-| `/cmd-build` | Create production-ready deliverable |
-| `/cmd-iterate` | Iterate on existing blueprint |
-| `/cmd-design-iterate` | Iterate on existing components |
-| `/cmd-status` | Display project workflow state |
-| `/cmd-trace` | Generate traceability matrix |
+
 
 See [full command reference](skills/) for details.
 
@@ -120,7 +108,7 @@ Create `.claude-plugin/config.json` to customize plugin behavior:
 ```json
 {
   "name": "claude-code-component-creator",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "settings": {
     "default_model": "sonnet",
     "artifacts_dir": ".ccc/artifacts",
@@ -167,13 +155,13 @@ See [Hooks Documentation](docs/hooks.md) for more details.
 
 ## Plugin Profiler Framework
 
-CCC v3.1.0 introduces an automated plugin profiling system that enhances review reports with comprehensive plugin metadata.
+CCC introduces an automated plugin profiling system that enhances review reports with comprehensive plugin metadata.
 
 ### Overview
 
 When you run `/cmd-review` on a plugin, CCC now automatically:
 1. Extracts plugin metadata (name, version, positioning, architecture)
-2. Analyzes component structure (skills, agents, commands, hooks)
+2. Analyzes component structure (skills, agents, hooks)
 3. Identifies workflow mechanisms and activation patterns
 4. Evaluates documentation completeness (0-100 score)
 5. Generates standardized plugin profile (JSON + Markdown)
@@ -242,98 +230,9 @@ Reports are scored 0-100, with recommendations for improvement.
 
 See [Plugin Profiler Documentation](agents/profiler/plugin-profiler/SKILL.md) for implementation details.
 
-## Reference Integrity Validation
-
-**NEW in v3.2.0**: CCC now automatically detects and reports reference integrity issues in plugins.
-
-### What It Detects
-
-- **Broken References**: Skills field references pointing to non-existent files
-- **Orphan Files**: Components that are never referenced by other components
-- **Circular Dependencies**: A → B → C → A reference cycles
-- **Path Issues**: Absolute paths and path normalization problems
-
-### Usage
-
-```bash
-# Full review with reference checking (default)
-/cmd-review --target=.
-
-# Reference check only
-/cmd-review --target=. --reference-only
-
-# Skip reference check
-/cmd-review --target=. --no-reference-check
-```
-
-### Interactive Mode
-
-```bash
-/cmd-review --target=. --interactive
-```
-
-This displays a multi-select menu where you can choose which checks to run:
-- Reference Integrity Scan
-- 8-Dimension Quality Assessment
-- Architecture Analysis
-- Dependency Analysis
-- Linkage Validation
-
-### Output Reports
-
-Reference integrity scan generates two reports:
-
-```
-docs/reviews/
-├── YYYY-MM-DD-reference-integrity-report.json    # Structured data
-└── YYYY-MM-DD-reference-integrity-report.md      # Human-readable report
-```
-
-### Integrity Score
-
-The scan calculates an integrity score (0-100) based on:
-- Broken references: -10 points each
-- Orphan files: -2 points each
-- Circular dependencies: -20 points each
-- Path issues: -1 point each
-
-### Example Report
-
-```markdown
-# Reference Integrity Report
-
-**Integrity Score**: 80/100 (B)
-
-## 🔴 Broken References (2)
-
-### BR-001: ccc:non-existent-skill
-**File**: `skills/my-skill/SKILL.md`
-**Fix**: Create the missing skill or remove the reference
-
-## ⚠️ Orphan Files (1)
-
-### OR-001: skills/unused-skill/SKILL.md
-**Issue**: File never referenced by any component
-**Fix**: Add reference or delete this file
-
-## 🔴 Circular Dependencies (1)
-
-### Cycle: agent-a → agent-b → agent-c → agent-a
-**Fix**: Break the cycle by removing one reference
-```
-
-### Benefits
-
-- **Early Detection**: Catch broken references before deployment
-- **Maintenance Aid**: Identify unused components for cleanup
-- **Architecture Validation**: Prevent circular dependency issues
-- **Quality Assurance**: Ensure plugin integrity score ≥ 90
-
-See [Reference Integrity Scanner Documentation](agents/reviewer/reference-integrity-scanner/SKILL.md) for implementation details.
-
 ## Quality Dimensions
 
-CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-dimension checks:
+CCC achieves **96/100** overall quality score with comprehensive 8-dimension checks:
 
 | Dimension | Weight | Rules | Score | Description |
 |-----------|--------|-------|-------|-------------|
@@ -346,140 +245,13 @@ CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-d
 | Scalability | 10% | 4 | 96/100 | Parallel processing, batching, timeouts |
 | Testability | Extra | 20 | 95/100 | Test coverage, evals.json framework |
 
-**Quality Improvements in v3.1.0**:
-- Security: +26 points (OWASP Top 10 compliant)
-- Scalability: +21 points (parallel processing support)
-- Testability: +17 points (comprehensive test framework)
-
-## API Reference
-
-### Core Commands
-
-#### `/cmd-init`
-**Purpose**: Create intent artifact using 4-question framework
-**Arguments**: None (interactive)
-**Output**: `intent-{id}.yaml` in artifacts directory
-**Example**:
-```bash
-/cmd-init
-```
-
-#### `/cmd-design`
-**Purpose**: Generate blueprint from intent
-**Arguments**:
-- `intent-id` (optional): Specific intent to design from
-**Output**: `blueprint-{id}.yaml`
-**Example**:
-```bash
-/cmd-design
-/cmd-design intent-123
-```
-
-#### `/cmd-build`
-**Purpose**: Create production-ready deliverable
-**Arguments**:
-- `blueprint-id` (optional): Specific blueprint to build from
-**Output**: Complete deliverable package with SKILL.md, code, tests, docs
-**Example**:
-```bash
-/cmd-build
-/cmd-build blueprint-456
-```
-
-#### `/cmd-review`
-**Purpose**: Comprehensive quality review (76+ checks)
-**Arguments**:
-- `component-path`: Path to component to review
-- `type` (optional): Component type (skill/subagent/command/hook/mcp)
-**Output**: Review report with score and issues
-**Example**:
-```bash
-/cmd-review skills/my-skill/
-/cmd-review agents/my-agent/ --type subagent
-```
-
-### Artifact Structure
-
-#### Intent Artifact
-```yaml
-id: intent-001
-type: intent
-requirements:
-  - Requirement description
-constraints:
-  - Constraint description
-assumptions:
-  - Assumption description
-```
-
-#### Blueprint Artifact
-```yaml
-id: blueprint-001
-type: blueprint
-parent_intent: intent-001
-workflow:
-  steps:
-    - name: Step name
-      action: Action description
-      tools: [Tool1, Tool2]
-```
-
-#### Delivery Artifact
-```yaml
-id: delivery-001
-type: delivery
-parent_blueprint: blueprint-001
-artifacts:
-  - SKILL.md
-  - implementation.py
-  - tests/
-  - README.md
-```
-
-### SubAgent API
-
-SubAgents can be invoked programmatically:
-```python
-# Example: Using review-core SubAgent
-result = invoke_subagent(
-    "review-core",
-    {"component-path": "skills/my-skill/"}
-)
-```
-
-### Extension Points
-
-#### Custom Antipatterns
-Add custom antipattern rules:
-```yaml
-# agents/reviewer/knowledge/antipatterns/custom/my-rule.yaml
-id: CUSTOM-001
-name: my-custom-rule
-severity: warning
-component_type: skill
-detection:
-  method: regex
-  pattern: "banned-pattern"
-```
-
-#### Custom Hooks
-Implement custom hooks:
-```json
-{
-  "event": "PreToolUse",
-  "type": "command",
-  "command": "my-custom-hook.sh"
-}
-```
-
-See [Extension Guide](docs/extensions.md) for more details.
-
 ## Documentation
 
 - [Migration Guide](docs/v3-migration-guide.md) - Upgrade from v2.0 to v3.0
 - [Best Practices](docs/best-practices/ccc-best-practices.md) - Usage guidelines
 - [User Guides](docs/user-guide/) - Detailed command documentation
 - [Templates](docs/templates/) - Intent/Blueprint/Delivery templates
+- [Release Workflow](docs/github-release-workflow.md) - Standard release process
 
 ## Examples
 
@@ -535,101 +307,7 @@ See [test-fixtures/](test-fixtures/) for example components.
    /cmd-fix --report review-report.md
    ```
 
-#### Artifacts Not Found
-
-**Symptoms**: "Intent/Blueprint not found" errors
-
-**Solutions**:
-1. Check artifacts directory exists: `.ccc/artifacts/`
-2. Verify artifact files have correct format: `intent-*.yaml`
-3. Use `/cmd-status` to see all artifacts
-4. Check file permissions (should be readable)
-
-#### Permission Errors
-
-**Symptoms**: "Permission denied" when executing hooks/commands
-
-**Solutions**:
-1. Ensure SubAgents declare required tools in `tools:` field
-2. Set correct `permissionMode:` in SubAgent frontmatter:
-   ```yaml
-   permissionMode: prompt  # or auto, depending on trust level
-   ```
-3. Check that hook scripts are executable:
-   ```bash
-   chmod +x hooks/*.sh
-   ```
-
-#### Model/Token Limit Issues
-
-**Symptoms**: "Context too long" or "Token limit exceeded"
-
-**Solutions**:
-1. Use more efficient models for simple tasks:
-   ```yaml
-   model: haiku  # Instead of sonnet for simple operations
-   ```
-2. Split large components into smaller SubAgents
-3. Reduce skill description length (max 16,000 chars recommended)
-4. Use `disable-model-invocation: true` for command-like skills
-
-#### Platform-Specific Issues
-
-**Windows**:
-- Use WSL (Windows Subsystem for Linux) for best compatibility
-- Ensure path separators are correct (`/` not `\`)
-- Check line endings (LF not CRLF)
-
-**macOS**:
-- Grant necessary permissions in System Preferences > Security
-- Ensure shell scripts use proper shebang (`#!/bin/bash`)
-
-**Linux**:
-- Check SELinux/AppArmor permissions if enabled
-- Verify user has execute permissions for scripts
-
-### Getting Help
-
-If you're still stuck:
-
-1. **Check Documentation**: Search [docs/](docs/) for relevant guides
-2. **Review Examples**: Look at [test-fixtures/](test-fixtures/) for working examples
-3. **Run Diagnostics**:
-   ```bash
-   /cmd-validate  # Validate all artifacts
-   /cmd-trace     # Check traceability
-   ```
-4. **Report Issues**: File a bug report with:
-   - Steps to reproduce
-   - Error messages
-   - Output of `/cmd-status`
-   - Claude Code version
-   - Operating system
-
-### Debug Mode
-
-Enable debug logging:
-```bash
-export CCC_DEBUG=1
-export CCC_LOG_LEVEL=debug
-```
-
-Check logs:
-```bash
-tail -f ~/.ccc/logs/debug.log
-```
-
-### Performance Issues
-
-If CCC is slow:
-
-1. **Reduce Review Scope**: Use specific component paths instead of reviewing entire project
-2. **Disable Expensive Checks**: Configure review thresholds
-3. **Use Faster Models**: Set `model: haiku` for SubAgents that don't need complex reasoning
-4. **Cache Results**: CCC caches some review results; clear cache if stale:
-   ```bash
-   rm -rf .ccc/cache/
-   ```
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete troubleshooting guide.
 
 ## Contributing
 
@@ -643,18 +321,12 @@ Copyright (c) 2026 showme.cc
 
 ## Maintainer
 
-- **mzdbxqh** - [GitHub](https://github.com/mzdbxqh)
+- **mzdbxqh** - [GitHub](https://github.com/mzdbxqh/claude-code-component-creator)
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-## Skill 拆分策略
+---
 
-当 skill 超过 400 行时，参考 `skill-splitting-strategy-analysis.md`：
-- 5 维度诊断框架
-- 5 种拆分策略
-- 实战案例
-
-**已完成拆分**:
-- report-renderer → 4 个专用 renderers (Token 降低 87-92%)
+**Version**: 3.2.0 | **Quality Score**: 96/100 | **License**: MIT
