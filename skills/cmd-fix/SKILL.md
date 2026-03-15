@@ -4,15 +4,15 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "交互式修复审查问题。触发：修复/整改/改进。支持自动/交互/手动三种模式。"
+description: "开发流程第5步。交互式修复审查问题。触发：修复/整改/改进。承接review的问题清单，修复后输出给validate。支持自动/交互/手动模式。"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"
 ---
 
 # /cmd-fix
 
 **适用流程**:
-- **主工作流**: `design` → `review` → **fix** → `validate` → `build`
-- **代码迭代**: `implement` → `review` → **fix**
+- **开发流程**: `init` → `design` → `implement` → `review` → **fix** → `validate` → `build`
+- **迭代流程**: `design-iterate` → `implement` → `review` → **fix**
 - **制品迭代**: `iterate` → `review` → **fix** → `build`
 
 Interactive repair workflow with AskUserQuestion strategy selection and SubAgent factory execution.

@@ -4,13 +4,13 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "分析组件差异，生成增量改进方案。触发：重构/升级/优化。输出差异分析和迭代设计文档。"
+description: "迭代流程第1步。分析现有组件差异，生成增量改进方案。触发：重构/升级/优化。输出迭代计划给implement。"
 argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /cmd-design-iterate
 
-**完整流程**: 现有代码 → **design-iterate** → `implement` → `review` → `fix`
+**迭代流程**: 现有代码 → **design-iterate** → `implement` → `review` → `fix`
 
 Iterate on existing components - analyze current vs target state, generate incremental change proposals.
 

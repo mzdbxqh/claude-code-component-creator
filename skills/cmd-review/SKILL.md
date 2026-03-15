@@ -4,15 +4,16 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
-description: "执行组件质量审查，覆盖76+反模式和8维度。触发：审查/评审/验证。输出问题清单和改进建议。"
+description: "开发流程第4步。执行组件质量审查，覆盖161+反模式和8维度。触发：审查/评审/验证。承接implement的代码，发现问题输出给fix。"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/] [--no-reference-check=false] [--reference-only=false] [--interactive=false]"
 ---
 
 # /cmd-review
 
 **适用流程**:
-- **主工作流**: `design` → **review** → `fix` → `validate` → `build`
-- **代码迭代**: `implement` → **review** → `fix`
+- **开发流程**: `init` → `design` → `implement` → **review** → `fix` → `validate` → `build`
+- **迭代流程**: `design-iterate` → `implement` → **review** → `fix`
+- **制品迭代**: `iterate` → **review** → `build`
 - **制品迭代**: `iterate` → **review** → `fix` → `build`
 
 Performs comprehensive component quality review using 76+ antipatterns across 8 dimensions.
