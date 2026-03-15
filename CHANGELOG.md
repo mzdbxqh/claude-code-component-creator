@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔄 变更
+
+**工作流重构**
+- **统一 implement 环节**: cmd-implement 现在支持两种模式
+  - 模式1: 从 Blueprint 首次实现代码（开发流程）
+  - 模式2: 从 Iteration Plan 增量变更（迭代流程）
+- **工作流描述统一**: 所有 cmd-* 命令使用一致的工作流术语
+  - 开发流程（7步）: init → design → implement → review → fix → validate → build
+  - 迭代流程（4步）: design-iterate → implement → review → fix
+  - 制品迭代流程（3步）: iterate → review → build
+
+### ❌ 移除
+
+**裁剪冗余命令（7个）**
+- 移除 `cmd-design-new` - 与 cmd-design 功能重复
+- 移除 `cmd-quick` - 仅为组合调用，非核心功能
+- 移除 `cmd-review-workflow` - cmd-review 已覆盖
+- 移除 `cmd-review-migration-plan` - 低频特殊场景
+- 移除 `cmd-status-graph` - cmd-status 的冗余版本
+- 移除 `cmd-status-trace` - 与 cmd-trace 重复
+- 移除 `cmd-diff` - 低频使用
+
+**效果**:
+- Skills 数量: 25 → 18 (-28%)
+- 维护成本降低约 30%
+- 代码理解难度显著下降
+
 ### 🚀 新增
 
 **代码审查规则扩展 (+53条规则, 163→216)**

@@ -4,7 +4,7 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
-description: "从Blueprint生成生产就绪交付物。触发：构建/生成/打包。输出完整Delivery制品。主工作流终点。"
+description: "开发流程第7步。从Blueprint生成生产就绪交付物。触发：构建/生成/打包。承接validate的验证通过，输出完整Delivery制品。开发流程终点。"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"
 skills:
   - ccc:workflow-engine
@@ -12,7 +12,7 @@ skills:
 
 # /cmd-build
 
-**完整流程**: `init` → `design` → `review` → `fix` → `validate` → **build**
+**开发流程**: `init` → `design` → `implement` → `review` → `fix` → `validate` → **build**
 
 Generates complete production-ready deliverable packages from validated blueprints including SKILL.md, implementation code, tests, and documentation.
 

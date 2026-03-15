@@ -4,13 +4,13 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "迭代优化Blueprint，生成改进版本。触发：优化/简化/重构。自动检测改进机会，递增ID。"
+description: "制品迭代流程第1步。迭代优化Blueprint，生成改进版本。触发：优化/简化/重构。自动检测改进机会，输出Blueprint-v2给review。"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /cmd-iterate
 
-**完整流程**: Blueprint-v1 → **iterate** → Blueprint-v2 → `review` → `fix` → `build`
+**制品迭代流程**: Blueprint-v1 → **iterate** → Blueprint-v2 → `review` → `build`
 
 Iterates on existing blueprint artifacts to create improved versions with refinement tracking and change documentation.
 

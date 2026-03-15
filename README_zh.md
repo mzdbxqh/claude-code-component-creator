@@ -36,14 +36,12 @@ git clone https://github.com/mzdbxqh/claude-code-component-creator.git
 ### 创建第一个组件
 
 ```bash
-# 一键完整工作流
-/cmd-quick
-
-# 或分步执行
+# 分步执行
 /cmd-init          # 创建意图
 /cmd-design        # 生成蓝图
-/cmd-build         # 创建交付物
+/cmd-implement     # 实现代码
 /cmd-review        # 质量检查
+/cmd-build         # 创建交付物
 ```
 
 ## 核心工作流
@@ -63,16 +61,18 @@ Review (质量保证)
 | 命令 | 描述 |
 |------|------|
 | `/cmd-init` | 使用 4 问框架创建意图制品 |
-| `/cmd-design` | 从意图生成蓝图 |
+| `/cmd-design` | 从意图生成蓝图设计文档 |
+| `/cmd-implement` | 从蓝图实现代码或应用迭代计划 |
+| `/cmd-review` | 全面质量审查（161+ 检查项）|
+| `/cmd-fix` | 交互式修复审查发现的问题 |
+| `/cmd-validate` | 使用外部工具验证制品 |
 | `/cmd-build` | 创建生产就绪的交付物 |
-| `/cmd-review` | 全面质量审查（76+ 检查项）|
-| `/cmd-quick` | 一键执行完整工作流 |
 | `/cmd-iterate` | 迭代现有蓝图 |
+| `/cmd-design-iterate` | 迭代现有组件 |
 | `/cmd-status` | 显示项目工作流状态 |
 | `/cmd-trace` | 生成可追溯性矩阵 |
-| `/cmd-validate` | 使用外部工具验证制品 |
 
-查看 [完整命令参考](commands/) 了解详情。
+查看 [完整命令参考](skills/) 了解详情。
 
 ## 质量评估维度
 

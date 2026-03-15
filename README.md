@@ -72,14 +72,12 @@ See [Troubleshooting](#troubleshooting) for more help.
 ### Create Your First Component
 
 ```bash
-# Complete workflow in one command
-/cmd-quick
-
-# Or step by step
+# Step by step
 /cmd-init          # Create intent
 /cmd-design        # Generate blueprint
-/cmd-build         # Create deliverable
+/cmd-implement     # Implement code
 /cmd-review        # Quality check
+/cmd-build         # Create deliverable
 ```
 
 ## Core Workflow
@@ -100,17 +98,17 @@ Review (Quality assurance)
 |---------|-------------|
 | `/cmd-init` | Create intent artifact using 4-question framework |
 | `/cmd-design` | Generate blueprint from intent |
+| `/cmd-implement` | Implement code from blueprint or iteration plan |
+| `/cmd-review` | Comprehensive quality review (161+ checks) with automatic plugin profiling |
+| `/cmd-fix` | Interactive problem fixing with auto/manual modes |
+| `/cmd-validate` | Validate artifacts with external tools |
 | `/cmd-build` | Create production-ready deliverable |
-| `/cmd-implement` | Implement iteration plans with validation |
-| `/cmd-review` | Comprehensive quality review (76+ checks) with automatic plugin profiling |
-| `/cmd-quick` | Execute complete workflow in one command |
 | `/cmd-iterate` | Iterate on existing blueprint |
 | `/cmd-design-iterate` | Iterate on existing components |
 | `/cmd-status` | Display project workflow state |
 | `/cmd-trace` | Generate traceability matrix |
-| `/cmd-validate` | Validate artifacts with external tools |
 
-See [full command reference](commands/) for details.
+See [full command reference](skills/) for details.
 
 ## Configuration
 
@@ -398,15 +396,6 @@ CCC v3.1.0 achieves **96/100 (A+)** overall quality score with comprehensive 8-d
 ```bash
 /cmd-review skills/my-skill/
 /cmd-review agents/my-agent/ --type subagent
-```
-
-#### `/cmd-quick`
-**Purpose**: Execute complete workflow (init→design→build)
-**Arguments**: None (interactive)
-**Output**: Complete deliverable from start to finish
-**Example**:
-```bash
-/cmd-quick
 ```
 
 ### Artifact Structure

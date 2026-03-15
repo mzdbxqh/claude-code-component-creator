@@ -4,13 +4,13 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "验证制品语法、Schema和Token预算。触发：验证/检查/确认。输出验证报告。主工作流第5步。"
+description: "开发流程第6步。验证制品语法、Schema和Token预算。触发：验证/检查/确认。承接fix的修复结果，验证通过输出给build。"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"
 ---
 
 # /cmd-validate
 
-**完整流程**: `init` → `design` → `review` → `fix` → **validate** → `build`
+**开发流程**: `init` → `design` → `implement` → `review` → `fix` → **validate** → `build`
 
 Validates artifacts using external tools including YAML lint, schema validation, and token count analysis.
 

@@ -4,7 +4,7 @@ model: sonnet
 context: fork
 disable-model-invocation: true
 allowed-tools: [Read, Write, Edit, Glob, Grep]
-description: "5阶段设计流程生成Blueprint。触发：设计/创建方案。从Intent创建详细设计。主工作流第2步。"
+description: "开发流程第2步。5阶段设计流程生成Blueprint设计文档。触发：设计/创建方案。承接init的Intent，输出Blueprint给implement。"
 argument-hint: "--name=<name> [--intent-id=current] [--lang=zh-cn|en-us|ja-jp]"
 skills:
   - ccc:design-review-trigger
@@ -12,7 +12,7 @@ skills:
 
 # /cmd-design
 
-**完整流程**: `init` → **design** → `review` → `fix` → `validate` → `build`
+**开发流程**: `init` → **design** → `implement` → `review` → `fix` → `validate` → `build`
 
 Creates comprehensive blueprint artifacts from intent specifications using structured 5-stage design workflow analysis.
 

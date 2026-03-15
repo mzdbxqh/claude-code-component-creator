@@ -1,6 +1,6 @@
 ---
 name: cmd-init
-description: "4问框架分析需求，创建Intent。触发：启动/初始化/需求。输出Intent制品。主工作流起点。"
+description: "开发流程第1步。4问框架分析需求，创建Intent制品。触发：启动/初始化/需求。输出Intent给design。"
 model: sonnet
 context: fork
 disable-model-invocation: true
@@ -12,7 +12,7 @@ skills:
 
 # /cmd-init
 
-**完整流程**: **init** → `design` → `review` → `fix` → `validate` → `build`
+**开发流程**: **init** → `design` → `implement` → `review` → `fix` → `validate` → `build`
 
 Create Intent artifact using 4-question framework. Analyzes user requirement and generates structured Intent with cognitive load management.
 
