@@ -44,3 +44,16 @@ __pycache__/
 # OS generated
 Thumbs.db
 Desktop.ini
+
+# CCC Persistence Files (v3.2.0)
+
+# Checkpoint 文件（运行时状态，不应提交）
+.checkpoints/
+
+# 持久化中间文件（只保留最终报告）
+docs/*/*/
+!docs/*/*/*.md
+!docs/*/*/README.md
+
+# 临时文件
+**/*.tmp.json
