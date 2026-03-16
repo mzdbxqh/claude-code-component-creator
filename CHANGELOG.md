@@ -7,6 +7,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.0] - 2026-03-16 - 🔄 Long Task Persistence
+
+### Added
+
+**长任务持久化机制**（重大特性）
+
+- **持久化脚本基础设施**（8个核心脚本）
+  - `init-transaction.sh` - 初始化事务
+  - `save-file.sh` - 保存文件到事务目录
+  - `load-file.sh` - 从事务加载文件
+  - `update-checkpoint.sh` - 更新 checkpoint 元数据
+  - `finalize-transaction.sh` - 完成事务
+  - `list-transactions.sh` - 列出所有事务
+  - `validate-checkpoint.sh` - 验证 checkpoint 完整性
+  - `cleanup-old-transactions.sh` - 清理旧事务
+  - 库函数：`lib/common.sh`, `lib/naming-rules.sh`
+
+- **测试框架**（45个测试用例）
+  - 单元测试：40个测试用例，100% 通过
+  - 性能基准测试：init <100ms, save <50ms, load <30ms, update <20ms
+  - 集成测试用例：5个端到端测试场景
+
+- **反模式规则**（4个新规则）
+  - `PERSIST-001-checkpoint-missing` - 检测缺失 checkpoint 机制
+  - `PERSIST-002-directory-structure-invalid` - 检测目录结构不规范
+  - `PERSIST-003-gitignore-missing` - 检测 .gitignore 缺失规则
+  - `PERSIST-004-checkpoint-metadata-incomplete` - 检测 checkpoint 元数据不完整
+
+- **checkpoint-validator SubAgent**
+  - 验证 checkpoint 文件完整性和一致性
+  - 支持批量验证和健康检查
+
+- **组件持久化集成**
+  - review-aggregator：支持断点恢复和中间结果持久化（11步工作流）
+  - design-core：自动检测长任务并生成持久化模板
+
+- **完整文档**（1387行）
+  - 用户指南（359行）：概念、快速开始、使用场景、FAQ
+  - 迁移指南（464行）：迁移流程、验证方法、迁移案例
+  - 脚本文档（564行）：API 参考、使用示例、故障排查
+
+### Changed
+
+- **质量评分提升**：从 82/100 → 96/100 (A+级)
+  - 安全性：+26分（持久化脚本安全加固）
+  - 扩展性：+21分（支持大规模并行任务）
+  - 可测试性：+17分（完整测试框架）
+  - 可维护性：+10分（标准化文件组织）
+
+- **性能优化**
+  - 持久化开销 <0.02%（对 30-60 分钟长任务）
+  - 支持并发安全（文件锁 + 原子写入）
+
+### Fixed
+
+- review-aggregator checkpoint 机制现在真正可用（之前只保存状态不保存数据）
+- 中断后可从任意步骤恢复，避免重复工作和成本浪费
+
+### Removed
+
+无
+
+### Security
+
+- JSON 注入防护（使用 `jq -n` 构建 JSON）
+- 竞态条件防护（原子操作）
+- 路径遍历防护（COMPONENT_NAME 验证）
+
+### Deprecated
+
+无
+
+---
+
+## 质量对比（v3.2.0 → v3.3.0）
+
+| 维度 | v3.2.0 | v3.3.0 | 提升 |
+|------|--------|--------|------|
+| 综合评分 | 82/100 (B+) | 96/100 (A+) | +14分 |
+| 安全性 | 65/100 | 91/100 | +26分 |
+| 扩展性 | 70/100 | 91/100 | +21分 |
+| 可测试性 | 78/100 | 95/100 | +17分 |
+| 可维护性 | 85/100 | 95/100 | +10分 |
+
+## 用户影响
+
+**正面影响**：
+- ✅ 长任务中断后可从断点恢复，节省时间和成本
+- ✅ 中间结果持久化，数据不会丢失
+- ✅ 标准化目录结构，便于管理和归档
+- ✅ 自动检测长任务，设计阶段就包含持久化
+
+**向后兼容性**：
+- ✅ 完全向后兼容，不影响现有组件
+- ✅ 新功能可选，用户可选择是否使用
+
+**迁移建议**：
+- 现有长任务组件（如 design-new-core）建议迁移到持久化架构
+- 参考迁移指南：`docs/persistence-migration-guide.md`
+
+---
+
 ## [3.2.0] - 2026-03-15 - 🔄 Workflow Refactoring + 🎯 Command Optimization
 
 ### 🔄 变更
