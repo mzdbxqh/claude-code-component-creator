@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [3.4.0] - 2026-03-16 - 🎯 Quality Improvements & ERROR Fixes
+## [3.4.0] - 2026-03-16 - 🚀 Long Task Persistence & Quality Excellence
+
+> **📝 版本说明**: v3.4.0 包含了原计划的 v3.3.0（长任务持久化）和 v3.4.0（质量改进）的所有特性。两个版本在同一天开发完成，现统一发布为 v3.4.0。v3.3.0 从未创建 Git tag 或 GitHub Release，仅作为内部开发版本记录。
 
 ### Fixed (修复)
 
@@ -63,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [3.3.0] - 2026-03-16 - 🔄 Long Task Persistence
+
+> **⚠️ 注意**: 此版本从未正式发布（无 Git tag 和 GitHub Release）。所有 v3.3.0 特性已合并到 v3.4.0 中统一发布。详见 [v3.4.0](#340) 发布说明。
 
 ### Added
 
