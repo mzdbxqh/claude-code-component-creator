@@ -1,7 +1,7 @@
 # Claude Code Component Creator (CCC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
 [![Quality Score](https://img.shields.io/badge/quality-96%2F100-brightgreen.svg)](docs/reviews/)
 
 一个强大的 Claude Code 插件，通过结构化的 Intent/Blueprint/Delivery 工作流创建高质量组件和技能。
@@ -108,7 +108,7 @@ CCC 可以通过多种方式配置：
 ```json
 {
   "name": "claude-code-component-creator",
-  "version": "3.2.0",
+  "version": "3.4.0",
   "settings": {
     "default_model": "sonnet",
     "artifacts_dir": ".ccc/artifacts",
@@ -329,4 +329,4 @@ Copyright (c) 2026 showme.cc
 
 ---
 
-**版本**: 3.2.0 | **质量评分**: 96/100 | **许可证**: MIT
+**版本**: 3.4.0 | **质量评分**: 96/100 | **许可证**: MIT

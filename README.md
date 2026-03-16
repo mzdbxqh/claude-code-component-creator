@@ -1,7 +1,7 @@
 # Claude Code Component Creator (CCC)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
+[![Version](https://img.shields.io/badge/version-3.4.0-blue.svg)](https://github.com/mzdbxqh/claude-code-component-creator)
 [![Quality Score](https://img.shields.io/badge/quality-96%2F100-brightgreen.svg)](docs/reviews/)
 
 A powerful Claude Code plugin for creating high-quality components and skills with a structured Intent/Blueprint/Delivery workflow.
@@ -21,23 +21,6 @@ A powerful Claude Code plugin for creating high-quality components and skills wi
 - **Checkpoint Recovery**: Resume long-running workflows from interruptions
 - **Performance Benchmarking**: Built-in performance testing framework
 - **Plugin Profiler Framework**: Automatic plugin profiling with standardized metadata extraction
-
-### Long Task Persistence (v3.3.0+)
-
-- ✅ **Checkpoint Recovery**: Resume from any step, avoid repeated work
-- ✅ **Intermediate Result Persistence**: All key data saved to files
-- ✅ **Standardized Directory Structure**: Unified file organization
-- ✅ **Auto-Detection**: design-core automatically identifies long tasks and generates persistence templates
-- ✅ **Performance Optimized**: <0.02% overhead for long tasks
-
-**Supported Components**:
-- review-aggregator (11-step workflow with checkpoint recovery)
-- design-core (automatic long task detection)
-
-**Documentation**:
-- [User Guide](docs/long-task-persistence-user-guide.md)
-- [Migration Guide](docs/persistence-migration-guide.md)
-- [Script Documentation](scripts/persistence/README.md)
 
 ## Quick Start
 
@@ -125,7 +108,7 @@ Create `.claude-plugin/config.json` to customize plugin behavior:
 ```json
 {
   "name": "claude-code-component-creator",
-  "version": "3.2.0",
+  "version": "3.4.0",
   "settings": {
     "default_model": "sonnet",
     "artifacts_dir": ".ccc/artifacts",
@@ -346,4 +329,4 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
-**Version**: 3.2.0 | **Quality Score**: 96/100 | **License**: MIT
+**Version**: 3.4.0 | **Quality Score**: 96/100 | **License**: MIT
