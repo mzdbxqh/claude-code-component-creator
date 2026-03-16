@@ -1,0 +1,591 @@
+id: PERSIST-002
+name: directory-structure-invalid
+severity: warning
+component_type: skill
+category: persistence
+
+title:
+  zh: "目录结构不规范"
+  en: "Invalid directory structure"
+
+description:
+  zh: |
+    持久化文件应按照规范的目录结构组织。不规范的目录结构会导致：
+    - 文件散落在不同位置，难以查找和维护
+    - 与.gitignore规则不匹配，可能误提交到Git
+    - 与脚本约定不符，导致脚本无法正确访问文件
+    - 混淆临时文件和正式结果
+
+    规范的目录结构：
+    - Checkpoint文件：`.checkpoints/transaction-id/`
+    - 临时结果：`docs/{skill-name}-{timestamp}/`
+    - 最终结果：`docs/final-results/{skill-name}/`
+
+    无效的结构：
+    - 直接在docs/根目录放JSON文件（docs/result.json）
+    - 使用.ccc/temp/目录
+    - 使用系统临时目录（/tmp/）
+  en: |
+    Persistence files should be organized in a standardized directory structure. Unstructured directories cause:
+    - Files scattered in different locations, hard to find and maintain
+    - Mismatch with .gitignore rules, may accidentally commit to Git
+    - Inconsistent with script conventions, scripts fail to access files correctly
+    - Confusion between temporary files and formal results
+
+    Standardized directory structure:
+    - Checkpoint files: `.checkpoints/transaction-id/`
+    - Temporary results: `docs/{skill-name}-{timestamp}/`
+    - Final results: `docs/final-results/{skill-name}/`
+
+    Invalid structures:
+    - JSON files directly in docs/ root (docs/result.json)
+    - Using .ccc/temp/ directory
+    - Using system temporary directory (/tmp/)
+
+rationale:
+  zh: |
+    **为什么需要规范的目录结构**:
+
+    1. **可维护性**: 统一的目录结构便于查找和管理文件
+    2. **Git管理**: 配合.gitignore，确保临时文件不被误提交
+    3. **脚本兼容性**: 持久化脚本基于标准目录结构设计，规范的结构才能正确工作
+    4. **团队协作**: 统一的约定，减少沟通和误解
+    5. **安全性**: 敏感临时文件与正式结果分离
+
+    **标准目录结构**:
+
+    ```
+    project-root/
+    ├── .checkpoints/              # Checkpoint 存储目录
+    │   └── {transaction-id}/      # 按 transaction ID 分类
+    │       ├── checkpoint.json    # checkpoint 元数据
+    │       └── data.json          # 关键数据
+    │
+    ├── docs/
+    │   ├── {skill-name}-{timestamp}/  # 按 skill 和时间戳分类
+    │   │   ├── step-1-results.json
+    │   │   ├── step-2-results.json
+    │   │   └── ...
+    │   │
+    │   └── final-results/
+    │       ├── {skill-name}/
+    │       │   ├── report.md
+    │       │   └── summary.json
+    │       └── ...
+    │
+    └── .gitignore
+        .checkpoints/
+        docs/*/*/
+        !docs/*/*/*.md
+        **/*.tmp.json
+    ```
+
+    **路径匹配规则**:
+
+    - 有效路径：`docs/{skill-name}-{timestamp}/{file}`
+    - 无效路径：`docs/{file}.json`（直接在docs/根目录）
+    - 无效路径：`.ccc/temp/{file}`（使用.ccc/temp/）
+    - 无效路径：`/tmp/{file}`（使用系统临时目录）
+  en: |
+    **Why standardized directory structure is needed**:
+
+    1. **Maintainability**: Unified structure makes it easy to find and manage files
+    2. **Git management**: Works with .gitignore to prevent temporary files from being accidentally committed
+    3. **Script compatibility**: Persistence scripts are designed based on standard directory structure
+    4. **Team collaboration**: Unified conventions reduce communication and misunderstanding
+    5. **Security**: Sensitive temporary files separated from formal results
+
+    **Standard directory structure**:
+
+    ```
+    project-root/
+    ├── .checkpoints/              # Checkpoint storage directory
+    │   └── {transaction-id}/      # Classified by transaction ID
+    │       ├── checkpoint.json    # checkpoint metadata
+    │       └── data.json          # critical data
+    │
+    ├── docs/
+    │   ├── {skill-name}-{timestamp}/  # Classified by skill and timestamp
+    │   │   ├── step-1-results.json
+    │   │   ├── step-2-results.json
+    │   │   └── ...
+    │   │
+    │   └── final-results/
+    │       ├── {skill-name}/
+    │       │   ├── report.md
+    │       │   └── summary.json
+    │       └── ...
+    │
+    └── .gitignore
+        .checkpoints/
+        docs/*/*/
+        !docs/*/*/*.md
+        **/*.tmp.json
+    ```
+
+    **Path matching rules**:
+
+    - Valid path: `docs/{skill-name}-{timestamp}/{file}`
+    - Invalid path: `docs/{file}.json` (directly in docs/ root)
+    - Invalid path: `.ccc/temp/{file}` (using .ccc/temp/)
+    - Invalid path: `/tmp/{file}` (using system temporary directory)
+
+official_reference:
+  document: "long-task-persistence-standard-design.md"
+  section: "4.2 PERSIST-002: 目录结构不规范"
+
+detection:
+  method: file-path-check
+  invalid_patterns:
+    - "^docs/[^/]+\\.json$"              # 直接在 docs/ 根目录放 JSON 文件
+    - "^\\.ccc/temp/"                     # 使用 .ccc/temp/
+    - "^/tmp/"                            # 使用系统临时目录
+
+  valid_pattern: "^(docs/[^/]+-[^/]+/[^/]+|docs/final-results/.+|.checkpoints/.+)$"
+
+  detection_logic: |
+    1. 扫描代码中所有文件操作（Write, Bash 等）的路径
+    2. 检查路径是否匹配无效模式：
+       - 直接在 docs/ 根目录（docs/*.json）
+       - 使用 .ccc/temp/
+       - 使用 /tmp/
+    3. 如果使用了无效路径，标记为 WARNING
+    4. 对比有效模式，提供修复建议
+
+fix:
+  automatic: true
+  description: "自动移动文件到标准目录位置，不需要手动修复"
+  suggestion:
+    zh: |
+      使用以下命名约定组织文件：
+
+      **checkpoint 文件**（由init-transaction.sh自动创建）：
+
+      ```
+      .checkpoints/{transaction-id}/
+      ├── checkpoint.json      # checkpoint元数据
+      ├── workflow-config.json # workflow配置
+      └── data/
+          ├── step-1.json
+          ├── step-2.json
+          └── ...
+      ```
+
+      **临时结果文件**（步骤中间结果）：
+
+      ```
+      docs/{skill-name}-{timestamp}/
+      ├── step-1-results.json
+      ├── step-2-analysis.json
+      ├── step-3-review.json
+      └── ...
+      ```
+
+      示例：
+      ```
+      docs/review-aggregator-20260316-143022/
+      ├── step-1-collect.json
+      ├── step-2-analysis.json
+      ├── step-3-review.json
+      └── step-4-report.json
+      ```
+
+      **最终结果文件**（任务完成后）：
+
+      ```
+      docs/final-results/{skill-name}/
+      ├── report.md
+      ├── summary.json
+      └── [其他最终输出]
+      ```
+
+      示例：
+      ```
+      docs/final-results/review-aggregator/
+      ├── 2026-03-16-review-report.md
+      └── 2026-03-16-summary.json
+      ```
+
+      **修复代码示例**：
+
+      修复前（错误）：
+      ```python
+      # 错误：直接在 docs/ 根目录
+      Write(file_path="docs/results.json", content=data)
+
+      # 错误：使用 /tmp/
+      Write(file_path="/tmp/results.json", content=data)
+
+      # 错误：使用 .ccc/temp/
+      Write(file_path=".ccc/temp/results.json", content=data)
+      ```
+
+      修复后（正确）：
+      ```python
+      from datetime import datetime
+      import os
+
+      # 步骤中间结果
+      skill_name = "review-aggregator"
+      timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+      result_dir = f"docs/{skill_name}-{timestamp}"
+      os.makedirs(result_dir, exist_ok=True)
+
+      Write(file_path=f"{result_dir}/step-1-results.json", content=data)
+
+      # 最终结果
+      final_dir = f"docs/final-results/{skill_name}"
+      os.makedirs(final_dir, exist_ok=True)
+
+      Write(file_path=f"{final_dir}/report.md", content=report)
+      ```
+
+    en: |
+      Use the following naming convention to organize files:
+
+      **Checkpoint files** (auto-created by init-transaction.sh):
+
+      ```
+      .checkpoints/{transaction-id}/
+      ├── checkpoint.json      # checkpoint metadata
+      ├── workflow-config.json # workflow configuration
+      └── data/
+          ├── step-1.json
+          ├── step-2.json
+          └── ...
+      ```
+
+      **Temporary result files** (step intermediate results):
+
+      ```
+      docs/{skill-name}-{timestamp}/
+      ├── step-1-results.json
+      ├── step-2-analysis.json
+      ├── step-3-review.json
+      └── ...
+      ```
+
+      Example:
+      ```
+      docs/review-aggregator-20260316-143022/
+      ├── step-1-collect.json
+      ├── step-2-analysis.json
+      ├── step-3-review.json
+      └── step-4-report.json
+      ```
+
+      **Final result files** (after task completion):
+
+      ```
+      docs/final-results/{skill-name}/
+      ├── report.md
+      ├── summary.json
+      └── [other final outputs]
+      ```
+
+      Example:
+      ```
+      docs/final-results/review-aggregator/
+      ├── 2026-03-16-review-report.md
+      └── 2026-03-16-summary.json
+      ```
+
+      **Code fix example**:
+
+      Before (incorrect):
+      ```python
+      # Wrong: directly in docs/ root
+      Write(file_path="docs/results.json", content=data)
+
+      # Wrong: using /tmp/
+      Write(file_path="/tmp/results.json", content=data)
+
+      # Wrong: using .ccc/temp/
+      Write(file_path=".ccc/temp/results.json", content=data)
+      ```
+
+      After (correct):
+      ```python
+      from datetime import datetime
+      import os
+
+      # Step intermediate results
+      skill_name = "review-aggregator"
+      timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+      result_dir = f"docs/{skill_name}-{timestamp}"
+      os.makedirs(result_dir, exist_ok=True)
+
+      Write(file_path=f"{result_dir}/step-1-results.json", content=data)
+
+      # Final results
+      final_dir = f"docs/final-results/{skill_name}"
+      os.makedirs(final_dir, exist_ok=True)
+
+      Write(file_path=f"{final_dir}/report.md", content=report)
+      ```
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误 1：直接在docs/根目录放JSON文件
+
+      ```python
+      # 错误的做法
+      Write(file_path="docs/review-results.json", content=review_data)
+      Write(file_path="docs/analysis.json", content=analysis_data)
+      ```
+      问题：docs/根目录被污染，与.gitignore规则不符
+
+      ❌ 错误 2：使用.ccc/temp/目录
+
+      ```bash
+      # 在脚本中使用
+      mkdir -p .ccc/temp
+      save_results() {
+        cp $1 .ccc/temp/
+      }
+      ```
+      问题：.ccc/temp/不是标准目录，脚本可能无法正确处理
+
+      ❌ 错误 3：使用系统临时目录
+
+      ```python
+      Write(file_path="/tmp/review-results.json", content=data)
+      Write(file_path="/var/tmp/analysis.json", content=data)
+      ```
+      问题：系统临时目录会被清理，文件可能丢失；跨系统不兼容
+
+      ❌ 错误 4：混乱的目录结构
+
+      ```
+      docs/
+      ├── review-20260316.json      # 混乱：随意命名
+      ├── results.json              # 混乱：无法追踪来源
+      ├── step1.json                # 混乱：无法识别关系
+      ├── final-report.md           # 混乱：与其他文件混在一起
+      └── archive/
+          └── old-results.json      # 混乱：没有标准结构
+      ```
+      问题：无法快速定位文件，难以维护和删除过期文件
+
+    en: |
+      ❌ Error 1: JSON files directly in docs/ root
+
+      ```python
+      # Wrong approach
+      Write(file_path="docs/review-results.json", content=review_data)
+      Write(file_path="docs/analysis.json", content=analysis_data)
+      ```
+      Issue: docs/ root is polluted, doesn't match .gitignore rules
+
+      ❌ Error 2: Using .ccc/temp/ directory
+
+      ```bash
+      # In script
+      mkdir -p .ccc/temp
+      save_results() {
+        cp $1 .ccc/temp/
+      }
+      ```
+      Issue: .ccc/temp/ is not standard, scripts may fail to process correctly
+
+      ❌ Error 3: Using system temporary directory
+
+      ```python
+      Write(file_path="/tmp/review-results.json", content=data)
+      Write(file_path="/var/tmp/analysis.json", content=data)
+      ```
+      Issue: System temp directory gets cleaned, files may be lost; cross-system incompatible
+
+      ❌ Error 4: Chaotic directory structure
+
+      ```
+      docs/
+      ├── review-20260316.json      # Messy: arbitrary naming
+      ├── results.json              # Messy: can't track source
+      ├── step1.json                # Messy: can't identify relationships
+      ├── final-report.md           # Messy: mixed with other files
+      └── archive/
+          └── old-results.json      # Messy: no standard structure
+      ```
+      Issue: Hard to locate files quickly, difficult to maintain and clean up old files
+
+  good:
+    zh: |
+      ✅ 正确 1：规范的checkpoint目录结构
+
+      ```
+      .checkpoints/
+      ├── review-20260316-143022/
+      │   ├── checkpoint.json
+      │   ├── workflow-config.json
+      │   └── data/
+      │       ├── step-1-collect.json
+      │       ├── step-2-analysis.json
+      │       └── step-3-review.json
+      │
+      └── review-20260316-150015/
+          ├── checkpoint.json
+          └── data/
+              └── step-1-collect.json
+      ```
+
+      ✅ 正确 2：规范的临时结果目录结构
+
+      ```
+      docs/
+      └── review-aggregator-20260316-143022/
+          ├── step-1-collect-info.json
+          ├── step-2-architecture-analysis.json
+          ├── step-3-review-core.json
+          └── step-4-generate-report.json
+      ```
+
+      ✅ 正确 3：规范的最终结果目录结构
+
+      ```
+      docs/final-results/
+      └── review-aggregator/
+          ├── 2026-03-16-review-report.md
+          ├── 2026-03-16-summary.json
+          └── 2026-03-15-review-report.md
+      ```
+
+      ✅ 正确 4：完整的代码实现
+
+      ```python
+      from datetime import datetime
+      import os
+      import json
+
+      class ReviewAggregatorSkill:
+        def __init__(self):
+          self.skill_name = "review-aggregator"
+          self.timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+          self.temp_dir = f"docs/{self.skill_name}-{self.timestamp}"
+          self.final_dir = f"docs/final-results/{self.skill_name}"
+
+        def setup_directories(self):
+          os.makedirs(self.temp_dir, exist_ok=True)
+          os.makedirs(self.final_dir, exist_ok=True)
+
+        def save_step_result(self, step_num, step_name, data):
+          file_path = f"{self.temp_dir}/step-{step_num}-{step_name}.json"
+          Write(file_path=file_path, content=json.dumps(data))
+
+        def save_final_result(self, data, filename):
+          file_path = f"{self.final_dir}/{self.timestamp}-{filename}"
+          Write(file_path=file_path, content=data)
+
+        def execute(self):
+          self.setup_directories()
+
+          # 步骤1：收集信息
+          info = collect_info()
+          self.save_step_result(1, "collect-info", info)
+
+          # 步骤2：分析架构
+          analysis = SubAgent('architecture-analyzer', data=info)
+          self.save_step_result(2, "analysis", analysis)
+
+          # 步骤3：执行审查
+          review = SubAgent('review-core', data=analysis)
+          self.save_step_result(3, "review", review)
+
+          # 步骤4：生成报告
+          report = generate_report(review)
+          self.save_final_result(report, "report.md")
+
+          return report
+      ```
+
+    en: |
+      ✅ Correct 1: Standardized checkpoint directory structure
+
+      ```
+      .checkpoints/
+      ├── review-20260316-143022/
+      │   ├── checkpoint.json
+      │   ├── workflow-config.json
+      │   └── data/
+      │       ├── step-1-collect.json
+      │       ├── step-2-analysis.json
+      │       └── step-3-review.json
+      │
+      └── review-20260316-150015/
+          ├── checkpoint.json
+          └── data/
+              └── step-1-collect.json
+      ```
+
+      ✅ Correct 2: Standardized temporary result directory structure
+
+      ```
+      docs/
+      └── review-aggregator-20260316-143022/
+          ├── step-1-collect-info.json
+          ├── step-2-architecture-analysis.json
+          ├── step-3-review-core.json
+          └── step-4-generate-report.json
+      ```
+
+      ✅ Correct 3: Standardized final result directory structure
+
+      ```
+      docs/final-results/
+      └── review-aggregator/
+          ├── 2026-03-16-review-report.md
+          ├── 2026-03-16-summary.json
+          └── 2026-03-15-review-report.md
+      ```
+
+      ✅ Correct 4: Complete code implementation
+
+      ```python
+      from datetime import datetime
+      import os
+      import json
+
+      class ReviewAggregatorSkill:
+        def __init__(self):
+          self.skill_name = "review-aggregator"
+          self.timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+          self.temp_dir = f"docs/{self.skill_name}-{self.timestamp}"
+          self.final_dir = f"docs/final-results/{self.skill_name}"
+
+        def setup_directories(self):
+          os.makedirs(self.temp_dir, exist_ok=True)
+          os.makedirs(self.final_dir, exist_ok=True)
+
+        def save_step_result(self, step_num, step_name, data):
+          file_path = f"{self.temp_dir}/step-{step_num}-{step_name}.json"
+          Write(file_path=file_path, content=json.dumps(data))
+
+        def save_final_result(self, data, filename):
+          file_path = f"{self.final_dir}/{self.timestamp}-{filename}"
+          Write(file_path=file_path, content=data)
+
+        def execute(self):
+          self.setup_directories()
+
+          # Step 1: Collect information
+          info = collect_info()
+          self.save_step_result(1, "collect-info", info)
+
+          # Step 2: Analyze architecture
+          analysis = SubAgent('architecture-analyzer', data=info)
+          self.save_step_result(2, "analysis", analysis)
+
+          # Step 3: Execute review
+          review = SubAgent('review-core', data=analysis)
+          self.save_step_result(3, "review", review)
+
+          # Step 4: Generate report
+          report = generate_report(review)
+          self.save_final_result(report, "report.md")
+
+          return report
+      ```
+
+tags: ["persistence", "directory-structure", "file-organization", "naming-convention"]
+related_rules: ["PERSIST-001", "PERSIST-003", "PERSIST-004"]

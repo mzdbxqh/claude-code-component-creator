@@ -1,0 +1,507 @@
+id: PERSIST-001
+name: checkpoint-missing
+severity: error
+component_type: skill
+category: persistence
+
+title:
+  zh: "checkpoint 机制缺失"
+  en: "Missing checkpoint mechanism"
+
+description:
+  zh: |
+    长任务（≥5步 或 包含SubAgent调用 或 包含文件生成 或 预计运行时间>3分钟）必须实现持久化机制。
+
+    当任务执行中断时，应该能够从checkpoint恢复，而不是从头开始。缺少checkpoint机制会导致：
+    - 任务中断后无法恢复，需要重新执行（浪费时间和资源）
+    - 无法追踪任务执行进度
+    - 无法处理长时间运行的任务
+
+    本规则检测是否在Skill中正确实现了checkpoint持久化机制。
+  en: |
+    Long-running tasks (≥5 steps OR SubAgent calls OR file generation OR estimated time >3min) must implement persistence mechanism.
+
+    When task execution is interrupted, it should be able to recover from a checkpoint instead of restarting from the beginning. Missing checkpoint mechanism causes:
+    - Unable to recover after interruption, needs full re-execution (wastes time and resources)
+    - Cannot track task execution progress
+    - Cannot handle long-running tasks
+
+    This rule detects whether the Skill correctly implements checkpoint persistence mechanism.
+
+rationale:
+  zh: |
+    **为什么需要 checkpoint 机制**:
+
+    1. **任务容错性**: 长任务中断后可以恢复，避免全量重计算
+    2. **资源效率**: 减少重复计算，节省API额度和计算资源
+    3. **用户体验**: 任务可以跨会话继续执行，支持断点续传
+    4. **可观测性**: 记录任务进度和中间结果，便于调试和监控
+
+    **何时需要 checkpoint**:
+    - 步骤数 ≥ 5
+    - 包含 SubAgent 调用
+    - 包含文件生成操作
+    - 预计执行时间 > 3 分钟
+
+    **实现方式**:
+    - 初始化事务：init-transaction.sh（创建transaction_id和checkpoint目录）
+    - 保存中间结果：save-file.sh（保存关键数据和状态）
+    - 完成事务：finalize-transaction.sh（标记任务完成）
+  en: |
+    **Why checkpoint mechanism is needed**:
+
+    1. **Task resilience**: Long tasks can recover from interruption, avoiding full recomputation
+    2. **Resource efficiency**: Reduces redundant computation, saves API quota and resources
+    3. **User experience**: Tasks can continue across sessions, supports checkpoint recovery
+    4. **Observability**: Records task progress and intermediate results for debugging and monitoring
+
+    **When checkpoint is needed**:
+    - Step count ≥ 5
+    - Contains SubAgent calls
+    - Contains file generation operations
+    - Estimated execution time > 3 minutes
+
+    **Implementation methods**:
+    - Initialize transaction: init-transaction.sh (creates transaction_id and checkpoint directory)
+    - Save intermediate results: save-file.sh (saves critical data and state)
+    - Finalize transaction: finalize-transaction.sh (marks task completion)
+
+official_reference:
+  document: "long-task-persistence-standard-design.md"
+  section: "4.1 PERSIST-001: checkpoint 机制缺失"
+
+detection:
+  method: workflow-analysis
+  trigger_conditions:
+    - "step_count >= 5"
+    OR:
+    - "has_subagent_call: true"
+    OR:
+    - "has_file_generation: true"
+    OR:
+    - "estimated_execution_time > 3min"
+
+  required_patterns:
+    - "init-transaction.sh"
+    - "save-file.sh"
+    - "finalize-transaction.sh"
+
+  detection_logic: |
+    1. 分析 Skill 中的工作流步骤数
+    2. 检查是否包含 SubAgent 调用（如 SubAgent(...) 调用）
+    3. 检查是否包含文件生成操作（如 Write(...) 调用）
+    4. 估算执行时间（根据API调用数量和类型）
+    5. 如果满足上述任何条件，检查是否存在以下三个持久化脚本的调用：
+       - init-transaction.sh: 初始化事务
+       - save-file.sh: 保存中间结果
+       - finalize-transaction.sh: 完成事务
+    6. 如果缺少任何一个脚本调用，标记为ERROR
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      在 Skill 的工作流中添加持久化调用。按以下模板添加三个关键步骤：
+
+      **步骤 0.1：初始化事务**
+
+      在工作流开始时创建transaction_id和checkpoint目录：
+
+      ```python
+      # 初始化事务
+      TRANSACTION_ID = f"review-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+      Bash(
+        command=f"bash scripts/persistence/init-transaction.sh review {TRANSACTION_ID} review-aggregator",
+        description="初始化持久化事务"
+      )
+      ```
+
+      **步骤 N：保存中间结果**
+
+      在关键步骤完成后保存结果：
+
+      ```python
+      # 执行第 N 步业务逻辑
+      results = ... # 业务逻辑处理结果
+
+      # 保存步骤结果
+      Write(
+        file_path="/tmp/step-n-results.json",
+        content=json.dumps(results)
+      )
+
+      Bash(
+        command=f"bash scripts/persistence/save-file.sh {TRANSACTION_ID} step_n_results intermediate-result /tmp/step-n-results.json",
+        description="保存步骤N的中间结果"
+      )
+      ```
+
+      **步骤 Final：完成事务**
+
+      在工作流结束时标记完成：
+
+      ```python
+      Bash(
+        command=f"bash scripts/persistence/finalize-transaction.sh {TRANSACTION_ID} completed",
+        description="标记事务完成"
+      )
+      ```
+
+      **实现要点**：
+
+      1. 选择合理的保存点
+         - 每个重要的中间结果都应该保存
+         - 避免过于频繁的保存操作
+         - 关键决策点后必须保存
+
+      2. 确保数据完整性
+         - 保存的数据应该包含足以恢复的所有信息
+         - 包括当前进度、已处理的输入、生成的输出
+
+      3. 事务ID命名规范
+         - 格式：skill-名称-timestamp
+         - 示例：review-20260316-143022
+
+      4. 恢复逻辑（可选但推荐）
+         - 在工作流开始时检查是否存在未完成的事务
+         - 如果存在，加载checkpoint并从该点继续执行
+         - 提供用户选择是继续还是重新开始
+
+    en: |
+      Add persistence calls to the Skill workflow. Add three critical steps following this template:
+
+      **Step 0.1: Initialize transaction**
+
+      Create transaction_id and checkpoint directory at workflow start:
+
+      ```python
+      # Initialize transaction
+      TRANSACTION_ID = f"review-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+      Bash(
+        command=f"bash scripts/persistence/init-transaction.sh review {TRANSACTION_ID} review-aggregator",
+        description="Initialize persistence transaction"
+      )
+      ```
+
+      **Step N: Save intermediate results**
+
+      Save results after critical steps complete:
+
+      ```python
+      # Execute step N business logic
+      results = ... # business logic processing result
+
+      # Save step result
+      Write(
+        file_path="/tmp/step-n-results.json",
+        content=json.dumps(results)
+      )
+
+      Bash(
+        command=f"bash scripts/persistence/save-file.sh {TRANSACTION_ID} step_n_results intermediate-result /tmp/step-n-results.json",
+        description="Save step N intermediate result"
+      )
+      ```
+
+      **Final Step: Finalize transaction**
+
+      Mark completion at workflow end:
+
+      ```python
+      Bash(
+        command=f"bash scripts/persistence/finalize-transaction.sh {TRANSACTION_ID} completed",
+        description="Mark transaction as completed"
+      )
+      ```
+
+      **Implementation guidelines**:
+
+      1. Choose reasonable save points
+         - Save every important intermediate result
+         - Avoid too frequent save operations
+         - Must save after critical decision points
+
+      2. Ensure data integrity
+         - Saved data should contain all information needed for recovery
+         - Include current progress, processed inputs, generated outputs
+
+      3. Transaction ID naming convention
+         - Format: skill-name-timestamp
+         - Example: review-20260316-143022
+
+      4. Recovery logic (optional but recommended)
+         - Check for unfinished transactions at workflow start
+         - If exists, load checkpoint and continue from that point
+         - Offer user choice to continue or restart
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误 1：多步骤工作流缺少持久化
+
+      ```python
+      # skills/cmd-review/SKILL.md
+      # 步骤数 ≥ 5，包含 SubAgent 调用，但缺少 checkpoint
+
+      class ReviewSkill:
+        def execute(self):
+          # 步骤 1：收集信息
+          info = collect_info()
+
+          # 步骤 2：调用分析器
+          analysis = SubAgent('architecture-analyzer', data=info)
+
+          # 步骤 3：执行审查
+          review = SubAgent('review-core', data=analysis)
+
+          # 步骤 4：生成报告
+          report = generate_report(review)
+
+          # 步骤 5：保存结果
+          Write(file_path="report.md", content=report)
+
+          return report
+      ```
+      问题：没有 init-transaction.sh、save-file.sh、finalize-transaction.sh 的调用
+
+      ❌ 错误 2：包含文件生成但缺少持久化
+
+      ```python
+      class DataProcessingSkill:
+        def execute(self):
+          # 处理数据
+          data = process_large_dataset()
+
+          # 生成多个文件
+          Write(file_path="output1.json", content=json1)
+          Write(file_path="output2.json", content=json2)
+          Write(file_path="output3.json", content=json3)
+
+          return results
+      ```
+      问题：虽然生成了文件，但没有持久化机制来记录进度
+
+      ❌ 错误 3：长时间运行但缺少checkpoint
+
+      ```python
+      class LongRunningSkill:
+        def execute(self):
+          for i in range(1000):
+            # 每次迭代耗时较长
+            result = expensive_computation()
+            process_result(result)
+
+          return final_result
+      ```
+      问题：虽然运行时间长，但没有checkpoint来保存中间进度
+
+    en: |
+      ❌ Error 1: Multi-step workflow missing persistence
+
+      ```python
+      # skills/cmd-review/SKILL.md
+      # Step count ≥ 5, contains SubAgent call, but lacks checkpoint
+
+      class ReviewSkill:
+        def execute(self):
+          # Step 1: Collect information
+          info = collect_info()
+
+          # Step 2: Call analyzer
+          analysis = SubAgent('architecture-analyzer', data=info)
+
+          # Step 3: Execute review
+          review = SubAgent('review-core', data=analysis)
+
+          # Step 4: Generate report
+          report = generate_report(review)
+
+          # Step 5: Save result
+          Write(file_path="report.md", content=report)
+
+          return report
+      ```
+      Issue: No calls to init-transaction.sh, save-file.sh, finalize-transaction.sh
+
+      ❌ Error 2: File generation without persistence
+
+      ```python
+      class DataProcessingSkill:
+        def execute(self):
+          # Process data
+          data = process_large_dataset()
+
+          # Generate multiple files
+          Write(file_path="output1.json", content=json1)
+          Write(file_path="output2.json", content=json2)
+          Write(file_path="output3.json", content=json3)
+
+          return results
+      ```
+      Issue: Although files are generated, no persistence mechanism to record progress
+
+      ❌ Error 3: Long-running without checkpoint
+
+      ```python
+      class LongRunningSkill:
+        def execute(self):
+          for i in range(1000):
+            # Each iteration takes significant time
+            result = expensive_computation()
+            process_result(result)
+
+          return final_result
+      ```
+      Issue: Although runtime is long, no checkpoint to save intermediate progress
+
+  good:
+    zh: |
+      ✅ 正确 1：完整的多步骤工作流与持久化
+
+      ```python
+      # skills/cmd-review-aggregator/SKILL.md
+      from datetime import datetime
+      import json
+
+      class ReviewAggregatorSkill:
+        def execute(self):
+          # 初始化事务
+          transaction_id = f"review-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          Bash(
+            command=f"bash scripts/persistence/init-transaction.sh review {transaction_id} review-aggregator",
+            description="初始化持久化事务"
+          )
+
+          # 步骤 1：收集信息
+          info = collect_info()
+
+          # 步骤 2：调用分析器
+          analysis = SubAgent('architecture-analyzer', data=info)
+          Write(file_path="/tmp/analysis.json", content=json.dumps(analysis))
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} analysis intermediate-result /tmp/analysis.json")
+
+          # 步骤 3：执行审查
+          review = SubAgent('review-core', data=analysis)
+          Write(file_path="/tmp/review.json", content=json.dumps(review))
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} review intermediate-result /tmp/review.json")
+
+          # 步骤 4：生成报告
+          report = generate_report(review)
+          Write(file_path="/tmp/report.md", content=report)
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} report final-result /tmp/report.md")
+
+          # 步骤 5：完成事务
+          Bash(command=f"bash scripts/persistence/finalize-transaction.sh {transaction_id} completed")
+
+          return report
+      ```
+
+      ✅ 正确 2：带恢复逻辑的持久化
+
+      ```python
+      class RobustLongTaskSkill:
+        def execute(self):
+          transaction_id = f"process-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          # 检查并恢复现有的checkpoint
+          existing_checkpoint = check_existing_checkpoint()
+          if existing_checkpoint:
+            confirm = ask_user("发现未完成的任务，是否继续？")
+            if confirm:
+              transaction_id = existing_checkpoint['transaction_id']
+              current_step = existing_checkpoint['current_step']
+            else:
+              transaction_id = f"process-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          # 初始化或继续事务
+          Bash(command=f"bash scripts/persistence/init-transaction.sh process {transaction_id} long-task")
+
+          # 执行步骤并保存进度
+          for step_num in range(1, 6):
+            result = execute_step(step_num)
+            save_step_result(transaction_id, step_num, result)
+
+          # 完成事务
+          Bash(command=f"bash scripts/persistence/finalize-transaction.sh {transaction_id} completed")
+
+          return result
+      ```
+
+    en: |
+      ✅ Correct 1: Complete multi-step workflow with persistence
+
+      ```python
+      # skills/cmd-review-aggregator/SKILL.md
+      from datetime import datetime
+      import json
+
+      class ReviewAggregatorSkill:
+        def execute(self):
+          # Initialize transaction
+          transaction_id = f"review-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          Bash(
+            command=f"bash scripts/persistence/init-transaction.sh review {transaction_id} review-aggregator",
+            description="Initialize persistence transaction"
+          )
+
+          # Step 1: Collect information
+          info = collect_info()
+
+          # Step 2: Call analyzer
+          analysis = SubAgent('architecture-analyzer', data=info)
+          Write(file_path="/tmp/analysis.json", content=json.dumps(analysis))
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} analysis intermediate-result /tmp/analysis.json")
+
+          # Step 3: Execute review
+          review = SubAgent('review-core', data=analysis)
+          Write(file_path="/tmp/review.json", content=json.dumps(review))
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} review intermediate-result /tmp/review.json")
+
+          # Step 4: Generate report
+          report = generate_report(review)
+          Write(file_path="/tmp/report.md", content=report)
+          Bash(command=f"bash scripts/persistence/save-file.sh {transaction_id} report final-result /tmp/report.md")
+
+          # Step 5: Finalize transaction
+          Bash(command=f"bash scripts/persistence/finalize-transaction.sh {transaction_id} completed")
+
+          return report
+      ```
+
+      ✅ Correct 2: Persistence with recovery logic
+
+      ```python
+      class RobustLongTaskSkill:
+        def execute(self):
+          transaction_id = f"process-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          # Check and recover existing checkpoint
+          existing_checkpoint = check_existing_checkpoint()
+          if existing_checkpoint:
+            confirm = ask_user("Found unfinished task, continue?")
+            if confirm:
+              transaction_id = existing_checkpoint['transaction_id']
+              current_step = existing_checkpoint['current_step']
+            else:
+              transaction_id = f"process-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+          # Initialize or continue transaction
+          Bash(command=f"bash scripts/persistence/init-transaction.sh process {transaction_id} long-task")
+
+          # Execute steps and save progress
+          for step_num in range(1, 6):
+            result = execute_step(step_num)
+            save_step_result(transaction_id, step_num, result)
+
+          # Finalize transaction
+          Bash(command=f"bash scripts/persistence/finalize-transaction.sh {transaction_id} completed")
+
+          return result
+      ```
+
+tags: ["persistence", "checkpoint", "long-task", "workflow", "resilience"]
+related_rules: ["PERSIST-002", "PERSIST-003", "PERSIST-004"]

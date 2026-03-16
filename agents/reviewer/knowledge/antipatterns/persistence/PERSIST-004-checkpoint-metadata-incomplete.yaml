@@ -1,0 +1,708 @@
+id: PERSIST-004
+name: checkpoint-metadata-incomplete
+severity: warning
+component_type: skill
+category: persistence
+
+title:
+  zh: "checkpoint 元数据不完整"
+  en: "Incomplete checkpoint metadata"
+
+description:
+  zh: |
+    每个checkpoint JSON文件必须包含所有必需的元数据字段，以确保能够正确恢复任务。
+
+    不完整的元数据导致：
+    - 无法识别checkpoint对应的任务类型
+    - 无法判断任务执行到哪一步
+    - 无法确定数据存储位置
+    - 无法追踪重要文件和关键数据
+    - 恢复机制失效，无法断点续传
+
+    必需的元数据字段：
+    - `transaction_id`: 事务唯一标识符
+    - `workflow_type`: 工作流类型（skill类型）
+    - `status`: 当前状态（pending/running/completed/failed）
+    - `current_step`: 当前执行的步骤号
+    - `data_directory`: 数据存储目录
+    - `key_files`: 关键文件列表（用于恢复）
+
+    标准的checkpoint.json格式：
+    ```json
+    {
+      "transaction_id": "review-20260316-143022",
+      "workflow_type": "review-aggregator",
+      "status": "running",
+      "current_step": 2,
+      "data_directory": "docs/review-aggregator-20260316-143022",
+      "key_files": {
+        "step_1_results": "docs/review-aggregator-20260316-143022/step-1.json",
+        "step_2_results": "docs/review-aggregator-20260316-143022/step-2.json"
+      }
+    }
+    ```
+  en: |
+    Each checkpoint JSON file must contain all required metadata fields to ensure tasks can be recovered correctly.
+
+    Incomplete metadata causes:
+    - Cannot identify the task type corresponding to checkpoint
+    - Cannot determine which step the task executed to
+    - Cannot confirm data storage location
+    - Cannot track important files and critical data
+    - Recovery mechanism fails, cannot resume from checkpoint
+
+    Required metadata fields:
+    - `transaction_id`: Unique transaction identifier
+    - `workflow_type`: Workflow type (skill type)
+    - `status`: Current status (pending/running/completed/failed)
+    - `current_step`: Current executing step number
+    - `data_directory`: Data storage directory
+    - `key_files`: List of critical files (for recovery)
+
+    Standard checkpoint.json format:
+    ```json
+    {
+      "transaction_id": "review-20260316-143022",
+      "workflow_type": "review-aggregator",
+      "status": "running",
+      "current_step": 2,
+      "data_directory": "docs/review-aggregator-20260316-143022",
+      "key_files": {
+        "step_1_results": "docs/review-aggregator-20260316-143022/step-1.json",
+        "step_2_results": "docs/review-aggregator-20260316-143022/step-2.json"
+      }
+    }
+    ```
+
+rationale:
+  zh: |
+    **为什么需要完整的元数据**:
+
+    1. **恢复可靠性**: 包含所有信息，能准确恢复到中断前的状态
+    2. **跨会话持久化**: 元数据足够详细，不同session可以独立使用
+    3. **可追踪性**: 能追踪哪个任务、哪一步，便于调试
+    4. **故障诊断**: 充分的元数据帮助诊断为什么某个checkpoint失效
+    5. **自动化处理**: 脚本和自动化工具可以根据元数据自动选择正确的恢复策略
+
+    **必需字段说明**:
+
+    | 字段 | 类型 | 说明 | 示例 |
+    |------|------|------|------|
+    | transaction_id | string | 事务唯一ID，用于标识此次执行 | `review-20260316-143022` |
+    | workflow_type | string | 工作流/skill的类型名 | `review-aggregator` |
+    | status | enum | 当前状态 | `running`, `completed`, `failed` |
+    | current_step | integer | 当前执行到第几步（1-based） | `2` |
+    | data_directory | string | 步骤结果存储的根目录 | `docs/review-aggregator-20260316-143022` |
+    | key_files | object | 重要文件映射，便于恢复 | `{"step_1": "path/file1.json", ...}` |
+
+    **字段值的约定**:
+
+    - `transaction_id`: 格式 `{workflow-type}-{timestamp}`，timestamp 为 `YYYYMMDDhhmmss`
+    - `workflow_type`: 对应 skill 的 name（去掉 cmd-/std-/lib- 前缀后的部分）
+    - `status`: `pending` 初始化，`running` 正在执行，`completed` 完成，`failed` 失败
+    - `current_step`: 第一步是 1，不是 0
+    - `data_directory`: 相对路径（相对于项目根目录）
+    - `key_files`: 路径必须存在或易于重新生成
+
+    **可选字段**（推荐但不强制）:
+
+    ```json
+    {
+      "created_at": "2026-03-16T14:30:22Z",
+      "updated_at": "2026-03-16T14:32:15Z",
+      "last_activity": "step-2-completed",
+      "estimated_total_steps": 5,
+      "input_data": {...},
+      "execution_context": {...},
+      "error_details": null
+    }
+    ```
+
+    这些可选字段增强可追踪性和调试能力。
+  en: |
+    **Why complete metadata is needed**:
+
+    1. **Recovery reliability**: Contains all information to accurately recover to pre-interruption state
+    2. **Cross-session persistence**: Metadata detailed enough for different sessions to use independently
+    3. **Traceability**: Can track which task, which step, easy for debugging
+    4. **Failure diagnosis**: Sufficient metadata helps diagnose why a checkpoint failed
+    5. **Automated processing**: Scripts and automation tools can automatically choose correct recovery strategy
+
+    **Required field explanations**:
+
+    | Field | Type | Description | Example |
+    |-------|------|-------------|---------|
+    | transaction_id | string | Unique transaction ID to identify this execution | `review-20260316-143022` |
+    | workflow_type | string | Workflow/skill type name | `review-aggregator` |
+    | status | enum | Current status | `running`, `completed`, `failed` |
+    | current_step | integer | Which step currently executing (1-based) | `2` |
+    | data_directory | string | Root directory where step results stored | `docs/review-aggregator-20260316-143022` |
+    | key_files | object | Important file mappings for recovery | `{"step_1": "path/file1.json", ...}` |
+
+    **Field value conventions**:
+
+    - `transaction_id`: Format `{workflow-type}-{timestamp}`, timestamp as `YYYYMMDDhhmmss`
+    - `workflow_type`: Corresponds to skill name (without cmd-/std-/lib- prefix)
+    - `status`: `pending` initialization, `running` executing, `completed` done, `failed` failed
+    - `current_step`: First step is 1, not 0
+    - `data_directory`: Relative path (relative to project root)
+    - `key_files`: Paths must exist or be easily regenerated
+
+    **Optional fields** (recommended but not required):
+
+    ```json
+    {
+      "created_at": "2026-03-16T14:30:22Z",
+      "updated_at": "2026-03-16T14:32:15Z",
+      "last_activity": "step-2-completed",
+      "estimated_total_steps": 5,
+      "input_data": {...},
+      "execution_context": {...},
+      "error_details": null
+    }
+    ```
+
+    These optional fields enhance traceability and debugging capabilities.
+
+official_reference:
+  document: "long-task-persistence-standard-design.md"
+  section: "4.4 PERSIST-004: checkpoint 元数据不完整"
+
+detection:
+  method: json-schema-check
+  file_pattern: ".checkpoints/**/*.json"
+  required_fields:
+    - "transaction_id"
+    - "workflow_type"
+    - "status"
+    - "current_step"
+    - "data_directory"
+    - "key_files"
+
+  detection_logic: |
+    1. 扫描所有 .checkpoints 目录中的 JSON 文件（通常是 checkpoint.json）
+    2. 使用 JSON schema 验证每个文件
+    3. 检查以下必需字段是否存在且不为 null：
+       - transaction_id: 字符串，非空
+       - workflow_type: 字符串，非空
+       - status: 字符串，值为 pending/running/completed/failed 之一
+       - current_step: 整数，值 >= 0
+       - data_directory: 字符串，路径有效
+       - key_files: 对象，至少包含一个条目
+    4. 如果缺少任何必需字段，标记为 WARNING
+    5. 验证字段值的格式和合理性
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      使用 `init-transaction.sh` 创建标准checkpoint JSON。该脚本会自动生成包含所有必需字段的checkpoint.json文件。
+
+      **推荐方法：使用脚本创建**
+
+      ```bash
+      # init-transaction.sh 会自动创建完整的 checkpoint.json
+      bash scripts/persistence/init-transaction.sh \
+        review \
+        "review-20260316-143022" \
+        "review-aggregator"
+      ```
+
+      这会创建格式正确的 `.checkpoints/review-20260316-143022/checkpoint.json`：
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "pending",
+        "current_step": 0,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {},
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:30:22Z"
+      }
+      ```
+
+      **如果需要手动创建或修复**
+
+      1. **查看现有的 checkpoint.json**
+
+         ```bash
+         cat .checkpoints/review-20260316-143022/checkpoint.json
+         ```
+
+      2. **确保包含所有必需字段**
+
+         ```json
+         {
+           "transaction_id": "review-20260316-143022",
+           "workflow_type": "review-aggregator",
+           "status": "running",
+           "current_step": 2,
+           "data_directory": "docs/review-aggregator-20260316-143022",
+           "key_files": {
+             "step_1_results": "docs/review-aggregator-20260316-143022/step-1.json",
+             "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2.json",
+             "step_2_review": "docs/review-aggregator-20260316-143022/step-2-review.json"
+           },
+           "created_at": "2026-03-16T14:30:22Z",
+           "updated_at": "2026-03-16T14:32:15Z"
+         }
+         ```
+
+      3. **更新 checkpoint 时使用 update-checkpoint.sh**
+
+         ```bash
+         # 更新状态和current_step
+         bash scripts/persistence/update-checkpoint.sh \
+           "review-20260316-143022" \
+           --status running \
+           --current-step 2
+         ```
+
+      4. **或直接使用 Python 脚本**
+
+         ```python
+         import json
+         from datetime import datetime
+
+         checkpoint_path = ".checkpoints/review-20260316-143022/checkpoint.json"
+
+         # 读取现有数据
+         with open(checkpoint_path, 'r') as f:
+           checkpoint = json.load(f)
+
+         # 更新必需字段
+         checkpoint['transaction_id'] = 'review-20260316-143022'
+         checkpoint['workflow_type'] = 'review-aggregator'
+         checkpoint['status'] = 'running'
+         checkpoint['current_step'] = 2
+         checkpoint['data_directory'] = 'docs/review-aggregator-20260316-143022'
+         checkpoint['key_files'] = {
+           'step_1': 'docs/review-aggregator-20260316-143022/step-1.json',
+           'step_2': 'docs/review-aggregator-20260316-143022/step-2.json'
+         }
+         checkpoint['updated_at'] = datetime.now().isoformat() + 'Z'
+
+         # 保存回文件
+         with open(checkpoint_path, 'w') as f:
+           json.dump(checkpoint, f, indent=2)
+         ```
+
+      **验证 checkpoint 的完整性**
+
+      ```bash
+      # 使用提供的验证脚本
+      bash scripts/persistence/validate-checkpoint.sh "review-20260316-143022"
+
+      # 或者手动检查
+      python << 'EOF'
+      import json
+
+      with open('.checkpoints/review-20260316-143022/checkpoint.json') as f:
+        cp = json.load(f)
+
+      required = ['transaction_id', 'workflow_type', 'status', 'current_step', 'data_directory', 'key_files']
+      missing = [f for f in required if f not in cp or cp[f] is None]
+
+      if missing:
+        print(f"缺失字段: {missing}")
+      else:
+        print("checkpoint 完整")
+      EOF
+      ```
+
+    en: |
+      Create standard checkpoint JSON using `init-transaction.sh`. This script automatically generates a checkpoint.json file with all required fields.
+
+      **Recommended method: Use script to create**
+
+      ```bash
+      # init-transaction.sh automatically creates complete checkpoint.json
+      bash scripts/persistence/init-transaction.sh \
+        review \
+        "review-20260316-143022" \
+        "review-aggregator"
+      ```
+
+      This creates correctly formatted `.checkpoints/review-20260316-143022/checkpoint.json`:
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "pending",
+        "current_step": 0,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {},
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:30:22Z"
+      }
+      ```
+
+      **If need to manually create or fix**
+
+      1. **View existing checkpoint.json**
+
+         ```bash
+         cat .checkpoints/review-20260316-143022/checkpoint.json
+         ```
+
+      2. **Ensure all required fields are included**
+
+         ```json
+         {
+           "transaction_id": "review-20260316-143022",
+           "workflow_type": "review-aggregator",
+           "status": "running",
+           "current_step": 2,
+           "data_directory": "docs/review-aggregator-20260316-143022",
+           "key_files": {
+             "step_1_results": "docs/review-aggregator-20260316-143022/step-1.json",
+             "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2.json",
+             "step_2_review": "docs/review-aggregator-20260316-143022/step-2-review.json"
+           },
+           "created_at": "2026-03-16T14:30:22Z",
+           "updated_at": "2026-03-16T14:32:15Z"
+         }
+         ```
+
+      3. **Update checkpoint using update-checkpoint.sh**
+
+         ```bash
+         # Update status and current_step
+         bash scripts/persistence/update-checkpoint.sh \
+           "review-20260316-143022" \
+           --status running \
+           --current-step 2
+         ```
+
+      4. **Or directly use Python script**
+
+         ```python
+         import json
+         from datetime import datetime
+
+         checkpoint_path = ".checkpoints/review-20260316-143022/checkpoint.json"
+
+         # Read existing data
+         with open(checkpoint_path, 'r') as f:
+           checkpoint = json.load(f)
+
+         # Update required fields
+         checkpoint['transaction_id'] = 'review-20260316-143022'
+         checkpoint['workflow_type'] = 'review-aggregator'
+         checkpoint['status'] = 'running'
+         checkpoint['current_step'] = 2
+         checkpoint['data_directory'] = 'docs/review-aggregator-20260316-143022'
+         checkpoint['key_files'] = {
+           'step_1': 'docs/review-aggregator-20260316-143022/step-1.json',
+           'step_2': 'docs/review-aggregator-20260316-143022/step-2.json'
+         }
+         checkpoint['updated_at'] = datetime.now().isoformat() + 'Z'
+
+         # Save back to file
+         with open(checkpoint_path, 'w') as f:
+           json.dump(checkpoint, f, indent=2)
+         ```
+
+      **Validate checkpoint completeness**
+
+      ```bash
+      # Use provided validation script
+      bash scripts/persistence/validate-checkpoint.sh "review-20260316-143022"
+
+      # Or manually check
+      python << 'EOF'
+      import json
+
+      with open('.checkpoints/review-20260316-143022/checkpoint.json') as f:
+        cp = json.load(f)
+
+      required = ['transaction_id', 'workflow_type', 'status', 'current_step', 'data_directory', 'key_files']
+      missing = [f for f in required if f not in cp or cp[f] is None]
+
+      if missing:
+        print(f"Missing fields: {missing}")
+      else:
+        print("Checkpoint complete")
+      EOF
+      ```
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误 1：checkpoint.json 完全为空
+
+      ```json
+      {}
+      ```
+      问题：缺少所有必需字段，无法恢复任何信息
+
+      ❌ 错误 2：只有部分必需字段
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator"
+      }
+      ```
+      问题：缺少 status、current_step、data_directory、key_files
+
+      ❌ 错误 3：字段类型错误
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "in-progress",  // 错误：应该是 running
+        "current_step": "2",      // 错误：应该是整数，不是字符串
+        "data_directory": null,   // 错误：不能为 null
+        "key_files": []           // 错误：应该是对象，不是数组
+      }
+      ```
+
+      ❌ 错误 4：key_files 为空
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {}  // 空，无法追踪任何中间结果文件
+      }
+      ```
+      问题：无法知道已完成的步骤产生了哪些文件
+
+      ❌ 错误 5：data_directory 路径无效
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "/tmp/review-20260316-143022",  // 错误：不应该使用绝对路径
+        "key_files": {...}
+      }
+      ```
+      问题：路径在不同机器上无效，跨系统不兼容
+
+    en: |
+      ❌ Error 1: checkpoint.json completely empty
+
+      ```json
+      {}
+      ```
+      Issue: Missing all required fields, cannot recover any information
+
+      ❌ Error 2: Only partial required fields
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator"
+      }
+      ```
+      Issue: Missing status, current_step, data_directory, key_files
+
+      ❌ Error 3: Wrong field types
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "in-progress",  // Wrong: should be running
+        "current_step": "2",      // Wrong: should be integer, not string
+        "data_directory": null,   // Wrong: cannot be null
+        "key_files": []           // Wrong: should be object, not array
+      }
+      ```
+
+      ❌ Error 4: key_files is empty
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {}  // Empty, cannot track any intermediate result files
+      }
+      ```
+      Issue: Cannot know which files were produced by completed steps
+
+      ❌ Error 5: data_directory path invalid
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "/tmp/review-20260316-143022",  // Wrong: shouldn't use absolute path
+        "key_files": {...}
+      }
+      ```
+      Issue: Path invalid on different machines, cross-system incompatible
+
+  good:
+    zh: |
+      ✅ 正确 1：最小化完整的 checkpoint.json
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "pending",
+        "current_step": 0,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {}
+      }
+      ```
+
+      ✅ 正确 2：执行中期的 checkpoint.json
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json"
+        }
+      }
+      ```
+
+      ✅ 正确 3：完整的 checkpoint.json（包含可选字段）
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 3,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json",
+          "step_3_review": "docs/review-aggregator-20260316-143022/step-3-review-core.json"
+        },
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:35:10Z",
+        "last_activity": "step-3-completed",
+        "estimated_total_steps": 4,
+        "execution_context": {
+          "user": "claude-code",
+          "skill": "cmd-review-aggregator",
+          "initiator": "review-aggregator-main"
+        }
+      }
+      ```
+
+      ✅ 正确 4：已完成的 checkpoint.json
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "completed",
+        "current_step": 4,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json",
+          "step_3_review": "docs/review-aggregator-20260316-143022/step-3-review-core.json",
+          "step_4_report": "docs/review-aggregator-20260316-143022/step-4-generate-report.json"
+        },
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:38:45Z",
+        "completed_at": "2026-03-16T14:38:45Z"
+      }
+      ```
+
+    en: |
+      ✅ Correct 1: Minimally complete checkpoint.json
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "pending",
+        "current_step": 0,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {}
+      }
+      ```
+
+      ✅ Correct 2: checkpoint.json in mid-execution
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 2,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json"
+        }
+      }
+      ```
+
+      ✅ Correct 3: Complete checkpoint.json (with optional fields)
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "running",
+        "current_step": 3,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json",
+          "step_3_review": "docs/review-aggregator-20260316-143022/step-3-review-core.json"
+        },
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:35:10Z",
+        "last_activity": "step-3-completed",
+        "estimated_total_steps": 4,
+        "execution_context": {
+          "user": "claude-code",
+          "skill": "cmd-review-aggregator",
+          "initiator": "review-aggregator-main"
+        }
+      }
+      ```
+
+      ✅ Correct 4: Completed checkpoint.json
+
+      ```json
+      {
+        "transaction_id": "review-20260316-143022",
+        "workflow_type": "review-aggregator",
+        "status": "completed",
+        "current_step": 4,
+        "data_directory": "docs/review-aggregator-20260316-143022",
+        "key_files": {
+          "step_1_collect": "docs/review-aggregator-20260316-143022/step-1-collect-info.json",
+          "step_2_analysis": "docs/review-aggregator-20260316-143022/step-2-architecture-analysis.json",
+          "step_3_review": "docs/review-aggregator-20260316-143022/step-3-review-core.json",
+          "step_4_report": "docs/review-aggregator-20260316-143022/step-4-generate-report.json"
+        },
+        "created_at": "2026-03-16T14:30:22Z",
+        "updated_at": "2026-03-16T14:38:45Z",
+        "completed_at": "2026-03-16T14:38:45Z"
+      }
+      ```
+
+tags: ["persistence", "checkpoint", "metadata", "json-schema", "recovery"]
+related_rules: ["PERSIST-001", "PERSIST-002", "PERSIST-003"]

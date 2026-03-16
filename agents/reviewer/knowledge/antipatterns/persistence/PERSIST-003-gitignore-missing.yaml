@@ -1,0 +1,568 @@
+id: PERSIST-003
+name: gitignore-missing-patterns
+severity: info
+component_type: plugin
+category: persistence
+
+title:
+  zh: ".gitignore 缺失规则"
+  en: "Missing .gitignore patterns"
+
+description:
+  zh: |
+    .gitignore 文件应包含持久化相关的规则，防止临时文件和checkpoint被误提交到Git仓库。
+
+    缺失的规则会导致：
+    - 临时checkpoint文件被提交到Git（增加仓库体积）
+    - 临时结果文件被提交到Git（污染仓库历史）
+    - 中间步骤的结果被版本控制（非必要的文件跟踪）
+    - 其他开发者的工作目录与仓库冲突
+
+    必需的.gitignore规则：
+    - `.checkpoints/` - checkpoint目录（所有临时数据）
+    - `docs/*/*/` - 临时结果目录（排除 *.md 文件）
+    - `**/*.tmp.json` - 临时JSON文件
+
+    使用例外规则允许保留文档：
+    - `!docs/*/*/*.md` - 保留Markdown文档
+    - `!docs/*/*/README.md` - 保留README文件
+  en: |
+    The .gitignore file should contain persistence-related rules to prevent temporary files and checkpoints from being accidentally committed to the Git repository.
+
+    Missing rules cause:
+    - Temporary checkpoint files committed to Git (increases repository size)
+    - Temporary result files committed to Git (pollutes repository history)
+    - Intermediate step results under version control (unnecessary file tracking)
+    - Conflicts between other developers' working directories and repository
+
+    Required .gitignore rules:
+    - `.checkpoints/` - checkpoint directory (all temporary data)
+    - `docs/*/*/` - temporary result directory (exclude *.md files)
+    - `**/*.tmp.json` - temporary JSON files
+
+    Use exception rules to preserve documentation:
+    - `!docs/*/*/*.md` - preserve Markdown documents
+    - `!docs/*/*/README.md` - preserve README files
+
+rationale:
+  zh: |
+    **为什么需要完整的.gitignore规则**:
+
+    1. **仓库清洁**: 不跟踪临时文件，保持仓库简洁
+    2. **节省空间**: checkpoint和中间结果不提交，减少仓库体积
+    3. **提交历史干净**: 避免临时文件的频繁更新污染提交历史
+    4. **团队协作**: 统一的规则，避免不同成员环境差异
+    5. **安全性**: 敏感的中间结果和临时数据不进入版本控制
+    6. **合规性**: 可能的敏感信息（API密钥、临时令牌等）不被版本控制
+
+    **标准.gitignore配置**:
+
+    ```gitignore
+    # CCC Persistence Files
+    # Checkpoint 持久化目录
+    .checkpoints/
+
+    # 临时结果目录（docs/skill-name-timestamp/）
+    docs/*/*/
+    # 但保留 Markdown 文档
+    !docs/*/*/*.md
+    !docs/*/*/README.md
+
+    # 临时 JSON 文件
+    **/*.tmp.json
+
+    # 其他临时文件
+    **/*.tmp
+    **/*.temp
+    **/*.bak
+    ```
+
+    **为什么排除 *.md 但保留其他**:
+
+    - Markdown文档是重要的交付物，需要版本控制
+    - JSON、JSON.bak等是临时中间结果，不需要版本控制
+    - 通过例外规则 `!docs/*/*/*.md` 实现选择性忽略
+
+    **git check-ignore 验证**:
+
+    ```bash
+    # 验证规则是否正确应用
+    git check-ignore .checkpoints/transaction-id/checkpoint.json
+    # 应输出：.gitignore:2: .checkpoints/
+
+    git check-ignore docs/review-aggregator-20260316/step-1.json
+    # 应输出：.gitignore:5: docs/*/*/
+
+    git check-ignore docs/review-aggregator-20260316/README.md
+    # 应输出空（表示不被忽略）
+    ```
+  en: |
+    **Why complete .gitignore rules are needed**:
+
+    1. **Repository cleanliness**: Don't track temporary files, keep repository clean
+    2. **Save space**: Checkpoints and intermediate results not committed, reduce repository size
+    3. **Clean commit history**: Avoid frequent temporary file updates polluting commit history
+    4. **Team collaboration**: Unified rules, avoid environment differences among members
+    5. **Security**: Sensitive intermediate results and temporary data not under version control
+    6. **Compliance**: Possible sensitive information (API keys, temporary tokens) not version controlled
+
+    **Standard .gitignore configuration**:
+
+    ```gitignore
+    # CCC Persistence Files
+    # Checkpoint persistence directory
+    .checkpoints/
+
+    # Temporary result directory (docs/skill-name-timestamp/)
+    docs/*/*/
+    # But preserve Markdown documents
+    !docs/*/*/*.md
+    !docs/*/*/README.md
+
+    # Temporary JSON files
+    **/*.tmp.json
+
+    # Other temporary files
+    **/*.tmp
+    **/*.temp
+    **/*.bak
+    ```
+
+    **Why exclude *.json but keep *.md**:
+
+    - Markdown documents are important deliverables, need version control
+    - JSON, .bak etc. are temporary intermediate results, don't need version control
+    - Achieve selective ignore through exception rules `!docs/*/*/*.md`
+
+    **Verify with git check-ignore**:
+
+    ```bash
+    # Verify rules are correctly applied
+    git check-ignore .checkpoints/transaction-id/checkpoint.json
+    # Should output: .gitignore:2: .checkpoints/
+
+    git check-ignore docs/review-aggregator-20260316/step-1.json
+    # Should output: .gitignore:5: docs/*/*/
+
+    git check-ignore docs/review-aggregator-20260316/README.md
+    # Should output nothing (means not ignored)
+    ```
+
+official_reference:
+  document: "long-task-persistence-standard-design.md"
+  section: "4.3 PERSIST-003: .gitignore 缺失规则"
+
+detection:
+  method: file-check
+  required_file: ".gitignore"
+  required_patterns:
+    - "^\\.checkpoints/"
+    - "^docs/\\*/\\*/"
+    - "^\\*\\*/\\*\\.tmp\\.json"
+
+  detection_logic: |
+    1. 检查项目根目录是否存在 .gitignore 文件
+    2. 读取 .gitignore 文件内容
+    3. 逐行检查是否包含以下规则（可以使用不同的表示方式）：
+       - checkpoint 目录忽略规则（.checkpoints/ 或类似）
+       - 临时结果目录忽略规则（docs/*/* 或类似）
+       - 临时文件忽略规则（**.tmp.json 或 *.tmp.json 或类似）
+    4. 如果缺少任何规则，提示需要添加
+    5. 检查是否有正确的例外规则（!docs/*/*/*.md 等）
+
+fix:
+  automatic: true
+  description: "自动追加缺失的规则到.gitignore文件"
+  suggestion:
+    zh: |
+      在项目根目录的 .gitignore 文件中添加以下规则（如果文件不存在，需要创建）：
+
+      **添加位置**: 项目根目录下的 `.gitignore` 文件末尾
+
+      **完整的规则块**:
+
+      ```gitignore
+      # ===== CCC Persistence Files =====
+      # Checkpoint 持久化目录
+      .checkpoints/
+
+      # 临时结果目录（docs/skill-name-timestamp/）
+      docs/*/*/
+      # 但保留 Markdown 文档和 README
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+
+      # 临时 JSON 文件
+      **/*.tmp.json
+
+      # 其他临时文件扩展名
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      ```
+
+      **分步骤添加（如果希望逐步添加）**:
+
+      1. **第一步**: 忽略 checkpoint 目录
+         ```gitignore
+         # Checkpoint persistence
+         .checkpoints/
+         ```
+
+      2. **第二步**: 忽略临时结果目录（但保留 Markdown）
+         ```gitignore
+         # Temporary results
+         docs/*/*/
+         !docs/*/*/*.md
+         !docs/*/*/README.md
+         ```
+
+      3. **第三步**: 忽略临时文件
+         ```gitignore
+         # Temporary files
+         **/*.tmp.json
+         **/*.tmp
+         **/*.temp
+         **/*.bak
+         ```
+
+      **修复步骤**:
+
+      ```bash
+      # 1. 进入项目根目录
+      cd /path/to/project
+
+      # 2. 查看当前 .gitignore 内容
+      cat .gitignore
+
+      # 3. 在文件末尾添加规则
+      cat >> .gitignore << 'EOF'
+
+      # ===== CCC Persistence Files =====
+      .checkpoints/
+      docs/*/*/
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+      **/*.tmp.json
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      EOF
+
+      # 4. 验证规则是否正确
+      git check-ignore .checkpoints/test.json
+      git check-ignore docs/skill-20260316/test.json
+      git check-ignore docs/skill-20260316/README.md
+
+      # 5. 提交变更
+      git add .gitignore
+      git commit -m "[config] 添加持久化文件的 .gitignore 规则"
+      ```
+
+      **如果已经提交了临时文件，需要清理**:
+
+      ```bash
+      # 1. 列出所有被追踪但应该被忽略的文件
+      git ls-files | grep -E "\.checkpoints|docs/[^/]+-[^/]+/" | grep -v "\.md"
+
+      # 2. 从 Git 缓存中移除（但保留本地文件）
+      git rm --cached .checkpoints/* 2>/dev/null
+      git rm --cached docs/*/* 2>/dev/null | grep -v "\.md"
+
+      # 3. 提交移除操作
+      git commit -m "[config] 移除不应该版本控制的临时文件"
+      ```
+
+    en: |
+      Add the following rules to the .gitignore file in your project root (create if doesn't exist):
+
+      **Add location**: End of `.gitignore` file in project root
+
+      **Complete rule block**:
+
+      ```gitignore
+      # ===== CCC Persistence Files =====
+      # Checkpoint persistence directory
+      .checkpoints/
+
+      # Temporary result directory (docs/skill-name-timestamp/)
+      # But preserve Markdown documents and README
+      docs/*/*/
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+
+      # Temporary JSON files
+      **/*.tmp.json
+
+      # Other temporary file extensions
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      ```
+
+      **Add step-by-step (if you prefer gradual addition)**:
+
+      1. **Step 1**: Ignore checkpoint directory
+         ```gitignore
+         # Checkpoint persistence
+         .checkpoints/
+         ```
+
+      2. **Step 2**: Ignore temporary result directory (but keep Markdown)
+         ```gitignore
+         # Temporary results
+         docs/*/*/
+         !docs/*/*/*.md
+         !docs/*/*/README.md
+         ```
+
+      3. **Step 3**: Ignore temporary files
+         ```gitignore
+         # Temporary files
+         **/*.tmp.json
+         **/*.tmp
+         **/*.temp
+         **/*.bak
+         ```
+
+      **Fix steps**:
+
+      ```bash
+      # 1. Go to project root
+      cd /path/to/project
+
+      # 2. View current .gitignore content
+      cat .gitignore
+
+      # 3. Append rules to file
+      cat >> .gitignore << 'EOF'
+
+      # ===== CCC Persistence Files =====
+      .checkpoints/
+      docs/*/*/
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+      **/*.tmp.json
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      EOF
+
+      # 4. Verify rules are correctly applied
+      git check-ignore .checkpoints/test.json
+      git check-ignore docs/skill-20260316/test.json
+      git check-ignore docs/skill-20260316/README.md
+
+      # 5. Commit changes
+      git add .gitignore
+      git commit -m "[config] Add .gitignore rules for persistence files"
+      ```
+
+      **If temporary files already committed, need cleanup**:
+
+      ```bash
+      # 1. List all tracked files that should be ignored
+      git ls-files | grep -E "\.checkpoints|docs/[^/]+-[^/]+/" | grep -v "\.md"
+
+      # 2. Remove from Git cache (keep local files)
+      git rm --cached .checkpoints/* 2>/dev/null
+      git rm --cached docs/*/* 2>/dev/null | grep -v "\.md"
+
+      # 3. Commit removal
+      git commit -m "[config] Remove temporary files that shouldn't be version controlled"
+      ```
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误 1：.gitignore 完全缺失
+
+      ```
+      项目根目录无 .gitignore 文件
+      ```
+      后果：所有文件都会被Git追踪，包括临时checkpoint和结果文件
+
+      ❌ 错误 2：.gitignore 存在但规则不完整
+
+      ```gitignore
+      # 现有规则（不完整）
+      *.log
+      node_modules/
+
+      # 缺失的规则
+      # 没有 .checkpoints/
+      # 没有 docs/*/*/
+      # 没有 **/*.tmp.json
+      ```
+
+      ❌ 错误 3：规则格式错误
+
+      ```gitignore
+      # 错误的规则格式
+      checkpoints/         # 应该是 .checkpoints/
+      docs/*/            # 应该是 docs/*/*/（两层）
+      *.tmpjson          # 应该是 **/*.tmp.json
+      ```
+
+      ❌ 错误 4：缺少例外规则，导致 Markdown 也被忽略
+
+      ```gitignore
+      # 只有忽略规则，没有例外
+      docs/*/*/
+      # 缺少：!docs/*/*/*.md
+      ```
+      后果：docs/review-20260316/README.md 也会被忽略（不应该）
+
+      ❌ 错误 5：规则过于宽泛
+
+      ```gitignore
+      # 过于宽泛的规则
+      docs/         # 这会忽略整个 docs/ 目录，包括所有 Markdown 文档！
+      tmp/
+      temp/
+      ```
+      后果：重要的文档被误忽略
+
+    en: |
+      ❌ Error 1: .gitignore file completely missing
+
+      ```
+      No .gitignore file in project root
+      ```
+      Consequence: All files will be tracked by Git, including temporary checkpoints and result files
+
+      ❌ Error 2: .gitignore exists but rules incomplete
+
+      ```gitignore
+      # Existing rules (incomplete)
+      *.log
+      node_modules/
+
+      # Missing rules
+      # No .checkpoints/
+      # No docs/*/*/
+      # No **/*.tmp.json
+      ```
+
+      ❌ Error 3: Wrong rule format
+
+      ```gitignore
+      # Incorrect rule format
+      checkpoints/         # Should be .checkpoints/
+      docs/*/            # Should be docs/*/*/ (two levels)
+      *.tmpjson          # Should be **/*.tmp.json
+      ```
+
+      ❌ Error 4: Missing exception rules, causes Markdown to be ignored too
+
+      ```gitignore
+      # Only ignore rules, no exceptions
+      docs/*/*/
+      # Missing: !docs/*/*/*.md
+      ```
+      Consequence: docs/review-20260316/README.md will also be ignored (shouldn't be)
+
+      ❌ Error 5: Rules too broad
+
+      ```gitignore
+      # Too broad rules
+      docs/         # This ignores entire docs/ directory, including all Markdown documents!
+      tmp/
+      temp/
+      ```
+      Consequence: Important documents accidentally ignored
+
+  good:
+    zh: |
+      ✅ 正确 1：最小化的完整规则集
+
+      ```gitignore
+      # CCC Persistence Files
+      .checkpoints/
+      docs/*/*/
+      !docs/*/*/*.md
+      **/*.tmp.json
+      ```
+
+      ✅ 正确 2：详细的注释规则集
+
+      ```gitignore
+      # ===== CCC Persistence Files =====
+
+      # Checkpoint 持久化目录（包含所有临时数据和恢复信息）
+      .checkpoints/
+
+      # 临时结果目录（docs/{skill-name}-{timestamp}/）
+      # 包含所有中间步骤的结果，不应该版本控制
+      docs/*/*/
+      # 例外：保留 Markdown 文档
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+
+      # 临时 JSON 文件（可能在其他目录产生）
+      **/*.tmp.json
+
+      # 其他临时文件
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      ```
+
+      ✅ 正确 3：完整规则集（包含更多覆盖范围）
+
+      ```gitignore
+      # ===== CCC Persistence Files =====
+
+      # Checkpoint 和临时数据
+      .checkpoints/
+      .ccc/temp/
+
+      # 临时结果目录
+      docs/*/*/
+      !docs/*/*/*.md
+      !docs/*/*/README.md
+
+      # 临时和备份文件
+      **/*.tmp.json
+      **/*.tmp
+      **/*.temp
+      **/*.bak
+      **/*.swp
+      **/*.swo
+
+      # IDE 和编辑器临时文件
+      .idea/
+      .vscode/
+      *.swp
+      *~
+
+      # 构建和依赖
+      node_modules/
+      __pycache__/
+      *.pyc
+      dist/
+      build/
+      ```
+
+      ✅ 正确 4：验证规则生效
+
+      ```bash
+      # 验证 checkpoint 被忽略
+      $ git check-ignore .checkpoints/transaction-id/checkpoint.json
+      .checkpoints/transaction-id/checkpoint.json
+
+      # 验证临时结果被忽略
+      $ git check-ignore docs/review-aggregator-20260316/step-1.json
+      docs/review-aggregator-20260316/step-1.json
+
+      # 验证 Markdown 文档不被忽略
+      $ git check-ignore docs/review-aggregator-20260316/README.md
+      # 无输出（表示不被忽略，这是正确的）
+
+      # 验证临时 JSON 被忽略
+      $ git check-ignore scripts/temp.tmp.json
+      scripts/temp.tmp.json
+      ```
+
+tags: ["persistence", "gitignore", "version-control", "configuration"]
+related_rules: ["PERSIST-001", "PERSIST-002", "PERSIST-004"]
