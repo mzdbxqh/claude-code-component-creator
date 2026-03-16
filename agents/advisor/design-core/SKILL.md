@@ -76,7 +76,169 @@ Design Core 是 CCC 工作流的阶段 3 组件，负责基于阶段 2 架构决
    - 错误处理 (失败响应)
 3. 确保每个步骤单一职责
 4. 验证步骤间的逻辑流
-**输出**: 包含 4-8 步的完整工作流
+5. **长任务检测和持久化**:
+   - 统计步骤数量
+   - 分析是否调用 SubAgent
+   - 分析是否生成中间文件
+   - 估算预计执行时间
+   - 如果满足长任务条件，在工作流中插入持久化模板
+
+**长任务判定标准**:
+```
+步骤数 ≥ 5
+  AND
+(
+  调用 SubAgent (≥1次)
+  OR
+  生成中间文件
+  OR
+  预计执行时间 > 3分钟
+)
+```
+
+**如果检测为长任务，在 Workflow 中插入持久化模板**:
+
+#### 持久化模板（长任务必需）
+
+**Step 0.0: 初始化持久化事务**
+
+```bash
+TRANSACTION_ID="{workflow-type}-$(date +%Y%m%d-%H%M%S)"
+Bash(command="bash scripts/persistence/init-transaction.sh {workflow-type} $TRANSACTION_ID {component-name}",
+     description="初始化持久化事务")
+```
+
+**说明**:
+- `{workflow-type}`: 替换为具体的工作流类型（如 design, blueprint, review, aggregation）
+- `{component-name}`: 替换为执行组件名（如 cmd-design, cmd-review-aggregator）
+- 此步骤应在工作流的最开始执行，在所有业务逻辑之前
+
+**Step 0.1: 检查恢复点**
+
+```bash
+# 检查是否有未完成的事务
+pending_transactions=$(Bash(command="bash scripts/persistence/list-transactions.sh {workflow-type} in_progress",
+                            description="查询未完成的事务"))
+
+if [[ -n "$pending_transactions" ]]; then
+    response = AskUserQuestion({
+      "questions": [{
+        "question": "发现未完成的 {workflow-type} 事务，是否恢复？",
+        "header": "恢复选项",
+        "multiSelect": false,
+        "options": [
+          {
+            "label": "从断点恢复",
+            "description": "继续之前中断的执行"
+          },
+          {
+            "label": "重新开始",
+            "description": "忽略之前的进度，重新执行"
+          }
+        ]
+      }]
+    })
+
+    if response == "从断点恢复":
+        # 获取最新未完成事务
+        TRANSACTION_ID = extract_latest_transaction_id(pending_transactions)
+
+        # 加载 checkpoint
+        checkpoint_content = Read(file_path=".checkpoints/${TRANSACTION_ID}.json")
+        checkpoint = parse_json(checkpoint_content)
+
+        # 从断点恢复
+        resume_from_step = checkpoint.current_step + 1
+        goto Step {resume_from_step}
+    else:
+        # 重新开始，生成新事务ID
+        TRANSACTION_ID = "{workflow-type}-$(date +%Y%m%d-%H%M%S)"
+fi
+```
+
+**说明**:
+- 此步骤在初始化后立即执行
+- 如果用户选择恢复，需要加载 checkpoint 并跳转到断点步骤
+- 如果用户选择重新开始，生成新的事务ID继续执行
+
+**Step N: 保存中间结果**（在每个关键步骤后插入）
+
+```bash
+# 保存步骤N的中间结果到临时文件
+Write(file_path="/tmp/step-{n}-results.json",
+      content=json(results))
+
+# 将临时文件归档到持久化存储
+Bash(command="bash scripts/persistence/save-file.sh $TRANSACTION_ID step_{n}_results intermediate-result /tmp/step-{n}-results.json",
+     description="保存步骤{n}的中间结果")
+
+# 更新 checkpoint 进度
+Bash(command="bash scripts/persistence/update-checkpoint.sh $TRANSACTION_ID {n} '{\"step_name\":\"{步骤名称}\",\"status\":\"completed\"}'",
+     description="更新 checkpoint 进度到步骤{n}")
+```
+
+**说明**:
+- `{n}`: 替换为具体步骤编号（如 1, 2, 3）
+- `{步骤名称}`: 替换为步骤的描述性名称（如 "解析输入", "调用SubAgent", "生成报告"）
+- **关键步骤**: 指生成中间结果、调用 SubAgent、或执行长时间操作的步骤
+- 建议在以下时机保存中间结果：
+  - 调用 SubAgent 后
+  - 生成文件后
+  - 完成重要计算后
+  - 每个主要阶段结束后
+
+**Step Final: 完成事务**
+
+```bash
+Bash(command="bash scripts/persistence/finalize-transaction.sh $TRANSACTION_ID completed",
+     description="标记事务完成")
+```
+
+**说明**:
+- 此步骤应在工作流的最后执行，在所有业务逻辑完成后
+- 状态应设为 `completed`（成功）或 `failed`（失败）
+- 完成后事务将被归档，checkpoint 文件将被清理
+
+**持久化模板集成示例**:
+
+```markdown
+## Workflow
+
+### Step 0.0: 初始化持久化事务
+[插入初始化模板]
+
+### Step 0.1: 检查恢复点
+[插入恢复点检查模板]
+
+### Step 1: 解析输入
+**目标**: 解析用户输入
+**操作**: 读取并验证输入
+**输出**: 解析结果
+**错误处理**: 格式错误时提示
+
+[如果是关键步骤，插入保存中间结果模板]
+
+### Step 2: 调用 SubAgent 处理数据
+**目标**: 调用专用 SubAgent 处理
+**操作**: Agent(subagent="ccc:data-processor", ...)
+**输出**: 处理结果
+**错误处理**: SubAgent 失败时回退
+
+[插入保存中间结果模板]
+
+### Step 3: 生成报告
+**目标**: 生成最终报告
+**操作**: 格式化结果并写入文件
+**输出**: 报告文件
+**错误处理**: 写入失败时重试
+
+[插入保存中间结果模板]
+
+### Step 4: 完成事务
+[插入完成事务模板]
+```
+
+**输出**: 包含 4-8 步的完整工作流（长任务包含持久化步骤）
 **错误处理**: 如果工作流不完整，识别差距并建议缺失步骤
 
 ### Step 3.5: 生成证据链
