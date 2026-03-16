@@ -1,0 +1,108 @@
+{
+  "test_cases": [
+    {
+      "name": "persistence_init_transaction",
+      "description": "测试事务初始化功能",
+      "workflow": "persistence",
+      "steps": [
+        "调用 init-transaction.sh",
+        "验证 checkpoint 文件创建",
+        "验证数据目录创建",
+        "验证 JSON 格式正确"
+      ],
+      "assertions": [
+        "checkpoint_file_exists",
+        "data_directory_exists",
+        "checkpoint_json_valid",
+        "transaction_id_format_correct"
+      ],
+      "expected_duration": "< 100ms"
+    },
+    {
+      "name": "persistence_save_load_file",
+      "description": "测试文件保存和加载",
+      "workflow": "persistence",
+      "steps": [
+        "初始化事务",
+        "保存测试文件",
+        "验证 checkpoint 更新",
+        "加载文件",
+        "验证内容一致性"
+      ],
+      "assertions": [
+        "file_saved_successfully",
+        "checkpoint_key_files_updated",
+        "loaded_content_matches_saved",
+        "no_data_loss"
+      ],
+      "expected_duration": "< 200ms"
+    },
+    {
+      "name": "review_aggregator_checkpoint_recovery",
+      "description": "测试 review-aggregator 断点恢复",
+      "workflow": "review",
+      "steps": [
+        "启动 review-aggregator",
+        "执行到 Step 2",
+        "模拟中断",
+        "重新启动",
+        "选择'从断点恢复'",
+        "验证从 Step 3 继续",
+        "验证数据正确性"
+      ],
+      "assertions": [
+        "checkpoint_saved_at_step_2",
+        "recovery_detected",
+        "resumed_from_step_3",
+        "no_data_loss",
+        "final_report_generated"
+      ],
+      "expected_duration": "< 30 minutes"
+    },
+    {
+      "name": "design_core_long_task_detection",
+      "description": "测试 design-core 长任务自动检测",
+      "workflow": "design",
+      "steps": [
+        "使用 design-core 设计长任务组件",
+        "验证检测条件触发",
+        "验证持久化模板生成",
+        "验证模板内容正确"
+      ],
+      "assertions": [
+        "long_task_detected",
+        "persistence_template_generated",
+        "init_template_present",
+        "recovery_template_present",
+        "save_template_present",
+        "finalize_template_present"
+      ],
+      "expected_duration": "< 5 minutes"
+    },
+    {
+      "name": "persistence_performance_overhead",
+      "description": "测试持久化性能开销",
+      "workflow": "review",
+      "steps": [
+        "运行 benchmark.sh",
+        "测量各操作延迟",
+        "计算总开销",
+        "对比原workflow时间"
+      ],
+      "assertions": [
+        "init_latency < 100ms",
+        "save_latency < 50ms",
+        "load_latency < 30ms",
+        "update_latency < 20ms",
+        "total_overhead < 10%"
+      ],
+      "expected_duration": "< 2 minutes"
+    }
+  ],
+  "metadata": {
+    "version": "v3.2.0",
+    "created": "2026-03-16",
+    "total_test_cases": 5,
+    "estimated_total_duration": "< 40 minutes"
+  }
+}
