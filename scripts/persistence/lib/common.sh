@@ -45,7 +45,7 @@ update_registry() {
        --arg status "$status" \
        --arg updated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
        '.transactions |= map(if .transaction_id == $id then .status = $status | .updated_at = $updated else . end) |
-        if any(.transaction_id == $id) then . else .transactions += [{transaction_id: $id, workflow_type: $type, status: $status, updated_at: $updated}] end' \
+        if (.transactions | any(.transaction_id == $id)) then . else .transactions += [{transaction_id: $id, workflow_type: $type, status: $status, updated_at: $updated}] end' \
        "$registry_file" > "${registry_file}.tmp"; then
         rm -f "${registry_file}.tmp"
         echo "Error: Failed to update registry" >&2
