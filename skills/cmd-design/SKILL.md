@@ -3,6 +3,7 @@ name: cmd-design
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:blueprint-core:blueprint-core
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "开发流程第2步。5阶段设计流程生成Blueprint设计文档。触发：设计/创建方案。承接init的Intent，输出Blueprint给implement。"
 argument-hint: "--name=<name> [--intent-id=current] [--lang=zh-cn|en-us|ja-jp]"

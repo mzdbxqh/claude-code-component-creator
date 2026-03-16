@@ -3,6 +3,7 @@ name: cmd-iterate
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:reviewer:design-iterate-core:design-iterate-core
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "制品迭代流程第1步。迭代优化Blueprint，生成改进版本。触发：优化/简化/重构。自动检测改进机会，输出Blueprint-v2给review。"
 argument-hint: "[--artifact-id=<id>] [--lang=zh-cn|en-us|ja-jp]"

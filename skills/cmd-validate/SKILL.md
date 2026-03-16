@@ -3,6 +3,7 @@ name: cmd-validate
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:checkpoint-core:checkpoint-core
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "开发流程第6步。验证制品语法、Schema和Token预算。触发：验证/检查/确认。承接fix的修复结果，验证通过输出给build。"
 argument-hint: "[--artifact-id=current] [--lang=zh-cn|en-us|ja-jp]"

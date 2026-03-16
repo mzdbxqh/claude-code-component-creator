@@ -3,6 +3,7 @@ name: cmd-fix
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:fix-orchestrator:fix-orchestrator
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "开发流程第5步。交互式修复审查问题。触发：修复/整改/改进。承接review的问题清单，修复后输出给validate。支持自动/交互/手动模式。"
 argument-hint: "[--artifact-id=<id>] [--auto] [--dry-run]"

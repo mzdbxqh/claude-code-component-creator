@@ -7,6 +7,8 @@ tools:
   - Read
   - Glob
   - Grep
+  - Write
+  - Bash
 permissionMode: prompt
 skills:
   - ccc:std-component-selection

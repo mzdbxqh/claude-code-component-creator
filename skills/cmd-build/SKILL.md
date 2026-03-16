@@ -3,6 +3,7 @@ name: cmd-build
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:delivery-core:delivery-core
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 description: "开发流程第7步。从Blueprint生成生产就绪交付物。触发：构建/生成/打包。承接validate的验证通过，输出完整Delivery制品。开发流程终点。"
 argument-hint: "--artifact-id=<blueprint-id> [--lang=zh-cn|en-us|ja-jp]"

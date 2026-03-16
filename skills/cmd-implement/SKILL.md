@@ -3,6 +3,7 @@ name: cmd-implement
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:delivery-core:delivery-core
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 description: "实现代码：从Blueprint首次实现或从iteration-plan增量变更。触发：实现/编码/执行。支持整体/分阶段/预览模式。开发流程第3步或迭代流程第2步。"
 argument-hint: "--blueprint=<blueprint-path> | --plan=<iteration-plan-path> [--phase=<phase-number>] [--dry-run]"

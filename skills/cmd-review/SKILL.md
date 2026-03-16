@@ -3,6 +3,7 @@ name: cmd-review
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:reviewer:review-aggregator:review-aggregator
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
 description: "开发流程第4步。执行组件质量审查，覆盖161+反模式和8维度。触发：审查/评审/验证。承接implement的代码，发现问题输出给fix。"
 argument-hint: "[--target=<path>] [--artifact-id=current] [--type=standard|migration] [--linkage-check=true] [--no-arch] [--arch-only] [--lang=zh-cn|en-us|ja-jp] [--skip-profiling=false] [--profile-only=false] [--profile-output=docs/profile/] [--no-reference-check=false] [--reference-only=false] [--interactive=false]"
@@ -594,23 +595,23 @@ write_file(report_path, report_md)
 ### 核心 Agents
 - **ccc:reviewer-core**: 审查协调器，负责整体审查流程编排
 - **ccc:review-core**: 智能审阅核心，基于组件类型加载反模式库执行深度质量检查
-- **ccc:architecture-analyzer**: 架构分析器，执行 L1+L2 架构分析（工作流/组件/职责/协作/命令）
-- **ccc:dependency-analyzer**: 依赖分析器，检查链路验证（调用图/循环依赖/隐式调用）
-- **ccc:linkage-validator**: 链路验证器，验证 skills 字段引用完整性
+- **ccc:reviewer:architecture-analyzer:architecture-analyzer**: 架构分析器，执行 L1+L2 架构分析（工作流/组件/职责/协作/命令）
+- **ccc:reviewer:dependency-analyzer:dependency-analyzer**: 依赖分析器，检查链路验证（调用图/循环依赖/隐式调用）
+- **ccc:reviewer:linkage-validator:linkage-validator**: 链路验证器，验证 skills 字段引用完整性
 - **ccc:reference-integrity-scanner**: 引用完整性扫描器，检测断开引用、孤儿文件和循环依赖（v3.2.0新增）
 - **ccc:review-aggregator**: 审查结果聚合器，汇总多维度审查结果
-- **ccc:report-renderer**: 报告渲染器，生成最终的审查报告
+- **ccc:reviewer:report-renderer:report-renderer**: 报告渲染器，生成最终的审查报告
 
 ### 辅助 Agents
 - **ccc:workflow-discoverer**: 工作流发现器，识别工作流模式和阶段
-- **ccc:eval-executor**: Eval 执行器，运行测试用例和基准测试
+- **ccc:reviewer:eval-executor:eval-executor**: Eval 执行器，运行测试用例和基准测试
 - **ccc:eval-grader**: Eval 评分器，对测试结果打分
 - **ccc:eval-parser**: Eval 解析器，解析 evals.json 测试定义
 
 ### 调度策略
 
 **串行模式（默认）**:
-- cmd-review → ccc:reviewer-core → ccc:review-aggregator → ccc:report-renderer
+- cmd-review → ccc:reviewer:review-aggregator:review-aggregator → ccc:reviewer:report-renderer:report-renderer
 - 组件逐个审查，每个组件完成后再审查下一个
 - 适用场景：小型项目（<10 组件）、资源受限环境
 
@@ -679,14 +680,14 @@ Step 4: 聚合和报告
 ### Agent 输入输出
 | Agent | 输入 | 输出 |
 |-------|------|------|
-| ccc:reviewer-core | 审查目标路径/工件 ID + 参数 | 审查任务分解 |
-| ccc:review-core | 组件文件 + 反模式规则 | 单个组件审查结果（JSON）|
-| ccc:architecture-analyzer | 所有组件 | 架构分析报告 |
-| ccc:dependency-analyzer | 所有组件 | 依赖关系图和问题 |
-| ccc:linkage-validator | 所有组件 | 链路验证结果 |
-| ccc:review-aggregator | 所有审查结果 | 聚合评分和问题清单 |
-| ccc:report-renderer | 聚合结果 | Markdown 审查报告 |
-| ccc:eval-executor | 测试定义 | 测试执行结果 |
+| ccc:reviewer:review-aggregator | 审查目标路径/工件 ID + 参数 | 审查任务分解 |
+| ccc:reviewer:review-core:review-core | 组件文件 + 反模式规则 | 单个组件审查结果（JSON）|
+| ccc:reviewer:architecture-analyzer:architecture-analyzer | 所有组件 | 架构分析报告 |
+| ccc:reviewer:dependency-analyzer:dependency-analyzer | 所有组件 | 依赖关系图和问题 |
+| ccc:reviewer:linkage-validator:linkage-validator | 所有组件 | 链路验证结果 |
+| ccc:reviewer:review-aggregator:review-aggregator | 所有审查结果 | 聚合评分和问题清单 |
+| ccc:reviewer:report-renderer:report-renderer | 聚合结果 | Markdown 审查报告 |
+| ccc:reviewer:eval-executor:eval-executor | 测试定义 | 测试执行结果 |
 
 ### 调用示例
 ```
@@ -694,18 +695,18 @@ Step 4: 聚合和报告
   ↓
 cmd-review 解析参数和扫描目标
   ↓
-调用 ccc:reviewer-core (编排审查流程)
+调用 ccc:reviewer:review-aggregator (编排审查流程)
   ↓
 并行执行多维度检查:
-  - ccc:review-core (8 维度规则检查) × N 个组件
-  - ccc:architecture-analyzer (L1+L2 分析)
-  - ccc:dependency-analyzer (链路验证)
-  - ccc:linkage-validator (引用检查)
-  - eval-executor (可选，测试执行)
+  - ccc:reviewer:review-core:review-core (8 维度规则检查) × N 个组件
+  - ccc:reviewer:architecture-analyzer:architecture-analyzer (L1+L2 分析)
+  - ccc:reviewer:dependency-analyzer:dependency-analyzer (链路验证)
+  - ccc:reviewer:linkage-validator:linkage-validator (引用检查)
+  - ccc:reviewer:eval-executor:eval-executor (可选，测试执行)
   ↓
-调用 review-aggregator (聚合结果)
+调用 ccc:reviewer:review-aggregator:review-aggregator (聚合结果)
   ↓
-调用 report-renderer (生成报告)
+调用 ccc:reviewer:report-renderer:report-renderer (生成报告)
   ↓
 cmd-review 输出摘要和报告路径
 ```

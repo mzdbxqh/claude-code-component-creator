@@ -3,6 +3,7 @@ name: cmd-design-iterate
 model: sonnet
 context: fork
 disable-model-invocation: true
+agent: ccc:reviewer:design-iterate-core:design-iterate-core
 allowed-tools: [Read, Write, Edit, Glob, Grep]
 description: "迭代流程第1步。分析现有组件差异，生成增量改进方案。触发：重构/升级/优化。输出迭代计划给implement。"
 argument-hint: "<component-path> [--lang=zh-cn|en-us|ja-jp]"

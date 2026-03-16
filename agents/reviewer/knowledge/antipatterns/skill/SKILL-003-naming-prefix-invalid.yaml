@@ -1,0 +1,334 @@
+id: SKILL-003
+name: naming-prefix-invalid
+severity: warning
+component_type: skill
+category: metadata
+
+title:
+  zh: "Skill 命名前缀不符合规范"
+  en: "Invalid Skill naming prefix"
+
+description:
+  zh: |
+    Skill 名称应遵循 CCC 三角色分类体系，使用正确的前缀：
+
+    - **cmd-**: 工作流命令 Skills（用户直接调用的斜杠命令）
+    - **std-**: 标准规范 Skills（定义规则和标准，由其他组件加载）
+    - **lib-**: 知识库 Skills（包含参考数据，由其他组件加载）
+
+    使用错误的前缀会导致组件分类混乱，影响可维护性。
+  en: |
+    Skill names should follow CCC three-role classification system with correct prefix:
+
+    - **cmd-**: Workflow command Skills (user-invoked slash commands)
+    - **std-**: Standard specification Skills (define rules and standards, loaded by other components)
+    - **lib-**: Knowledge base Skills (contain reference data, loaded by other components)
+
+    Using wrong prefix causes component classification confusion and impacts maintainability.
+
+rationale:
+  zh: |
+    **为什么需要前缀分类**:
+    - 明确组件职责：cmd- 用户命令、std- 规范定义、lib- 知识库
+    - 避免误用：用户不会直接调用 std-/lib- Skills
+    - 提高可维护性：一眼识别组件类型
+    - 符合官方最佳实践
+
+    **分类决策树**（详见 std-component-selection）:
+    1. 用户直接调用？→ cmd-
+    2. 定义规则/标准？→ std-
+    3. 提供知识/数据？→ lib-
+  en: |
+    **Why prefix classification is needed**:
+    - Clear component responsibilities: cmd- user commands, std- specifications, lib- knowledge bases
+    - Avoid misuse: Users won't directly invoke std-/lib- Skills
+    - Improve maintainability: Identify component type at a glance
+    - Comply with official best practices
+
+    **Classification decision tree** (see std-component-selection):
+    1. User-invoked directly? → cmd-
+    2. Define rules/standards? → std-
+    3. Provide knowledge/data? → lib-
+
+official_reference:
+  skill: "ccc:std-naming-rules"
+  section: "Skill 命名前缀规范"
+
+detection:
+  method: regex
+  patterns:
+    missing_prefix: '^name:\s*(?!cmd-|std-|lib-)([a-z][a-z0-9-]*)\s*$'
+    invalid_prefix: '^name:\s*(test-|dev-|tmp-|old-|new-).*$'
+  file_pattern: 'skills/*/SKILL.md'
+  detection_logic: |
+    1. 检查 name 字段是否以 cmd-/std-/lib- 开头
+    2. 如果不是，检查是否是合理的例外（如内部测试 skills）
+    3. 如果使用了其他前缀（如 test-），标记为无效
+    4. 提供修正建议
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      根据 Skill 的职责选择正确的前缀：
+
+      **判断方法**：
+
+      1. **检查触发方式**
+         - 用户通过斜杠命令调用（如 /review, /design）→ `cmd-`
+         - 其他组件通过 skills: 字段加载 → `std-` 或 `lib-`
+
+      2. **检查内容类型**
+         - 包含工作流步骤和 SubAgent 调用 → `cmd-`
+         - 定义规则、标准、检查逻辑 → `std-`
+         - 提供参考数据、模板、示例 → `lib-`
+
+      3. **检查 frontmatter**
+         - `context: fork` 且有 `allowed-tools` → 通常是 `cmd-`
+         - `context: main` 且无 `allowed-tools` → 通常是 `std-` 或 `lib-`
+
+      **修复示例**：
+
+      ```yaml
+      # 修复前
+      ---
+      name: review
+      description: "执行代码审查"
+      allowed-tools: [Bash, Read, Write]
+      ---
+
+      # 修复后（用户命令）
+      ---
+      name: cmd-review
+      description: "执行代码审查"
+      allowed-tools: [Bash, Read, Write]
+      ---
+      ```
+
+      ```yaml
+      # 修复前
+      ---
+      name: component-selection
+      description: "组件选型规则"
+      context: main
+      ---
+
+      # 修复后（标准规范）
+      ---
+      name: std-component-selection
+      description: "组件选型规则"
+      context: main
+      ---
+      ```
+
+      **注意**：
+      - 重命名 Skill 后，需要同步更新所有引用该 Skill 的地方
+      - 更新目录名：`skills/review/` → `skills/cmd-review/`
+      - 更新文档中的引用
+    en: |
+      Choose correct prefix based on Skill responsibility:
+
+      **Decision method**:
+
+      1. **Check invocation method**
+         - User invokes via slash command (e.g., /review, /design) → `cmd-`
+         - Other components load via skills: field → `std-` or `lib-`
+
+      2. **Check content type**
+         - Contains workflow steps and SubAgent invocations → `cmd-`
+         - Defines rules, standards, validation logic → `std-`
+         - Provides reference data, templates, examples → `lib-`
+
+      3. **Check frontmatter**
+         - `context: fork` with `allowed-tools` → Usually `cmd-`
+         - `context: main` without `allowed-tools` → Usually `std-` or `lib-`
+
+      **Fix examples**:
+
+      ```yaml
+      # Before
+      ---
+      name: review
+      description: "Execute code review"
+      allowed-tools: [Bash, Read, Write]
+      ---
+
+      # After (user command)
+      ---
+      name: cmd-review
+      description: "Execute code review"
+      allowed-tools: [Bash, Read, Write]
+      ---
+      ```
+
+      ```yaml
+      # Before
+      ---
+      name: component-selection
+      description: "Component selection rules"
+      context: main
+      ---
+
+      # After (standard specification)
+      ---
+      name: std-component-selection
+      description: "Component selection rules"
+      context: main
+      ---
+      ```
+
+      **Note**:
+      - After renaming Skill, update all references
+      - Update directory: `skills/review/` → `skills/cmd-review/`
+      - Update references in documentation
+
+examples:
+  bad:
+    zh: |
+      ❌ 错误 1：用户命令缺少 cmd- 前缀
+      ```yaml
+      ---
+      # skills/review/SKILL.md
+      name: review
+      description: "执行代码审查"
+      allowed-tools: [Bash, Read, Write, Task]
+      context: fork
+      ---
+      ```
+      问题：这是用户命令，应使用 cmd-review
+
+      ❌ 错误 2：标准规范缺少 std- 前缀
+      ```yaml
+      ---
+      # skills/naming-rules/SKILL.md
+      name: naming-rules
+      description: "Skill 命名规则"
+      context: main
+      allowed-tools: []
+      ---
+      ```
+      问题：这是标准规范，应使用 std-naming-rules
+
+      ❌ 错误 3：知识库缺少 lib- 前缀
+      ```yaml
+      ---
+      # skills/antipatterns/SKILL.md
+      name: antipatterns
+      description: "反模式知识库"
+      context: main
+      allowed-tools: []
+      ---
+      ```
+      问题：这是知识库，应使用 lib-antipatterns
+
+      ❌ 错误 4：使用了无效前缀
+      ```yaml
+      ---
+      name: test-review
+      description: "测试用的审查功能"
+      ---
+      ```
+      问题：test- 不是标准前缀，应移除或重命名
+    en: |
+      ❌ Error 1: User command missing cmd- prefix
+      ```yaml
+      ---
+      # skills/review/SKILL.md
+      name: review
+      description: "Execute code review"
+      allowed-tools: [Bash, Read, Write, Task]
+      context: fork
+      ---
+      ```
+      Issue: This is a user command, should use cmd-review
+
+      ❌ Error 2: Standard spec missing std- prefix
+      ```yaml
+      ---
+      # skills/naming-rules/SKILL.md
+      name: naming-rules
+      description: "Skill naming rules"
+      context: main
+      allowed-tools: []
+      ---
+      ```
+      Issue: This is a standard spec, should use std-naming-rules
+
+      ❌ Error 3: Knowledge base missing lib- prefix
+      ```yaml
+      ---
+      # skills/antipatterns/SKILL.md
+      name: antipatterns
+      description: "Antipattern knowledge base"
+      context: main
+      allowed-tools: []
+      ---
+      ```
+      Issue: This is a knowledge base, should use lib-antipatterns
+
+      ❌ Error 4: Using invalid prefix
+      ```yaml
+      ---
+      name: test-review
+      description: "Test review functionality"
+      ---
+      ```
+      Issue: test- is not a standard prefix, should remove or rename
+  good:
+    zh: |
+      ✅ 正确 1：用户命令使用 cmd- 前缀
+      ```yaml
+      ---
+      name: cmd-review
+      description: "执行代码审查"
+      allowed-tools: [Bash, Read, Write, Task]
+      ---
+      ```
+
+      ✅ 正确 2：标准规范使用 std- 前缀
+      ```yaml
+      ---
+      name: std-naming-rules
+      description: "Skill 命名规则"
+      context: main
+      ---
+      ```
+
+      ✅ 正确 3：知识库使用 lib- 前缀
+      ```yaml
+      ---
+      name: lib-antipatterns
+      description: "反模式知识库"
+      context: main
+      ---
+      ```
+    en: |
+      ✅ Correct 1: User command with cmd- prefix
+      ```yaml
+      ---
+      name: cmd-review
+      description: "Execute code review"
+      allowed-tools: [Bash, Read, Write, Task]
+      ---
+      ```
+
+      ✅ Correct 2: Standard spec with std- prefix
+      ```yaml
+      ---
+      name: std-naming-rules
+      description: "Skill naming rules"
+      context: main
+      ---
+      ```
+
+      ✅ Correct 3: Knowledge base with lib- prefix
+      ```yaml
+      ---
+      name: lib-antipatterns
+      description: "Antipattern knowledge base"
+      context: main
+      ---
+      ```
+
+tags: ["metadata", "naming", "prefix", "classification", "skill"]
+related_rules: ["SKILL-002", "ARCH-010"]
