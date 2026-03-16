@@ -19,6 +19,12 @@ WORKFLOW_TYPE=$1
 TRANSACTION_ID=$2
 COMPONENT_NAME=${3:-${WORKFLOW_TYPE}}
 
+# 验证 component_name 不包含路径分隔符，防止路径遍历攻击
+if [[ "$COMPONENT_NAME" =~ [/.] ]]; then
+    echo "Error: Invalid component_name: $COMPONENT_NAME (cannot contain / or .)" >&2
+    exit 2
+fi
+
 # 导入库函数
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
@@ -34,32 +40,56 @@ validate_transaction_id "$TRANSACTION_ID" || exit 2
 DATA_DIR="docs/${TRANSACTION_ID}/${COMPONENT_NAME}"
 CHECKPOINT_FILE=".checkpoints/${TRANSACTION_ID}.json"
 
-# 检查事务是否已存在
-if [[ -f "$CHECKPOINT_FILE" ]]; then
+# 使用原子操作检查和创建 checkpoint 文件，防止竞态条件
+if ! (set -C; : > "$CHECKPOINT_FILE") 2>/dev/null; then
     echo '{"status":"error","message":"Transaction already exists: '"$TRANSACTION_ID"'"}' >&2
     exit 1
 fi
 
-# 创建目录
-mkdir -p "$DATA_DIR"
-mkdir -p ".checkpoints"
+# 创建目录并检查错误
+if ! mkdir -p "$DATA_DIR"; then
+    echo "Error: Failed to create data directory: $DATA_DIR" >&2
+    rm -f "$CHECKPOINT_FILE"
+    exit 2
+fi
 
-# 创建初始 checkpoint
-cat > "$CHECKPOINT_FILE" <<EOF
-{
-  "version": "1.0",
-  "transaction_id": "${TRANSACTION_ID}",
-  "workflow_type": "${WORKFLOW_TYPE}",
-  "component_name": "${COMPONENT_NAME}",
-  "status": "in_progress",
-  "current_step": 0,
-  "created_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-  "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-  "data_directory": "${DATA_DIR}",
-  "key_files": {},
-  "statistics": {}
-}
-EOF
+if ! mkdir -p ".checkpoints"; then
+    echo "Error: Failed to create checkpoints directory" >&2
+    rm -f "$CHECKPOINT_FILE"
+    exit 2
+fi
+
+# 创建初始 checkpoint（使用 jq 确保 JSON 安全，防止注入攻击）
+jq -n \
+  --arg version "1.0" \
+  --arg transaction_id "$TRANSACTION_ID" \
+  --arg workflow_type "$WORKFLOW_TYPE" \
+  --arg component_name "$COMPONENT_NAME" \
+  --arg status "in_progress" \
+  --argjson current_step 0 \
+  --arg created_at "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+  --arg last_updated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+  --arg data_directory "$DATA_DIR" \
+  '{
+    version: $version,
+    transaction_id: $transaction_id,
+    workflow_type: $workflow_type,
+    component_name: $component_name,
+    status: $status,
+    current_step: $current_step,
+    created_at: $created_at,
+    last_updated: $last_updated,
+    data_directory: $data_directory,
+    key_files: {},
+    statistics: {}
+  }' > "$CHECKPOINT_FILE"
+
+# 验证生成的 checkpoint JSON 有效性
+if ! validate_json "$CHECKPOINT_FILE"; then
+    echo "Error: Failed to create valid checkpoint JSON" >&2
+    rm -f "$CHECKPOINT_FILE"
+    exit 2
+fi
 
 # 更新全局注册表
 update_registry "$TRANSACTION_ID" "$WORKFLOW_TYPE" "in_progress"
