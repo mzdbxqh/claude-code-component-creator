@@ -2,6 +2,7 @@
 name: checkpoint-validator
 description: 验证持久化 checkpoint 文件的完整性和一致性，确保恢复机制可用
 model: haiku
+permissionMode: allow
 tools:
   - Read
   - Grep

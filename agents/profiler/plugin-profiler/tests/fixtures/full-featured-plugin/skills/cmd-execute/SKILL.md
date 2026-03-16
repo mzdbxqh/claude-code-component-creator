@@ -3,6 +3,7 @@ name: cmd-execute
 description: "Execute plan with validation. Triggers: execute/run/implement"
 model: sonnet
 context: fork
+permissionMode: prompt
 tools:
   - Read
   - Bash

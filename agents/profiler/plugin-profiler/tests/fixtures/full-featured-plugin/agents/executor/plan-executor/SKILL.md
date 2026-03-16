@@ -3,6 +3,7 @@ name: plan-executor
 description: "执行计划的核心 SubAgent"
 model: haiku
 context: fork
+permissionMode: prompt
 tools:
   - Read
   - Bash

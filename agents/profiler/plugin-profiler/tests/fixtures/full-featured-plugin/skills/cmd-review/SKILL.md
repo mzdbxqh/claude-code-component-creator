@@ -3,6 +3,7 @@ name: cmd-review
 description: "Review execution results with quality checks. Triggers: review/检查/quality check"
 model: sonnet
 context: fork
+permissionMode: allow
 tools:
   - Read
   - Grep

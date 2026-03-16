@@ -3,6 +3,7 @@ name: cmd-plan
 description: "Create execution plan using planning framework. Triggers: plan/planning/create plan"
 model: sonnet
 context: fork
+permissionMode: allow
 tools:
   - Read
   - Write

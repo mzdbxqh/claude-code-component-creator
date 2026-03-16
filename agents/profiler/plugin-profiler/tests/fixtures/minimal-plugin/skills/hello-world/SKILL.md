@@ -3,6 +3,7 @@ name: hello-world
 description: "A simple hello world skill for testing"
 model: haiku
 context: fork
+permissionMode: allow
 tools:
   - Write
 ---

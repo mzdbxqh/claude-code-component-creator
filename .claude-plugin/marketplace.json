@@ -7,8 +7,8 @@
     {
       "name": "ccc",
       "source": "./",
-      "description": "Claude Code Component Creator v3.2.0 - Structured Intent/Blueprint/Delivery workflow for creating high-quality components with 216 antipattern rules, parallel processing, and comprehensive quality assurance.",
-      "version": "3.2.0",
+      "description": "Claude Code Component Creator v3.3.0 - Meta-plugin with Intent/Blueprint/Delivery workflow, 221 antipattern rules, long-task persistence, and comprehensive quality assurance. Supports parallel processing and checkpoint recovery.",
+      "version": "3.3.0",
       "author": {
         "name": "mzdbxqh"
       },
