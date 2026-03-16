@@ -1,7 +1,7 @@
 {
   "name": "ccc",
-  "description": "Claude Code Component Creator v3.3.0 - Meta-plugin with Intent/Blueprint/Delivery workflow, 221 antipattern rules, and long-task persistence",
-  "version": "3.3.0",
+  "description": "Claude Code Component Creator v3.4.0 - Meta-plugin with Intent/Blueprint/Delivery workflow, 221 antipattern rules, and long-task persistence",
+  "version": "3.4.0",
   "author": {
     "name": "mzdbxqh",
     "email": "mzdbxqh@github.com"
