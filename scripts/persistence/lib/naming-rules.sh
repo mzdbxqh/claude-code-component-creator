@@ -5,6 +5,12 @@
 generate_filename() {
     local key=$1
     local file_type=$2
+
+    if [[ -z "$key" || -z "$file_type" ]]; then
+        echo "Error: Missing required parameters (key, file_type)" >&2
+        return 1
+    fi
+
     local date_prefix=$(date +%Y-%m-%d)
 
     case "$file_type" in
@@ -29,6 +35,11 @@ generate_filename() {
 # 验证事务 ID 格式
 validate_transaction_id() {
     local transaction_id=$1
+
+    if [[ -z "$transaction_id" ]]; then
+        echo "Error: Transaction ID is required" >&2
+        return 1
+    fi
 
     # 格式: {workflow-type}-{YYYYMMDD}-{HHMMSS}
     if [[ ! "$transaction_id" =~ ^[a-z]+-[0-9]{8}-[0-9]{6}$ ]]; then
