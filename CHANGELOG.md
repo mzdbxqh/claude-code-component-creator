@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.1] - 2026-03-25
+
+### Fixed (修复)
+
+**代码质量**
+- 修复 cmd-review SKILL.md description 过长问题（186字符 → 72字符）
+- 为 std-naming-rules、std-evidence-chain、lib-design-patterns 添加 argument-hint 字段
+
+**Git 配置优化**
+- 从 Git 历史中过滤 .backup/ 目录（14个文件，减少 120KB 历史数据）
+- 添加 reports/ 到 .gitignore（运行时持久化数据目录）
+- 添加 docs/reviews/ 到 .gitignore（运行时生成的审查报告）
+
+### Removed (移除)
+
+- 从版本控制中移除 docs/reviews/ 目录（13个文件，4344行历史数据）
+- 保留本地文件供参考，但不再跟踪新文件
+
+---
+
 ## [3.4.0] - 2026-03-16 - 🚀 Long Task Persistence & Quality Excellence
 
 > **📝 版本说明**: v3.4.0 包含了原计划的 v3.3.0（长任务持久化）和 v3.4.0（质量改进）的所有特性。两个版本在同一天开发完成，现统一发布为 v3.4.0。v3.3.0 从未创建 Git tag 或 GitHub Release，仅作为内部开发版本记录。
