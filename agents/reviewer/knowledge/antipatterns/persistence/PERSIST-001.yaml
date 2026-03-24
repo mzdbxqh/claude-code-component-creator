@@ -1,0 +1,109 @@
+id: PERSIST-001
+name: missing-checkpoint-in-long-task
+severity: warning
+component_type: skill
+category: persistence
+
+title:
+  zh: "长任务缺少检查点机制"
+  en: "Missing checkpoint in long task"
+
+description:
+  zh: |
+    工作流步骤超过3步的长运行技能或Agent，应实现检查点持久化机制。
+    未实现检查点的长任务在中断后需要从头执行，造成时间和Token浪费。
+  en: |
+    Long-running skills or agents with workflow steps exceeding 3 should implement checkpoint persistence.
+    Long tasks without checkpoints need to restart from the beginning after interruption, wasting time and tokens.
+
+rationale:
+  zh: "基于ccc-core持久化最佳实践，长任务应支持断点续传"
+  en: "Per ccc-core persistence best practices, long tasks should support breakpoint resumption"
+
+detection:
+  method: section-check
+  required_when: "工作流步骤 > 3"
+  required_sections:
+    - "checkpoint"
+    - "persistence"
+    - "检查点"
+    - "持久化"
+    - "ccc-core/persistence"
+    - "CheckpointManager"
+    - "State"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **检查点实现实践**:
+
+      ```markdown
+      ## 检查点机制
+
+      **自动保存**:
+      - 每完成一个工作流步骤自动保存状态
+      - 使用 CheckpointManager 实现原子保存
+
+      **状态恢复**:
+      - 启动时检查是否存在检查点
+      - 从最后一个完成的步骤恢复执行
+
+      **使用示例**:
+      ```python
+      from ccc_core.persistence import CheckpointManager, State
+
+      # 初始化检查点管理器
+      checkpoint = CheckpointManager(trace_id="YYYYMMDD_HHMMSS_Random6")
+
+      # 加载或创建状态
+      state = checkpoint.load_state() or State()
+
+      # 执行步骤并保存检查点
+      for step in workflow_steps:
+          if step.id in state.completed_steps:
+              continue  # 跳过已完成步骤
+
+          result = execute_step(step)
+          state.completed_steps.append(step.id)
+          checkpoint.save_state(state)  # 原子保存
+      ```
+      ```
+    en: |
+      **Checkpoint Implementation**:
+
+      ```markdown
+      ## Checkpoint Mechanism
+
+      **Auto Save**:
+      - Automatically save state after each workflow step
+      - Use CheckpointManager for atomic saves
+
+      **State Recovery**:
+      - Check for existing checkpoints on startup
+      - Resume execution from last completed step
+
+      **Usage Example**:
+      ```python
+      from ccc_core.persistence import CheckpointManager, State
+
+      # Initialize checkpoint manager
+      checkpoint = CheckpointManager(trace_id="YYYYMMDD_HHMMSS_Random6")
+
+      # Load or create state
+      state = checkpoint.load_state() or State()
+
+      # Execute steps and save checkpoints
+      for step in workflow_steps:
+          if step.id in state.completed_steps:
+              continue  # Skip completed steps
+
+          result = execute_step(step)
+          state.completed_steps.append(step.id)
+          checkpoint.save_state(state)  # Atomic save
+      ```
+      ```
+
+tags: ["persistence", "checkpoint", "long-task", "resilience"]
+related_rules: ["PERSIST-002", "PERSIST-004"]

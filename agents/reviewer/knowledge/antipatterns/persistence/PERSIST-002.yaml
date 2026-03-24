@@ -1,0 +1,118 @@
+id: PERSIST-002
+name: missing-state-management
+severity: info
+component_type: all
+category: persistence
+
+title:
+  zh: "缺少状态管理"
+  en: "Missing state management"
+
+description:
+  zh: |
+    维护执行状态的组件应使用ccc_core.persistence.State类进行状态管理，
+    而不是使用简单的字典或全局变量。State类提供序列化、版本控制和恢复支持。
+  en: |
+    Components maintaining execution state should use ccc_core.persistence.State class
+    instead of simple dictionaries or global variables. State class provides serialization,
+    version control, and recovery support.
+
+rationale:
+  zh: "基于ccc-core状态管理最佳实践，统一使用State类确保状态可靠性"
+  en: "Per ccc-core state management best practices, unified State class usage ensures state reliability"
+
+detection:
+  method: code-analysis
+  patterns:
+    - pattern: '(?i)state\s*=\s*\{\}'
+      description: "Using plain dict for state"
+    - pattern: '(?i)global\s+state'
+      description: "Using global variable for state"
+    - pattern: '(?i)self\.state\s*=\s*\{'
+      description: "Using dict as instance state"
+  required_practices:
+    - "使用 ccc_core.persistence.State"
+    - "使用 State.to_dict() 序列化"
+    - "使用 State.from_dict() 反序列化"
+  file_pattern: '*.py'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **State类使用实践**:
+
+      ❌ 不推荐:
+      ```python
+      # 使用字典管理状态
+      state = {
+          "completed_steps": [],
+          "current_step": None,
+          "data": {}
+      }
+
+      # 使用全局变量
+      global execution_state
+      execution_state = {}
+      ```
+
+      ✅ 推荐:
+      ```python
+      from ccc_core.persistence import State
+
+      # 使用State类
+      state = State(
+          trace_id="YYYYMMDD_HHMMSS_Random6",
+          completed_steps=[],
+          current_step=None,
+          data={}
+      )
+
+      # 序列化保存
+      state_dict = state.to_dict()
+      save_to_file(state_dict)
+
+      # 反序列化恢复
+      loaded_dict = load_from_file()
+      state = State.from_dict(loaded_dict)
+      ```
+    en: |
+      **State Class Usage**:
+
+      ❌ Not Recommended:
+      ```python
+      # Using dict for state
+      state = {
+          "completed_steps": [],
+          "current_step": None,
+          "data": {}
+      }
+
+      # Using global variable
+      global execution_state
+      execution_state = {}
+      ```
+
+      ✅ Recommended:
+      ```python
+      from ccc_core.persistence import State
+
+      # Using State class
+      state = State(
+          trace_id="YYYYMMDD_HHMMSS_Random6",
+          completed_steps=[],
+          current_step=None,
+          data={}
+      )
+
+      # Serialize for saving
+      state_dict = state.to_dict()
+      save_to_file(state_dict)
+
+      # Deserialize for recovery
+      loaded_dict = load_from_file()
+      state = State.from_dict(loaded_dict)
+      ```
+
+tags: ["persistence", "state", "State", "serialization"]
+related_rules: ["PERSIST-001", "PERSIST-004"]

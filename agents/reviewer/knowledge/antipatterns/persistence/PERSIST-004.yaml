@@ -1,0 +1,136 @@
+id: PERSIST-004
+name: missing-resume-support
+severity: info
+component_type: skill
+category: persistence
+
+title:
+  zh: "缺少恢复支持"
+  en: "Missing resume support"
+
+description:
+  zh: |
+    预估运行时间超过5分钟的长任务应提供恢复支持，包括--resume参数或
+    自动检查点恢复机制。这允许用户在中断后从中断点继续执行，而非重新开始。
+  en: |
+    Long tasks with estimated runtime exceeding 5 minutes should provide resume support,
+    including --resume parameter or automatic checkpoint recovery mechanism.
+    This allows users to continue from interruption point instead of starting over.
+
+rationale:
+  zh: "基于用户体验最佳实践，长任务应支持断点续传避免重复工作"
+  en: "Per user experience best practices, long tasks should support resume to avoid duplicate work"
+
+detection:
+  method: section-check
+  required_when: "预估运行时间 > 5分钟"
+  required_sections:
+    - "resume"
+    - "恢复"
+    - "断点续传"
+    - "--resume"
+    - "checkpoint recovery"
+    - "检查点恢复"
+    - "ResumeManager"
+  file_pattern: '*.md'
+
+fix:
+  automatic: false
+  suggestion:
+    zh: |
+      **恢复支持实现实践**:
+
+      ```markdown
+      ## 断点续传支持
+
+      **命令行参数**:
+      ```bash
+      # 正常执行
+      /long-task
+
+      # 从检查点恢复
+      /long-task --resume
+
+      # 指定检查点ID恢复
+      /long-task --resume --checkpoint-id=20260315_143022_A1B2C3
+      ```
+
+      **自动恢复机制**:
+      - 启动时自动检测未完成的检查点
+      - 提示用户是否继续上次执行
+      - 默认行为：询问用户
+
+      **实现示例**:
+      ```python
+      from ccc_core.persistence import ResumeManager, generate_trace_id
+
+      def main(resume=False, checkpoint_id=None):
+          trace_id = checkpoint_id or generate_trace_id()
+          resume_mgr = ResumeManager(trace_id)
+
+          if resume or resume_mgr.has_checkpoint():
+              state = resume_mgr.load_checkpoint()
+              print(f"从检查点恢复: {trace_id}")
+              print(f"已完成步骤: {state.completed_steps}")
+          else:
+              state = resume_mgr.create_new_state()
+
+          # 执行工作流...
+          for step in remaining_steps(state):
+              execute_step(step)
+              resume_mgr.save_checkpoint(state)
+
+          # 完成后清理检查点
+          resume_mgr.cleanup()
+      ```
+      ```
+    en: |
+      **Resume Support Implementation**:
+
+      ```markdown
+      ## Resume/Breakpoint Support
+
+      **Command Line Arguments**:
+      ```bash
+      # Normal execution
+      /long-task
+
+      # Resume from checkpoint
+      /long-task --resume
+
+      # Resume with specific checkpoint ID
+      /long-task --resume --checkpoint-id=20260315_143022_A1B2C3
+      ```
+
+      **Auto Recovery**:
+      - Auto-detect incomplete checkpoints on startup
+      - Prompt user whether to continue last execution
+      - Default behavior: ask user
+
+      **Implementation Example**:
+      ```python
+      from ccc_core.persistence import ResumeManager, generate_trace_id
+
+      def main(resume=False, checkpoint_id=None):
+          trace_id = checkpoint_id or generate_trace_id()
+          resume_mgr = ResumeManager(trace_id)
+
+          if resume or resume_mgr.has_checkpoint():
+              state = resume_mgr.load_checkpoint()
+              print(f"Resuming from checkpoint: {trace_id}")
+              print(f"Completed steps: {state.completed_steps}")
+          else:
+              state = resume_mgr.create_new_state()
+
+          # Execute workflow...
+          for step in remaining_steps(state):
+              execute_step(step)
+              resume_mgr.save_checkpoint(state)
+
+          # Cleanup checkpoint after completion
+          resume_mgr.cleanup()
+      ```
+      ```
+
+tags: ["persistence", "resume", "checkpoint", "long-task", "ux"]
+related_rules: ["PERSIST-001", "PERSIST-002"]
