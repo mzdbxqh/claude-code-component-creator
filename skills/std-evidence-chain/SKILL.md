@@ -4,6 +4,7 @@ description: "证据链规范。确保工作流需求到实现的完整追溯性
 model: sonnet
 allowed-tools: []
 context: main
+argument-hint: ""
 ---
 
 # 证据链规范

@@ -4,6 +4,7 @@ description: "设计模式知识库，CCC 5阶段设计流程模式。由Subagen
 model: sonnet
 allowed-tools: []
 context: main
+argument-hint: ""
 ---
 
 # 设计模式知识库
