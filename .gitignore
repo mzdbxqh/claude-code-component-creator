@@ -56,6 +56,9 @@ Desktop.ini
 # 持久化运行时数据目录
 reports/
 
+# 运行时生成的审查报告（保留历史，但忽略新文件）
+docs/reviews/
+
 # 持久化中间文件（只保留最终报告）
 docs/*/*/
 !docs/*/*/*.md
