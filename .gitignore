@@ -53,6 +53,9 @@ Desktop.ini
 # Checkpoint 文件（运行时状态，不应提交）
 .checkpoints/
 
+# 持久化运行时数据目录
+reports/
+
 # 持久化中间文件（只保留最终报告）
 docs/*/*/
 !docs/*/*/*.md
